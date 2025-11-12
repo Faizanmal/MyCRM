@@ -484,4 +484,268 @@ export type Tag = {
   color: string;
 };
 
+// ==================== New Features API ====================
+
+// Campaign Management API
+export const campaignAPI = {
+  // Campaigns
+  getCampaigns: () => apiClient.get('/campaigns/campaigns/'),
+  getCampaign: (id: string) => apiClient.get(`/campaigns/campaigns/${id}/`),
+  createCampaign: (data: any) => apiClient.post('/campaigns/campaigns/', data),
+  updateCampaign: (id: string, data: any) => apiClient.put(`/campaigns/campaigns/${id}/`, data),
+  deleteCampaign: (id: string) => apiClient.delete(`/campaigns/campaigns/${id}/`),
+  scheduleCampaign: (id: string, scheduledAt: string) => 
+    apiClient.post(`/campaigns/campaigns/${id}/schedule/`, { scheduled_at: scheduledAt }),
+  sendCampaignNow: (id: string) => apiClient.post(`/campaigns/campaigns/${id}/send_now/`),
+  getCampaignAnalytics: (id: string) => apiClient.get(`/campaigns/campaigns/${id}/analytics/`),
+  getCampaignStatistics: () => apiClient.get('/campaigns/campaigns/statistics/'),
+  
+  // Segments
+  getSegments: () => apiClient.get('/campaigns/segments/'),
+  createSegment: (data: any) => apiClient.post('/campaigns/segments/', data),
+  previewSegment: (id: string) => apiClient.get(`/campaigns/segments/${id}/preview/`),
+  
+  // Templates
+  getTemplates: () => apiClient.get('/campaigns/templates/'),
+  createTemplate: (data: any) => apiClient.post('/campaigns/templates/', data),
+  duplicateTemplate: (id: string) => apiClient.post(`/campaigns/templates/${id}/duplicate/`),
+};
+
+// Pipeline Analytics API
+export const analyticsAPI = {
+  getPipelineAnalytics: () => apiClient.get('/core/analytics/pipeline_analytics/'),
+  getSalesForecast: (months: number = 3) => 
+    apiClient.get(`/core/analytics/sales_forecast/?months=${months}`),
+  getAIInsights: () => apiClient.get('/core/analytics/ai_insights_dashboard/'),
+};
+
+// Document Management API
+export const documentAPI = {
+  // Documents
+  getDocuments: (params?: any) => apiClient.get('/documents/documents/', { params }),
+  getDocument: (id: string) => apiClient.get(`/documents/documents/${id}/`),
+  uploadDocument: (formData: FormData) => 
+    apiClient.post('/documents/documents/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  downloadDocument: (id: string) => 
+    apiClient.get(`/documents/documents/${id}/download/`, { responseType: 'blob' }),
+  createDocumentVersion: (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post(`/documents/documents/${id}/create_version/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  getDocumentVersions: (id: string) => apiClient.get(`/documents/documents/${id}/versions/`),
+  shareDocument: (id: string, data: any) => 
+    apiClient.post(`/documents/documents/${id}/share/`, data),
+  requestApproval: (id: string, approverId: string) => 
+    apiClient.post(`/documents/documents/${id}/request_approval/`, { approver_id: approverId }),
+  
+  // Templates
+  getDocumentTemplates: () => apiClient.get('/documents/templates/'),
+  generateFromTemplate: (id: string, data: any) => 
+    apiClient.post(`/documents/templates/${id}/generate/`, data),
+  
+  // Approvals
+  getApprovals: () => apiClient.get('/documents/approvals/'),
+  approveDocument: (id: string, comments: string = '') => 
+    apiClient.post(`/documents/approvals/${id}/approve/`, { comments }),
+  rejectDocument: (id: string, comments: string) => 
+    apiClient.post(`/documents/approvals/${id}/reject/`, { comments }),
+  
+  // Comments
+  getDocumentComments: (documentId: string) => 
+    apiClient.get(`/documents/comments/?document=${documentId}`),
+  addComment: (data: any) => apiClient.post('/documents/comments/', data),
+};
+
+// Integration Hub API
+export const integrationAPI = {
+  // Webhooks
+  getWebhooks: () => apiClient.get('/integrations/webhooks/'),
+  createWebhook: (data: any) => apiClient.post('/integrations/webhooks/', data),
+  testWebhook: (id: string) => apiClient.post(`/integrations/webhooks/${id}/test/`),
+  getWebhookDeliveries: (id: string) => 
+    apiClient.get(`/integrations/webhooks/${id}/deliveries/`),
+  activateWebhook: (id: string) => apiClient.post(`/integrations/webhooks/${id}/activate/`),
+  deactivateWebhook: (id: string) => apiClient.post(`/integrations/webhooks/${id}/deactivate/`),
+  
+  // Integrations
+  getIntegrations: () => apiClient.get('/integrations/integrations/'),
+  createIntegration: (data: any) => apiClient.post('/integrations/integrations/', data),
+  syncIntegration: (id: string) => apiClient.post(`/integrations/integrations/${id}/sync/`),
+  testIntegration: (id: string) => apiClient.post(`/integrations/integrations/${id}/test/`),
+  getIntegrationLogs: (id: string) => 
+    apiClient.get(`/integrations/integrations/${id}/logs/`),
+};
+
+// Activity Feed API
+export const activityAPI = {
+  // Activities
+  getActivities: (params?: any) => apiClient.get('/activity/activities/', { params }),
+  getMyFeed: () => apiClient.get('/activity/activities/my_feed/'),
+  getEntityActivities: (model: string, id: string) => 
+    apiClient.get(`/activity/activities/for_entity/?model=${model}&id=${id}`),
+  
+  // Comments
+  getComments: (model: string, id: string) => 
+    apiClient.get(`/activity/comments/for_entity/?model=${model}&id=${id}`),
+  addComment: (data: any) => apiClient.post('/activity/comments/', data),
+  getReplies: (commentId: string) => apiClient.get(`/activity/comments/${commentId}/replies/`),
+  
+  // Notifications
+  getNotifications: () => apiClient.get('/activity/notifications/'),
+  markNotificationRead: (id: string) => 
+    apiClient.post(`/activity/notifications/${id}/mark_read/`),
+  markAllNotificationsRead: () => 
+    apiClient.post('/activity/notifications/mark_all_read/'),
+  getUnreadCount: () => apiClient.get('/activity/notifications/unread_count/'),
+  
+  // Mentions
+  getMentions: () => apiClient.get('/activity/mentions/'),
+  markMentionRead: (id: string) => apiClient.post(`/activity/mentions/${id}/mark_read/`),
+  markAllMentionsRead: () => apiClient.post('/activity/mentions/mark_all_read/'),
+  
+  // Follows
+  followEntity: (model: string, id: string) => 
+    apiClient.post('/activity/follows/follow_entity/', { model, id }),
+  unfollowEntity: (model: string, id: string) => 
+    apiClient.post('/activity/follows/unfollow_entity/', { model, id }),
+  getFollows: () => apiClient.get('/activity/follows/'),
+};
+
+// Lead Qualification API
+export const leadQualificationAPI = {
+  // Scoring Rules
+  getScoringRules: () => apiClient.get('/lead-qualification/scoring-rules/'),
+  createScoringRule: (data: any) => apiClient.post('/lead-qualification/scoring-rules/', data),
+  updateScoringRule: (id: string, data: any) => 
+    apiClient.patch(`/lead-qualification/scoring-rules/${id}/`, data),
+  deleteScoringRule: (id: string) => apiClient.delete(`/lead-qualification/scoring-rules/${id}/`),
+  activateRule: (id: string) => apiClient.post(`/lead-qualification/scoring-rules/${id}/activate/`),
+  deactivateRule: (id: string) => apiClient.post(`/lead-qualification/scoring-rules/${id}/deactivate/`),
+  
+  // Qualification Criteria
+  getQualificationCriteria: () => apiClient.get('/lead-qualification/qualification-criteria/'),
+  createQualificationCriteria: (data: any) => 
+    apiClient.post('/lead-qualification/qualification-criteria/', data),
+  updateQualificationCriteria: (id: string, data: any) => 
+    apiClient.patch(`/lead-qualification/qualification-criteria/${id}/`, data),
+  deleteQualificationCriteria: (id: string) => 
+    apiClient.delete(`/lead-qualification/qualification-criteria/${id}/`),
+  
+  // Lead Scores
+  getLeadScores: (params?: any) => apiClient.get('/lead-qualification/lead-scores/', { params }),
+  getLeadScore: (leadId: string) => 
+    apiClient.get(`/lead-qualification/lead-scores/by_lead/?lead_id=${leadId}`),
+  calculateScore: (leadId: string) => 
+    apiClient.post(`/lead-qualification/lead-scores/calculate/`, { lead_id: leadId }),
+  recalculateAll: () => apiClient.post('/lead-qualification/lead-scores/recalculate_all/'),
+  getScoreBreakdown: (id: string) => 
+    apiClient.get(`/lead-qualification/lead-scores/${id}/breakdown/`),
+  getHistory: (id: string) => apiClient.get(`/lead-qualification/lead-scores/${id}/history/`),
+  getSummary: () => apiClient.get('/lead-qualification/lead-scores/summary/'),
+  
+  // Qualification Workflows
+  getWorkflows: () => apiClient.get('/lead-qualification/qualification-workflows/'),
+  createWorkflow: (data: any) => apiClient.post('/lead-qualification/qualification-workflows/', data),
+  updateWorkflow: (id: string, data: any) => 
+    apiClient.patch(`/lead-qualification/qualification-workflows/${id}/`, data),
+  deleteWorkflow: (id: string) => 
+    apiClient.delete(`/lead-qualification/qualification-workflows/${id}/`),
+  activateWorkflow: (id: string) => 
+    apiClient.post(`/lead-qualification/qualification-workflows/${id}/activate/`),
+  deactivateWorkflow: (id: string) => 
+    apiClient.post(`/lead-qualification/qualification-workflows/${id}/deactivate/`),
+  getWorkflowExecutions: (id: string) => 
+    apiClient.get(`/lead-qualification/qualification-workflows/${id}/executions/`),
+  
+  // Lead Enrichment
+  enrichLead: (leadId: string) => 
+    apiClient.post(`/lead-qualification/lead-enrichment/enrich/`, { lead_id: leadId }),
+  getEnrichmentData: (leadId: string) => 
+    apiClient.get(`/lead-qualification/lead-enrichment/by_lead/?lead_id=${leadId}`),
+};
+
+// Advanced Reporting API
+export const advancedReportingAPI = {
+  // Dashboards
+  getDashboards: () => apiClient.get('/advanced-reporting/dashboards/'),
+  createDashboard: (data: any) => apiClient.post('/advanced-reporting/dashboards/', data),
+  getDashboard: (id: string) => apiClient.get(`/advanced-reporting/dashboards/${id}/`),
+  updateDashboard: (id: string, data: any) => 
+    apiClient.patch(`/advanced-reporting/dashboards/${id}/`, data),
+  deleteDashboard: (id: string) => apiClient.delete(`/advanced-reporting/dashboards/${id}/`),
+  duplicateDashboard: (id: string) => 
+    apiClient.post(`/advanced-reporting/dashboards/${id}/duplicate/`),
+  shareDashboard: (id: string, data: any) => 
+    apiClient.post(`/advanced-reporting/dashboards/${id}/share/`, data),
+  getDashboardData: (id: string) => apiClient.get(`/advanced-reporting/dashboards/${id}/data/`),
+  
+  // Dashboard Widgets
+  getWidgets: (dashboardId?: string) => {
+    const params = dashboardId ? { dashboard: dashboardId } : {};
+    return apiClient.get('/advanced-reporting/widgets/', { params });
+  },
+  createWidget: (data: any) => apiClient.post('/advanced-reporting/widgets/', data),
+  updateWidget: (id: string, data: any) => 
+    apiClient.patch(`/advanced-reporting/widgets/${id}/`, data),
+  deleteWidget: (id: string) => apiClient.delete(`/advanced-reporting/widgets/${id}/`),
+  getWidgetData: (id: string) => apiClient.get(`/advanced-reporting/widgets/${id}/data/`),
+  
+  // Reports
+  getReports: () => apiClient.get('/advanced-reporting/reports/'),
+  createReport: (data: any) => apiClient.post('/advanced-reporting/reports/', data),
+  getReport: (id: string) => apiClient.get(`/advanced-reporting/reports/${id}/`),
+  updateReport: (id: string, data: any) => 
+    apiClient.patch(`/advanced-reporting/reports/${id}/`, data),
+  deleteReport: (id: string) => apiClient.delete(`/advanced-reporting/reports/${id}/`),
+  executeReport: (id: string) => apiClient.post(`/advanced-reporting/reports/${id}/execute/`),
+  previewReport: (id: string) => apiClient.get(`/advanced-reporting/reports/${id}/preview/`),
+  scheduleReport: (id: string, data: any) => 
+    apiClient.post(`/advanced-reporting/reports/${id}/schedule/`, data),
+  
+  // Report Schedules
+  getSchedules: (reportId?: string) => {
+    const params = reportId ? { report: reportId } : {};
+    return apiClient.get('/advanced-reporting/schedules/', { params });
+  },
+  createSchedule: (data: any) => apiClient.post('/advanced-reporting/schedules/', data),
+  updateSchedule: (id: string, data: any) => 
+    apiClient.patch(`/advanced-reporting/schedules/${id}/`, data),
+  deleteSchedule: (id: string) => apiClient.delete(`/advanced-reporting/schedules/${id}/`),
+  activateSchedule: (id: string) => 
+    apiClient.post(`/advanced-reporting/schedules/${id}/activate/`),
+  deactivateSchedule: (id: string) => 
+    apiClient.post(`/advanced-reporting/schedules/${id}/deactivate/`),
+  
+  // Report Executions
+  getExecutions: (reportId?: string) => {
+    const params = reportId ? { report: reportId } : {};
+    return apiClient.get('/advanced-reporting/executions/', { params });
+  },
+  getExecution: (id: string) => apiClient.get(`/advanced-reporting/executions/${id}/`),
+  downloadExecution: (id: string) => 
+    apiClient.get(`/advanced-reporting/executions/${id}/download/`),
+  
+  // KPIs
+  getKPIs: () => apiClient.get('/advanced-reporting/kpis/'),
+  createKPI: (data: any) => apiClient.post('/advanced-reporting/kpis/', data),
+  getKPI: (id: string) => apiClient.get(`/advanced-reporting/kpis/${id}/`),
+  updateKPI: (id: string, data: any) => apiClient.patch(`/advanced-reporting/kpis/${id}/`, data),
+  deleteKPI: (id: string) => apiClient.delete(`/advanced-reporting/kpis/${id}/`),
+  calculateKPI: (id: string) => apiClient.post(`/advanced-reporting/kpis/${id}/calculate/`),
+  getKPIHistory: (id: string, days?: number) => 
+    apiClient.get(`/advanced-reporting/kpis/${id}/history/`, { params: { days } }),
+  getKPISummary: () => apiClient.get('/advanced-reporting/kpis/summary/'),
+  
+  // KPI Values
+  getKPIValues: (kpiId?: string) => {
+    const params = kpiId ? { kpi: kpiId } : {};
+    return apiClient.get('/advanced-reporting/kpi-values/', { params });
+  },
+};
+
 export default apiClient;

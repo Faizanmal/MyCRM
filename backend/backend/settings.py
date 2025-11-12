@@ -50,6 +50,12 @@ INSTALLED_APPS = [
     'opportunity_management',
     'task_management',
     'communication_management',
+    'campaign_management',
+    'document_management',
+    'integration_hub',
+    'activity_feed',
+    'lead_qualification',
+    'advanced_reporting',
     'reporting',
 ]
 

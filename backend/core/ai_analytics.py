@@ -551,6 +551,350 @@ class WorkflowAutomation:
             })
         
         return suggestions
+
+
+class PipelineAnalytics:
+    """Advanced pipeline analytics and insights"""
+    
+    @staticmethod
+    def get_pipeline_health():
+        """
+        Calculate overall pipeline health metrics
+        
+        Returns:
+            dict: Pipeline health indicators
+        """
+        opportunities = Opportunity.objects.all()
+        
+        # Stage distribution
+        stage_distribution = opportunities.values('stage').annotate(
+            count=Count('id'),
+            total_value=Sum('amount')
+        ).order_by('stage')
+        
+        # Calculate velocity (average time in each stage)
+        velocity_metrics = PipelineAnalytics._calculate_stage_velocity()
+        
+        # Identify bottlenecks
+        bottlenecks = PipelineAnalytics._identify_bottlenecks(velocity_metrics)
+        
+        # Win rate analysis
+        win_rate = PipelineAnalytics._calculate_win_rate()
+        
+        # Average deal size
+        avg_deal_size = opportunities.aggregate(avg=Avg('amount'))['avg'] or 0
+        
+        # Pipeline coverage (pipeline value / quota)
+        pipeline_value = opportunities.filter(
+            stage__in=['qualification', 'proposal', 'negotiation']
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        return {
+            'overall_health_score': PipelineAnalytics._calculate_health_score(
+                win_rate, velocity_metrics, bottlenecks
+            ),
+            'stage_distribution': list(stage_distribution),
+            'velocity_metrics': velocity_metrics,
+            'bottlenecks': bottlenecks,
+            'win_rate': win_rate,
+            'average_deal_size': round(avg_deal_size, 2),
+            'pipeline_value': round(pipeline_value, 2),
+            'recommendations': PipelineAnalytics._generate_health_recommendations(
+                win_rate, bottlenecks, velocity_metrics
+            )
+        }
+    
+    @staticmethod
+    def get_pipeline_forecast(months=3):
+        """
+        Forecast pipeline outcomes for next period
+        
+        Args:
+            months: Number of months to forecast
+            
+        Returns:
+            dict: Forecast data by stage and time period
+        """
+        opportunities = Opportunity.objects.all()
+        
+        forecast_by_stage = {}
+        
+        for stage in ['qualification', 'proposal', 'negotiation', 'closed_won']:
+            stage_opps = opportunities.filter(stage=stage)
+            
+            expected_close = stage_opps.aggregate(
+                total=Sum('amount'),
+                weighted=Sum('amount') * Avg('probability') / 100
+            )
+            
+            forecast_by_stage[stage] = {
+                'count': stage_opps.count(),
+                'total_value': expected_close['total'] or 0,
+                'weighted_value': expected_close['weighted'] or 0,
+                'expected_close_rate': PipelineAnalytics._get_stage_close_rate(stage)
+            }
+        
+        # Time-based forecast
+        monthly_forecast = []
+        for month in range(1, months + 1):
+            target_date = timezone.now() + timedelta(days=30 * month)
+            
+            expected_closes = opportunities.filter(
+                expected_close_date__year=target_date.year,
+                expected_close_date__month=target_date.month
+            )
+            
+            monthly_forecast.append({
+                'month': target_date.strftime('%Y-%m'),
+                'expected_deals': expected_closes.count(),
+                'expected_revenue': expected_closes.aggregate(
+                    total=Sum('amount')
+                )['total'] or 0
+            })
+        
+        return {
+            'by_stage': forecast_by_stage,
+            'by_month': monthly_forecast,
+            'total_pipeline_value': sum(s['total_value'] for s in forecast_by_stage.values()),
+            'weighted_pipeline_value': sum(s['weighted_value'] for s in forecast_by_stage.values())
+        }
+    
+    @staticmethod
+    def get_conversion_funnel():
+        """
+        Analyze conversion rates through the sales funnel
+        
+        Returns:
+            dict: Conversion metrics for each stage
+        """
+        from django.db.models import F, ExpressionWrapper, DurationField
+        
+        # Get all opportunities with stage history
+        opportunities = Opportunity.objects.all()
+        total_opps = opportunities.count()
+        
+        stages = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won', 'closed_lost']
+        funnel_data = []
+        
+        for i, stage in enumerate(stages):
+            stage_count = opportunities.filter(stage=stage).count()
+            
+            conversion_rate = (stage_count / total_opps * 100) if total_opps > 0 else 0
+            
+            # Calculate drop-off from previous stage
+            if i > 0:
+                prev_stage_count = opportunities.filter(stage=stages[i-1]).count()
+                drop_off_rate = ((prev_stage_count - stage_count) / prev_stage_count * 100) if prev_stage_count > 0 else 0
+            else:
+                drop_off_rate = 0
+            
+            funnel_data.append({
+                'stage': stage,
+                'count': stage_count,
+                'conversion_rate': round(conversion_rate, 2),
+                'drop_off_rate': round(drop_off_rate, 2)
+            })
+        
+        return {
+            'funnel': funnel_data,
+            'overall_conversion': round(
+                opportunities.filter(stage='closed_won').count() / total_opps * 100, 2
+            ) if total_opps > 0 else 0,
+            'recommendations': PipelineAnalytics._generate_funnel_recommendations(funnel_data)
+        }
+    
+    @staticmethod
+    def get_deal_velocity():
+        """
+        Calculate average time to close deals
+        
+        Returns:
+            dict: Velocity metrics
+        """
+        from django.db.models import F, ExpressionWrapper, fields
+        
+        closed_deals = Opportunity.objects.filter(
+            stage__in=['closed_won', 'closed_lost'],
+            closed_at__isnull=False
+        )
+        
+        # Calculate average time from creation to close
+        velocities = []
+        for deal in closed_deals:
+            days_to_close = (deal.closed_at - deal.created_at).days
+            velocities.append({
+                'id': str(deal.id),
+                'days': days_to_close,
+                'amount': float(deal.amount),
+                'stage': deal.stage
+            })
+        
+        if not velocities:
+            return {
+                'average_days': 0,
+                'median_days': 0,
+                'fastest': None,
+                'slowest': None
+            }
+        
+        avg_days = np.mean([v['days'] for v in velocities])
+        median_days = np.median([v['days'] for v in velocities])
+        
+        return {
+            'average_days': round(avg_days, 1),
+            'median_days': round(median_days, 1),
+            'fastest': min(velocities, key=lambda x: x['days']),
+            'slowest': max(velocities, key=lambda x: x['days']),
+            'by_stage': PipelineAnalytics._velocity_by_stage(closed_deals)
+        }
+    
+    @staticmethod
+    def _calculate_stage_velocity():
+        """Calculate average time spent in each stage"""
+        # Simplified - in production, track stage transitions
+        stages = ['prospecting', 'qualification', 'proposal', 'negotiation']
+        velocity = {}
+        
+        for stage in stages:
+            opps = Opportunity.objects.filter(stage=stage)
+            if opps.exists():
+                avg_age = np.mean([
+                    (timezone.now() - opp.created_at).days 
+                    for opp in opps
+                ])
+                velocity[stage] = round(avg_age, 1)
+            else:
+                velocity[stage] = 0
+        
+        return velocity
+    
+    @staticmethod
+    def _identify_bottlenecks(velocity_metrics):
+        """Identify stages with unusually long durations"""
+        bottlenecks = []
+        
+        if not velocity_metrics:
+            return bottlenecks
+        
+        avg_velocity = np.mean(list(velocity_metrics.values()))
+        
+        for stage, days in velocity_metrics.items():
+            if days > avg_velocity * 1.5:  # 50% longer than average
+                bottlenecks.append({
+                    'stage': stage,
+                    'days': days,
+                    'severity': 'high' if days > avg_velocity * 2 else 'medium'
+                })
+        
+        return bottlenecks
+    
+    @staticmethod
+    def _calculate_win_rate():
+        """Calculate overall win rate"""
+        closed_opps = Opportunity.objects.filter(
+            stage__in=['closed_won', 'closed_lost']
+        )
+        
+        total = closed_opps.count()
+        won = closed_opps.filter(stage='closed_won').count()
+        
+        return round((won / total * 100), 2) if total > 0 else 0
+    
+    @staticmethod
+    def _calculate_health_score(win_rate, velocity_metrics, bottlenecks):
+        """Calculate overall pipeline health score (0-100)"""
+        score = 100
+        
+        # Deduct for low win rate
+        if win_rate < 20:
+            score -= 30
+        elif win_rate < 40:
+            score -= 15
+        
+        # Deduct for bottlenecks
+        score -= len(bottlenecks) * 10
+        
+        # Deduct for slow velocity
+        if velocity_metrics:
+            avg_velocity = np.mean(list(velocity_metrics.values()))
+            if avg_velocity > 60:  # More than 60 days average
+                score -= 20
+            elif avg_velocity > 30:
+                score -= 10
+        
+        return max(0, min(100, score))
+    
+    @staticmethod
+    def _generate_health_recommendations(win_rate, bottlenecks, velocity_metrics):
+        """Generate recommendations based on pipeline health"""
+        recommendations = []
+        
+        if win_rate < 30:
+            recommendations.append({
+                'type': 'win_rate',
+                'priority': 'high',
+                'message': 'Win rate is below 30%. Focus on lead qualification and deal quality.'
+            })
+        
+        for bottleneck in bottlenecks:
+            recommendations.append({
+                'type': 'bottleneck',
+                'priority': bottleneck['severity'],
+                'message': f"Bottleneck detected in {bottleneck['stage']} stage ({bottleneck['days']} days avg). Review processes."
+            })
+        
+        if velocity_metrics and np.mean(list(velocity_metrics.values())) > 45:
+            recommendations.append({
+                'type': 'velocity',
+                'priority': 'medium',
+                'message': 'Sales cycle is longer than optimal. Consider streamlining approval processes.'
+            })
+        
+        return recommendations
+    
+    @staticmethod
+    def _generate_funnel_recommendations(funnel_data):
+        """Generate recommendations based on funnel analysis"""
+        recommendations = []
+        
+        for stage_data in funnel_data:
+            if stage_data['drop_off_rate'] > 50:
+                recommendations.append({
+                    'stage': stage_data['stage'],
+                    'priority': 'high',
+                    'message': f"High drop-off rate ({stage_data['drop_off_rate']}%) in {stage_data['stage']}. Review qualification criteria."
+                })
+        
+        return recommendations
+    
+    @staticmethod
+    def _get_stage_close_rate(stage):
+        """Get historical close rate for a stage"""
+        stage_mapping = {
+            'qualification': 0.20,
+            'proposal': 0.40,
+            'negotiation': 0.65,
+            'closed_won': 1.0
+        }
+        return stage_mapping.get(stage, 0.10)
+    
+    @staticmethod
+    def _velocity_by_stage(closed_deals):
+        """Calculate velocity metrics by stage"""
+        by_stage = {}
+        
+        for stage in ['closed_won', 'closed_lost']:
+            stage_deals = closed_deals.filter(stage=stage)
+            if stage_deals.exists():
+                avg_days = np.mean([
+                    (deal.closed_at - deal.created_at).days 
+                    for deal in stage_deals
+                ])
+                by_stage[stage] = round(avg_days, 1)
+            else:
+                by_stage[stage] = 0
+        
+        return by_stage
     
     @staticmethod
     def _suggest_contact_actions(contact_id):

@@ -46,3 +46,9 @@ psutil==5.9.6
 python-magic==0.4.27
 bleach==6.1.0
 markdown==3.5.1
+
+# Testing & Performance
+coverage==7.3.2
+locust==2.17.0
+django-redis==5.4.0
+faker==20.1.0  # For generating test data

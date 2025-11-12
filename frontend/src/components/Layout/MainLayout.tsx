@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
+import {
   BarChart3, 
   Users, 
   UserPlus, 
@@ -22,10 +22,16 @@ import {
   Workflow,
   Shield,
   Upload,
-  Zap
+  Zap,
+  FileCode,
+  Target,
+  PieChart,
+  Activity,
+  LayoutDashboard
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import NotificationsDropdown from '@/components/NotificationsDropdown';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
@@ -36,16 +42,22 @@ const navigation = [
   { name: 'Communications', href: '/communications', icon: Mail },
 ];
 
-const toolsNavigation = [
-  { name: 'Workflows', href: '/workflows', icon: Workflow },
+const analyticsNavigation = [
+  { name: 'Pipeline Analytics', href: '/analytics/pipeline', icon: PieChart },
+  { name: 'Lead Scoring', href: '/lead-qualification', icon: Target },
+  { name: 'Advanced Reports', href: '/advanced-reporting', icon: LayoutDashboard },
   { name: 'Reports', href: '/reports', icon: FileText },
+];
+
+const toolsNavigation = [
   { name: 'Email Campaigns', href: '/campaigns', icon: Zap },
+  { name: 'Documents', href: '/documents', icon: FileCode },
+  { name: 'Integrations', href: '/integrations', icon: Activity },
+  { name: 'Workflows', href: '/workflows', icon: Workflow },
   { name: 'Import/Export', href: '/data', icon: Upload },
   { name: 'Security', href: '/security', icon: Shield },
   { name: 'Settings', href: '/settings', icon: Settings },
-];
-
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+];export default function MainLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -93,12 +105,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               />
             </div>
             
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="w-5 h-5" />
-              <Badge className="absolute -top-1 -right-1 px-1 min-w-5 h-5 flex items-center justify-center text-xs">
-                3
-              </Badge>
-            </Button>
+            <NotificationsDropdown />
             
             <div className="flex items-center space-x-2 pl-2 border-l">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -138,6 +145,37 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               </h3>
               
               {navigation.map((item) => {
+                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                return (
+                  <Link key={item.name} href={item.href}>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start",
+                        isActive 
+                          ? "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700" 
+                          : "text-gray-700 hover:bg-gray-50",
+                        !sidebarOpen && "justify-center px-2"
+                      )}
+                      title={!sidebarOpen ? item.name : undefined}
+                    >
+                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3")} />
+                      {sidebarOpen && item.name}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className={cn(
+                "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3",
+                !sidebarOpen && "text-center"
+              )}>
+                {sidebarOpen ? 'Analytics' : 'A'}
+              </h3>
+              
+              {analyticsNavigation.map((item) => {
                 const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                 return (
                   <Link key={item.name} href={item.href}>
@@ -214,6 +252,32 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   </h3>
                   
                   {navigation.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start",
+                            isActive 
+                              ? "bg-blue-50 text-blue-600" 
+                              : "text-gray-700"
+                          )}
+                        >
+                          <item.icon className="w-4 h-4 mr-3" />
+                          {item.name}
+                        </Button>
+                      </Link>
+                    );
+                  })}
+                </div>
+                
+                <div className="space-y-1">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Analytics
+                  </h3>
+                  
+                  {analyticsNavigation.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                       <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>

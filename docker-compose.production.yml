@@ -1,0 +1,239 @@
+# Production-Optimized Docker Compose Configuration
+version: '3.8'
+
+services:
+  # PostgreSQL Database with connection pooling
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: mycrm_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backup:/backup
+    ports:
+      - "5432:5432"
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=128MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=16MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+      -c max_connections=200
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+
+  # Redis for caching and Celery broker
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+
+  # Backend application with Gunicorn
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: >
+      gunicorn backend.wsgi:application
+      --workers 4
+      --threads 2
+      --worker-class gthread
+      --worker-tmp-dir /dev/shm
+      --bind 0.0.0.0:8000
+      --timeout 30
+      --graceful-timeout 30
+      --max-requests 1000
+      --max-requests-jitter 50
+      --access-logfile -
+      --error-logfile -
+      --log-level info
+    volumes:
+      - ./backend:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/mycrm_db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - DJANGO_SETTINGS_MODULE=backend.settings
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+
+  # Celery worker for background tasks
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: >
+      celery -A backend worker
+      --loglevel=info
+      --concurrency=4
+      --max-tasks-per-child=1000
+      --prefetch-multiplier=4
+    volumes:
+      - ./backend:/app
+      - media_volume:/app/media
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/mycrm_db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+
+  # Celery beat for scheduled tasks
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A backend beat --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/mycrm_db
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/static
+      - media_volume:/media
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+
+  # Frontend application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000/api
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+
+  # Monitoring - Prometheus (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+    profiles:
+      - monitoring
+
+  # Monitoring - Grafana (optional)
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+      - mycrm_network
+    profiles:
+      - monitoring
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  mycrm_network:
+    driver: bridge

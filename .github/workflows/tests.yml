@@ -1,0 +1,111 @@
+# Automated Testing Script for CI/CD
+# This can be used in GitHub Actions or other CI/CD pipelines
+
+name: Django CI Tests
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_mycrm_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run migrations
+      run: |
+        cd backend
+        python manage.py migrate
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_mycrm_db
+        REDIS_URL: redis://localhost:6379/1
+    
+    - name: Run tests with coverage
+      run: |
+        cd backend
+        coverage run --source='.' manage.py test --parallel
+        coverage report
+        coverage xml
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_mycrm_db
+        REDIS_URL: redis://localhost:6379/1
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+    
+    - name: Run performance tests
+      run: |
+        cd backend
+        python manage.py test core.performance_tests
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_mycrm_db
+        REDIS_URL: redis://localhost:6379/1
+    
+    - name: Check code quality
+      run: |
+        cd backend
+        python manage.py check --deploy
+        python manage.py makemigrations --check --dry-run
+    
+    - name: Generate test report
+      if: always()
+      run: |
+        echo "Test Summary" > test-report.txt
+        echo "===========" >> test-report.txt
+        echo "Python Version: ${{ matrix.python-version }}" >> test-report.txt
+        echo "Tests completed at: $(date)" >> test-report.txt
+    
+    - name: Upload test report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report
+        path: test-report.txt

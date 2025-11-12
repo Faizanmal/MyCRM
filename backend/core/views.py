@@ -626,3 +626,38 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
         }
         
         return Response(dashboard_data)
+    
+    @action(detail=False, methods=['get'])
+    def pipeline_analytics(self, request):
+        """Get comprehensive pipeline analytics"""
+        from .ai_analytics import PipelineAnalytics
+        
+        if request.user.role not in ['admin', 'manager', 'sales_rep']:
+            return Response(
+                {'error': 'Insufficient permissions'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        analytics_data = {
+            'pipeline_health': PipelineAnalytics.get_pipeline_health(),
+            'pipeline_forecast': PipelineAnalytics.get_pipeline_forecast(3),
+            'conversion_funnel': PipelineAnalytics.get_conversion_funnel(),
+            'deal_velocity': PipelineAnalytics.get_deal_velocity(),
+            'generated_at': timezone.now().isoformat()
+        }
+        
+        return Response(analytics_data)
+    
+    @action(detail=False, methods=['get'])
+    def sales_forecast(self, request):
+        """Get detailed sales forecast"""
+        if request.user.role not in ['admin', 'manager']:
+            return Response(
+                {'error': 'Manager or admin access required'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        period_months = int(request.query_params.get('months', 3))
+        forecast_data = SalesForecasting.forecast_revenue(period_months)
+        
+        return Response(forecast_data)
