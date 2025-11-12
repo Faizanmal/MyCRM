@@ -1,0 +1,246 @@
+# === General ===
+.mypy_cache/
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.env
+.env.local
+.env.*.local
+*.log
+
+# === Python/Django Backend ===
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+/static
+
+# Flask/Django migrations (optional - comment out if you want to track migrations)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# === Node/React/Next.js Frontend ===
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+.vercel
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Turbopack
+.next/cache/
+
+# === Docker ===
+*.dockerignore
+
+# === Database ===
+*.sqlite
+*.sqlite3
+*.db
+
+# PostgreSQL
+*.dump
+*.sql
+
+# === IDE ===
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.iml
+
+# === OS Files ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# === Backup files ===
+*.bak
+*.backup
+*.tmp
+*.temp
+
+# === Logs ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# === Certificates & Keys ===
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# === Sensitive Data ===
+secrets.json
+credentials.json
+.secrets/
+
+# === Media Files (optional) ===
+# Uncomment if you don't want to track uploaded media files
+# /backend/media/
+# /backend/uploads/
+
+# === Documentation Build ===
+docs/_build/
+docs/.build/
+
+# === Temporary Files ===
+tmp/
+temp/
+*.tmp
+
+# === Package Manager Locks (optional) ===
+# Uncomment if you want to ignore lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# === macOS ===
+.AppleDouble
+.LSOverride
+
+# === Windows ===
+$RECYCLE.BIN/
+Desktop.ini
+
+# === Linux ===
+.directory
+.Trash-*
+
+# === Redis ===
+dump.rdb
+
+# === Celery ===
+celerybeat-schedule.*
+
+# === Monitoring ===
+.prometheus/
+grafana/
+
+# === Sentry ===
+.sentryclirc
+
+# === Email Templates (compiled) ===
+*.mjml.html
