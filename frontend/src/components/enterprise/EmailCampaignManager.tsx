@@ -42,15 +42,19 @@ export default function EmailCampaignManager() {
   const { toast } = useToast();
 
   const loadCampaigns = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await axios.get('/api/core/email-campaigns/');
       setCampaigns(response.data);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load campaigns';
       toast({
         title: 'Error',
-        description: 'Failed to load campaigns',
+        description: errorMessage,
         variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
     }
   }, [toast]);
 
@@ -58,8 +62,9 @@ export default function EmailCampaignManager() {
     try {
       const response = await axios.get('/api/core/email-templates/');
       setTemplates(response.data);
-    } catch (error) {
-      console.error('Failed to load templates', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load templates';
+      console.error('Failed to load templates:', errorMessage);
     }
   }, []);
 
@@ -70,18 +75,23 @@ export default function EmailCampaignManager() {
 
   const sendCampaign = async (campaignId: string) => {
     try {
+      setLoading(true);
       await axios.post(`/api/core/email-campaigns/${campaignId}/send/`);
       toast({
         title: 'Success',
         description: 'Campaign started successfully',
       });
       loadCampaigns();
-    } catch (_error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start campaign';
+      console.error('Failed to start campaign:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to start campaign',
+        description: errorMessage,
         variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,7 +101,7 @@ export default function EmailCampaignManager() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Mail className="h-8 w-8" />
-            Email Campaign Manager
+            Email Campaign Manager {loading && <span className="text-sm text-muted-foreground">(Loading...)</span>}
           </h1>
           <p className="text-muted-foreground mt-1">Create and manage email campaigns</p>
         </div>
@@ -257,10 +267,12 @@ function CreateCampaignDialog({ templates, onCreated }: { templates: EmailTempla
       setName('');
       setSubject('');
       onCreated();
-    } catch (_error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create campaign';
+      console.error('Create campaign error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to create campaign',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -363,10 +375,12 @@ function CreateTemplateDialog({ onCreated }: { onCreated: () => void }) {
       setSubject('');
       setHtmlContent('');
       onCreated();
-    } catch (_error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create template';
+      console.error('Create template error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to create template',
+        description: errorMessage,
         variant: 'destructive',
       });
     }

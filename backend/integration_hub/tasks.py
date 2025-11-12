@@ -162,6 +162,13 @@ def sync_third_party_integration(integration_id):
     try:
         integration = ThirdPartyIntegration.objects.get(id=integration_id)
         
+        # Log sync attempt
+        sync_log = IntegrationLog.objects.create(
+            integration=integration,
+            event_type='sync_start',
+            description=f"Syncing {integration.provider} integration"
+        )
+        
         # Provider-specific sync logic
         if integration.provider == 'slack':
             sync_slack(integration)
@@ -173,6 +180,10 @@ def sync_third_party_integration(integration_id):
         integration.error_count = 0
         integration.status = 'active'
         integration.save()
+        
+        # Update sync log status
+        sync_log.status = 'success'
+        sync_log.save()
         
         logger.info(f"Integration synced: {integration.name}")
         
@@ -187,8 +198,8 @@ def sync_third_party_integration(integration_id):
             integration.error_message = str(e)
             integration.status = 'error'
             integration.save()
-        except:
-            pass
+        except ThirdPartyIntegration.DoesNotExist:
+            logger.error(f"Failed to update integration error status: Integration {integration_id} not found")
 
 
 def sync_slack(integration):

@@ -7,13 +7,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Campaign, CampaignSegment, CampaignRecipient, CampaignClick, EmailTemplate
 from .serializers import (
     CampaignSerializer, CampaignSegmentSerializer, CampaignRecipientSerializer,
-    CampaignClickSerializer, EmailTemplateSerializer, CampaignStatsSerializer
+    EmailTemplateSerializer
 )
 from .tasks import send_campaign_emails, process_campaign_segment
 
@@ -256,11 +256,19 @@ class CampaignSegmentViewSet(viewsets.ModelViewSet):
         leads = Lead.objects.all()
         
         # Apply filters from segment.filters
-        # Simplified - in production, build dynamic queries
+        if segment.filters:
+            # Filter contacts/leads based on segment criteria
+            for field, value in segment.filters.items():
+                if hasattr(Contact, field):
+                    contacts = contacts.filter(**{field: value})
+                if hasattr(Lead, field):
+                    leads = leads.filter(**{field: value})
         
         return Response({
-            'contacts': contacts[:10].values('id', 'email', 'first_name', 'last_name'),
-            'leads': leads[:10].values('id', 'email', 'name'),
+            'segment_name': segment.name,
+            'segment_description': segment.description,
+            'contacts': list(contacts[:10].values('id', 'email', 'first_name', 'last_name')),
+            'leads': list(leads[:10].values('id', 'email', 'name')),
             'total_count': contacts.count() + leads.count()
         })
 

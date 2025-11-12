@@ -7,4 +7,4 @@ class IntegrationHubConfig(AppConfig):
     verbose_name = 'Integration Hub'
     
     def ready(self):
-        import integration_hub.signals
+        import integration_hub.signals  # noqa: F401

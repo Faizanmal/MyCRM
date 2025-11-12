@@ -122,13 +122,16 @@ class Command(BaseCommand):
         
         # Run pg_dump
         with open(backup.file_path, 'wb') as output_file:
-            process = subprocess.run(
+            result = subprocess.run(
                 cmd,
                 stdout=output_file,
                 stderr=subprocess.PIPE,
                 env=env,
                 check=True
             )
+            # Log backup process completion
+            if result.returncode == 0:
+                self.stdout.write('Backup process completed successfully')
         
         self.stdout.write(f'Full backup created: {backup.file_path}')
 

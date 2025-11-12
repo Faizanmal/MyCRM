@@ -193,6 +193,13 @@ function DashboardCanvas({ dashboard, widgets, onRemoveWidget }: { dashboard: Da
 
 // Widget Palette Component
 function WidgetPalette({ onAddWidget }: { onAddWidget: (widget: Widget) => void }) {
+  const colorClasses: { [key: string]: string } = {
+    blue: 'text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50',
+    green: 'text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50',
+    purple: 'text-purple-600 hover:text-purple-700 border-purple-200 hover:bg-purple-50',
+    orange: 'text-orange-600 hover:text-orange-700 border-orange-200 hover:bg-orange-50',
+  };
+
   const widgetTypes = [
     { type: 'metric', icon: TrendingUp, label: 'Metric', color: 'blue' },
     { type: 'chart', icon: BarChart3, label: 'Chart', color: 'green' },
@@ -206,7 +213,7 @@ function WidgetPalette({ onAddWidget }: { onAddWidget: (widget: Widget) => void 
         <Button
           key={type}
           variant="outline"
-          className="w-full justify-start"
+          className={`w-full justify-start ${colorClasses[color]}`}
           onClick={() => onAddWidget({
             id: `widget-${Date.now()}`,
             type: type as any,
@@ -436,12 +443,32 @@ function CreateReportDialog({ onCreated }: { onCreated: () => void }) {
   const { toast } = useToast();
 
   const MODELS = [
-    { value: 'contact_management.Contact', label: 'Contacts' },
-    { value: 'lead_management.Lead', label: 'Leads' },
-    { value: 'opportunity_management.Opportunity', label: 'Opportunities' },
+    { value: 'contact_management.Contact', label: 'Contacts', defaultColumns: ['id', 'name', 'email', 'phone', 'company'] },
+    { value: 'lead_management.Lead', label: 'Leads', defaultColumns: ['id', 'first_name', 'email', 'company_name', 'lead_source', 'status'] },
+    { value: 'opportunity_management.Opportunity', label: 'Opportunities', defaultColumns: ['id', 'name', 'amount', 'stage', 'close_date'] },
   ];
 
+  const currentModel = MODELS.find(m => m.value === modelName);
+  const availableColumns = currentModel?.defaultColumns || [];
+
+  const toggleColumn = (column: string) => {
+    setColumns(prev => 
+      prev.includes(column)
+        ? prev.filter(c => c !== column)
+        : [...prev, column]
+    );
+  };
+
   const handleCreate = async () => {
+    if (!columns.length) {
+      toast({
+        title: 'Error',
+        description: 'Please select at least one column',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       await axios.post('/api/core/reports/', {
         name,
@@ -456,6 +483,7 @@ function CreateReportDialog({ onCreated }: { onCreated: () => void }) {
       });
       setOpen(false);
       setName('');
+      setColumns([]);
       onCreated();
     } catch (error) {
       console.error('Error creating report:', error);
@@ -475,7 +503,7 @@ function CreateReportDialog({ onCreated }: { onCreated: () => void }) {
           Create Report
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Create Report</DialogTitle>
           <DialogDescription>Configure a new custom report</DialogDescription>
@@ -492,7 +520,10 @@ function CreateReportDialog({ onCreated }: { onCreated: () => void }) {
           </div>
           <div>
             <Label htmlFor="model">Data Source</Label>
-            <Select value={modelName} onValueChange={setModelName}>
+            <Select value={modelName} onValueChange={(value) => {
+              setModelName(value);
+              setColumns([]); // Reset columns when model changes
+            }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -504,6 +535,25 @@ function CreateReportDialog({ onCreated }: { onCreated: () => void }) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label>Select Columns ({columns.length} selected)</Label>
+            <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto">
+              {availableColumns.map(column => (
+                <div key={column} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`col-${column}`}
+                    checked={columns.includes(column)}
+                    onChange={() => toggleColumn(column)}
+                    className="mr-2"
+                  />
+                  <label htmlFor={`col-${column}`} className="text-sm cursor-pointer">
+                    {column}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setOpen(false)}>

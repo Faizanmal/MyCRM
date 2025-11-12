@@ -160,7 +160,7 @@ export default function NotificationsDropdown() {
                     }`}
                   >
                     <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 text-2xl">
+                      <div className="shrink-0 text-2xl">
                         {getNotificationIcon()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -174,7 +174,7 @@ export default function NotificationsDropdown() {
                       {!notification.is_read && (
                         <button
                           onClick={() => markAsRead(notification.id)}
-                          className="flex-shrink-0 text-blue-600 hover:text-blue-700"
+                          className="shrink-0 text-blue-600 hover:text-blue-700"
                           title="Mark as read"
                         >
                           <CheckIcon className="w-5 h-5" />

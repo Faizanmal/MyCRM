@@ -86,7 +86,7 @@ const toolsNavigation = [
             </Button>
 
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-linear-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">C</span>
               </div>
               <h1 className="text-xl font-semibold text-gray-900 hidden sm:block">MyCRM</h1>
@@ -106,7 +106,7 @@ const toolsNavigation = [
             <NotificationsDropdown />
             
             <div className="flex items-center space-x-2 pl-2 border-l">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-white">
                   {user?.first_name?.[0] || user?.username?.[0] || 'U'}
                 </span>

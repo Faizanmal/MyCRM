@@ -6,7 +6,6 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.db import connection
 from django.core.cache import cache
-from django.core.mail import send_mail
 from core.models import SystemHealth
 import time
 import requests

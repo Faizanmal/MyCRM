@@ -257,7 +257,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: AIInsights }) => (
             <h4 className="font-medium">Sales Forecast</h4>
             {((aiInsights?.sales_forecast?.recommendations as string[]) || [])?.slice(0, 3).map((rec: string, index: number) => (
               <div key={index} className="flex items-start space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                 <span className="text-sm">{rec}</span>
               </div>
             ))}
@@ -266,7 +266,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: AIInsights }) => (
             <h4 className="font-medium">Customer Retention</h4>
             {aiInsights?.churn_risk?.recommendations?.slice(0, 3).map((rec: string, index: number) => (
               <div key={index} className="flex items-start space-x-2">
-                <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
                 <span className="text-sm">{rec}</span>
               </div>
             ))}
@@ -365,7 +365,7 @@ const SalesForecastView = ({
               <div className="space-y-2">
                 {salesForecast?.recommendations?.map((rec: string, index: number) => (
                   <div key={index} className="flex items-start space-x-2">
-                    <Lightbulb className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <Lightbulb className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
                     <span className="text-sm">{rec}</span>
                   </div>
                 ))}
@@ -510,7 +510,7 @@ const LeadScoringView = ({
                 <div className="space-y-2">
                   {leadScore.recommendations?.map((rec: string, index: number) => (
                     <div key={index} className="flex items-start space-x-2">
-                      <Target className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <Target className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                       <span className="text-sm">{rec}</span>
                     </div>
                   ))}
@@ -572,7 +572,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: AIInsights }) => (
             <div className="space-y-2">
               {aiInsights?.churn_risk?.recommendations?.map((rec: string, index: number) => (
                 <div key={index} className="flex items-start space-x-2">
-                  <Clock className="h-4 w-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <Clock className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
                   <span className="text-sm">{rec}</span>
                 </div>
               ))}

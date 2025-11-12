@@ -7,4 +7,4 @@ class LeadQualificationConfig(AppConfig):
     verbose_name = 'Lead Qualification & Scoring'
     
     def ready(self):
-        import lead_qualification.signals
+        import lead_qualification.signals  # noqa: F401

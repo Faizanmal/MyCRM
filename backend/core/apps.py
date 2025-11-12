@@ -13,4 +13,3 @@ class CoreConfig(AppConfig):
     def ready(self):
         """Initialize the app when Django starts"""
         # Import signal handlers
-        from . import signals

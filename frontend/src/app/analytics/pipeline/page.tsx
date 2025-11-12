@@ -305,7 +305,7 @@ export default function PipelineAnalyticsPage() {
               <div className="space-y-4">
                 {aiInsights?.insights?.slice(0, 5).map((insight: Record<string, unknown>, index: number) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className={`flex-shrink-0 w-2 h-2 mt-2 rounded-full ${
+                    <div className={`shrink-0 w-2 h-2 mt-2 rounded-full ${
                       (insight.priority as string) === 'high' ? 'bg-red-500' :
                       (insight.priority as string) === 'medium' ? 'bg-yellow-500' :
                       'bg-blue-500'

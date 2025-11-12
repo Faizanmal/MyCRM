@@ -2,6 +2,10 @@
 
 # Add these to your settings.py for better performance
 
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+
 # 1. DATABASE OPTIMIZATION
 DATABASES = {
     'default': {

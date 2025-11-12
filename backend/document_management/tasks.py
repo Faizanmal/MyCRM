@@ -103,6 +103,9 @@ def generate_document_from_template(template_id, variables, entity_type, entity_
         with template.file.open('r') as f:
             content = f.read()
         
+        # Get file size for audit
+        file_size = os.path.getsize(template.file.path) if template.file.name else 0
+        
         # Replace variables
         for key, value in variables.items():
             placeholder = f"{{{{{key}}}}}"  # {{variable_name}}
@@ -115,18 +118,31 @@ def generate_document_from_template(template_id, variables, entity_type, entity_
             'name': filename,
             'category': template.template_type,
             'uploaded_by': user,
+            'size': file_size,
         }
         
-        # Set entity relationship
+        # Set entity relationship with validation
         if entity_type == 'lead':
             from lead_management.models import Lead
-            document_data['lead_id'] = entity_id
+            try:
+                Lead.objects.get(id=entity_id)
+                document_data['lead_id'] = entity_id
+            except Lead.DoesNotExist:
+                pass
         elif entity_type == 'contact':
             from contact_management.models import Contact
-            document_data['contact_id'] = entity_id
+            try:
+                Contact.objects.get(id=entity_id)
+                document_data['contact_id'] = entity_id
+            except Contact.DoesNotExist:
+                pass
         elif entity_type == 'opportunity':
             from opportunity_management.models import Opportunity
-            document_data['opportunity_id'] = entity_id
+            try:
+                Opportunity.objects.get(id=entity_id)
+                document_data['opportunity_id'] = entity_id
+            except Opportunity.DoesNotExist:
+                pass
         
         document = Document.objects.create(**document_data)
         document.file.save(filename, ContentFile(content.encode('utf-8')))

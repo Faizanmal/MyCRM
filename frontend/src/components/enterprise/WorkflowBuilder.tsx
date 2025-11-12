@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,23 +59,50 @@ export default function WorkflowBuilder() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchWorkflows();
-  }, []);
-
-  const fetchWorkflows = async () => {
+  const fetchWorkflows = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get('/api/core/workflows/');
       setWorkflows(response.data.results || response.data);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load workflows';
+      console.error('Fetch workflows error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to load workflows',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchWorkflows();
+  }, [fetchWorkflows]);
+
+  const copyWorkflow = async (workflow: WorkflowData) => {
+    try {
+      const newWorkflow = {
+        ...workflow,
+        id: undefined,
+        name: `${workflow.name} (Copy)`,
+        status: 'draft' as const,
+      };
+      await axios.post('/api/core/workflows/', newWorkflow);
+      toast({
+        title: 'Success',
+        description: 'Workflow copied successfully',
+      });
+      fetchWorkflows();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to copy workflow';
+      console.error('Copy workflow error:', errorMessage);
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -103,10 +130,12 @@ export default function WorkflowBuilder() {
       fetchWorkflows();
       setIsCreating(false);
       setSelectedWorkflow(null);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save workflow';
+      console.error('Save workflow error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to save workflow',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -121,10 +150,12 @@ export default function WorkflowBuilder() {
         description: `Workflow ${newStatus === 'active' ? 'activated' : 'deactivated'}`,
       });
       fetchWorkflows();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update workflow status';
+      console.error('Toggle workflow status error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to update workflow status',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -139,10 +170,12 @@ export default function WorkflowBuilder() {
         title: 'Success',
         description: 'Workflow execution started',
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to execute workflow';
+      console.error('Execute workflow error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to execute workflow',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -155,6 +188,7 @@ export default function WorkflowBuilder() {
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Workflow className="h-8 w-8" />
             Workflow Automation
+            {loading && <span className="text-sm text-muted-foreground ml-2">(Loading...)</span>}
           </h1>
           <p className="text-muted-foreground mt-1">Automate your business processes</p>
         </div>
@@ -190,17 +224,30 @@ export default function WorkflowBuilder() {
                         <div className="space-y-2">
                           <div className="flex justify-between items-start">
                             <h3 className="font-semibold">{workflow.name}</h3>
-                            <Badge
-                              variant={
-                                workflow.status === 'active'
-                                  ? 'default'
-                                  : workflow.status === 'draft'
-                                  ? 'secondary'
-                                  : 'outline'
-                              }
-                            >
-                              {workflow.status}
-                            </Badge>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  copyWorkflow(workflow);
+                                }}
+                                title="Duplicate workflow"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <Badge
+                                variant={
+                                  workflow.status === 'active'
+                                    ? 'default'
+                                    : workflow.status === 'draft'
+                                    ? 'secondary'
+                                    : 'outline'
+                                }
+                              >
+                                {workflow.status}
+                              </Badge>
+                            </div>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {workflow.description}

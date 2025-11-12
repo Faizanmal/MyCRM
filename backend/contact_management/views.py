@@ -12,7 +12,6 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 import io
-import pandas as pd
 from .models import Contact, ContactGroup, ContactImport
 from .serializers import (
     ContactSerializer, ContactCreateSerializer, ContactGroupSerializer,

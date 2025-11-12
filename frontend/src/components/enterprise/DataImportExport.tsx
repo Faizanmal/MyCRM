@@ -67,11 +67,11 @@ export default function DataImportExport() {
         </TabsList>
 
         <TabsContent value="import" className="space-y-4">
-          <ImportWizard />
+          <ImportWizard onNotify={toast} />
         </TabsContent>
 
         <TabsContent value="export" className="space-y-4">
-          <ExportWizard />
+          <ExportWizard onNotify={toast} />
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
@@ -93,6 +93,7 @@ function ImportWizard() {
   const [modelFields, setModelFields] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const { toast } = useToast();
 
   const MODELS = [
@@ -102,23 +103,60 @@ function ImportWizard() {
     { value: 'task_management.Task', label: 'Tasks' },
   ];
 
+  const getAvailableFields = (modelValue: string): string[] => {
+    const fieldMap: Record<string, string[]> = {
+      'contact_management.Contact': ['name', 'email', 'phone', 'company', 'title', 'status'],
+      'lead_management.Lead': ['first_name', 'last_name', 'email', 'phone', 'company_name', 'lead_source'],
+      'opportunity_management.Opportunity': ['name', 'amount', 'stage', 'close_date', 'description'],
+      'task_management.Task': ['title', 'description', 'due_date', 'priority', 'status'],
+    };
+    return fieldMap[modelValue] || [];
+  };
+
+  const parseFileHeaders = useCallback((file: File) => {
+    // This would parse the first row of the file
+    // For demo purposes, using mock data
+    setFileHeaders(['Name', 'Email', 'Phone', 'Company', 'Title', 'Status']);
+    
+    // Show file preview info in toast notification
+    toast({
+      title: 'File Preview',
+      description: `File: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`,
+    });
+    
+    // Update model fields when file is selected
+    if (modelName) {
+      const fields = getAvailableFields(modelName);
+      setModelFields(fields);
+    }
+  }, [modelName, toast]);
+
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       // Parse headers from CSV/Excel
       parseFileHeaders(selectedFile);
+      // Show file preview info
+      setFilePreview(`${selectedFile.name} - ${(selectedFile.size / 1024).toFixed(2)} KB`);
     }
-  }, []);
+  }, [parseFileHeaders]);
 
-  const parseFileHeaders = async (file: File) => {
-    // This would parse the first row of the file
-    // For demo purposes, using mock data
-    setFileHeaders(['Name', 'Email', 'Phone', 'Company', 'Title', 'Status']);
+  const handleModelChange = (value: string) => {
+    setModelName(value);
+    const fields = getAvailableFields(value);
+    setModelFields(fields);
   };
 
   const handleImport = async () => {
-    if (!file) return;
+    if (!file || !modelFields.length) {
+      toast({
+        title: 'Error',
+        description: 'Please select a file and data type',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setUploading(true);
     const formData = new FormData();
@@ -174,7 +212,7 @@ function ImportWizard() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="model">Select Data Type</Label>
-              <Select value={modelName} onValueChange={setModelName}>
+              <Select value={modelName} onValueChange={handleModelChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose what to import" />
                 </SelectTrigger>
@@ -211,9 +249,9 @@ function ImportWizard() {
                 onChange={handleFileChange}
                 className="cursor-pointer"
               />
-              {file && (
+              {filePreview && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  Selected: {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                  Selected: {filePreview}
                 </p>
               )}
             </div>
@@ -234,7 +272,7 @@ function ImportWizard() {
             <div>
               <h3 className="font-semibold mb-4">Field Mapping</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Map your file columns to CRM fields
+                Map your file columns to CRM fields. Available fields: {modelFields.join(', ')}
               </p>
             </div>
 
@@ -450,10 +488,11 @@ function ExportWizard() {
         title: 'Success',
         description: 'Data exported successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Export failed:', error);
       toast({
         title: 'Error',
-        description: 'Failed to export data',
+        description: error.response?.data?.error || 'Failed to export data',
         variant: 'destructive',
       });
     } finally {
@@ -554,8 +593,8 @@ function ImportHistory() {
     try {
       const response = await axios.get('/api/core/data-import-logs/');
       setLogs(response.data.results || response.data);
-    } catch (error) {
-      console.error('Failed to fetch import logs');
+    } catch (error: any) {
+      console.error('Failed to fetch import logs:', error.response?.data?.error || error.message);
     } finally {
       setLoading(false);
     }
@@ -565,7 +604,7 @@ function ImportHistory() {
     <Card>
       <CardHeader>
         <CardTitle>Import History</CardTitle>
-        <CardDescription>View past import operations</CardDescription>
+        <CardDescription>View past import operations ({loading ? 'Loading...' : logs.length} records)</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[500px]">

@@ -6,7 +6,7 @@ from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from .models import AuditLog, SystemHealth
+from .models import SystemHealth
 from .security import SecurityAuditLog
 
 User = get_user_model()

@@ -3,12 +3,11 @@ Lead Scoring Engine
 Calculates lead scores based on rules and updates qualification stages
 """
 import json
-from datetime import datetime, timedelta
-from django.db.models import Q
+from datetime import timedelta
 from django.utils import timezone
 from .models import (
     ScoringRule, QualificationCriteria, LeadScore, 
-    QualificationWorkflow, WorkflowExecution, LeadEnrichmentData
+    QualificationWorkflow, WorkflowExecution
 )
 
 

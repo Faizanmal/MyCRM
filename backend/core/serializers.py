@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from .models import (
     AuditLog, SystemConfiguration, APIKey, DataBackup, 
     Workflow, WorkflowExecution, Integration, NotificationTemplate, SystemHealth,
-    UserPermission, PermissionGroup, UserPermissionGroup, Team, TeamMember,
+    UserPermission, PermissionGroup, Team, TeamMember,
     DataImportLog, Notification, SavedSearch, Dashboard, Report, ScheduledReport,
     SearchLog, EmailLog, EmailClick, EmailCampaign
 )

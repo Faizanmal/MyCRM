@@ -31,8 +31,6 @@ class DashboardSerializer(serializers.ModelSerializer):
     
     def get_shared_with_details(self, obj):
         """Get details of users dashboard is shared with"""
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
         return [
             {'id': user.id, 'username': user.username, 'email': user.email}
             for user in obj.shared_with.all()
@@ -87,8 +85,6 @@ class ReportSerializer(serializers.ModelSerializer):
     
     def get_shared_with_details(self, obj):
         """Get details of users report is shared with"""
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
         return [
             {'id': user.id, 'username': user.username, 'email': user.email}
             for user in obj.shared_with.all()

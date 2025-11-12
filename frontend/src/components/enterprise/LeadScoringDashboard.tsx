@@ -1,7 +1,7 @@
 // Lead Scoring Dashboard Component
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,26 +33,28 @@ export default function LeadScoringDashboard() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  React.useEffect(() => {
-    loadLeads();
-  }, []);
-
-  const loadLeads = async () => {
+  const loadLeads = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get('/api/core/lead-scores/');
       setLeads(response.data);
       calculateDistribution(response.data);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load lead scores';
+      console.error('Load leads error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to load lead scores',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  React.useEffect(() => {
+    loadLeads();
+  }, [loadLeads]);
 
   const calculateDistribution = (leads: Lead[]) => {
     const dist = leads.reduce((acc, lead) => {
@@ -71,10 +73,12 @@ export default function LeadScoringDashboard() {
         description: 'Lead scores recalculated',
       });
       loadLeads();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to recalculate scores';
+      console.error('Recalculate scores error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to recalculate scores',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -94,7 +98,7 @@ export default function LeadScoringDashboard() {
             <Target className="h-8 w-8" />
             Lead Scoring Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">AI-powered lead scoring and prioritization</p>
+          <CardDescription>Analyze and manage qualified leads by scoring</CardDescription>
         </div>
         <Button onClick={recalculateScores} disabled={loading}>
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />

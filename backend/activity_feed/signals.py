@@ -3,7 +3,7 @@ Activity Feed Signals
 Automatically create activity records for CRM actions
 """
 
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from .models import Activity
@@ -22,7 +22,7 @@ def lead_activity(sender, instance, created, **kwargs):
         )
     else:
         # Check if status changed
-        if hasattr(instance, '_state') and instance._state.adding == False:
+        if hasattr(instance, '_state') and not instance._state.adding:
             Activity.objects.create(
                 actor=instance.assigned_to if hasattr(instance, 'assigned_to') and instance.assigned_to else instance.created_by,
                 action='updated',

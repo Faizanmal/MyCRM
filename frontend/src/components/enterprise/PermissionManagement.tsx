@@ -1,7 +1,7 @@
 // Permission Management Component
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,6 +50,9 @@ export default function PermissionManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
+  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
+  const [groupEditOpen, setGroupEditOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
   const { toast } = useToast();
 
   const PERMISSION_CATEGORIES = {
@@ -61,11 +64,7 @@ export default function PermissionManagement() {
     'System': ['system.settings', 'system.audit', 'system.integrations', 'system.security'],
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [permsRes, groupsRes, usersRes] = await Promise.all([
@@ -76,16 +75,22 @@ export default function PermissionManagement() {
       setPermissions(permsRes.data.results || permsRes.data);
       setGroups(groupsRes.data.results || groupsRes.data);
       setUsers(usersRes.data.results || usersRes.data);
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load permissions data';
+      console.error('Fetch data error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to load permissions data',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const grantPermission = async (userId: number, permission: string, reason: string) => {
     try {
@@ -100,10 +105,12 @@ export default function PermissionManagement() {
         description: 'Permission granted successfully',
       });
       fetchData();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to grant permission';
+      console.error('Grant permission error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to grant permission',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -117,10 +124,12 @@ export default function PermissionManagement() {
         description: 'Permission revoked successfully',
       });
       fetchData();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to revoke permission';
+      console.error('Revoke permission error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to revoke permission',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -134,14 +143,52 @@ export default function PermissionManagement() {
         description: 'Permission group created successfully',
       });
       fetchData();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create permission group';
+      console.error('Create group error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to create permission group',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
   };
+
+  const togglePermissionSelection = (permission: string) => {
+    const newSet = new Set(selectedPermissions);
+    if (newSet.has(permission)) {
+      newSet.delete(permission);
+    } else {
+      newSet.add(permission);
+    }
+    setSelectedPermissions(newSet);
+  };
+
+  const handleEditGroup = async () => {
+    if (selectedPermissions.size === 0 || !newGroupName) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a group name and select permissions',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    await createGroup({
+      name: newGroupName,
+      description: `Group with selected permissions`,
+      permissions: Array.from(selectedPermissions),
+    });
+    
+    setGroupEditOpen(false);
+    setNewGroupName('');
+    setSelectedPermissions(new Set());
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -150,6 +197,7 @@ export default function PermissionManagement() {
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Shield className="h-8 w-8" />
             Permission Management
+            {loading && <span className="text-sm text-muted-foreground ml-2">(Loading...)</span>}
           </h1>
           <p className="text-muted-foreground mt-1">Manage user permissions and access control</p>
         </div>
@@ -191,27 +239,66 @@ export default function PermissionManagement() {
                     <h3 className="font-semibold text-lg">{category}</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                       {perms.map((perm) => (
-                        <Badge key={perm} variant="outline" className="justify-between">
-                          {perm}
-                        </Badge>
+                        <div key={perm} className="flex items-center gap-2">
+                          <Checkbox 
+                            id={perm}
+                            checked={selectedPermissions.has(perm)}
+                            onCheckedChange={() => togglePermissionSelection(perm)}
+                          />
+                          <Badge variant="outline" className="text-xs cursor-pointer">
+                            {perm}
+                          </Badge>
+                        </div>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
+              {selectedPermissions.size > 0 && (
+                <div className="mt-6 pt-6 border-t">
+                  <Dialog open={groupEditOpen} onOpenChange={setGroupEditOpen}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Create Group with Selected ({selectedPermissions.size})
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create Permission Group</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="group-name">Group Name</Label>
+                          <Input
+                            id="group-name"
+                            value={newGroupName}
+                            onChange={(e) => setNewGroupName(e.target.value)}
+                            placeholder="e.g., Sales Manager"
+                          />
+                        </div>
+                        <Button onClick={handleEditGroup} className="w-full">
+                          Create Group
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* Permission Groups Tab */}
         <TabsContent value="groups" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div className="flex-1 max-w-sm">
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex-1 max-w-sm relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search groups..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
+                className="w-full pl-8"
               />
             </div>
             <CreateGroupDialog onSuccess={fetchData} />
@@ -244,6 +331,10 @@ export default function PermissionManagement() {
                           </Badge>
                         )}
                       </div>
+                      <Button variant="outline" size="sm" className="w-full mt-4">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Group
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -260,12 +351,21 @@ export default function PermissionManagement() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search users..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
                 <Select onValueChange={(value) => setSelectedUser(Number(value))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a user" />
                   </SelectTrigger>
                   <SelectContent>
-                    {users.map((user) => (
+                    {filteredUsers.map((user) => (
                       <SelectItem key={user.id} value={user.id.toString()}>
                         {user.username} ({user.role})
                       </SelectItem>
@@ -316,10 +416,12 @@ function CreateGroupDialog({ onSuccess }: { onSuccess: () => void }) {
       setDescription('');
       setSelectedPermissions([]);
       onSuccess();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create permission group';
+      console.error('Create group error:', errorMessage);
       toast({
         title: 'Error',
-        description: 'Failed to create permission group',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -396,7 +498,14 @@ function UserPermissionsEditor({
               <Badge variant={perm.is_granted ? 'default' : 'destructive'}>
                 {perm.is_granted ? 'Granted' : 'Revoked'}
               </Badge>
-              <Button variant="ghost" size="sm" onClick={() => onRevoke(perm.id)}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  onRevoke(perm.id);
+                  onGrant(userId, perm.permission, 'User action to revoke');
+                }}
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>

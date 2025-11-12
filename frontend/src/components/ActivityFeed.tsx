@@ -193,7 +193,7 @@ export default function ActivityFeed({
             activities.map((activity) => (
               <div key={activity.id} className="p-4 hover:bg-gray-50">
                 <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     {getActivityIcon(activity.activity_type)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -271,7 +271,7 @@ export default function ActivityFeed({
               comments.map((comment) => (
                 <div key={comment.id} className="p-4 hover:bg-gray-50">
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-blue-600">
                           {comment.user_display_name?.charAt(0).toUpperCase() || '?'}

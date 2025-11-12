@@ -7,11 +7,9 @@ from rest_framework import viewsets, status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Count
+from django.db.models import Count, Max
 from django.utils import timezone
-from datetime import datetime, timedelta
-from django.core.cache import cache
-from django.conf import settings
+from datetime import timedelta
 
 from .models import (
     AuditLog, SystemConfiguration, APIKey, DataBackup,
@@ -23,7 +21,7 @@ from .serializers import (
     IntegrationSerializer, NotificationTemplateSerializer, SystemHealthSerializer,
     SecurityDashboardSerializer, AdvancedAnalyticsSerializer
 )
-from .security import SecurityAuditLog, RateLimitManager, AdvancedPermissions
+from .security import SecurityAuditLog
 from .ai_analytics import SalesForecasting, LeadScoring, CustomerSegmentation, PredictiveAnalytics, WorkflowAutomation
 
 User = get_user_model()
@@ -78,6 +76,9 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
         metrics = {
             'total_events_today': AuditLog.objects.filter(
                 timestamp__date=today
+            ).count(),
+            'total_events_yesterday': AuditLog.objects.filter(
+                timestamp__date=yesterday
             ).count(),
             'high_risk_events_today': AuditLog.objects.filter(
                 timestamp__date=today,
@@ -355,7 +356,7 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
         
         # Get latest health check for each component
         latest_checks = SystemHealth.objects.values('component').annotate(
-            latest_check=models.Max('checked_at')
+            latest_check=Max('checked_at')
         )
         
         health_checks = []
@@ -649,8 +650,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
         return Response(analytics_data)
     
     @action(detail=False, methods=['get'])
-    def sales_forecast(self, request):
-        """Get detailed sales forecast"""
+    def detailed_sales_forecast(self, request):
+        """Get detailed sales forecast with role-based access"""
         if request.user.role not in ['admin', 'manager']:
             return Response(
                 {'error': 'Manager or admin access required'},

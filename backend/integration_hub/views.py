@@ -7,13 +7,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils import timezone
 
 from .models import Webhook, WebhookDelivery, ThirdPartyIntegration, IntegrationLog, APIEndpoint
 from .serializers import (
     WebhookSerializer, WebhookDeliverySerializer, ThirdPartyIntegrationSerializer,
     IntegrationLogSerializer, APIEndpointSerializer
 )
-from .tasks import trigger_webhook, deliver_webhook, sync_third_party_integration
+from .tasks import trigger_webhook, sync_third_party_integration
 
 
 class WebhookViewSet(viewsets.ModelViewSet):
@@ -39,7 +40,9 @@ class WebhookViewSet(viewsets.ModelViewSet):
         test_payload = {
             'event': 'test.webhook',
             'test': True,
-            'timestamp': str(timezone.now())
+            'timestamp': str(timezone.now()),
+            'webhook_id': webhook.id,
+            'webhook_name': webhook.name,
         }
         
         # Trigger test delivery

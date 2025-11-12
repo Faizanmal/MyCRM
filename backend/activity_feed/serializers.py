@@ -4,7 +4,6 @@ Activity Feed Serializers
 
 from rest_framework import serializers
 from .models import Activity, Comment, Mention, Notification, Follow
-from django.contrib.contenttypes.models import ContentType
 
 
 class ActivitySerializer(serializers.ModelSerializer):

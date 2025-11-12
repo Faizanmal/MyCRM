@@ -4,14 +4,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.db.models import Q, Count, Sum, Avg
-from django.core.exceptions import ValidationError
-import json
 
 from .models import Dashboard, DashboardWidget, Report, ReportSchedule, ReportExecution, KPI, KPIValue
 from .serializers import (
     DashboardSerializer, DashboardWidgetSerializer, ReportSerializer,
     ReportScheduleSerializer, ReportExecutionSerializer, KPISerializer,
-    KPIValueSerializer, DashboardWidgetDataSerializer
+    KPIValueSerializer
 )
 from .tasks import execute_report_task, calculate_kpi_task
 
@@ -116,7 +114,6 @@ class DashboardViewSet(viewsets.ModelViewSet):
         from contact_management.models import Contact
         from lead_management.models import Lead
         from opportunity_management.models import Opportunity
-        from task_management.models import Task
         
         widget_type = widget.widget_type
         config = widget.query_config or {}

@@ -7,4 +7,4 @@ class ActivityFeedConfig(AppConfig):
     verbose_name = 'Activity Feed'
     
     def ready(self):
-        import activity_feed.signals
+        pass

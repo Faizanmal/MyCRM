@@ -28,3 +28,11 @@ def lead_saved(sender, instance, created, **kwargs):
         if any(hasattr(instance, field) for field in significant_fields):
             logger.info(f"Lead updated: {instance.name}, queuing score recalculation")
             calculate_lead_score_task.delay(instance.id)
+
+
+@receiver(post_delete, sender=Lead)
+def lead_deleted(sender, instance, **kwargs):
+    """
+    Log when a lead is deleted
+    """
+    logger.info(f"Lead deleted: {instance.name} (ID: {instance.id})")

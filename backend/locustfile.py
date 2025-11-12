@@ -5,7 +5,6 @@ Run with: locust -f locustfile.py --host=http://localhost:8000
 
 from locust import HttpUser, task, between, TaskSet
 from random import randint, choice
-import json
 
 
 class ContactBehavior(TaskSet):

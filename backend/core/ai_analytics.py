@@ -5,9 +5,9 @@ Provides machine learning insights, predictive analytics, and automation
 
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Q, Count, Sum, Avg
+from django.db.models import Count, Sum, Avg
 from django.contrib.auth import get_user_model
 from contact_management.models import Contact
 from lead_management.models import Lead
@@ -667,7 +667,6 @@ class PipelineAnalytics:
         Returns:
             dict: Conversion metrics for each stage
         """
-        from django.db.models import F, ExpressionWrapper, DurationField
         
         # Get all opportunities with stage history
         opportunities = Opportunity.objects.all()
@@ -711,7 +710,6 @@ class PipelineAnalytics:
         Returns:
             dict: Velocity metrics
         """
-        from django.db.models import F, ExpressionWrapper, fields
         
         closed_deals = Opportunity.objects.filter(
             stage__in=['closed_won', 'closed_lost'],

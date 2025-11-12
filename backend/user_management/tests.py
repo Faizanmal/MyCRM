@@ -1,9 +1,6 @@
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.contrib.auth import get_user_model
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from django.urls import reverse
-from .models import UserProfile, Permission, RolePermission, AuditLog
+from .models import UserProfile, Permission, AuditLog
 
 User = get_user_model()
 

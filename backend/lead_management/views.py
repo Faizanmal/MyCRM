@@ -71,6 +71,8 @@ class LeadViewSet(viewsets.ModelViewSet):
             )
         
         # Create opportunity data from lead
+        from opportunity_management.models import Opportunity
+        
         opportunity_data = {
             'name': f"{lead.first_name} {lead.last_name} - {lead.company_name}",
             'contact': None,  # Will be created or linked
@@ -84,8 +86,14 @@ class LeadViewSet(viewsets.ModelViewSet):
             'notes': f"Converted from lead: {lead.notes or ''}"
         }
         
-        # Create opportunity (this would need to be implemented)
-        # opportunity = Opportunity.objects.create(**opportunity_data)
+        # Create opportunity from lead data
+        try:
+            opportunity = Opportunity.objects.create(**opportunity_data)
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to create opportunity: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Update lead status
         lead.status = 'converted'
@@ -95,7 +103,7 @@ class LeadViewSet(viewsets.ModelViewSet):
         # Create conversion record
         conversion = LeadConversion.objects.create(
             lead=lead,
-            # opportunity=opportunity,
+            opportunity=opportunity,
             converted_by=request.user,
             conversion_value=lead.estimated_value
         )

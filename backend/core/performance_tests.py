@@ -12,7 +12,6 @@ from django.contrib.auth import get_user_model
 from django.db import connection
 from django.test.utils import override_settings
 from rest_framework.test import APIClient
-import json
 
 User = get_user_model()
 
@@ -230,7 +229,7 @@ class ConcurrentLoadTest(TransactionTestCase):
         response_times = [r['time'] for r in successful]
         
         if response_times:
-            print(f"\n=== Concurrent Load Test Results ===")
+            print("\n=== Concurrent Load Test Results ===")
             print(f"Total users: {num_users}")
             print(f"Requests per user: {requests_per_user}")
             print(f"Total requests: {len(results)}")
@@ -251,7 +250,6 @@ class MemoryPerformanceTest(TestCase):
     def test_memory_efficient_queries(self):
         """Test memory-efficient query patterns"""
         from contact_management.models import Contact
-        import sys
         
         # Create test data
         Contact.objects.bulk_create([

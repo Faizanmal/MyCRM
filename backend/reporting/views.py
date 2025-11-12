@@ -2,9 +2,9 @@ from rest_framework import viewsets, status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Sum, Avg, Q
+from django.db.models import Sum, Q
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 from .models import Dashboard, Report, ReportSchedule, Analytics, KPIMetric, DataExport
 from .serializers import (
     DashboardSerializer, ReportSerializer, ReportScheduleSerializer,

@@ -2,7 +2,6 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.utils import timezone
 from django.db.models import Count, Avg, Q
 
 from .models import (
@@ -15,7 +14,7 @@ from .serializers import (
     LeadEnrichmentDataSerializer, LeadScoreCalculationSerializer,
     BulkScoreCalculationSerializer
 )
-from .scoring_engine import LeadScoringEngine, LeadQualificationChecker, recalculate_all_leads
+from .scoring_engine import LeadScoringEngine, LeadQualificationChecker
 from .tasks import calculate_lead_score_task, enrich_lead_data_task
 
 
@@ -184,7 +183,7 @@ class LeadScoreViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def distribution(self, request):
         """Get score distribution statistics"""
-        from django.db.models import Count, Case, When, IntegerField
+        from django.db.models import Count, Case, When
         
         distribution = LeadScore.objects.filter(
             id__in=LeadScore.objects.values('lead').annotate(

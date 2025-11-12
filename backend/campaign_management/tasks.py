@@ -4,7 +4,6 @@ Celery tasks for campaign management
 
 from celery import shared_task
 from django.utils import timezone
-from django.core.mail import send_mail
 from django.conf import settings
 import logging
 
@@ -16,7 +15,7 @@ def send_campaign_emails(self, campaign_id):
     """
     Send emails for a campaign
     """
-    from .models import Campaign, CampaignRecipient
+    from .models import Campaign
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Mail
     
@@ -89,7 +88,7 @@ def process_campaign_segment(segment_id):
     """
     Calculate contact count for a segment based on filters
     """
-    from .models import CampaignSegment, CampaignRecipient
+    from .models import CampaignSegment
     from contact_management.models import Contact
     from lead_management.models import Lead
     

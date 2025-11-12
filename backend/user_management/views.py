@@ -3,22 +3,16 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from django.contrib.auth import get_user_model
-from django.db.models import Q
-from django.utils import timezone
 import pyotp
 import qrcode
 import io
 import base64
-from .models import User, UserProfile, Permission, RolePermission, AuditLog
+from .models import User, Permission, RolePermission, AuditLog
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
-    LoginSerializer, PasswordChangeSerializer, TwoFactorSetupSerializer,
-    TwoFactorVerifySerializer, PermissionSerializer, RolePermissionSerializer,
+    LoginSerializer, PasswordChangeSerializer, TwoFactorVerifySerializer, PermissionSerializer, RolePermissionSerializer,
     AuditLogSerializer
 )
-
-User = get_user_model()
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import timedelta
 from .models import Task, CalendarEvent, Reminder, TaskTemplate
 from .serializers import (
     TaskSerializer, TaskCreateSerializer, CalendarEventSerializer,

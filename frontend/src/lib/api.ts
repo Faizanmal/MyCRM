@@ -48,8 +48,11 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return apiClient(originalRequest);
         }
-      } catch (_refreshError: unknown) {
-        // Refresh failed, redirect to login
+      } catch (refreshError: unknown) {
+        // Refresh failed - log error and redirect to login
+        const errorMessage = refreshError instanceof Error ? refreshError.message : 'Token refresh failed';
+        console.error('Token refresh error:', errorMessage);
+        
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login';

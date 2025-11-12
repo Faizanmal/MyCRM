@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Campaign, CampaignSegment, CampaignRecipient, CampaignClick, EmailTemplate
+from .models import Campaign, CampaignSegment, CampaignRecipient, EmailTemplate
 
 
 @admin.register(Campaign)

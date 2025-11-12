@@ -10,7 +10,6 @@ import {
   Shield, 
   AlertTriangle, 
   CheckCircle, 
-  Clock, 
   Database,
   Server,
   Mail,
@@ -267,7 +266,7 @@ const SecurityDashboard = () => {
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-6">
-          <AuditLogsView auditSummary={auditSummary} />
+          <AuditLogsView auditSummary={auditSummary} getRiskLevelColor={getRiskLevelColor} />
         </TabsContent>
 
         <TabsContent value="api-keys" className="space-y-6">
@@ -317,7 +316,7 @@ const SystemHealthDetails = ({ healthData }: { healthData: HealthData }) => (
   </div>
 );
 
-const AuditLogsView = ({ auditSummary }: { auditSummary: AuditSummary }) => (
+const AuditLogsView = ({ auditSummary, getRiskLevelColor }: { auditSummary: AuditSummary; getRiskLevelColor: (level: string) => string }) => (
   <div className="space-y-6">
     <Card>
       <CardHeader>
@@ -331,7 +330,7 @@ const AuditLogsView = ({ auditSummary }: { auditSummary: AuditSummary }) => (
             <div className="text-sm text-muted-foreground">Total Events</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">
+            <div className={`text-2xl font-bold ${getRiskLevelColor('critical')}`}>
               {auditSummary?.high_risk_events_today || 0}
             </div>
             <div className="text-sm text-muted-foreground">High Risk</div>

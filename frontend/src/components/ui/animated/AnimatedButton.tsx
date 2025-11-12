@@ -6,7 +6,7 @@
  * Enhanced button with ripple effects, hover animations, and loading states.
  */
 
-import React, { ReactNode, ButtonHTMLAttributes, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';

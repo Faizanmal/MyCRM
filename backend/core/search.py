@@ -7,8 +7,6 @@ from django.db.models import Q, Count, Avg, Sum, Max, Min
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.apps import apps
 from django.contrib.auth import get_user_model
-from functools import reduce
-import operator
 import logging
 
 User = get_user_model()

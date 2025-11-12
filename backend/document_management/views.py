@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from django.http import FileResponse, Http404
-from django.shortcuts import get_object_or_404
+from django.http import FileResponse
+from django.db.models import Q
 
 from .models import Document, DocumentTemplate, DocumentShare, DocumentComment, DocumentApproval
 from .serializers import (
@@ -99,7 +99,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
             root = document
         
         versions = Document.objects.filter(
-            models.Q(id=root.id) | models.Q(parent_document=root)
+            Q(id=root.id) | Q(parent_document=root)
         ).order_by('-version')
         
         serializer = self.get_serializer(versions, many=True)
@@ -286,8 +286,8 @@ class DocumentApprovalViewSet(viewsets.ModelViewSet):
         if self.request.user.role != 'admin':
             # Show approvals where user is approver or requester
             queryset = queryset.filter(
-                models.Q(approver=self.request.user) |
-                models.Q(requested_by=self.request.user)
+                Q(approver=self.request.user) |
+                Q(requested_by=self.request.user)
             )
         
         return queryset

@@ -24,6 +24,14 @@ class DocumentShareAdmin(admin.ModelAdmin):
     search_fields = ['shared_with_email']
 
 
+@admin.register(DocumentComment)
+class DocumentCommentAdmin(admin.ModelAdmin):
+    list_display = ['document', 'created_by', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'updated_at']
+    search_fields = ['document__name', 'created_by__username', 'content']
+    readonly_fields = ['created_at', 'updated_at']
+
+
 @admin.register(DocumentApproval)
 class DocumentApprovalAdmin(admin.ModelAdmin):
     list_display = ['document', 'approver', 'status', 'requested_at', 'responded_at']

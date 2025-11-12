@@ -1,7 +1,6 @@
 from celery import shared_task
 from django.utils import timezone
-from django.db.models import Count, Sum, Avg, Q
-import json
+from django.db.models import Count, Sum, Avg
 from datetime import timedelta
 
 
@@ -10,7 +9,7 @@ def execute_report_task(execution_id):
     """
     Execute a report and save results
     """
-    from .models import ReportExecution, Report
+    from .models import ReportExecution
     
     try:
         execution = ReportExecution.objects.get(id=execution_id)
@@ -57,7 +56,8 @@ def generate_report_data(report, limit=None):
     data_source = report.data_source
     filters = report.filters or {}
     grouping = report.grouping or []
-    sorting = report.sorting or []
+    # TODO: Implement sorting configuration for dynamic report ordering
+    # sorting = report.sorting or []
     
     # Select model based on data source
     if data_source == 'leads':
@@ -235,7 +235,7 @@ def send_report_email(execution_id):
             elif result_summary.get('type') == 'summary':
                 summary = result_summary.get('summary', {})
                 body = f"Report '{report.name}' has completed.\n\n"
-                body += f"Summary:\n"
+                body += "Summary:\n"
                 for key, value in summary.items():
                     body += f"  {key}: {value}\n"
             else:

@@ -5,7 +5,6 @@ Run these scripts to test system capacity and performance under load
 
 import requests
 import time
-import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import List, Dict
@@ -74,7 +73,7 @@ class LoadTester:
     ) -> Dict:
         """Run a load test with concurrent users"""
         print(f"\n{'='*60}")
-        print(f"Starting Load Test")
+        print("Starting Load Test")
         print(f"{'='*60}")
         print(f"Endpoint: {method.upper()} {endpoint}")
         print(f"Concurrent Users: {num_users}")
@@ -139,7 +138,7 @@ class LoadTester:
     def _print_results(self, stats: Dict):
         """Print test results"""
         print(f"\n{'='*60}")
-        print(f"Load Test Results")
+        print("Load Test Results")
         print(f"{'='*60}")
         print(f"Total Requests:       {stats['total_requests']}")
         print(f"Successful:           {stats['successful_requests']}")
@@ -149,7 +148,7 @@ class LoadTester:
         print(f"Requests/Second:      {stats['requests_per_second']:.2f}")
         
         if 'avg_response_time' in stats:
-            print(f"\nResponse Times:")
+            print("\nResponse Times:")
             print(f"  Average:            {stats['avg_response_time']:.2f}ms")
             print(f"  Minimum:            {stats['min_response_time']:.2f}ms")
             print(f"  Maximum:            {stats['max_response_time']:.2f}ms")
@@ -206,7 +205,7 @@ def run_comprehensive_load_tests(base_url: str, auth_token: str = None):
     
     # Print summary
     print(f"\n{'='*60}")
-    print(f"COMPREHENSIVE TEST SUMMARY")
+    print("COMPREHENSIVE TEST SUMMARY")
     print(f"{'='*60}")
     for test_name, result in results.items():
         print(f"\n{test_name}:")

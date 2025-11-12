@@ -10,8 +10,6 @@ from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
 import logging
-import hashlib
-import json
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
