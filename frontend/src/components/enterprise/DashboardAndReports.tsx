@@ -1,4 +1,5 @@
 // Dashboard Builder and Report Builder Components
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useCallback } from 'react';

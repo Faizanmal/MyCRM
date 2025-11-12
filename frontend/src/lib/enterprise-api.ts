@@ -1,4 +1,5 @@
 // Enterprise API client extensions
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from './api';
 
 // Core Enterprise APIs

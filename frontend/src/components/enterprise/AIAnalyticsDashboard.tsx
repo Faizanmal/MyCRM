@@ -12,15 +12,13 @@ import {
   TrendingUp, 
   TrendingDown, 
   Target, 
-  Users, 
   Brain,
   AlertCircle,
   CheckCircle,
   Clock,
   Lightbulb,
   BarChart3,
-  PieChart,
-  LineChart
+  PieChart
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enterpriseAPI } from '@/lib/enterprise-api';
@@ -153,6 +151,7 @@ const AIAnalyticsDashboard = () => {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AIOverview = ({ aiInsights }: { aiInsights: any }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {/* Sales Forecast Summary */}
@@ -187,6 +186,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: any }) => (
         </div>
         <p className="text-xs text-muted-foreground">Total customers</p>
         <div className="space-y-1 pt-2">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {Object.entries(aiInsights?.customer_segments?.insights || {}).slice(0, 3).map(([segment, data]: [string, any]) => (
             <div key={segment} className="flex justify-between text-xs">
               <span className="capitalize">{segment.replace('_', ' ')}</span>
@@ -256,6 +256,7 @@ const SalesForecastView = ({
   selectedPeriod, 
   setSelectedPeriod 
 }: { 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   salesForecast: any;
   forecastLoading: boolean;
   selectedPeriod: string;
@@ -351,6 +352,7 @@ const SalesForecastView = ({
   </div>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomerSegmentationView = ({ aiInsights }: { aiInsights: any }) => (
   <div className="space-y-6">
     <Card>
@@ -360,6 +362,7 @@ const CustomerSegmentationView = ({ aiInsights }: { aiInsights: any }) => (
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {Object.entries(aiInsights?.customer_segments?.insights || {}).map(([segment, data]: [string, any]) => (
             <Card key={segment}>
               <CardHeader className="pb-3">
@@ -407,6 +410,7 @@ const LeadScoringView = ({
   selectedLeadId, 
   setSelectedLeadId 
 }: { 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   leadScore: any;
   scoreLoading: boolean;
   selectedLeadId: string;
@@ -465,8 +469,8 @@ const LeadScoringView = ({
               </div>
 
               <div>
-                <h4 className="font-medium mb-3">Score Breakdown</h4>
                 <div className="space-y-3">
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {Object.entries(leadScore.score_breakdown || {}).map(([component, score]: [string, any]) => (
                     <div key={component}>
                       <div className="flex justify-between text-sm mb-1">
@@ -498,6 +502,7 @@ const LeadScoringView = ({
   </div>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ChurnPredictionView = ({ aiInsights }: { aiInsights: any }) => (
   <div className="space-y-6">
     <Card>
@@ -525,6 +530,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: any }) => (
           <div>
             <h4 className="font-medium mb-3">High-Risk Customers</h4>
             <div className="space-y-2">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {aiInsights?.churn_risk?.high_risk_customers?.slice(0, 5).map((customer: any, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>

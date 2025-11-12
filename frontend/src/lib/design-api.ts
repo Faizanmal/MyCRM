@@ -51,6 +51,7 @@ export interface Project {
   canvas_width: number;
   canvas_height: number;
   canvas_background: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   design_data: Record<string, any>;
   ai_prompt: string;
   color_palette: string[];
@@ -67,6 +68,7 @@ export interface DesignComponent {
   id: number;
   project: number;
   component_type: 'text' | 'image' | 'shape' | 'button' | 'icon' | 'group' | 'frame' | 'map' | 'chart';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties: Record<string, any>;
   z_index: number;
   ai_generated: boolean;
@@ -80,7 +82,9 @@ export interface AIGenerationRequest {
   request_type: 'layout' | 'logo' | 'color_palette' | 'text_content' | 'image' | 'refinement';
   status: 'pending' | 'processing' | 'completed' | 'failed';
   prompt: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parameters: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   result: Record<string, any> | null;
   error_message: string;
   model_used: string;
@@ -94,6 +98,7 @@ export interface Template {
   name: string;
   description: string;
   category: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   design_data: Record<string, any>;
   thumbnail_url: string;
   width: number;
@@ -151,7 +156,7 @@ export const projectsAPI = {
     await apiClient.delete(`/projects/projects/${id}/`);
   },
   
-  saveDesign: async (id: number, design_data: Record<string, any>) => {
+  saveDesign: async (id: number, design_data: Record<string, unknown>) => {
     const response = await apiClient.post<Project>(
       `/projects/projects/${id}/save_design/`,
       { design_data }
@@ -220,7 +225,7 @@ export const aiAPI = {
     return response.data;
   },
   
-  refineDesign: async (current_design: Record<string, any>, refinement_instruction: string) => {
+  refineDesign: async (current_design: Record<string, unknown>, refinement_instruction: string) => {
     const response = await apiClient.post('/ai/refine-design/', {
       current_design,
       refinement_instruction,

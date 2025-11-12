@@ -16,7 +16,6 @@ import {
   Copy,
   Plus,
   CheckCircle2,
-  XCircle,
   Clock
 } from 'lucide-react';
 

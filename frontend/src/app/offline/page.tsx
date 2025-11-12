@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { WifiOff, RefreshCw } from 'lucide-react';
 
 export default function OfflinePage() {
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return navigator.onLine;
+  });
 
   useEffect(() => {
-    setIsOnline(navigator.onLine);
-
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -21,17 +22,15 @@ export default function OfflinePage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (isOnline && typeof window !== 'undefined') {
+      window.location.href = '/dashboard';
+    }
+  }, [isOnline]);
+
   const handleRetry = () => {
     window.location.reload();
   };
-
-  if (isOnline) {
-    // If back online, redirect to home
-    if (typeof window !== 'undefined') {
-      window.location.href = '/dashboard';
-    }
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -41,7 +40,7 @@ export default function OfflinePage() {
             <WifiOff className="w-10 h-10 text-gray-400" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            You're Offline
+            You&apos;re Offline
           </h1>
           <p className="text-gray-600">
             No internet connection detected. Some features may not be available.
@@ -167,7 +166,7 @@ export default function OfflinePage() {
         </button>
 
         <p className="text-xs text-gray-500 mt-4">
-          Changes will sync automatically when you're back online
+          Changes will sync automatically when you&apos;re back online
         </p>
       </div>
     </div>

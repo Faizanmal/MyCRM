@@ -1,7 +1,7 @@
 // Email Campaign Manager Component
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Mail, Send, Users, BarChart3, FileText, Plus, Play, Pause } from 'lucide-react';
+import { Mail, Send, BarChart3, FileText, Plus, Play, Pause } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 
@@ -41,12 +41,7 @@ export default function EmailCampaignManager() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  React.useEffect(() => {
-    loadCampaigns();
-    loadTemplates();
-  }, []);
-
-  const loadCampaigns = async () => {
+  const loadCampaigns = useCallback(async () => {
     try {
       const response = await axios.get('/api/core/email-campaigns/');
       setCampaigns(response.data);
@@ -57,16 +52,21 @@ export default function EmailCampaignManager() {
         variant: 'destructive',
       });
     }
-  };
+  }, [toast]);
 
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     try {
       const response = await axios.get('/api/core/email-templates/');
       setTemplates(response.data);
     } catch (error) {
       console.error('Failed to load templates', error);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    loadCampaigns();
+    loadTemplates();
+  }, [loadCampaigns, loadTemplates]);
 
   const sendCampaign = async (campaignId: string) => {
     try {
@@ -76,7 +76,7 @@ export default function EmailCampaignManager() {
         description: 'Campaign started successfully',
       });
       loadCampaigns();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to start campaign',
@@ -257,7 +257,7 @@ function CreateCampaignDialog({ templates, onCreated }: { templates: EmailTempla
       setName('');
       setSubject('');
       onCreated();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to create campaign',
@@ -363,7 +363,7 @@ function CreateTemplateDialog({ onCreated }: { onCreated: () => void }) {
       setSubject('');
       setHtmlContent('');
       onCreated();
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to create template',

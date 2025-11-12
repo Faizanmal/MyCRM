@@ -28,11 +28,13 @@ export function useScrollAnimation(options = {}) {
  * Hook to detect if user prefers reduced motion
  */
 export function usePrefersReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
 
     const handleChange = () => {
       setPrefersReducedMotion(mediaQuery.matches);
@@ -256,11 +258,13 @@ export function useIntersectionRatio(options = {}) {
  * Returns true if media query matches
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+  const [matches, setMatches] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(query).matches;
+  });
 
   useEffect(() => {
     const media = window.matchMedia(query);
-    setMatches(media.matches);
 
     const listener = (e: MediaQueryListEvent) => {
       setMatches(e.matches);
@@ -281,7 +285,7 @@ export function useResponsiveAnimation() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const getConfig = (baseConfig: any) => {
+  const getConfig = (baseConfig: Record<string, unknown> & { transition?: Record<string, unknown> }) => {
     if (prefersReducedMotion) {
       return {};
     }
@@ -290,8 +294,8 @@ export function useResponsiveAnimation() {
       return {
         ...baseConfig,
         transition: {
-          ...baseConfig.transition,
-          duration: (baseConfig.transition?.duration || 0.3) * 0.7,
+          ...(baseConfig.transition || {}),
+          duration: ((baseConfig.transition as Record<string, unknown>)?.duration as number || 0.3) * 0.7,
         },
       };
     }

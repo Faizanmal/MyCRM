@@ -1,4 +1,5 @@
 // Data Import/Export Component
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';

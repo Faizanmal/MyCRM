@@ -131,7 +131,7 @@ export default function OnboardingPage() {
             <h1 className="text-3xl font-bold text-gray-900">Welcome to MyCRM</h1>
           </div>
           <p className="text-gray-600">
-            Let's get your account set up in just a few steps
+            Let&apos;s get your account set up in just a few steps
           </p>
         </div>
 
@@ -256,7 +256,7 @@ export default function OnboardingPage() {
             {currentStep === 2 && (
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
-                  Invite your team members to collaborate. They'll receive an email invitation.
+                  Invite your team members to collaborate. They&apos;ll receive an email invitation.
                 </p>
 
                 {teamMembers.map((member, index) => (
@@ -311,7 +311,7 @@ export default function OnboardingPage() {
             {currentStep === 3 && (
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
-                  Do you have existing data you'd like to import?
+                  Do you have existing data you&apos;d like to import?
                 </p>
 
                 <div className="space-y-3">
@@ -461,7 +461,7 @@ export default function OnboardingPage() {
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                   </div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    You're All Set!
+                    You&apos;re All Set!
                   </h2>
                   <p className="text-gray-600">
                     Your MyCRM account is ready to use
@@ -470,7 +470,7 @@ export default function OnboardingPage() {
 
                 <div className="space-y-4">
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
+                    <h3 className="font-semibold text-blue-900 mb-2">What&apos;s Next?</h3>
                     <ul className="space-y-2 text-sm text-blue-700">
                       <li className="flex items-start gap-2">
                         <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />

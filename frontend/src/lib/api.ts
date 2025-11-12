@@ -48,7 +48,7 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return apiClient(originalRequest);
         }
-      } catch (refreshError) {
+      } catch (_refreshError: unknown) {
         // Refresh failed, redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
@@ -104,7 +104,7 @@ export const authAPI = {
 
 // Contacts API
 export const contactsAPI = {
-  getContacts: async (params?: any) => {
+  getContacts: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/contacts/contacts/', { params });
     return response.data;
   },
@@ -114,12 +114,12 @@ export const contactsAPI = {
     return response.data;
   },
 
-  createContact: async (contactData: any) => {
+  createContact: async (contactData: Record<string, unknown>) => {
     const response = await apiClient.post('/contacts/contacts/', contactData);
     return response.data;
   },
 
-  updateContact: async (id: number, contactData: any) => {
+  updateContact: async (id: number, contactData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/contacts/contacts/${id}/`, contactData);
     return response.data;
   },
@@ -129,7 +129,7 @@ export const contactsAPI = {
     return response.data;
   },
 
-  bulkUpdate: async (contactIds: number[], updates: any) => {
+  bulkUpdate: async (contactIds: number[], updates: Record<string, unknown>) => {
     const response = await apiClient.post('/contacts/contacts/bulk_update/', {
       contact_ids: contactIds,
       updates,
@@ -144,7 +144,7 @@ export const contactsAPI = {
     return response.data;
   },
 
-  exportContacts: async (format: string, options?: any) => {
+  exportContacts: async (format: string, options?: Record<string, unknown>) => {
     const response = await apiClient.post('/contacts/contacts/export/', {
       format,
       ...options,
@@ -155,7 +155,7 @@ export const contactsAPI = {
 
 // Leads API
 export const leadsAPI = {
-  getLeads: async (params?: any) => {
+  getLeads: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/leads/leads/', { params });
     return response.data;
   },
@@ -165,12 +165,12 @@ export const leadsAPI = {
     return response.data;
   },
 
-  createLead: async (leadData: any) => {
+  createLead: async (leadData: Record<string, unknown>) => {
     const response = await apiClient.post('/leads/leads/', leadData);
     return response.data;
   },
 
-  updateLead: async (id: number, leadData: any) => {
+  updateLead: async (id: number, leadData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/leads/leads/${id}/`, leadData);
     return response.data;
   },
@@ -180,7 +180,7 @@ export const leadsAPI = {
     return response.data;
   },
 
-  convertLead: async (id: number, opportunityData?: any) => {
+  convertLead: async (id: number, opportunityData?: Record<string, unknown>) => {
     const response = await apiClient.post(`/leads/leads/${id}/convert/`, opportunityData);
     return response.data;
   },
@@ -188,7 +188,7 @@ export const leadsAPI = {
 
 // Opportunities API
 export const opportunitiesAPI = {
-  getOpportunities: async (params?: any) => {
+  getOpportunities: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/opportunities/opportunities/', { params });
     return response.data;
   },
@@ -198,12 +198,12 @@ export const opportunitiesAPI = {
     return response.data;
   },
 
-  createOpportunity: async (opportunityData: any) => {
+  createOpportunity: async (opportunityData: Record<string, unknown>) => {
     const response = await apiClient.post('/opportunities/opportunities/', opportunityData);
     return response.data;
   },
 
-  updateOpportunity: async (id: number, opportunityData: any) => {
+  updateOpportunity: async (id: number, opportunityData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/opportunities/opportunities/${id}/`, opportunityData);
     return response.data;
   },
@@ -221,7 +221,7 @@ export const opportunitiesAPI = {
 
 // Tasks API
 export const tasksAPI = {
-  getTasks: async (params?: any) => {
+  getTasks: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/tasks/tasks/', { params });
     return response.data;
   },
@@ -231,12 +231,12 @@ export const tasksAPI = {
     return response.data;
   },
 
-  createTask: async (taskData: any) => {
+  createTask: async (taskData: Record<string, unknown>) => {
     const response = await apiClient.post('/tasks/tasks/', taskData);
     return response.data;
   },
 
-  updateTask: async (id: number, taskData: any) => {
+  updateTask: async (id: number, taskData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/tasks/tasks/${id}/`, taskData);
     return response.data;
   },
@@ -257,7 +257,7 @@ export const tasksAPI = {
 
 // Communications API
 export const communicationsAPI = {
-  getCommunications: async (params?: any) => {
+  getCommunications: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/communications/communications/', { params });
     return response.data;
   },
@@ -267,12 +267,12 @@ export const communicationsAPI = {
     return response.data;
   },
 
-  createCommunication: async (communicationData: any) => {
+  createCommunication: async (communicationData: Record<string, unknown>) => {
     const response = await apiClient.post('/communications/communications/', communicationData);
     return response.data;
   },
 
-  updateCommunication: async (id: number, communicationData: any) => {
+  updateCommunication: async (id: number, communicationData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/communications/communications/${id}/`, communicationData);
     return response.data;
   },
@@ -295,17 +295,17 @@ export const reportsAPI = {
     return response.data;
   },
 
-  getAnalytics: async (params?: any) => {
+  getAnalytics: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/reports/analytics/', { params });
     return response.data;
   },
 
-  createReport: async (reportData: any) => {
+  createReport: async (reportData: Record<string, unknown>) => {
     const response = await apiClient.post('/reports/reports/', reportData);
     return response.data;
   },
 
-  getReports: async (params?: any) => {
+  getReports: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/reports/reports/', { params });
     return response.data;
   },
@@ -318,7 +318,7 @@ export const reportsAPI = {
 
 // Meetings API
 export const meetingsAPI = {
-  list: async (params?: any) => {
+  list: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/meetings/meetings/', { params });
     return response.data;
   },
@@ -328,12 +328,12 @@ export const meetingsAPI = {
     return response.data;
   },
 
-  create: async (meetingData: any) => {
+  create: async (meetingData: Record<string, unknown>) => {
     const response = await apiClient.post('/meetings/meetings/', meetingData);
     return response.data;
   },
 
-  update: async (id: string, meetingData: any) => {
+  update: async (id: string, meetingData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/meetings/meetings/${id}/`, meetingData);
     return response.data;
   },
@@ -371,7 +371,7 @@ export const meetingsAPI = {
 
 // Action Items API
 export const actionItemsAPI = {
-  list: async (params?: any) => {
+  list: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/action-items/action-items/', { params });
     return response.data;
   },
@@ -381,12 +381,12 @@ export const actionItemsAPI = {
     return response.data;
   },
 
-  create: async (actionItemData: any) => {
+  create: async (actionItemData: Record<string, unknown>) => {
     const response = await apiClient.post('/action-items/action-items/', actionItemData);
     return response.data;
   },
 
-  update: async (id: string, actionItemData: any) => {
+  update: async (id: string, actionItemData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/action-items/action-items/${id}/`, actionItemData);
     return response.data;
   },
@@ -404,7 +404,7 @@ export const actionItemsAPI = {
 
 // Notes API
 export const notesAPI = {
-  list: async (params?: any) => {
+  list: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/notes/notes/', { params });
     return response.data;
   },
@@ -414,12 +414,12 @@ export const notesAPI = {
     return response.data;
   },
 
-  create: async (noteData: any) => {
+  create: async (noteData: Record<string, unknown>) => {
     const response = await apiClient.post('/notes/notes/', noteData);
     return response.data;
   },
 
-  update: async (id: string, noteData: any) => {
+  update: async (id: string, noteData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/notes/notes/${id}/`, noteData);
     return response.data;
   },
@@ -432,7 +432,7 @@ export const notesAPI = {
 
 // Tags API
 export const tagsAPI = {
-  list: async (params?: any) => {
+  list: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/tags/tags/', { params });
     return response.data;
   },
@@ -442,12 +442,12 @@ export const tagsAPI = {
     return response.data;
   },
 
-  create: async (tagData: any) => {
+  create: async (tagData: Record<string, unknown>) => {
     const response = await apiClient.post('/tags/tags/', tagData);
     return response.data;
   },
 
-  update: async (id: string, tagData: any) => {
+  update: async (id: string, tagData: Record<string, unknown>) => {
     const response = await apiClient.patch(`/tags/tags/${id}/`, tagData);
     return response.data;
   },

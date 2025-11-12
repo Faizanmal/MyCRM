@@ -1,4 +1,5 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -284,7 +285,7 @@ const AuditLogsView = ({ auditSummary }: { auditSummary: any }) => (
     <Card>
       <CardHeader>
         <CardTitle>Security Events Summary</CardTitle>
-        <CardDescription>Today's security-related activities</CardDescription>
+        <CardDescription>Today&apos;s security-related activities</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

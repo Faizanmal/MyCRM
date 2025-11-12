@@ -175,7 +175,7 @@ export default function TwoFactorAuthPage() {
                 </h3>
                 <p className="text-sm text-blue-700">
                   2FA adds an extra layer of security to your account. After entering your password,
-                  you'll need to enter a code from your authenticator app to complete login.
+                  you&apos;ll need to enter a code from your authenticator app to complete login.
                 </p>
               </div>
 
@@ -184,7 +184,7 @@ export default function TwoFactorAuthPage() {
                   <div className="space-y-2">
                     <h3 className="font-semibold">Get Started</h3>
                     <p className="text-sm text-gray-600">
-                      You'll need an authenticator app like:
+                      You&apos;ll need an authenticator app like:
                     </p>
                     <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
                       <li>Google Authenticator</li>
@@ -212,17 +212,16 @@ export default function TwoFactorAuthPage() {
                     <p className="text-sm text-gray-600 mb-4">
                       Open your authenticator app and scan this QR code
                     </p>
-                    {qrCode && (
                       <div className="flex justify-center p-4 bg-white border rounded-lg">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={qrCode} alt="2FA QR Code" className="w-64 h-64" />
                       </div>
-                    )}
                   </div>
 
                   <div>
                     <h3 className="font-semibold mb-2">Step 2: Enter Secret Key (Optional)</h3>
                     <p className="text-sm text-gray-600 mb-2">
-                      If you can't scan the QR code, enter this secret key manually:
+                      If you can&apos;t scan the QR code, enter this secret key manually:
                     </p>
                     <div className="p-3 bg-gray-100 border rounded font-mono text-sm break-all">
                       {secret}
@@ -282,7 +281,7 @@ export default function TwoFactorAuthPage() {
                         </h3>
                         <p className="text-sm text-green-700 mt-1">
                           Your account is protected with two-factor authentication.
-                          You'll need your authenticator app code to sign in.
+                          You&apos;ll need your authenticator app code to sign in.
                         </p>
                       </div>
                     </div>
@@ -336,7 +335,7 @@ export default function TwoFactorAuthPage() {
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Don't share codes</p>
+                    <p className="font-medium">Don&apos;t share codes</p>
                     <p className="text-sm text-gray-600">
                       Never share your authentication codes with anyone, including support staff
                     </p>

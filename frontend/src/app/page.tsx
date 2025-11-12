@@ -13,8 +13,6 @@ import { Badge } from '@/components/ui/badge';
 // (Import any other components you use)
 
 // We are keeping these imports for now, but the router and useEffect are removed below.
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // If this is your main dashboard page, you can name it DashboardPage,
