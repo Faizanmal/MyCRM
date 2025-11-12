@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard, FileText, BarChart3, TrendingUp, Plus, Edit,
-  Trash2, Play, Calendar, Download, Users, Settings
+  Play, Calendar, Download, Users, Settings
 } from 'lucide-react';
 
 interface Dashboard {
@@ -16,7 +16,7 @@ interface Dashboard {
   dashboard_type: string;
   is_default: boolean;
   is_public: boolean;
-  widgets: any[];
+  widgets: Record<string, unknown>[];
   created_at: string;
 }
 
@@ -49,11 +49,7 @@ export default function AdvancedReportingPage() {
   const [kpis, setKPIs] = useState<KPI[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, [activeTab]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       if (activeTab === 'dashboards') {
@@ -92,7 +88,11 @@ export default function AdvancedReportingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const getTrendIcon = (trend?: string) => {
     if (trend === 'up') return <TrendingUp className="w-4 h-4 text-green-500" />;

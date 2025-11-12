@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { documentAPI } from '@/lib/api';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import {
-  DocumentIcon,
   FolderIcon,
   CloudArrowUpIcon,
   MagnifyingGlassIcon,
@@ -17,18 +16,30 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/outline';
 
+interface Document {
+  id: string;
+  name?: string;
+  title?: string;
+  file?: string;
+  uploaded_at?: string;
+  created_at?: string;
+  size?: number;
+  type?: string;
+  mime_type?: string;
+  status?: string;
+  version?: number;
+  description?: string;
+  approval_status?: string;
+}
+
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    loadDocuments();
-  }, [filterType]);
-
-  const loadDocuments = async () => {
+  const loadDocuments = useCallback(async () => {
     try {
       const params = filterType !== 'all' ? { document_type: filterType } : {};
       const response = await documentAPI.getDocuments(params);
@@ -38,7 +49,11 @@ export default function DocumentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterType]);
+
+  useEffect(() => {
+    loadDocuments();
+  }, [loadDocuments]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -63,13 +78,13 @@ export default function DocumentsPage() {
     }
   };
 
-  const handleDownload = async (document: any) => {
+  const handleDownload = async (document: Document) => {
     try {
       const response = await documentAPI.downloadDocument(document.id);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = window.document.createElement('a');
       link.href = url;
-      link.setAttribute('download', document.file.split('/').pop() || 'download');
+      link.setAttribute('download', (document.file || 'download').split('/').pop() || 'download');
       window.document.body.appendChild(link);
       link.click();
       link.remove();
@@ -98,8 +113,8 @@ export default function DocumentsPage() {
   };
 
   const filteredDocuments = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    doc.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    (doc.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (doc.description || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -110,7 +125,7 @@ export default function DocumentsPage() {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
-              <p className="text-gray-600 mt-1">Manage your organization's documents</p>
+              <p className="text-gray-600 mt-1">Manage your organization&apos;s documents</p>
             </div>
             <div className="flex items-center space-x-3">
               <label className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
@@ -182,7 +197,7 @@ export default function DocumentsPage() {
                       {/* Document Icon */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="text-4xl">
-                          {getDocumentIcon(document.mime_type)}
+                          {getDocumentIcon(document.mime_type || '')}
                         </div>
                         <div className="relative">
                           <button className="p-1 hover:bg-gray-100 rounded">
@@ -201,8 +216,8 @@ export default function DocumentsPage() {
 
                       {/* Document Meta */}
                       <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                        <span>v{document.version}</span>
-                        <span>{new Date(document.created_at).toLocaleDateString()}</span>
+                        <span>v{document.version || 1}</span>
+                        <span>{document.created_at ? new Date(document.created_at).toLocaleDateString() : 'N/A'}</span>
                       </div>
 
                       {/* Status Badge */}

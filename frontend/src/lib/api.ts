@@ -328,8 +328,16 @@ export const meetingsAPI = {
     return response.data;
   },
 
-  create: async (meetingData: Record<string, unknown>) => {
-    const response = await apiClient.post('/meetings/meetings/', meetingData);
+  create: async (meetingData: Record<string, unknown> | FormData) => {
+    // Support both JSON payloads and FormData uploads (e.g., attachments).
+    if (typeof FormData !== 'undefined' && meetingData instanceof FormData) {
+      const response = await apiClient.post('/meetings/meetings/', meetingData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    }
+
+    const response = await apiClient.post('/meetings/meetings/', meetingData as Record<string, unknown>);
     return response.data;
   },
 
@@ -491,8 +499,8 @@ export const campaignAPI = {
   // Campaigns
   getCampaigns: () => apiClient.get('/campaigns/campaigns/'),
   getCampaign: (id: string) => apiClient.get(`/campaigns/campaigns/${id}/`),
-  createCampaign: (data: any) => apiClient.post('/campaigns/campaigns/', data),
-  updateCampaign: (id: string, data: any) => apiClient.put(`/campaigns/campaigns/${id}/`, data),
+  createCampaign: (data: Record<string, unknown>) => apiClient.post('/campaigns/campaigns/', data),
+  updateCampaign: (id: string, data: Record<string, unknown>) => apiClient.put(`/campaigns/campaigns/${id}/`, data),
   deleteCampaign: (id: string) => apiClient.delete(`/campaigns/campaigns/${id}/`),
   scheduleCampaign: (id: string, scheduledAt: string) => 
     apiClient.post(`/campaigns/campaigns/${id}/schedule/`, { scheduled_at: scheduledAt }),
@@ -502,12 +510,12 @@ export const campaignAPI = {
   
   // Segments
   getSegments: () => apiClient.get('/campaigns/segments/'),
-  createSegment: (data: any) => apiClient.post('/campaigns/segments/', data),
+  createSegment: (data: Record<string, unknown>) => apiClient.post('/campaigns/segments/', data),
   previewSegment: (id: string) => apiClient.get(`/campaigns/segments/${id}/preview/`),
   
   // Templates
   getTemplates: () => apiClient.get('/campaigns/templates/'),
-  createTemplate: (data: any) => apiClient.post('/campaigns/templates/', data),
+  createTemplate: (data: Record<string, unknown>) => apiClient.post('/campaigns/templates/', data),
   duplicateTemplate: (id: string) => apiClient.post(`/campaigns/templates/${id}/duplicate/`),
 };
 
@@ -522,7 +530,7 @@ export const analyticsAPI = {
 // Document Management API
 export const documentAPI = {
   // Documents
-  getDocuments: (params?: any) => apiClient.get('/documents/documents/', { params }),
+  getDocuments: (params?: Record<string, unknown>) => apiClient.get('/documents/documents/', { params }),
   getDocument: (id: string) => apiClient.get(`/documents/documents/${id}/`),
   uploadDocument: (formData: FormData) => 
     apiClient.post('/documents/documents/', formData, {
@@ -538,14 +546,14 @@ export const documentAPI = {
     });
   },
   getDocumentVersions: (id: string) => apiClient.get(`/documents/documents/${id}/versions/`),
-  shareDocument: (id: string, data: any) => 
+  shareDocument: (id: string, data: Record<string, unknown>) => 
     apiClient.post(`/documents/documents/${id}/share/`, data),
   requestApproval: (id: string, approverId: string) => 
     apiClient.post(`/documents/documents/${id}/request_approval/`, { approver_id: approverId }),
   
   // Templates
   getDocumentTemplates: () => apiClient.get('/documents/templates/'),
-  generateFromTemplate: (id: string, data: any) => 
+  generateFromTemplate: (id: string, data: Record<string, unknown>) => 
     apiClient.post(`/documents/templates/${id}/generate/`, data),
   
   // Approvals
@@ -558,14 +566,14 @@ export const documentAPI = {
   // Comments
   getDocumentComments: (documentId: string) => 
     apiClient.get(`/documents/comments/?document=${documentId}`),
-  addComment: (data: any) => apiClient.post('/documents/comments/', data),
+  addComment: (data: Record<string, unknown>) => apiClient.post('/documents/comments/', data),
 };
 
 // Integration Hub API
 export const integrationAPI = {
   // Webhooks
   getWebhooks: () => apiClient.get('/integrations/webhooks/'),
-  createWebhook: (data: any) => apiClient.post('/integrations/webhooks/', data),
+  createWebhook: (data: Record<string, unknown>) => apiClient.post('/integrations/webhooks/', data),
   testWebhook: (id: string) => apiClient.post(`/integrations/webhooks/${id}/test/`),
   getWebhookDeliveries: (id: string) => 
     apiClient.get(`/integrations/webhooks/${id}/deliveries/`),
@@ -574,7 +582,7 @@ export const integrationAPI = {
   
   // Integrations
   getIntegrations: () => apiClient.get('/integrations/integrations/'),
-  createIntegration: (data: any) => apiClient.post('/integrations/integrations/', data),
+  createIntegration: (data: Record<string, unknown>) => apiClient.post('/integrations/integrations/', data),
   syncIntegration: (id: string) => apiClient.post(`/integrations/integrations/${id}/sync/`),
   testIntegration: (id: string) => apiClient.post(`/integrations/integrations/${id}/test/`),
   getIntegrationLogs: (id: string) => 
@@ -584,7 +592,7 @@ export const integrationAPI = {
 // Activity Feed API
 export const activityAPI = {
   // Activities
-  getActivities: (params?: any) => apiClient.get('/activity/activities/', { params }),
+  getActivities: (params?: Record<string, unknown>) => apiClient.get('/activity/activities/', { params }),
   getMyFeed: () => apiClient.get('/activity/activities/my_feed/'),
   getEntityActivities: (model: string, id: string) => 
     apiClient.get(`/activity/activities/for_entity/?model=${model}&id=${id}`),
@@ -592,7 +600,7 @@ export const activityAPI = {
   // Comments
   getComments: (model: string, id: string) => 
     apiClient.get(`/activity/comments/for_entity/?model=${model}&id=${id}`),
-  addComment: (data: any) => apiClient.post('/activity/comments/', data),
+  addComment: (data: Record<string, unknown>) => apiClient.post('/activity/comments/', data),
   getReplies: (commentId: string) => apiClient.get(`/activity/comments/${commentId}/replies/`),
   
   // Notifications
@@ -620,8 +628,8 @@ export const activityAPI = {
 export const leadQualificationAPI = {
   // Scoring Rules
   getScoringRules: () => apiClient.get('/lead-qualification/scoring-rules/'),
-  createScoringRule: (data: any) => apiClient.post('/lead-qualification/scoring-rules/', data),
-  updateScoringRule: (id: string, data: any) => 
+  createScoringRule: (data: Record<string, unknown>) => apiClient.post('/lead-qualification/scoring-rules/', data),
+  updateScoringRule: (id: string, data: Record<string, unknown>) => 
     apiClient.patch(`/lead-qualification/scoring-rules/${id}/`, data),
   deleteScoringRule: (id: string) => apiClient.delete(`/lead-qualification/scoring-rules/${id}/`),
   activateRule: (id: string) => apiClient.post(`/lead-qualification/scoring-rules/${id}/activate/`),
@@ -629,15 +637,15 @@ export const leadQualificationAPI = {
   
   // Qualification Criteria
   getQualificationCriteria: () => apiClient.get('/lead-qualification/qualification-criteria/'),
-  createQualificationCriteria: (data: any) => 
+  createQualificationCriteria: (data: Record<string, unknown>) => 
     apiClient.post('/lead-qualification/qualification-criteria/', data),
-  updateQualificationCriteria: (id: string, data: any) => 
+  updateQualificationCriteria: (id: string, data: Record<string, unknown>) => 
     apiClient.patch(`/lead-qualification/qualification-criteria/${id}/`, data),
   deleteQualificationCriteria: (id: string) => 
     apiClient.delete(`/lead-qualification/qualification-criteria/${id}/`),
   
   // Lead Scores
-  getLeadScores: (params?: any) => apiClient.get('/lead-qualification/lead-scores/', { params }),
+  getLeadScores: (params?: Record<string, unknown>) => apiClient.get('/lead-qualification/lead-scores/', { params }),
   getLeadScore: (leadId: string) => 
     apiClient.get(`/lead-qualification/lead-scores/by_lead/?lead_id=${leadId}`),
   calculateScore: (leadId: string) => 
@@ -650,8 +658,8 @@ export const leadQualificationAPI = {
   
   // Qualification Workflows
   getWorkflows: () => apiClient.get('/lead-qualification/qualification-workflows/'),
-  createWorkflow: (data: any) => apiClient.post('/lead-qualification/qualification-workflows/', data),
-  updateWorkflow: (id: string, data: any) => 
+  createWorkflow: (data: Record<string, unknown>) => apiClient.post('/lead-qualification/qualification-workflows/', data),
+  updateWorkflow: (id: string, data: Record<string, unknown>) => 
     apiClient.patch(`/lead-qualification/qualification-workflows/${id}/`, data),
   deleteWorkflow: (id: string) => 
     apiClient.delete(`/lead-qualification/qualification-workflows/${id}/`),
@@ -673,14 +681,14 @@ export const leadQualificationAPI = {
 export const advancedReportingAPI = {
   // Dashboards
   getDashboards: () => apiClient.get('/advanced-reporting/dashboards/'),
-  createDashboard: (data: any) => apiClient.post('/advanced-reporting/dashboards/', data),
+  createDashboard: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/dashboards/', data),
   getDashboard: (id: string) => apiClient.get(`/advanced-reporting/dashboards/${id}/`),
-  updateDashboard: (id: string, data: any) => 
+  updateDashboard: (id: string, data: Record<string, unknown>) => 
     apiClient.patch(`/advanced-reporting/dashboards/${id}/`, data),
   deleteDashboard: (id: string) => apiClient.delete(`/advanced-reporting/dashboards/${id}/`),
   duplicateDashboard: (id: string) => 
     apiClient.post(`/advanced-reporting/dashboards/${id}/duplicate/`),
-  shareDashboard: (id: string, data: any) => 
+  shareDashboard: (id: string, data: Record<string, unknown>) => 
     apiClient.post(`/advanced-reporting/dashboards/${id}/share/`, data),
   getDashboardData: (id: string) => apiClient.get(`/advanced-reporting/dashboards/${id}/data/`),
   
@@ -689,22 +697,22 @@ export const advancedReportingAPI = {
     const params = dashboardId ? { dashboard: dashboardId } : {};
     return apiClient.get('/advanced-reporting/widgets/', { params });
   },
-  createWidget: (data: any) => apiClient.post('/advanced-reporting/widgets/', data),
-  updateWidget: (id: string, data: any) => 
+  createWidget: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/widgets/', data),
+  updateWidget: (id: string, data: Record<string, unknown>) => 
     apiClient.patch(`/advanced-reporting/widgets/${id}/`, data),
   deleteWidget: (id: string) => apiClient.delete(`/advanced-reporting/widgets/${id}/`),
   getWidgetData: (id: string) => apiClient.get(`/advanced-reporting/widgets/${id}/data/`),
   
   // Reports
   getReports: () => apiClient.get('/advanced-reporting/reports/'),
-  createReport: (data: any) => apiClient.post('/advanced-reporting/reports/', data),
+  createReport: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/reports/', data),
   getReport: (id: string) => apiClient.get(`/advanced-reporting/reports/${id}/`),
-  updateReport: (id: string, data: any) => 
+  updateReport: (id: string, data: Record<string, unknown>) => 
     apiClient.patch(`/advanced-reporting/reports/${id}/`, data),
   deleteReport: (id: string) => apiClient.delete(`/advanced-reporting/reports/${id}/`),
   executeReport: (id: string) => apiClient.post(`/advanced-reporting/reports/${id}/execute/`),
   previewReport: (id: string) => apiClient.get(`/advanced-reporting/reports/${id}/preview/`),
-  scheduleReport: (id: string, data: any) => 
+  scheduleReport: (id: string, data: Record<string, unknown>) => 
     apiClient.post(`/advanced-reporting/reports/${id}/schedule/`, data),
   
   // Report Schedules
@@ -712,8 +720,8 @@ export const advancedReportingAPI = {
     const params = reportId ? { report: reportId } : {};
     return apiClient.get('/advanced-reporting/schedules/', { params });
   },
-  createSchedule: (data: any) => apiClient.post('/advanced-reporting/schedules/', data),
-  updateSchedule: (id: string, data: any) => 
+  createSchedule: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/schedules/', data),
+  updateSchedule: (id: string, data: Record<string, unknown>) => 
     apiClient.patch(`/advanced-reporting/schedules/${id}/`, data),
   deleteSchedule: (id: string) => apiClient.delete(`/advanced-reporting/schedules/${id}/`),
   activateSchedule: (id: string) => 
@@ -732,9 +740,9 @@ export const advancedReportingAPI = {
   
   // KPIs
   getKPIs: () => apiClient.get('/advanced-reporting/kpis/'),
-  createKPI: (data: any) => apiClient.post('/advanced-reporting/kpis/', data),
+  createKPI: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/kpis/', data),
   getKPI: (id: string) => apiClient.get(`/advanced-reporting/kpis/${id}/`),
-  updateKPI: (id: string, data: any) => apiClient.patch(`/advanced-reporting/kpis/${id}/`, data),
+  updateKPI: (id: string, data: Record<string, unknown>) => apiClient.patch(`/advanced-reporting/kpis/${id}/`, data),
   deleteKPI: (id: string) => apiClient.delete(`/advanced-reporting/kpis/${id}/`),
   calculateKPI: (id: string) => apiClient.post(`/advanced-reporting/kpis/${id}/calculate/`),
   getKPIHistory: (id: string, days?: number) => 

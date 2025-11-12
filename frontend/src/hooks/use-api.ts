@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { meetingsAPI, actionItemsAPI, notesAPI, tagsAPI } from '@/lib/api';
 import type { Meeting, ActionItem, Tag } from '@/lib/api';
 
+type MeetingCreatePayload = Record<string, unknown> | FormData;
+
 // Meetings
 export function useMeetings(params?: {
   search?: string;
@@ -43,7 +45,8 @@ export function useUploadMeeting() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (formData: FormData) => meetingsAPI.create(formData),
+    // Accept either FormData (for uploads) or a plain object
+    mutationFn: (formData: MeetingCreatePayload) => meetingsAPI.create(formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meetings'] });
       queryClient.invalidateQueries({ queryKey: ['meetings', 'stats'] });
@@ -159,7 +162,8 @@ export function useDeleteActionItem() {
 export function useMeetingNotes(meetingId?: string) {
   return useQuery({
     queryKey: ['notes', meetingId],
-    queryFn: () => notesAPI.list(meetingId),
+    // notesAPI.list expects an object of params; pass meeting as a param when provided
+    queryFn: () => notesAPI.list(meetingId ? { meeting: meetingId } : undefined),
     enabled: !!meetingId,
   });
 }

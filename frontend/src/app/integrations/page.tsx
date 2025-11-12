@@ -16,7 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 // Integration Platform Icons/Logos
-const integrationLogos: any = {
+const integrationLogos: Record<string, string> = {
   slack: '💬',
   teams: '👥',
   salesforce: '☁️',
@@ -26,9 +26,31 @@ const integrationLogos: any = {
   custom: '🔧',
 };
 
+interface Integration {
+  id: string;
+  name: string;
+  platform: string;
+  status: string;
+  last_sync?: string;
+  last_sync_at?: string;
+  description?: string;
+  auth_type?: string;
+}
+
+interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  is_active?: boolean;
+  description?: string;
+  last_triggered_at?: string;
+}
+
 export default function IntegrationsPage() {
-  const [integrations, setIntegrations] = useState<any[]>([]);
-  const [webhooks, setWebhooks] = useState<any[]>([]);
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'integrations' | 'webhooks'>('integrations');
 
@@ -55,7 +77,7 @@ export default function IntegrationsPage() {
     try {
       await integrationAPI.testIntegration(id);
       alert('Integration test successful!');
-    } catch (error) {
+    } catch {
       alert('Integration test failed. Check the logs for details.');
     }
   };
@@ -65,7 +87,7 @@ export default function IntegrationsPage() {
       await integrationAPI.syncIntegration(id);
       alert('Sync started successfully!');
       await loadData();
-    } catch (error) {
+    } catch {
       alert('Failed to start sync.');
     }
   };
@@ -74,20 +96,20 @@ export default function IntegrationsPage() {
     try {
       await integrationAPI.testWebhook(id);
       alert('Test webhook sent successfully!');
-    } catch (error) {
+    } catch {
       alert('Failed to send test webhook.');
     }
   };
 
-  const toggleWebhook = async (webhook: any) => {
+  const toggleWebhook = async (webhook: Webhook) => {
     try {
-      if (webhook.is_active) {
+      if (webhook.active) {
         await integrationAPI.deactivateWebhook(webhook.id);
       } else {
         await integrationAPI.activateWebhook(webhook.id);
       }
       await loadData();
-    } catch (error) {
+    } catch {
       alert('Failed to toggle webhook.');
     }
   };

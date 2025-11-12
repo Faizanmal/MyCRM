@@ -1,32 +1,60 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { activityAPI } from '@/lib/api';
 import {
   BellIcon,
   CheckIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 
+interface Notification {
+  id: string;
+  message: string;
+  notification_type: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 export default function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const response = await activityAPI.getUnreadCount();
+      setUnreadCount(response.data.unread_count || 0);
+    } catch (error) {
+      console.error('Failed to load unread count:', error);
+    }
+  }, []);
+
+  const loadNotifications = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await activityAPI.getNotifications();
+      setNotifications(response.data.results || response.data);
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     loadUnreadCount();
     // Poll for new notifications every 30 seconds
     const interval = setInterval(loadUnreadCount, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadUnreadCount]);
 
   useEffect(() => {
     if (isOpen) {
       loadNotifications();
     }
-  }, [isOpen]);
+  }, [isOpen, loadNotifications]);
 
   useEffect(() => {
     // Close dropdown when clicking outside
@@ -39,27 +67,6 @@ export default function NotificationsDropdown() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const loadUnreadCount = async () => {
-    try {
-      const response = await activityAPI.getUnreadCount();
-      setUnreadCount(response.data.unread_count || 0);
-    } catch (error) {
-      console.error('Failed to load unread count:', error);
-    }
-  };
-
-  const loadNotifications = async () => {
-    setLoading(true);
-    try {
-      const response = await activityAPI.getNotifications();
-      setNotifications(response.data.results || response.data);
-    } catch (error) {
-      console.error('Failed to load notifications:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -83,7 +90,7 @@ export default function NotificationsDropdown() {
     }
   };
 
-  const getNotificationIcon = (notificationType: string) => {
+  const getNotificationIcon = () => {
     // You can customize icons based on notification type
     return '🔔';
   };
@@ -141,7 +148,7 @@ export default function NotificationsDropdown() {
               <div className="px-4 py-8 text-center text-gray-500">
                 <BellIcon className="mx-auto h-12 w-12 text-gray-400 mb-3" />
                 <p>No notifications</p>
-                <p className="text-sm mt-1">You're all caught up!</p>
+                <p className="text-sm mt-1">You&apos;re all caught up!</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
@@ -154,7 +161,7 @@ export default function NotificationsDropdown() {
                   >
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0 text-2xl">
-                        {getNotificationIcon(notification.notification_type)}
+                        {getNotificationIcon()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm ${!notification.is_read ? 'font-medium text-gray-900' : 'text-gray-700'}`}>

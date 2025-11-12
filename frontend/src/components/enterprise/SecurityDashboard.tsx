@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React from 'react';
@@ -21,6 +20,44 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { enterpriseAPI } from '@/lib/enterprise-api';
+
+interface HealthComponent {
+  status: string;
+  response_time?: number;
+  uptime?: number;
+  last_check?: string;
+}
+
+interface HealthData {
+  components: Record<string, HealthComponent>;
+  overall_status: string;
+}
+
+interface AuditAction {
+  action: string;
+  count: number;
+}
+
+interface AuditSummary {
+  total_events: number;
+  total_events_today?: number;
+  critical_events?: number;
+  high_risk_events_today?: number;
+  failed_logins_today?: number;
+  unique_users_today?: number;
+  top_actions: AuditAction[];
+}
+
+interface APIKey {
+  id: string;
+  name: string;
+  created_at: string;
+  last_used?: string;
+  permissions?: string[];
+  user_name?: string;
+  rate_limit?: number;
+  status?: string;
+}
 
 const SecurityDashboard = () => {
   const { data: securityData, isLoading: securityLoading } = useQuery({
@@ -207,15 +244,15 @@ const SecurityDashboard = () => {
                 />
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4">
-                  {healthData?.components && Object.entries(healthData.components).map(([component, data]: [string, any]) => (
+                  {healthData?.components && Object.entries(healthData.components).map(([component, data]) => (
                     <div key={component} className="flex items-center space-x-2">
                       {getHealthIcon(component)}
                       <span className="text-sm font-medium capitalize">{component}</span>
                       <Badge 
                         variant="secondary" 
-                        className={getStatusColor(data.status)}
+                        className={getStatusColor((data as HealthComponent).status)}
                       >
-                        {data.status}
+                        {(data as HealthComponent).status}
                       </Badge>
                     </div>
                   ))}
@@ -241,9 +278,9 @@ const SecurityDashboard = () => {
   );
 };
 
-const SystemHealthDetails = ({ healthData }: { healthData: any }) => (
+const SystemHealthDetails = ({ healthData }: { healthData: HealthData }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    {healthData?.components && Object.entries(healthData.components).map(([component, data]: [string, any]) => (
+    {healthData?.components && Object.entries(healthData.components).map(([component, data]: [string, HealthComponent]) => (
       <Card key={component}>
         <CardHeader>
           <div className="flex items-center space-x-2">
@@ -280,7 +317,7 @@ const SystemHealthDetails = ({ healthData }: { healthData: any }) => (
   </div>
 );
 
-const AuditLogsView = ({ auditSummary }: { auditSummary: any }) => (
+const AuditLogsView = ({ auditSummary }: { auditSummary: AuditSummary }) => (
   <div className="space-y-6">
     <Card>
       <CardHeader>
@@ -317,7 +354,7 @@ const AuditLogsView = ({ auditSummary }: { auditSummary: any }) => (
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {auditSummary?.top_actions?.map((action: any, index: number) => (
+          {auditSummary?.top_actions?.map((action: AuditAction, index: number) => (
             <div key={index} className="flex justify-between items-center">
               <span className="text-sm">{action.action}</span>
               <Badge variant="outline">{action.count}</Badge>
@@ -350,7 +387,7 @@ const APIKeysManagement = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {apiKeys?.results?.map((key: any) => (
+          {apiKeys?.results?.map((key: APIKey) => (
             <div key={key.id} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <div className="font-medium">{key.name}</div>

@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { analyticsAPI } from '@/lib/api';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import {
   ChartBarIcon,
-  ArrowTrendingUpIcon,
   CurrencyDollarIcon,
   ClockIcon,
   FunnelIcon,
@@ -30,18 +29,47 @@ import {
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
+interface PipelineHealthData {
+  health_score?: number;
+  total_pipeline_value?: number;
+  deal_count?: number;
+  by_stage?: Array<Record<string, unknown>>;
+}
+
+interface DealVelocityData {
+  average_days?: number;
+  by_stage?: Array<Record<string, unknown>>;
+}
+
+interface ConversionFunnelData {
+  overall_conversion_rate?: number;
+  stage_metrics?: Array<Record<string, unknown>>;
+}
+
+interface AnalyticsData {
+  pipeline_health?: PipelineHealthData;
+  deal_velocity?: DealVelocityData;
+  conversion_funnel?: ConversionFunnelData;
+}
+
+interface SalesForecastData {
+  monthly_forecast?: Array<Record<string, unknown>>;
+  confidence_score?: number;
+  total_predicted?: number;
+}
+
+interface AIInsightsData {
+  insights?: Array<Record<string, unknown>>;
+}
+
 export default function PipelineAnalyticsPage() {
-  const [analytics, setAnalytics] = useState<any>(null);
-  const [forecast, setForecast] = useState<any>(null);
-  const [aiInsights, setAIInsights] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [forecast, setForecast] = useState<SalesForecastData | null>(null);
+  const [aiInsights, setAIInsights] = useState<AIInsightsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [forecastMonths, setForecastMonths] = useState(3);
 
-  useEffect(() => {
-    loadData();
-  }, [forecastMonths]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [analyticsRes, forecastRes, insightsRes] = await Promise.all([
@@ -58,7 +86,11 @@ export default function PipelineAnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [forecastMonths]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (loading) {
     return (
@@ -168,7 +200,7 @@ export default function PipelineAnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value: any) => `$${value.toLocaleString()}`} />
+                  <Tooltip formatter={(value: number | string) => `$${Number(value).toLocaleString()}`} />
                   <Legend />
                   <Line
                     type="monotone"
@@ -197,13 +229,13 @@ export default function PipelineAnalyticsPage() {
                 <div>
                   <p className="text-sm text-gray-600">Total Forecast</p>
                   <p className="text-xl font-bold text-gray-900">
-                    ${forecast?.total_predicted?.toLocaleString() || 0}
+                    ${(forecast?.total_predicted as number)?.toLocaleString?.() || 0}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Confidence</p>
                   <p className="text-xl font-bold text-gray-900">
-                    {forecast?.confidence_score?.toFixed(0) || 0}%
+                    {(forecast?.confidence_score as number)?.toFixed?.(0) || 0}%
                   </p>
                 </div>
               </div>
@@ -226,11 +258,11 @@ export default function PipelineAnalyticsPage() {
               <div className="mt-4">
                 <p className="text-sm text-gray-600 mb-2">Stage Conversion Rates</p>
                 <div className="space-y-2">
-                  {analytics?.conversion_funnel?.stage_metrics?.map((stage: any, index: number) => (
+                  {analytics?.conversion_funnel?.stage_metrics?.map((stage: Record<string, unknown>, index: number) => (
                     <div key={index} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">{stage.stage}</span>
+                      <span className="text-sm text-gray-700">{stage.stage as string}</span>
                       <span className="text-sm font-medium text-gray-900">
-                        {stage.conversion_rate?.toFixed(1)}%
+                        {(stage.conversion_rate as number)?.toFixed(1)}%
                       </span>
                     </div>
                   ))}
@@ -250,16 +282,16 @@ export default function PipelineAnalyticsPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }: any) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    label={(props: Record<string, unknown>) => `${props.name}: ${(((props.percent as number) || 0) * 100).toFixed(0)}%`}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {analytics?.pipeline_health?.by_stage?.map((entry: any, index: number) => (
+                    {analytics?.pipeline_health?.by_stage?.map((entry: Record<string, unknown>, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: any) => `$${value.toLocaleString()}`} />
+                  <Tooltip formatter={(value: number | string) => `$${Number(value).toLocaleString()}`} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -271,19 +303,19 @@ export default function PipelineAnalyticsPage() {
                 AI Insights
               </h3>
               <div className="space-y-4">
-                {aiInsights?.insights?.slice(0, 5).map((insight: any, index: number) => (
+                {aiInsights?.insights?.slice(0, 5).map((insight: Record<string, unknown>, index: number) => (
                   <div key={index} className="flex items-start space-x-3">
                     <div className={`flex-shrink-0 w-2 h-2 mt-2 rounded-full ${
-                      insight.priority === 'high' ? 'bg-red-500' :
-                      insight.priority === 'medium' ? 'bg-yellow-500' :
+                      (insight.priority as string) === 'high' ? 'bg-red-500' :
+                      (insight.priority as string) === 'medium' ? 'bg-yellow-500' :
                       'bg-blue-500'
                     }`}></div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{insight.title}</p>
-                      <p className="text-sm text-gray-600">{insight.description}</p>
-                      {insight.recommendation && (
+                      <p className="text-sm font-medium text-gray-900">{insight.title as string}</p>
+                      <p className="text-sm text-gray-600">{insight.description as string}</p>
+                      {(insight.recommendation as string) && (
                         <p className="text-sm text-blue-600 mt-1">
-                          💡 {insight.recommendation}
+                          💡 {insight.recommendation as string}
                         </p>
                       )}
                     </div>

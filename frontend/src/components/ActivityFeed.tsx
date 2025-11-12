@@ -1,20 +1,35 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { activityAPI } from '@/lib/api';
 import {
   BellIcon,
   ChatBubbleLeftIcon,
   UserIcon,
   AtSymbolIcon,
-  HeartIcon,
   PaperAirplaneIcon,
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+
+interface Activity {
+  id: string;
+  activity_type: string;
+  description: string;
+  created_at: string;
+  user_display_name?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  user_display_name?: string;
+  reply_count?: number;
+}
 
 interface ActivityFeedProps {
-  entityModel?: string;
-  entityId?: string;
+  entityModel: string;
+  entityId: string;
   showComments?: boolean;
   maxHeight?: string;
 }
@@ -25,21 +40,14 @@ export default function ActivityFeed({
   showComments = true,
   maxHeight = '600px',
 }: ActivityFeedProps) {
-  const [activities, setActivities] = useState<any[]>([]);
-  const [comments, setComments] = useState<any[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'activity' | 'comments'>('activity');
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    loadActivities();
-    if (showComments && entityModel && entityId) {
-      loadComments();
-    }
-  }, [entityModel, entityId]);
-
-  const loadActivities = async () => {
+  const loadActivities = useCallback(async () => {
     try {
       let response;
       if (entityModel && entityId) {
@@ -53,9 +61,9 @@ export default function ActivityFeed({
     } finally {
       setLoading(false);
     }
-  };
+  }, [entityModel, entityId]);
 
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     if (!entityModel || !entityId) return;
     
     try {
@@ -64,7 +72,14 @@ export default function ActivityFeed({
     } catch (error) {
       console.error('Failed to load comments:', error);
     }
-  };
+  }, [entityModel, entityId]);
+
+  useEffect(() => {
+    loadActivities();
+    if (showComments && entityModel && entityId) {
+      loadComments();
+    }
+  }, [entityModel, entityId, showComments, loadActivities, loadComments]);
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !entityModel || !entityId) return;
@@ -213,7 +228,7 @@ export default function ActivityFeed({
           {/* Comment Input */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                   <UserIcon className="w-5 h-5 text-gray-600" />
                 </div>
@@ -275,7 +290,7 @@ export default function ActivityFeed({
                       <div className="mt-1 text-sm text-gray-700">
                         {parseCommentContent(comment.content)}
                       </div>
-                      {comment.reply_count > 0 && (
+                      {(comment.reply_count ?? 0) > 0 && (
                         <button className="mt-2 text-xs text-blue-600 hover:text-blue-700">
                           {comment.reply_count} {comment.reply_count === 1 ? 'reply' : 'replies'}
                         </button>

@@ -23,6 +23,66 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { enterpriseAPI } from '@/lib/enterprise-api';
 
+interface CustomerSegmentInsight {
+  count?: number;
+  avg_value?: number;
+  churn_risk?: number;
+  recommendations?: string[];
+  percentage?: number;
+}
+
+interface CustomerSegments {
+  insights: Record<string, CustomerSegmentInsight>;
+  total_segments?: number;
+  total_customers?: number;
+}
+
+interface ChurnRiskCustomer {
+  id: string;
+  name?: string;
+  contact_name?: string;
+  risk_score: number;
+  risk_level?: string;
+  last_activity: string;
+}
+
+interface ChurnRisk {
+  high_risk_customers: ChurnRiskCustomer[];
+  total_at_risk: number;
+  predicted_churn_rate?: number;
+  recommendations?: string[];
+}
+
+interface AIInsights {
+  customer_segments: CustomerSegments;
+  churn_risk: ChurnRisk;
+  sales_forecast?: Record<string, unknown>;
+  predictive_analytics?: Record<string, unknown>;
+  insights?: Array<Record<string, unknown>>;
+}
+
+interface SalesForecast {
+  monthly_forecast?: Array<Record<string, unknown>>;
+  confidence_score?: number;
+  forecast_amount?: number;
+  growth_rate?: number;
+  historical_average?: number;
+  confidence_interval?: [number, number];
+  trend?: string;
+  recommendations?: string[];
+  forecast?: Record<string, unknown>;
+  confidence?: number;
+}
+
+interface LeadScore {
+  score?: number;
+  total_score?: number;
+  quality?: string;
+  priority?: string;
+  score_breakdown: Record<string, number>;
+  recommendations?: string[];
+}
+
 const AIAnalyticsDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('3');
   const [selectedLeadId, setSelectedLeadId] = useState('');
@@ -44,37 +104,6 @@ const AIAnalyticsDashboard = () => {
     queryFn: () => enterpriseAPI.ai.calculateLeadScore(parseInt(selectedLeadId)),
     enabled: !!selectedLeadId,
   });
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'increasing':
-        return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'decreasing':
-        return <TrendingDown className="h-4 w-4 text-red-600" />;
-      default:
-        return <BarChart3 className="h-4 w-4 text-blue-600" />;
-    }
-  };
-
-  const getQualityColor = (quality: string) => {
-    const colors: { [key: string]: string } = {
-      hot: 'text-red-600 bg-red-100',
-      warm: 'text-orange-600 bg-orange-100',
-      cold: 'text-blue-600 bg-blue-100',
-    };
-    return colors[quality] || 'text-gray-600 bg-gray-100';
-  };
-
-  const getSegmentColor = (segment: string) => {
-    const colors: { [key: string]: string } = {
-      high_value: 'text-purple-600 bg-purple-100',
-      loyal: 'text-green-600 bg-green-100',
-      at_risk: 'text-red-600 bg-red-100',
-      new: 'text-blue-600 bg-blue-100',
-      inactive: 'text-gray-600 bg-gray-100',
-    };
-    return colors[segment] || 'text-gray-600 bg-gray-100';
-  };
 
   if (insightsLoading) {
     return (
@@ -151,8 +180,7 @@ const AIAnalyticsDashboard = () => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const AIOverview = ({ aiInsights }: { aiInsights: any }) => (
+const AIOverview = ({ aiInsights }: { aiInsights: AIInsights }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {/* Sales Forecast Summary */}
     <Card>
@@ -165,11 +193,11 @@ const AIOverview = ({ aiInsights }: { aiInsights: any }) => (
           ${aiInsights?.sales_forecast?.forecast_amount?.toLocaleString() || 0}
         </div>
         <p className="text-xs text-muted-foreground">
-          Next 3 months • {aiInsights?.sales_forecast?.growth_rate > 0 ? '+' : ''}{aiInsights?.sales_forecast?.growth_rate || 0}% growth
+          Next 3 months • {(aiInsights?.sales_forecast?.growth_rate as number) > 0 ? '+' : ''}{(aiInsights?.sales_forecast?.growth_rate as number) || 0}% growth
         </p>
         <div className="flex items-center pt-2">
-          {getTrendIcon(aiInsights?.sales_forecast?.trend)}
-          <span className="text-xs ml-1 capitalize">{aiInsights?.sales_forecast?.trend}</span>
+          {getTrendIcon((aiInsights?.sales_forecast?.trend as string) || '')}
+          <span className="text-xs ml-1 capitalize">{(aiInsights?.sales_forecast?.trend as string) || ''}</span>
         </div>
       </CardContent>
     </Card>
@@ -186,8 +214,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: any }) => (
         </div>
         <p className="text-xs text-muted-foreground">Total customers</p>
         <div className="space-y-1 pt-2">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {Object.entries(aiInsights?.customer_segments?.insights || {}).slice(0, 3).map(([segment, data]: [string, any]) => (
+          {Object.entries(aiInsights?.customer_segments?.insights || {}).slice(0, 3).map(([segment, data]: [string, CustomerSegmentInsight]) => (
             <div key={segment} className="flex justify-between text-xs">
               <span className="capitalize">{segment.replace('_', ' ')}</span>
               <span>{data.percentage}%</span>
@@ -228,7 +255,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: any }) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
             <h4 className="font-medium">Sales Forecast</h4>
-            {aiInsights?.sales_forecast?.recommendations?.slice(0, 3).map((rec: string, index: number) => (
+            {((aiInsights?.sales_forecast?.recommendations as string[]) || [])?.slice(0, 3).map((rec: string, index: number) => (
               <div key={index} className="flex items-start space-x-2">
                 <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <span className="text-sm">{rec}</span>
@@ -256,8 +283,7 @@ const SalesForecastView = ({
   selectedPeriod, 
   setSelectedPeriod 
 }: { 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  salesForecast: any;
+  salesForecast: SalesForecast;
   forecastLoading: boolean;
   selectedPeriod: string;
   setSelectedPeriod: (period: string) => void;
@@ -299,7 +325,7 @@ const SalesForecastView = ({
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold">
-                  {salesForecast?.growth_rate > 0 ? '+' : ''}{salesForecast?.growth_rate || 0}%
+                  {(salesForecast?.growth_rate as number) > 0 ? '+' : ''}{(salesForecast?.growth_rate as number) || 0}%
                 </div>
                 <div className="text-sm text-muted-foreground">Growth Rate</div>
               </div>
@@ -327,9 +353,9 @@ const SalesForecastView = ({
               </div>
 
               <div className="flex items-center space-x-2">
-                {getTrendIcon(salesForecast?.trend)}
+                {getTrendIcon(salesForecast?.trend || '')}
                 <span className="text-sm font-medium capitalize">
-                  {salesForecast?.trend} Trend
+                  {salesForecast?.trend || 'stable'} Trend
                 </span>
               </div>
             </div>
@@ -352,8 +378,7 @@ const SalesForecastView = ({
   </div>
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const CustomerSegmentationView = ({ aiInsights }: { aiInsights: any }) => (
+const CustomerSegmentationView = ({ aiInsights }: { aiInsights: AIInsights }) => (
   <div className="space-y-6">
     <Card>
       <CardHeader>
@@ -362,8 +387,7 @@ const CustomerSegmentationView = ({ aiInsights }: { aiInsights: any }) => (
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {Object.entries(aiInsights?.customer_segments?.insights || {}).map(([segment, data]: [string, any]) => (
+          {Object.entries(aiInsights?.customer_segments?.insights || {}).map(([segment, data]: [string, CustomerSegmentInsight]) => (
             <Card key={segment}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -410,8 +434,7 @@ const LeadScoringView = ({
   selectedLeadId, 
   setSelectedLeadId 
 }: { 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  leadScore: any;
+  leadScore: LeadScore;
   scoreLoading: boolean;
   selectedLeadId: string;
   setSelectedLeadId: (id: string) => void;
@@ -455,8 +478,8 @@ const LeadScoringView = ({
                   <div className="text-sm text-muted-foreground">Overall Score</div>
                 </div>
                 <div className="text-center">
-                  <Badge className={getQualityColor(leadScore.quality)} variant="secondary">
-                    {leadScore.quality.toUpperCase()}
+                  <Badge className={getQualityColor(leadScore.quality || '')} variant="secondary">
+                    {leadScore.quality?.toUpperCase() || 'UNKNOWN'}
                   </Badge>
                   <div className="text-sm text-muted-foreground mt-1">Quality Rating</div>
                 </div>
@@ -470,8 +493,7 @@ const LeadScoringView = ({
 
               <div>
                 <div className="space-y-3">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {Object.entries(leadScore.score_breakdown || {}).map(([component, score]: [string, any]) => (
+                  {Object.entries(leadScore.score_breakdown || {}).map(([component, score]: [string, number]) => (
                     <div key={component}>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="capitalize">{component}</span>
@@ -502,8 +524,7 @@ const LeadScoringView = ({
   </div>
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ChurnPredictionView = ({ aiInsights }: { aiInsights: any }) => (
+const ChurnPredictionView = ({ aiInsights }: { aiInsights: AIInsights }) => (
   <div className="space-y-6">
     <Card>
       <CardHeader>
@@ -530,8 +551,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: any }) => (
           <div>
             <h4 className="font-medium mb-3">High-Risk Customers</h4>
             <div className="space-y-2">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {aiInsights?.churn_risk?.high_risk_customers?.slice(0, 5).map((customer: any, index: number) => (
+              {aiInsights?.churn_risk?.high_risk_customers?.slice(0, 5).map((customer: ChurnRiskCustomer, index: number) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <div className="font-medium">{customer.contact_name}</div>
@@ -540,7 +560,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: any }) => (
                     </div>
                   </div>
                   <Badge variant="destructive">
-                    {customer.risk_level.toUpperCase()}
+                    {(customer.risk_level || 'MEDIUM').toUpperCase()}
                   </Badge>
                 </div>
               ))}

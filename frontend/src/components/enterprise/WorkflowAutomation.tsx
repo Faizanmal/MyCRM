@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from 'react';
@@ -11,11 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { 
   Workflow, 
   Play, 
-  Pause, 
   Settings, 
   Plus,
   Clock,
@@ -26,7 +23,6 @@ import {
   Phone,
   Calendar,
   Users,
-  Target,
   BarChart3
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -34,7 +30,7 @@ import { enterpriseAPI } from '@/lib/enterprise-api';
 
 interface WorkflowAction {
   type: string;
-  parameters: { [key: string]: any };
+  parameters: Record<string, unknown>;
   delay?: number;
 }
 
@@ -42,13 +38,40 @@ interface WorkflowData {
   name: string;
   description: string;
   trigger_type: string;
-  trigger_conditions: { [key: string]: any };
+  trigger_conditions: Record<string, unknown>;
   actions: WorkflowAction[];
   status: string;
 }
 
+interface Workflow {
+  id: string;
+  name: string;
+  description: string;
+  trigger_type: string;
+  trigger_conditions: Record<string, unknown>;
+  actions: WorkflowAction[];
+  status: string;
+  created_at: string;
+  updated_at: string;
+  execution_count?: number;
+}
+
+interface Execution {
+  id: string;
+  workflow_id: string;
+  workflow_name?: string;
+  status: string;
+  started_at: string;
+  completed_at?: string;
+  error_message?: string;
+  steps_completed?: number;
+  total_steps?: number;
+  progress_percentage?: number;
+  duration_minutes?: number;
+}
+
 const WorkflowAutomation = () => {
-  const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
+  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const queryClient = useQueryClient();
 
@@ -63,7 +86,7 @@ const WorkflowAutomation = () => {
   });
 
   const executeWorkflow = useMutation({
-    mutationFn: ({ id, triggerData }: { id: string; triggerData?: any }) =>
+    mutationFn: ({ id, triggerData }: { id: string; triggerData?: Record<string, unknown> }) =>
       enterpriseAPI.core.executeWorkflow(id, triggerData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflow-executions'] });
@@ -77,27 +100,6 @@ const WorkflowAutomation = () => {
       setIsCreating(false);
     },
   });
-
-  const getActionIcon = (actionType: string) => {
-    const icons: { [key: string]: React.ReactNode } = {
-      email: <Mail className="h-4 w-4" />,
-      sms: <Phone className="h-4 w-4" />,
-      task: <CheckCircle className="h-4 w-4" />,
-      meeting: <Calendar className="h-4 w-4" />,
-      assignment: <Users className="h-4 w-4" />,
-      notification: <AlertCircle className="h-4 w-4" />,
-    };
-    return icons[actionType] || <Zap className="h-4 w-4" />;
-  };
-
-  const getStatusColor = (status: string) => {
-    const colors: { [key: string]: string } = {
-      active: 'text-green-600 bg-green-100',
-      inactive: 'text-gray-600 bg-gray-100',
-      draft: 'text-yellow-600 bg-yellow-100',
-    };
-    return colors[status] || 'text-gray-600 bg-gray-100';
-  };
 
   if (isLoading) {
     return (
@@ -158,7 +160,7 @@ const WorkflowAutomation = () => {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-6">
-          <WorkflowTemplates onUseTemplate={(template) => setIsCreating(true)} />
+          <WorkflowTemplates onUseTemplate={() => setIsCreating(true)} />
         </TabsContent>
       </Tabs>
 
@@ -177,9 +179,9 @@ const WorkflowsList = ({
   onSelect, 
   onExecute 
 }: { 
-  workflows: any[];
-  onSelect: (workflow: any) => void;
-  onExecute: (id: string, data?: any) => void;
+  workflows: Workflow[];
+  onSelect: (workflow: Workflow) => void;
+  onExecute: (id: string, data?: Record<string, unknown>) => void;
 }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     {workflows.map((workflow) => (
@@ -411,7 +413,7 @@ const WorkflowCreator = ({
   );
 };
 
-const ExecutionHistory = ({ executions }: { executions: any[] }) => (
+const ExecutionHistory = ({ executions }: { executions: Execution[] }) => (
   <div className="space-y-4">
     {executions.length === 0 ? (
       <Card>
@@ -468,7 +470,7 @@ const ExecutionHistory = ({ executions }: { executions: any[] }) => (
   </div>
 );
 
-const WorkflowTemplates = ({ onUseTemplate }: { onUseTemplate: (template: any) => void }) => {
+const WorkflowTemplates = ({ onUseTemplate }: { onUseTemplate: () => void }) => {
   const templates = [
     {
       name: "Lead Nurturing Sequence",
@@ -518,7 +520,7 @@ const WorkflowTemplates = ({ onUseTemplate }: { onUseTemplate: (template: any) =
               <Button 
                 className="w-full mt-4" 
                 variant="outline"
-                onClick={() => onUseTemplate(template)}
+                onClick={() => onUseTemplate()}
               >
                 Use Template
               </Button>
@@ -534,7 +536,7 @@ const WorkflowDetails = ({
   workflow, 
   onClose 
 }: { 
-  workflow: any;
+  workflow: Workflow;
   onClose: () => void;
 }) => (
   <Dialog open={!!workflow} onOpenChange={onClose}>
@@ -565,7 +567,7 @@ const WorkflowDetails = ({
         <div>
           <Label>Actions ({workflow.actions?.length || 0})</Label>
           <div className="mt-2 space-y-2">
-            {workflow.actions?.map((action: any, index: number) => (
+            {workflow.actions?.map((action: WorkflowAction, index: number) => (
               <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg">
                 {getActionIcon(action.type)}
                 <span className="font-medium capitalize">{action.type}</span>

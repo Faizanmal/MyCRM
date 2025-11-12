@@ -13,7 +13,6 @@ import {
   Calendar, 
   Mail,
   Settings,
-  Bell,
   Search,
   LogOut,
   Menu,
@@ -29,7 +28,6 @@ import {
   Activity,
   LayoutDashboard
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import NotificationsDropdown from '@/components/NotificationsDropdown';
 

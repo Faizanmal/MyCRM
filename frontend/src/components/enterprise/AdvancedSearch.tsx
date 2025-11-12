@@ -34,7 +34,7 @@ export default function AdvancedSearch() {
   const [filters, setFilters] = useState<SearchFilter[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [savedSearches] = useState<SavedSearch[]>([]);
   const { toast } = useToast();
 
   const MODELS = [
@@ -75,7 +75,7 @@ export default function AdvancedSearch() {
         title: 'Search Complete',
         description: `Found ${response.data.results?.length || 0} results`,
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Search failed',
@@ -118,7 +118,7 @@ export default function AdvancedSearch() {
         title: 'Success',
         description: 'Search saved successfully',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to save search',

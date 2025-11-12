@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Shield, Search, Filter, AlertTriangle, Info, AlertCircle } from 'lucide-react';
+import { Shield, Filter, AlertTriangle, Info, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -34,7 +34,7 @@ interface AuditLog {
 
 export default function AuditLogViewer() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
   const [riskFilter, setRiskFilter] = useState('all');
@@ -71,38 +71,6 @@ export default function AuditLogViewer() {
 
     return matchesSearch && matchesAction && matchesRisk;
   });
-
-  const getRiskBadgeVariant = (risk: string) => {
-    switch (risk) {
-      case 'critical': return 'destructive';
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      default: return 'secondary';
-    }
-  };
-
-  const getRiskIcon = (risk: string) => {
-    switch (risk) {
-      case 'critical':
-      case 'high':
-        return <AlertTriangle className="h-4 w-4" />;
-      case 'medium':
-        return <AlertCircle className="h-4 w-4" />;
-      default:
-        return <Info className="h-4 w-4" />;
-    }
-  };
-
-  const getActionColor = (action: string) => {
-    switch (action) {
-      case 'create': return 'text-green-600';
-      case 'update': return 'text-blue-600';
-      case 'delete': return 'text-red-600';
-      case 'login': return 'text-purple-600';
-      case 'logout': return 'text-gray-600';
-      default: return 'text-gray-600';
-    }
-  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
