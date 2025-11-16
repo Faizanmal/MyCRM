@@ -36,7 +36,6 @@ interface ImportLog {
 
 export default function DataImportExport() {
   const [activeTab, setActiveTab] = useState('import');
-  const { toast } = useToast();
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -67,11 +66,11 @@ export default function DataImportExport() {
         </TabsList>
 
         <TabsContent value="import" className="space-y-4">
-          <ImportWizard onNotify={toast} />
+          <ImportWizard />
         </TabsContent>
 
         <TabsContent value="export" className="space-y-4">
-          <ExportWizard onNotify={toast} />
+          <ExportWizard />
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">

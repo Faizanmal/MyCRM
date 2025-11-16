@@ -1,10 +1,10 @@
 'use client';
 
 // FIXME: Add all missing imports for components and icons.
-import Image from 'next/image';
-import { 
-  Search, Bell, LogOut, BarChart3, Users, UserPlus, 
-  TrendingUp, Calendar, Mail, Settings, Phone 
+import { useRouter } from 'next/navigation';
+import {
+  Search, Bell, LogOut, BarChart3, Users, UserPlus,
+  TrendingUp, Calendar, Mail, Settings, Phone
 } from 'lucide-react'; // (Or your icon library)
 
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 // If this is your main dashboard page, you can name it DashboardPage,
 // or keep 'Home' if it's the file 'app/dashboard/page.tsx'
 export default function Home() {
+  const router = useRouter();
   // const router = useRouter(); // No longer needed if this IS the dashboard
 
   // FIXME: This redirect was incorrect.
@@ -55,16 +56,8 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center relative overflow-hidden">
-                  <Image
-                    src="/api/placeholder?w=32&h=32"
-                    alt="MyCRM Logo"
-                    width={32}
-                    height={32}
-                    className="w-full h-full object-cover"
-                    priority
-                  />
-                  <span className="absolute text-white font-bold text-sm">CRM</span>
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">CRM</span>
                 </div>
                 <h1 className="text-xl font-semibold text-gray-900">MyCRM</h1>
               </div>
@@ -111,32 +104,56 @@ export default function Home() {
               <div className="space-y-1">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Main</h3>
                 
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/dashboard')}
+                >
                   <BarChart3 className="w-4 h-4 mr-3" />
                   Dashboard
                 </Button>
                 
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/contacts')}
+                >
                   <Users className="w-4 h-4 mr-3" />
                   Contacts
                 </Button>
                 
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/leads')}
+                >
                   <UserPlus className="w-4 h-4 mr-3" />
                   Leads
                 </Button>
                 
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/opportunities')}
+                >
                   <TrendingUp className="w-4 h-4 mr-3" />
                   Opportunities
                 </Button>
                 
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/tasks')}
+                >
                   <Calendar className="w-4 h-4 mr-3" />
                   Tasks & Calendar
                 </Button>
                 
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/communications')}
+                >
                   <Mail className="w-4 h-4 mr-3" />
                   Communications
                 </Button>
@@ -145,7 +162,11 @@ export default function Home() {
               <div className="space-y-1 mt-6">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tools</h3>
                 
-                <Button variant="ghost" className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/settings')}
+                >
                   <Settings className="w-4 h-4 mr-3" />
                   Settings
                 </Button>
