@@ -4,34 +4,102 @@ A full-stack Customer Relationship Management (CRM) system built with Django RES
 
 ## 🚀 Features
 
-### Core Functionality
-- **Lead Management**: Comprehensive lead tracking with scoring and qualification
+### Core CRM Functionality
+- **Lead Management**: Comprehensive lead tracking with AI scoring and qualification
 - **Contact Management**: Centralized contact database with relationship tracking
 - **Opportunity Management**: Sales pipeline management with deal tracking
-- **Task Management**: Task assignment and tracking system
-- **Communication Management**: Integrated communication tracking (email, calls, meetings)
-- **Reporting & Analytics**: Advanced reporting with AI-powered insights
+- **Task Management**: Task assignment, tracking, and automation
+- **Communication Management**: Integrated multi-channel communication tracking
+- **Document Management**: Centralized document storage and organization
 
-### Enterprise Features
+### 🆕 Foundation Features (v1.0)
+- **Unified REST API (v1)**: Comprehensive, versioned API with filtering, search, and bulk operations
+- **CSV Import/Export**: Bulk data import/export with field mapping and validation
+- **AI Lead Scoring**: Machine learning-based lead prioritization with automatic retraining
+- **Workflow Automation**: Visual workflow builder with triggers and actions
+- **Background Jobs**: Celery-based async task processing for heavy operations
+- **Smart Notifications**: Multi-channel notifications with user preferences and digests
+- **API Documentation**: Interactive Swagger UI and ReDoc documentation
+
+### ⚡ Advanced Features (v2.0)
+1. **📊 Advanced Analytics Dashboard**
+   - Sales forecasting with ML predictions
+   - Conversion funnel analysis with bottleneck detection
+   - Cohort analysis for retention tracking
+   - Custom metrics builder for KPI tracking
+
+2. **📧 Email Campaign Management**
+   - Template builder with variable substitution
+   - Campaign scheduling and automation
+   - Email tracking (opens, clicks, bounces)
+   - Unsubscribe management and compliance
+   - A/B testing support
+
+3. **🔍 Comprehensive Audit Trail**
+   - Track all CRUD operations with full context
+   - Field-level change history and version control
+   - Data snapshots for point-in-time recovery
+   - Configurable retention policies per model
+   - Advanced search and filtering
+
+4. **📱 Customizable Dashboard Widgets**
+   - 12 widget types (metrics, charts, tables, timelines, maps)
+   - Drag-and-drop grid layout system
+   - Real-time data with intelligent caching
+   - Widget sharing and role-based permissions
+   - Auto-refresh intervals
+
+5. **⚡ Real-time WebSocket Notifications**
+   - Live notifications without polling
+   - Activity feed updates in real-time
+   - Task/lead/opportunity change notifications
+   - Connection monitoring and auto-reconnect
+   - Mark as read functionality
+
+6. **🔧 Custom Field Builder**
+   - 14 field types with full validation
+   - Add custom fields to any entity
+   - Field groups for better organization
+   - Role-based field visibility
+   - Dynamic form generation
+
+7. **📅 Unified Activity Timeline**
+   - Consolidated view across all entities
+   - Multiple data sources (activities, audit, tasks, opportunities)
+   - Advanced filtering by entity, user, date range
+   - Entity-specific timeline views
+   - Export capabilities
+
+8. **🔎 Advanced Search & Filtering**
+   - Full-text search across all fields
+   - Complex filter combinations
+   - Date range filtering
+   - Nested relationship filtering
+   - Saved search templates
+
+### Enterprise Security & Compliance
 - **Role-Based Access Control (RBAC)**: Granular permission management
-- **AI Analytics**: Machine learning-powered lead scoring and predictions
-- **Workflow Automation**: Automated business process workflows
-- **Email Integration**: SendGrid integration for email communications
-- **SMS Integration**: Twilio integration for SMS notifications
-- **Data Export**: Excel and PDF report generation
-- **Search**: Advanced search capabilities across entities
-- **Security**: Enterprise-grade security with rate limiting, OAuth, and API key management
+- **Audit Logging**: Complete activity tracking for compliance
+- **Data Encryption**: At-rest and in-transit encryption
+- **2FA Support**: Two-factor authentication with TOTP
+- **Rate Limiting**: API rate limiting and throttling
+- **OAuth Integration**: Third-party authentication support
+- **Security Middleware**: Enterprise-grade security layers
 
 ## 🛠️ Tech Stack
 
 ### Backend
 - **Framework**: Django 5.2.7
 - **API**: Django REST Framework 3.15.2
-- **Authentication**: JWT (djangorestframework-simplejwt)
+- **WebSockets**: Django Channels 4.0 + Daphne 4.0
+- **Authentication**: JWT (djangorestframework-simplejwt 5.3.0)
 - **Database**: PostgreSQL (production), SQLite (development)
-- **Task Queue**: Celery with Redis
-- **Cache**: Redis
-- **Security**: bcrypt, cryptography, 2FA (pyotp)
+- **Task Queue**: Celery 5.3.4 with Redis 5.0.1
+- **Message Broker**: Redis + channels-redis 4.1.0
+- **Cache**: Redis with django-redis 5.4.0
+- **ML/AI**: scikit-learn 1.3.2, pandas 2.2.2, numpy 1.25.2
+- **Security**: bcrypt 4.1.2, cryptography 42.0.5, 2FA (pyotp 2.9.0)
+- **Documentation**: drf-spectacular 0.27.0
 
 ### Frontend
 - **Framework**: Next.js 14+ (React 19)
@@ -113,7 +181,29 @@ A full-stack Customer Relationship Management (CRM) system built with Django RES
 6. **Access the application**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000/api
+   - API Documentation: http://localhost:8000/api/docs
    - Admin Panel: http://localhost:8000/admin
+
+### Quick Setup Script
+
+For fast local development setup:
+
+```bash
+# Run the automated setup script
+./setup.sh
+
+# Start Redis (required for Celery)
+redis-server
+
+# Terminal 1: Django server
+cd backend && python manage.py runserver
+
+# Terminal 2: Celery worker (for background tasks)
+cd backend && celery -A backend worker --loglevel=info
+
+# Terminal 3: Celery beat (for scheduled tasks)
+cd backend && celery -A backend beat --loglevel=info
+```
 
 ### Manual Setup
 
@@ -201,15 +291,22 @@ A full-stack Customer Relationship Management (CRM) system built with Django RES
 ```
 MyCRM/
 ├── backend/                    # Django backend
+│   ├── api/                   # 🆕 Unified REST API v1
+│   │   └── v1/                # API version 1 endpoints
 │   ├── accounts/              # User account management
 │   ├── contact_management/    # Contact CRUD operations
 │   ├── lead_management/       # Lead tracking and scoring
 │   ├── opportunity_management/# Sales opportunity tracking
 │   ├── task_management/       # Task management
 │   ├── communication_management/ # Communication logs
+│   ├── activity_feed/         # Activity feed & notifications
 │   ├── reporting/             # Reports and analytics
 │   ├── core/                  # Core utilities (AI, workflows, security)
+│   │   ├── lead_scoring.py    # 🆕 ML-based lead scoring
+│   │   ├── workflows.py       # 🆕 Workflow automation
+│   │   └── tasks.py           # 🆕 Celery background tasks
 │   ├── backend/               # Django settings and configuration
+│   │   └── celery.py          # 🆕 Celery configuration
 │   ├── requirements.txt       # Python dependencies
 │   └── manage.py             # Django management script
 │
@@ -223,9 +320,20 @@ MyCRM/
 │   └── package.json          # Node dependencies
 │
 ├── docker-compose.yml        # Docker composition
+├── setup.sh                 # 🆕 Quick setup script
+├── FEATURES.md              # 🆕 Complete feature documentation
+├── IMPLEMENTATION_SUMMARY.md # 🆕 Implementation details
+├── api_examples.py          # 🆕 Python API usage examples
 ├── .gitignore               # Git ignore rules
 └── README.md                # This file
 ```
+
+## 📚 Documentation
+
+- **[FEATURES.md](FEATURES.md)** - Complete feature documentation with API reference
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Implementation details and architecture
+- **[api_examples.py](api_examples.py)** - Python code examples for all API endpoints
+- **API Docs** - Interactive documentation at http://localhost:8000/api/docs/
 
 ## 🔧 Configuration
 
@@ -270,6 +378,17 @@ Once the backend is running, access the API documentation at:
 
 ### Main API Endpoints
 
+### Unified API v1 (Recommended)
+- `/api/v1/leads/` - Lead management with scoring
+- `/api/v1/contacts/` - Contact management
+- `/api/v1/opportunities/` - Opportunity tracking with pipeline
+- `/api/v1/tasks/` - Task management
+- `/api/v1/workflows/` - Workflow automation
+- `/api/v1/import/{resource}/` - CSV import
+- `/api/v1/export/{resource}/` - CSV export
+- `/api/v1/scoring/` - AI lead scoring
+
+### Legacy Endpoints
 - `/api/contacts/` - Contact management
 - `/api/leads/` - Lead management
 - `/api/opportunities/` - Opportunity tracking
@@ -277,6 +396,35 @@ Once the backend is running, access the API documentation at:
 - `/api/communications/` - Communication logs
 - `/api/reports/` - Reporting and analytics
 - `/api/users/` - User management
+
+### Quick API Examples
+
+```bash
+# Get JWT token
+curl -X POST http://localhost:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"password"}'
+
+# List leads (with filtering)
+curl http://localhost:8000/api/v1/leads/?status=qualified \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Create a lead
+curl -X POST http://localhost:8000/api/v1/leads/ \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"first_name":"John","last_name":"Doe","email":"john@example.com"}'
+
+# Import leads from CSV
+curl -X POST http://localhost:8000/api/v1/import/leads/ \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@leads.csv" \
+  -F 'mapping={"Email":"email","Name":"first_name"}'
+
+# Get pipeline statistics
+curl http://localhost:8000/api/v1/opportunities/pipeline/ \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
 
 ## 🔐 Authentication
 

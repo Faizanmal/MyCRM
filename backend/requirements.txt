@@ -27,6 +27,12 @@ crispy-bootstrap5==0.7
 django-environ==0.11.2
 gunicorn==21.2.0
 whitenoise==6.6.0
+drf-spectacular==0.27.0
+
+# WebSocket Support
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
 
 # Enterprise Security & Analytics
 bcrypt==4.1.2

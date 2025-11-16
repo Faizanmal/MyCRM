@@ -250,3 +250,59 @@ class Follow(models.Model):
     
     def __str__(self):
         return f"{self.user.username} follows {self.content_type.model}"
+
+
+class NotificationPreference(models.Model):
+    """User notification preferences"""
+    
+    CHANNEL_CHOICES = [
+        ('email', 'Email'),
+        ('push', 'Push Notification'),
+        ('in_app', 'In-App'),
+        ('sms', 'SMS'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='notification_preferences')
+    
+    # Email preferences
+    email_enabled = models.BooleanField(default=True)
+    email_mentions = models.BooleanField(default=True)
+    email_assignments = models.BooleanField(default=True)
+    email_comments = models.BooleanField(default=True)
+    email_updates = models.BooleanField(default=False)
+    email_daily_digest = models.BooleanField(default=False)
+    email_weekly_digest = models.BooleanField(default=True)
+    
+    # Push preferences
+    push_enabled = models.BooleanField(default=True)
+    push_mentions = models.BooleanField(default=True)
+    push_assignments = models.BooleanField(default=True)
+    push_comments = models.BooleanField(default=False)
+    
+    # In-app preferences
+    in_app_enabled = models.BooleanField(default=True)
+    in_app_mentions = models.BooleanField(default=True)
+    in_app_assignments = models.BooleanField(default=True)
+    in_app_comments = models.BooleanField(default=True)
+    in_app_updates = models.BooleanField(default=True)
+    
+    # Digest timing
+    digest_time = models.TimeField(default='08:00:00', help_text="Time to send daily digest")
+    digest_day = models.IntegerField(default=1, help_text="Day of week for weekly digest (0=Monday)")
+    
+    # Do Not Disturb
+    dnd_enabled = models.BooleanField(default=False)
+    dnd_start_time = models.TimeField(null=True, blank=True)
+    dnd_end_time = models.TimeField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'crm_notification_preferences'
+        verbose_name = 'Notification Preference'
+        verbose_name_plural = 'Notification Preferences'
+    
+    def __str__(self):
+        return f"Notification preferences for {self.user.username}"

@@ -18,7 +18,6 @@ export const metadata: Metadata = {
   title: "MyCRM - Customer Relationship Management",
   description: "A fully functional CRM system for managing customer interactions, sales pipelines, and business relationships.",
   manifest: "/manifest.json",
-  themeColor: "#2563eb",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
