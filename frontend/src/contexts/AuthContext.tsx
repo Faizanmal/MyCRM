@@ -43,67 +43,43 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // TEMPORARY: Authentication disabled - always authenticated with mock user
+  const [user] = useState<User | null>({
+    id: 1,
+    username: 'admin',
+    email: 'admin@example.com',
+    first_name: 'Admin',
+    last_name: 'User',
+    role: 'admin',
+    is_active: true,
+    two_factor_enabled: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  const [isLoading] = useState(false);
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = true; // TEMPORARY: Always authenticated
 
   const login = async (credentials: { username: string; password: string }) => {
-    try {
-      setIsLoading(true);
-      const response = await authAPI.login(credentials);
-      
-      // Check if 2FA is required
-      if (response.temp_token) {
-        // Handle 2FA flow
-        throw new Error('2FA verification required');
-      }
-      
-      // Store tokens
-      localStorage.setItem('access_token', response.access);
-      localStorage.setItem('refresh_token', response.refresh);
-      
-      // Set user data
-      setUser(response.user);
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    // TEMPORARY: Skip actual authentication - auto-login
+    console.log('TEMP: Authentication bypassed for:', credentials.username);
+    return Promise.resolve();
   };
 
   const logout = () => {
-    authAPI.logout();
-    setUser(null);
+    console.log('TEMP: Logout bypassed - authentication disabled');
+    // authAPI.logout();
+    // setUser(null);
   };
 
   const refreshUser = useCallback(async () => {
-    try {
-      const userData = await authAPI.getCurrentUser();
-      setUser(userData);
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
-      logout();
-    }
+    // TEMPORARY: Skip user refresh
+    console.log('TEMP: User refresh bypassed - authentication disabled');
+    return Promise.resolve();
   }, []);
 
-  useEffect(() => {
-    const initAuth = async () => {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        try {
-          await refreshUser();
-        } catch (error) {
-          console.error('Auth initialization failed:', error);
-          logout();
-        }
-      }
-      setIsLoading(false);
-    };
-
-    initAuth();
-  }, [refreshUser]);
+  // TEMPORARY: Skip auth initialization
+  // useEffect removed
 
   const value: AuthContextType = {
     user,

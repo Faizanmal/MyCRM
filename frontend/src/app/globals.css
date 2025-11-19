@@ -2,25 +2,139 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(148, 163, 184, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 130, 246, 0.3);
+  border-radius: 9999px;
+  transition: background-color 200ms;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 130, 246, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(96, 165, 250, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(96, 165, 250, 0.5);
+}
+
+/* Smooth transitions */
+.transition-theme {
+  transition: color 200ms, background-color 200ms, border-color 200ms;
+}
+
+/* Glass morphism effect */
+.glass {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.dark .glass {
+  background-color: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* Gradient text */
+.gradient-text {
+  background-image: linear-gradient(to right, rgb(37, 99, 235), rgb(147, 51, 234));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.dark .gradient-text {
+  background-image: linear-gradient(to right, rgb(96, 165, 250), rgb(192, 132, 252));
+}
+
+/* Modern card styles */
+.modern-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  transition: all 300ms;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.modern-card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .modern-card {
+  background-color: rgb(30, 41, 59);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(135deg, rgb(239, 246, 255), rgb(250, 245, 255), rgb(252, 231, 243));
+  animation: gradient 15s ease infinite;
+  background-size: 400% 400%;
+}
+
+.dark .animated-gradient {
+  background: linear-gradient(135deg, rgb(15, 23, 42), rgb(30, 41, 59), rgb(15, 23, 42));
+}
+
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Shimmer effect */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

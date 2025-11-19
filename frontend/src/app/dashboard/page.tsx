@@ -33,20 +33,22 @@ interface StatCardProps {
 
 function StatCard({ title, value, change, trend, icon: Icon }: StatCardProps) {
   return (
-    <Card>
+    <Card className="modern-card hover:scale-105 transition-transform duration-300 group">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <div className={`p-2 rounded-xl ${trend === 'up' ? 'bg-green-500/10 text-green-600 dark:bg-green-500/20' : 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20'} group-hover:scale-110 transition-transform`}>
+          <Icon className="h-4 w-4" />
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs flex items-center mt-1">
+        <div className="text-3xl font-bold gradient-text">{value}</div>
+        <p className="text-xs flex items-center mt-2">
           {trend === 'up' ? (
-            <ArrowUpRight className="w-3 h-3 text-green-600 mr-1" />
+            <ArrowUpRight className="w-4 h-4 text-green-600 dark:text-green-400 mr-1" />
           ) : (
-            <ArrowDownRight className="w-3 h-3 text-red-600 mr-1" />
+            <ArrowDownRight className="w-4 h-4 text-red-600 dark:text-red-400 mr-1" />
           )}
-          <span className={trend === 'up' ? 'text-green-600' : 'text-red-600'}>
+          <span className={`font-semibold ${trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
             {change}
           </span>
           <span className="text-muted-foreground ml-1">from last month</span>
@@ -90,13 +92,18 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <MainLayout>
-        <div className="p-4 lg:p-6 space-y-6">
-          {/* Welcome Section */}
-          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 rounded-lg p-6 text-white shadow-lg">
-            <h2 className="text-2xl lg:text-3xl font-bold mb-2">
-              Welcome back, {user?.first_name || user?.username || 'User'}! 👋
-            </h2>
-            <p className="text-blue-100">Here&apos;s what&apos;s happening with your CRM today.</p>
+        <div className="space-y-6">
+          {/* Welcome Section - Modern gradient card */}
+          <div className="relative overflow-hidden modern-card bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-blue-700 dark:via-purple-700 dark:to-pink-700 p-8 text-white shadow-2xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 blur-3xl"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl lg:text-4xl font-bold mb-3 flex items-center gap-3">
+                Welcome back, {user?.first_name || user?.username || 'User'}! 
+                <span className="inline-block animate-bounce">👋</span>
+              </h2>
+              <p className="text-blue-50 text-lg">Here&apos;s what&apos;s happening with your CRM today.</p>
+            </div>
           </div>
 
           {/* Stats Cards */}

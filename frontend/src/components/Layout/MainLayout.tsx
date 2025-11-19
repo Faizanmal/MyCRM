@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   BarChart3, 
   Users, 
@@ -26,7 +27,8 @@ import {
   Target,
   PieChart,
   Activity,
-  LayoutDashboard
+  LayoutDashboard,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationsDropdown from '@/components/NotificationsDropdown';
@@ -62,16 +64,16 @@ const toolsNavigation = [
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4 sticky top-0 z-40">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-theme">
+      {/* Header with glass morphism */}
+      <header className="glass sticky top-0 z-40 px-4 lg:px-6 py-3.5 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="hidden lg:flex"
+              className="hidden lg:flex hover:bg-primary/10 transition-colors"
             >
               <Menu className="w-5 h-5" />
             </Button>
@@ -80,44 +82,55 @@ const toolsNavigation = [
               variant="ghost"
               size="sm"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden"
+              className="lg:hidden hover:bg-primary/10 transition-colors"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
 
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-linear-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+            <Link href="/dashboard" className="flex items-center space-x-2 group">
+              <div className="w-9 h-9 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <Sparkles className="text-white w-5 h-5" />
               </div>
-              <h1 className="text-xl font-semibold text-gray-900 hidden sm:block">MyCRM</h1>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold gradient-text">MyCRM</h1>
+                <p className="text-[10px] text-muted-foreground -mt-1">Modern CRM Solution</p>
+              </div>
             </Link>
           </div>
           
-          <div className="flex items-center space-x-2 lg:space-x-4">
+          <div className="flex items-center space-x-2 lg:space-x-3">
             <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <input
                 type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder="Search anything..."
+                className="pl-10 pr-4 py-2 w-64 bg-secondary/50 dark:bg-secondary/30 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent text-sm transition-all placeholder:text-muted-foreground"
               />
             </div>
             
+            <ThemeToggle />
+            
             <NotificationsDropdown />
             
-            <div className="flex items-center space-x-2 pl-2 border-l">
-              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-white">
+            <div className="flex items-center space-x-2 pl-2 border-l border-border/50">
+              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+                <span className="text-sm font-bold text-white">
                   {user?.first_name?.[0] || user?.username?.[0] || 'U'}
                 </span>
               </div>
-              <span className="text-sm font-medium text-gray-700 hidden sm:block">
+              <span className="text-sm font-medium text-foreground hidden sm:block">
                 {user?.first_name && user?.last_name 
                   ? `${user.first_name} ${user.last_name}` 
                   : user?.username || 'User'
                 }
               </span>
-              <Button variant="ghost" size="sm" onClick={logout} title="Logout">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={logout} 
+                title="Logout"
+                className="hover:bg-destructive/10 hover:text-destructive transition-colors"
+              >
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
@@ -126,20 +139,20 @@ const toolsNavigation = [
       </header>
 
       <div className="flex">
-        {/* Desktop Sidebar */}
+        {/* Desktop Sidebar with modern styling */}
         <aside 
           className={cn(
-            "hidden lg:block bg-white border-r border-gray-200 transition-all duration-300 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto",
+            "hidden lg:block glass transition-all duration-300 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto border-r border-border/50",
             sidebarOpen ? "w-64" : "w-20"
           )}
         >
           <nav className="p-4 space-y-6">
             <div className="space-y-1">
               <h3 className={cn(
-                "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3",
-                !sidebarOpen && "text-center"
+                "text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2",
+                !sidebarOpen && "text-center px-0"
               )}>
-                {sidebarOpen ? 'Main' : 'M'}
+                {sidebarOpen ? '✦ Main' : '✦'}
               </h3>
               
               {navigation.map((item) => {
@@ -149,16 +162,16 @@ const toolsNavigation = [
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start",
+                        "w-full justify-start transition-all duration-200 rounded-xl",
                         isActive 
-                          ? "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700" 
-                          : "text-gray-700 hover:bg-gray-50",
+                          ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                         !sidebarOpen && "justify-center px-2"
                       )}
                       title={!sidebarOpen ? item.name : undefined}
                     >
-                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3")} />
-                      {sidebarOpen && item.name}
+                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3", isActive && "animate-pulse")} />
+                      {sidebarOpen && <span className="font-medium">{item.name}</span>}
                     </Button>
                   </Link>
                 );
@@ -167,10 +180,10 @@ const toolsNavigation = [
             
             <div className="space-y-1">
               <h3 className={cn(
-                "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3",
-                !sidebarOpen && "text-center"
+                "text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2",
+                !sidebarOpen && "text-center px-0"
               )}>
-                {sidebarOpen ? 'Analytics' : 'A'}
+                {sidebarOpen ? '📊 Analytics' : '📊'}
               </h3>
               
               {analyticsNavigation.map((item) => {
@@ -180,16 +193,16 @@ const toolsNavigation = [
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start",
+                        "w-full justify-start transition-all duration-200 rounded-xl",
                         isActive 
-                          ? "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700" 
-                          : "text-gray-700 hover:bg-gray-50",
+                          ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                         !sidebarOpen && "justify-center px-2"
                       )}
                       title={!sidebarOpen ? item.name : undefined}
                     >
-                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3")} />
-                      {sidebarOpen && item.name}
+                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3", isActive && "animate-pulse")} />
+                      {sidebarOpen && <span className="font-medium">{item.name}</span>}
                     </Button>
                   </Link>
                 );
@@ -198,10 +211,10 @@ const toolsNavigation = [
             
             <div className="space-y-1">
               <h3 className={cn(
-                "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3",
-                !sidebarOpen && "text-center"
+                "text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2",
+                !sidebarOpen && "text-center px-0"
               )}>
-                {sidebarOpen ? 'Tools' : 'T'}
+                {sidebarOpen ? '⚙️ Tools' : '⚙️'}
               </h3>
               
               {toolsNavigation.map((item) => {
@@ -211,16 +224,16 @@ const toolsNavigation = [
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start",
+                        "w-full justify-start transition-all duration-200 rounded-xl",
                         isActive 
-                          ? "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700" 
-                          : "text-gray-700 hover:bg-gray-50",
+                          ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                         !sidebarOpen && "justify-center px-2"
                       )}
                       title={!sidebarOpen ? item.name : undefined}
                     >
-                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3")} />
-                      {sidebarOpen && item.name}
+                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3", isActive && "animate-pulse")} />
+                      {sidebarOpen && <span className="font-medium">{item.name}</span>}
                     </Button>
                   </Link>
                 );
@@ -229,24 +242,29 @@ const toolsNavigation = [
           </nav>
         </aside>
 
-        {/* Mobile Sidebar */}
+        {/* Mobile Sidebar with modern styling */}
         {mobileMenuOpen && (
-          <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setMobileMenuOpen(false)}>
+          <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setMobileMenuOpen(false)}>
             <aside 
-              className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl"
+              className="absolute left-0 top-0 bottom-0 w-72 glass shadow-2xl animate-in slide-in-from-left duration-300"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-4 border-b flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900">Menu</h2>
-                <Button variant="ghost" size="sm" onClick={() => setMobileMenuOpen(false)}>
+              <div className="p-4 border-b border-border/50 flex items-center justify-between">
+                <h2 className="font-bold text-lg gradient-text">Navigation</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="hover:bg-destructive/10 hover:text-destructive"
+                >
                   <X className="w-5 h-5" />
                 </Button>
               </div>
               
-              <nav className="p-4 space-y-6">
+              <nav className="p-4 space-y-6 overflow-y-auto h-[calc(100vh-5rem)]">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                    Main
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+                    ✦ Main
                   </h3>
                   
                   {navigation.map((item) => {
@@ -256,14 +274,14 @@ const toolsNavigation = [
                         <Button
                           variant="ghost"
                           className={cn(
-                            "w-full justify-start",
+                            "w-full justify-start transition-all duration-200 rounded-xl",
                             isActive 
-                              ? "bg-blue-50 text-blue-600" 
-                              : "text-gray-700"
+                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
                           <item.icon className="w-4 h-4 mr-3" />
-                          {item.name}
+                          <span className="font-medium">{item.name}</span>
                         </Button>
                       </Link>
                     );
@@ -271,8 +289,8 @@ const toolsNavigation = [
                 </div>
                 
                 <div className="space-y-1">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                    Analytics
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+                    📊 Analytics
                   </h3>
                   
                   {analyticsNavigation.map((item) => {
@@ -282,14 +300,14 @@ const toolsNavigation = [
                         <Button
                           variant="ghost"
                           className={cn(
-                            "w-full justify-start",
+                            "w-full justify-start transition-all duration-200 rounded-xl",
                             isActive 
-                              ? "bg-blue-50 text-blue-600" 
-                              : "text-gray-700"
+                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
                           <item.icon className="w-4 h-4 mr-3" />
-                          {item.name}
+                          <span className="font-medium">{item.name}</span>
                         </Button>
                       </Link>
                     );
@@ -297,8 +315,8 @@ const toolsNavigation = [
                 </div>
                 
                 <div className="space-y-1">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                    Tools
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+                    ⚙️ Tools
                   </h3>
                   
                   {toolsNavigation.map((item) => {
@@ -308,14 +326,14 @@ const toolsNavigation = [
                         <Button
                           variant="ghost"
                           className={cn(
-                            "w-full justify-start",
+                            "w-full justify-start transition-all duration-200 rounded-xl",
                             isActive 
-                              ? "bg-blue-50 text-blue-600" 
-                              : "text-gray-700"
+                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
                           <item.icon className="w-4 h-4 mr-3" />
-                          {item.name}
+                          <span className="font-medium">{item.name}</span>
                         </Button>
                       </Link>
                     );
@@ -326,9 +344,11 @@ const toolsNavigation = [
           </div>
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-x-hidden">
-          {children}
+        {/* Main Content with modern styling */}
+        <main className="flex-1 overflow-x-hidden p-6">
+          <div className="max-w-[1600px] mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,12 @@ export default function LoginPage() {
   
   const { login } = useAuth();
   const router = useRouter();
+
+  // TEMPORARY: Auto-redirect since authentication is disabled
+  useEffect(() => {
+    console.log('TEMP: Auto-redirecting to dashboard - authentication disabled');
+    router.push('/');
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

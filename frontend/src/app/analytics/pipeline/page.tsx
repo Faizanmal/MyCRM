@@ -18,6 +18,7 @@ import {
   Bar,
   PieChart,
   Pie,
+  PieLabelRenderProps,
   Cell,
   XAxis,
   YAxis,
@@ -282,7 +283,7 @@ export default function PipelineAnalyticsPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(props: Record<string, unknown>) => `${props.name}: ${(((props.percent as number) || 0) * 100).toFixed(0)}%`}
+                    label={(props: PieLabelRenderProps) => `${(props.name as string)}: ${(((props.percent as number) || 0) * 100).toFixed(0)}%`}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
