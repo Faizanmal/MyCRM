@@ -48,6 +48,15 @@ urlpatterns = [
     path('api/lead-qualification/', include('lead_qualification.urls')),
     path('api/advanced-reporting/', include('advanced_reporting.urls')),
     path('api/reports/', include('reporting.urls')),
+    
+    # New Advanced Features
+    path('api/v1/integration-hub/', include('integration_hub.urls')),
+    path('api/v1/ai-insights/', include('ai_insights.urls')),
+    path('api/v1/gamification/', include('gamification.urls')),
+    path('api/v1/multi-tenant/', include('multi_tenant.urls')),
+    path('api/v1/sso/', include('sso_integration.urls')),
+    path('api/v1/collaboration/', include('collaboration.urls')),
+    path('api/v1/gdpr/', include('gdpr_compliance.urls')),
 ]
 
 if settings.DEBUG:

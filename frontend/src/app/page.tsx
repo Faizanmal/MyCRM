@@ -4,7 +4,8 @@
 import { useRouter } from 'next/navigation';
 import {
   Search, Bell, LogOut, BarChart3, Users, UserPlus,
-  TrendingUp, Calendar, Mail, Settings, Phone
+  TrendingUp, Calendar, Mail, Settings, Phone,
+  Puzzle, Sparkles, Trophy, MessageSquare, Shield
 } from 'lucide-react'; // (Or your icon library)
 
 import { Button } from '@/components/ui/button';
@@ -160,7 +161,74 @@ export default function Home() {
               </div>
               
               <div className="space-y-1 mt-6">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Advanced</h3>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/integration-hub')}
+                >
+                  <Puzzle className="w-4 h-4 mr-3" />
+                  Integration Hub
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/ai-insights')}
+                >
+                  <Sparkles className="w-4 h-4 mr-3" />
+                  AI Insights
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/gamification')}
+                >
+                  <Trophy className="w-4 h-4 mr-3" />
+                  Gamification
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/organizations')}
+                >
+                  <Users className="w-4 h-4 mr-3" />
+                  Organizations
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/collaboration')}
+                >
+                  <MessageSquare className="w-4 h-4 mr-3" />
+                  Collaboration
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/gdpr-compliance')}
+                >
+                  <Shield className="w-4 h-4 mr-3" />
+                  GDPR Compliance
+                </Button>
+              </div>
+              
+              <div className="space-y-1 mt-6">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tools</h3>
+                
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  onClick={() => router.push('/sso-settings')}
+                >
+                  <Settings className="w-4 h-4 mr-3" />
+                  SSO Settings
+                </Button>
                 
                 <Button 
                   variant="ghost" 

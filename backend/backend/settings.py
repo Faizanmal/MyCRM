@@ -64,6 +64,13 @@ INSTALLED_APPS = [
     'lead_qualification',
     'advanced_reporting',
     'reporting',
+    # New Advanced Features
+    'ai_insights',
+    'gamification',
+    'multi_tenant',
+    'sso_integration',
+    'collaboration',
+    'gdpr_compliance',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +80,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'multi_tenant.middleware.TenantMiddleware',  # Multi-tenant middleware (after auth)
     'core.security.SecurityMiddleware',  # Enterprise security middleware (after auth)
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -277,4 +285,9 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+# SSO Configuration
+BASE_URL = 'http://localhost:8000'
+FRONTEND_URL = 'http://localhost:3000'
+SSO_SESSION_TIMEOUT = 3600  # 1 hour
 CELERY_TIMEZONE = TIME_ZONE

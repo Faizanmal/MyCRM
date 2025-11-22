@@ -58,3 +58,7 @@ coverage==7.3.2
 locust==2.17.0
 django-redis==5.4.0
 faker==20.1.0  # For generating test data
+
+# AI & Machine Learning (New Features)
+openai==1.3.0  # For AI content generation
+textblob==0.17.1  # For sentiment analysis (optional)
