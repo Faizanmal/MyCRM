@@ -76,7 +76,7 @@ class EmailCampaign(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        db_table = 'crm_email_campaigns'
+        db_table = 'campaign_email_campaigns'
         verbose_name = 'Email Campaign'
         verbose_name_plural = 'Email Campaigns'
         ordering = ['-created_at']
@@ -98,38 +98,6 @@ class EmailCampaign(models.Model):
     def click_to_open_rate(self):
         """Calculate click-to-open rate"""
         return (self.clicked_count / self.opened_count * 100) if self.opened_count > 0 else 0
-
-
-class EmailTemplate(models.Model):
-    """Reusable email template"""
-    
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    category = models.CharField(max_length=100, blank=True)
-    
-    subject_template = models.CharField(max_length=500)
-    html_template = models.TextField()
-    text_template = models.TextField(blank=True)
-    
-    # Template variables
-    available_variables = models.JSONField(default=list, help_text="List of available template variables")
-    
-    # Thumbnail for preview
-    thumbnail_url = models.URLField(blank=True, null=True)
-    
-    is_active = models.BooleanField(default=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = 'crm_email_templates'
-        verbose_name = 'Email Template'
-        verbose_name_plural = 'Email Templates'
-    
-    def __str__(self):
-        return self.name
 
 
 class EmailRecipient(models.Model):
@@ -177,7 +145,7 @@ class EmailRecipient(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        db_table = 'crm_email_recipients'
+        db_table = 'campaign_email_recipients'
         verbose_name = 'Email Recipient'
         verbose_name_plural = 'Email Recipients'
         indexes = [
@@ -205,7 +173,7 @@ class EmailLink(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        db_table = 'crm_email_links'
+        db_table = 'campaign_email_clicks'
         verbose_name = 'Email Link'
         verbose_name_plural = 'Email Links'
     
@@ -225,7 +193,7 @@ class EmailClick(models.Model):
     user_agent = models.TextField(blank=True)
     
     class Meta:
-        db_table = 'crm_email_clicks'
+        db_table = 'campaign_email_individual_clicks'
         verbose_name = 'Email Click'
         verbose_name_plural = 'Email Clicks'
         indexes = [
@@ -249,7 +217,7 @@ class EmailUnsubscribe(models.Model):
     unsubscribed_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        db_table = 'crm_email_unsubscribes'
+        db_table = 'campaign_email_unsubscribes'
         verbose_name = 'Email Unsubscribe'
         verbose_name_plural = 'Email Unsubscribes'
     

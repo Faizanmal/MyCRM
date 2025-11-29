@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import {
-  Shield, FileText, Download, Trash2, AlertTriangle,
-  Check, X, Clock, Eye, Lock, Settings, UserCheck,
-  Bell, Calendar, Search, Filter, Plus, ExternalLink,
-  ChevronRight, Info, CheckCircle2, XCircle
+  Shield, Download, Trash2, AlertTriangle,
+  X, Clock, Eye, Lock, Settings, UserCheck,
+  Bell, Plus, ExternalLink,
+  Info, CheckCircle2, XCircle
 } from 'lucide-react';
 
 // Types
@@ -60,7 +60,6 @@ interface PrivacySettings {
 
 export default function GDPRCompliancePage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'consents' | 'export' | 'deletion' | 'breaches'>('dashboard');
-  const [searchTerm, setSearchTerm] = useState('');
 
   // Mock data
   const consents: Consent[] = [
@@ -199,7 +198,7 @@ export default function GDPRCompliancePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-purple-50 to-indigo-50 p-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center mb-2">
@@ -282,7 +281,7 @@ export default function GDPRCompliancePage() {
             <div className="space-y-6">
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                <div className="bg-linear-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
                   <div className="flex items-center justify-between mb-2">
                     <CheckCircle2 className="w-8 h-8 text-green-600" />
                     <span className="text-2xl font-bold text-green-900">{consents.filter(c => c.granted).length}/{consents.length}</span>
@@ -291,7 +290,7 @@ export default function GDPRCompliancePage() {
                   <p className="text-xs text-green-700 mt-1">Consents granted</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
                   <div className="flex items-center justify-between mb-2">
                     <Download className="w-8 h-8 text-blue-600" />
                     <span className="text-2xl font-bold text-blue-900">{exportRequests.length}</span>
@@ -300,7 +299,7 @@ export default function GDPRCompliancePage() {
                   <p className="text-xs text-blue-700 mt-1">Data exports made</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+                <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
                   <div className="flex items-center justify-between mb-2">
                     <Trash2 className="w-8 h-8 text-purple-600" />
                     <span className="text-2xl font-bold text-purple-900">{deletionRequests.length}</span>
@@ -309,7 +308,7 @@ export default function GDPRCompliancePage() {
                   <p className="text-xs text-purple-700 mt-1">Data deletions</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-6 border border-orange-200">
+                <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-lg p-6 border border-orange-200">
                   <div className="flex items-center justify-between mb-2">
                     <AlertTriangle className="w-8 h-8 text-orange-600" />
                     <span className="text-2xl font-bold text-orange-900">{breaches.length}</span>
@@ -552,7 +551,7 @@ export default function GDPRCompliancePage() {
               {/* Export Info */}
               <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex">
-                  <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <Info className="w-5 h-5 text-blue-600 mt-0.5 mr-3 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-blue-900 mb-1">About Data Exports</p>
                     <p className="text-sm text-blue-700">
@@ -626,7 +625,7 @@ export default function GDPRCompliancePage() {
               {/* Warning */}
               <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
                 <div className="flex">
-                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 mr-3 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-red-900 mb-1">Warning</p>
                     <p className="text-sm text-red-700">
@@ -701,7 +700,7 @@ export default function GDPRCompliancePage() {
               {/* Info */}
               <div className="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <div className="flex">
-                  <Shield className="w-5 h-5 text-purple-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <Shield className="w-5 h-5 text-purple-600 mt-0.5 mr-3 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-purple-900 mb-1">Your Data is Protected</p>
                     <p className="text-sm text-purple-700">

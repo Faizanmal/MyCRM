@@ -69,7 +69,7 @@ export default function UIShowcasePage() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
-                <div className={`p-2 rounded-xl bg-gradient-to-r ${stat.color} group-hover:scale-110 transition-transform`}>
+                <div className={`p-2 rounded-xl bg-linear-to-r ${stat.color} group-hover:scale-110 transition-transform`}>
                   <stat.icon className="h-4 w-4 text-white" />
                 </div>
               </CardHeader>
@@ -85,7 +85,7 @@ export default function UIShowcasePage() {
       <section className="space-y-4">
         <h2 className="text-3xl font-bold">Gradient Backgrounds</h2>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="relative overflow-hidden rounded-2xl p-8 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white shadow-2xl">
+          <div className="relative overflow-hidden rounded-2xl p-8 bg-linear-to-br from-blue-600 via-purple-600 to-pink-600 text-white shadow-2xl">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
             <div className="relative z-10">
               <Sparkles className="w-12 h-12 mb-4" />
@@ -122,7 +122,7 @@ export default function UIShowcasePage() {
       <section className="space-y-4">
         <h2 className="text-3xl font-bold">Interactive Elements</h2>
         <div className="flex flex-wrap gap-4">
-          <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button size="lg" className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
             <Sparkles className="w-4 h-4 mr-2" />
             Primary Action
           </Button>
@@ -141,10 +141,10 @@ export default function UIShowcasePage() {
       <section className="space-y-4">
         <h2 className="text-3xl font-bold">Badges & Tags</h2>
         <div className="flex flex-wrap gap-3">
-          <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">New</Badge>
-          <Badge className="bg-gradient-to-r from-green-500 to-green-600 text-white">Success</Badge>
-          <Badge className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">Featured</Badge>
-          <Badge className="bg-gradient-to-r from-pink-500 to-pink-600 text-white">Popular</Badge>
+          <Badge className="bg-linear-to-r from-blue-500 to-blue-600 text-white">New</Badge>
+          <Badge className="bg-linear-to-r from-green-500 to-green-600 text-white">Success</Badge>
+          <Badge className="bg-linear-to-r from-purple-500 to-purple-600 text-white">Featured</Badge>
+          <Badge className="bg-linear-to-r from-pink-500 to-pink-600 text-white">Popular</Badge>
           <Badge variant="outline">Outlined</Badge>
         </div>
       </section>

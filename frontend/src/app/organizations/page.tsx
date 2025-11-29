@@ -8,7 +8,6 @@ import {
   UserGroupIcon, 
   EnvelopeIcon,
   CheckCircleIcon,
-  XCircleIcon,
   ArrowPathIcon,
   ChartBarIcon,
   CogIcon,
@@ -316,7 +315,7 @@ export default function OrganizationsPage() {
 
           {/* Current Organization Card */}
           {currentOrg && (
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white mb-8">
+            <div className="bg-linear-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white mb-8">
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-4">
                   <BuildingOfficeIcon className="h-12 w-12" />
@@ -435,7 +434,7 @@ export default function OrganizationsPage() {
 
               {/* Plan Upgrade */}
               {currentOrg && currentOrg.plan !== 'enterprise' && (
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
+                <div className="bg-linear-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Upgrade Your Plan</h3>
                   <p className="text-gray-600 mb-4">
                     Unlock more features and increase your team size with a higher plan.

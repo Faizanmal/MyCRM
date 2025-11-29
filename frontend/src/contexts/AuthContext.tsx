@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { authAPI } from '@/lib/api';
 
 interface User {
   id: number;
@@ -42,43 +43,74 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  // TEMPORARY: Authentication disabled - always authenticated with mock user
-  const [user] = useState<User | null>({
-    id: 1,
-    username: 'admin',
-    email: 'admin@example.com',
-    first_name: 'Admin',
-    last_name: 'User',
-    role: 'admin',
-    is_active: true,
-    two_factor_enabled: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  });
-  const [isLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const isAuthenticated = true; // TEMPORARY: Always authenticated
+  const isAuthenticated = !!user;
 
   const login = async (credentials: { username: string; password: string }) => {
-    // TEMPORARY: Skip actual authentication - auto-login
-    console.log('TEMP: Authentication bypassed for:', credentials.username);
-    return Promise.resolve();
+    try {
+      setIsLoading(true);
+      const response = await authAPI.login(credentials);
+      
+      // Store tokens
+      localStorage.setItem('access_token', response.access);
+      localStorage.setItem('refresh_token', response.refresh);
+      
+      // Get user profile
+      const userProfile = await authAPI.getCurrentUser();
+      setUser(userProfile);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const logout = () => {
-    console.log('TEMP: Logout bypassed - authentication disabled');
-    // authAPI.logout();
-    // setUser(null);
-  };
-
-  const refreshUser = useCallback(async () => {
-    // TEMPORARY: Skip user refresh
-    console.log('TEMP: User refresh bypassed - authentication disabled');
-    return Promise.resolve();
+  const logout = useCallback(() => {
+    authAPI.logout();
+    setUser(null);
+    window.location.href = '/login';
   }, []);
 
-  // TEMPORARY: Skip auth initialization
-  // useEffect removed
+  const refreshUser = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        setUser(null);
+        return;
+      }
+      
+      const userProfile = await authAPI.getCurrentUser();
+      setUser(userProfile);
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      setUser(null);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+    }
+  }, []);
+
+  // Initialize auth on mount
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        try {
+          const userProfile = await authAPI.getCurrentUser();
+          setUser(userProfile);
+        } catch (error) {
+          console.error('Auth init failed:', error);
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+        }
+      }
+      setIsLoading(false);
+    };
+    
+    initAuth();
+  }, []);
 
   const value: AuthContextType = {
     user,

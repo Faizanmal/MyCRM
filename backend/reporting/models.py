@@ -8,7 +8,7 @@ class Dashboard(models.Model):
     """User dashboard configurations"""
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dashboards')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reporting_dashboards')
     is_default = models.BooleanField(default=False)
     layout = models.JSONField(default=dict)  # Dashboard layout configuration
     widgets = models.JSONField(default=list)  # List of widgets and their configurations

@@ -286,6 +286,42 @@ export const communicationsAPI = {
   },
 };
 
+// Dashboard API - for main CRM dashboard metrics
+export const dashboardAPI = {
+  getMetrics: async () => {
+    const response = await apiClient.get('/reports/analytics/dashboard_metrics/');
+    return response.data;
+  },
+
+  getSalesPipeline: async () => {
+    const response = await apiClient.get('/reports/analytics/sales_pipeline/');
+    return response.data;
+  },
+
+  getRecentActivities: async (limit: number = 10) => {
+    const response = await apiClient.get('/activity-feed/', { params: { limit } });
+    return response.data;
+  },
+
+  getRecentOpportunities: async (status?: string, limit: number = 5) => {
+    const response = await apiClient.get('/opportunities/opportunities/', { 
+      params: { status, page_size: limit, ordering: '-created_at' } 
+    });
+    return response.data;
+  },
+
+  getUpcomingTasks: async (limit: number = 5) => {
+    const response = await apiClient.get('/tasks/tasks/', { 
+      params: { 
+        status__in: 'pending,in_progress', 
+        ordering: 'due_date',
+        page_size: limit 
+      } 
+    });
+    return response.data;
+  },
+};
+
 // Reports API
 export const reportsAPI = {
   getDashboard: async () => {

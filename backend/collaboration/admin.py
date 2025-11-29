@@ -14,10 +14,10 @@ class DealRoomParticipantInline(admin.TabularInline):
 
 @admin.register(DealRoom)
 class DealRoomAdmin(admin.ModelAdmin):
-    list_display = ['name', 'opportunity', 'status', 'privacy_level', 'participant_count', 'created_at']
-    list_filter = ['status', 'privacy_level', 'created_at']
+    list_display = ['name', 'opportunity', 'status', 'privacy', 'participant_count', 'created_at']
+    list_filter = ['status', 'privacy', 'created_at']
     search_fields = ['name', 'description', 'opportunity__name']
-    autocomplete_fields = ['opportunity', 'created_by']
+    autocomplete_fields = ['opportunity', 'owner']
     inlines = [DealRoomParticipantInline]
     readonly_fields = ['participant_count', 'message_count', 'document_count', 'created_at', 'updated_at']
     
@@ -58,10 +58,10 @@ class ChannelMembershipInline(admin.TabularInline):
 
 @admin.register(Channel)
 class ChannelAdmin(admin.ModelAdmin):
-    list_display = ['name', 'channel_type', 'deal_room', 'is_archived', 'member_count', 'created_at']
+    list_display = ['name', 'channel_type', 'is_archived', 'member_count', 'created_at']
     list_filter = ['channel_type', 'is_archived', 'created_at']
-    search_fields = ['name', 'description', 'deal_room__name']
-    autocomplete_fields = ['deal_room', 'created_by']
+    search_fields = ['name', 'description']
+    autocomplete_fields = ['created_by']
     inlines = [ChannelMembershipInline]
     readonly_fields = ['member_count', 'message_count', 'created_at', 'updated_at']
 
@@ -102,32 +102,32 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(CollaborativeDocument)
 class CollaborativeDocumentAdmin(admin.ModelAdmin):
-    list_display = ['title', 'document_type', 'deal_room', 'version', 'is_locked', 'created_at']
-    list_filter = ['document_type', 'is_locked', 'created_at']
+    list_display = ['title', 'doc_type', 'deal_room', 'version', 'is_locked', 'created_at']
+    list_filter = ['doc_type', 'is_locked', 'created_at']
     search_fields = ['title', 'description', 'deal_room__name']
-    autocomplete_fields = ['deal_room', 'created_by', 'locked_by', 'parent_version']
-    readonly_fields = ['version', 'comment_count', 'created_at', 'updated_at', 'locked_at']
+    autocomplete_fields = ['deal_room', 'owner', 'locked_by', 'parent_version']
+    readonly_fields = ['version', 'comment_count', 'created_at', 'updated_at']
     
     fieldsets = (
         ('Document Information', {
-            'fields': ('title', 'description', 'document_type', 'deal_room')
+            'fields': ('title', 'description', 'doc_type', 'deal_room')
         }),
         ('Content', {
-            'fields': ('file_url', 'content')
+            'fields': ('file_path', 'file_size', 'mime_type')
         }),
         ('Versioning', {
             'fields': ('version', 'parent_version'),
             'classes': ('collapse',)
         }),
         ('Lock Status', {
-            'fields': ('is_locked', 'locked_by', 'locked_at')
+            'fields': ('is_locked', 'locked_by')
         }),
         ('Statistics', {
             'fields': ('comment_count',),
             'classes': ('collapse',)
         }),
         ('Tracking', {
-            'fields': ('created_by', 'created_at', 'updated_at'),
+            'fields': ('owner', 'created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
@@ -135,10 +135,10 @@ class CollaborativeDocumentAdmin(admin.ModelAdmin):
 
 @admin.register(DocumentComment)
 class DocumentCommentAdmin(admin.ModelAdmin):
-    list_display = ['document', 'created_by', 'is_resolved', 'created_at']
+    list_display = ['document', 'author', 'is_resolved', 'created_at']
     list_filter = ['is_resolved', 'created_at']
-    search_fields = ['content', 'document__title', 'created_by__username']
-    autocomplete_fields = ['document', 'created_by', 'parent_comment', 'resolved_by']
+    search_fields = ['content', 'document__title', 'author__username']
+    autocomplete_fields = ['document', 'author', 'parent_comment', 'resolved_by']
     readonly_fields = ['created_at', 'resolved_at']
 
 
@@ -178,19 +178,19 @@ class ApprovalWorkflowAdmin(admin.ModelAdmin):
 
 @admin.register(ApprovalStep)
 class ApprovalStepAdmin(admin.ModelAdmin):
-    list_display = ['workflow', 'step_name', 'step_type', 'step_order', 'is_required']
-    list_filter = ['step_type', 'is_required']
-    search_fields = ['step_name', 'workflow__name']
+    list_display = ['workflow', 'name', 'step_type', 'order', 'approver_count_required']
+    list_filter = ['step_type']
+    search_fields = ['name', 'workflow__name']
     autocomplete_fields = ['workflow']
     filter_horizontal = ['approvers']
 
 
 @admin.register(ApprovalInstance)
 class ApprovalInstanceAdmin(admin.ModelAdmin):
-    list_display = ['workflow', 'status', 'initiated_by', 'created_at', 'completed_at']
+    list_display = ['workflow', 'status', 'requested_by', 'created_at', 'completed_at']
     list_filter = ['status', 'created_at']
-    search_fields = ['workflow__name', 'initiated_by__username']
-    autocomplete_fields = ['workflow', 'initiated_by']
+    search_fields = ['workflow__name', 'requested_by__username']
+    autocomplete_fields = ['workflow', 'requested_by']
     readonly_fields = ['created_at', 'completed_at']
 
 

@@ -315,7 +315,7 @@ export default function TwoFactorAuthPage() {
             <CardContent>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="font-medium">Keep backup codes safe</p>
                     <p className="text-sm text-gray-600">
@@ -324,7 +324,7 @@ export default function TwoFactorAuthPage() {
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="font-medium">Use a strong password</p>
                     <p className="text-sm text-gray-600">
@@ -333,7 +333,7 @@ export default function TwoFactorAuthPage() {
                   </div>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
                   <div>
                     <p className="font-medium">Don&apos;t share codes</p>
                     <p className="text-sm text-gray-600">

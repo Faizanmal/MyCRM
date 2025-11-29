@@ -10,23 +10,38 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
+import socket
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9&*z^o7(_xmwo3t!x)ef3udr_-gc%*fop*^um306^w&bt^-!$f'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+# Validate SECRET_KEY
+if not SECRET_KEY:
+    if DEBUG:
+        # In development, generate a temporary key
+        import secrets
+        SECRET_KEY = secrets.token_urlsafe(50)
+        print("WARNING: Using temporary SECRET_KEY in development. Set SECRET_KEY environment variable for production.")
+    else:
+        raise ValueError("SECRET_KEY environment variable is required in production")
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -106,12 +121,43 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 ASGI_APPLICATION = 'backend.asgi.application'
 
+# Small helper: resolve env host names and fall back to a local address when unresolved
+def _resolve_env_host(env_name: str, default: str = 'localhost') -> str:
+    """Return a usable host string for the given environment variable.
+
+    Tries to resolve the configured hostname with socket.getaddrinfo().
+    If resolution fails, a safe fallback of 127.0.0.1 is returned and a
+    warning is emitted so developers understand why 'db' -> getaddrinfo
+    can fail when running Django outside of Docker.
+    """
+    host = os.getenv(env_name, default)
+    try:
+        # Try a quick name resolution; port is None (no port check)
+        socket.getaddrinfo(host, None)
+        return host
+    except Exception:
+        # Non-resolvable host (e.g. "db" on a non-Docker host)
+        fallback = '127.0.0.1'
+        if host != fallback:
+            import warnings
+            warnings.warn(
+                f"Configured host {host!r} could not be resolved (getaddrinfo failed). "
+                f"Falling back to {fallback!r}. If you intended to connect to a Docker "
+                "service, either run the app inside the same compose network or set the "
+                "DATABASE_HOST appropriately."
+            )
+        return fallback
+
 # Channels Configuration
+REDIS_HOST = _resolve_env_host('REDIS_HOST', 'localhost')
+REDIS_PORT = int(os.getenv('REDIS_PORT', '6379'))
+REDIS_DB = int(os.getenv('REDIS_DB', '0'))
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
@@ -120,8 +166,8 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Temporary switch to SQLite for development
-USE_SQLITE = True
+# Check if USE_SQLITE is set in environment
+USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
 
 if USE_SQLITE:
     DATABASES = {
@@ -133,12 +179,14 @@ if USE_SQLITE:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'mycrm_db',
-            'USER': 'postgres',
-            'PASSWORD': 'password',
-            'HOST': 'localhost',
-            'PORT': '5432',
+            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.db.backends.postgresql'),
+            'NAME': os.getenv('DATABASE_NAME', 'mycrm_db'),
+            'USER': os.getenv('DATABASE_USER', 'mycrm_user'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+            # resolve host names so running Django locally with DATABASE_HOST=db
+            # doesn't immediately blow up with getaddrinfo errors
+            'HOST': _resolve_env_host('DATABASE_HOST', 'localhost'),
+            'PORT': os.getenv('DATABASE_PORT', '5432'),
         }
     }
 
@@ -221,25 +269,24 @@ SPECTACULAR_SETTINGS = {
     'AUTHENTICATION_WHITELIST': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-}       'rest_framework.permissions.IsAuthenticated',
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
 }
 
 # JWT Configuration
+JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY', SECRET_KEY)
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    # Conservative defaults — shorter access token lifetime and reasonable refresh token lifetime
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('JWT_ACCESS_TOKEN_LIFETIME', '15'))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('JWT_REFRESH_TOKEN_LIFETIME', '10080'))),  # 7 days by default
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'SIGNING_KEY': JWT_SIGNING_KEY,
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS', 
+    'http://localhost:3000,http://127.0.0.1:3000'
+).split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -247,47 +294,90 @@ CORS_ALLOW_CREDENTIALS = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
+SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
+CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False') == 'True'
+# Make cookies HttpOnly by default (safe for production) and provide a SameSite option
+SESSION_COOKIE_HTTPONLY = os.getenv('SESSION_COOKIE_HTTPONLY', 'True') == 'True'
+SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
+SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
+
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    # Enforce stricter cookie handling in production
+    SESSION_COOKIE_HTTPONLY = True
+    # Ensure SameSite is set to a conservative default in production
+    SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
 
 # Enterprise Security Configuration
-ENCRYPTION_KEY = 'your-encryption-key-here'  # Generate with Fernet.generate_key()
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')  # Generate with Fernet.generate_key()
+if not ENCRYPTION_KEY:
+    import warnings
+    warnings.warn('ENCRYPTION_KEY not set! Enterprise encryption features will not work.')
 
 # Rate Limiting Configuration
 RATE_LIMIT_ENABLED = True
-DEFAULT_RATE_LIMIT = 100  # requests per hour
-ADMIN_RATE_LIMIT = 1000   # requests per hour for admins
+DEFAULT_RATE_LIMIT = int(os.getenv('DEFAULT_RATE_LIMIT', '100'))  # requests per hour
+ADMIN_RATE_LIMIT = int(os.getenv('ADMIN_RATE_LIMIT', '1000'))  # requests per hour for admins
 
 # Audit Logging Configuration
-AUDIT_LOG_ENABLED = True
+AUDIT_LOG_ENABLED = os.getenv('AUDIT_LOG_ENABLED', 'True') == 'True'
 AUDIT_SENSITIVE_FIELDS = ['password', 'ssn', 'credit_card']
 
 # Data Retention Policies
-AUDIT_LOG_RETENTION_DAYS = 365
-BACKUP_RETENTION_DAYS = 90
-SESSION_TIMEOUT_MINUTES = 120
+AUDIT_LOG_RETENTION_DAYS = int(os.getenv('AUDIT_LOG_RETENTION_DAYS', '365'))
+BACKUP_RETENTION_DAYS = int(os.getenv('BACKUP_RETENTION_DAYS', '90'))
+SESSION_TIMEOUT_MINUTES = int(os.getenv('SESSION_TIMEOUT_MINUTES', '120'))
 
 # Enterprise Features
-ENABLE_WORKFLOWS = True
-ENABLE_INTEGRATIONS = True
-ENABLE_ADVANCED_ANALYTICS = True
-ENABLE_COMPLIANCE_REPORTING = True
+ENABLE_WORKFLOWS = os.getenv('ENABLE_WORKFLOWS', 'True') == 'True'
+ENABLE_INTEGRATIONS = os.getenv('ENABLE_INTEGRATIONS', 'True') == 'True'
+ENABLE_ADVANCED_ANALYTICS = os.getenv('ENABLE_ADVANCED_ANALYTICS', 'True') == 'True'
+ENABLE_COMPLIANCE_REPORTING = os.getenv('ENABLE_COMPLIANCE_REPORTING', 'True') == 'True'
 
 # Email Configuration (for notifications)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-app-password'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@mycrm.com')
+
+# SendGrid Configuration (alternative)
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '')
+
+# Twilio Configuration
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '')
+TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER', '')
 
 # Celery Configuration (for background tasks)
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
 
 # SSO Configuration
-BASE_URL = 'http://localhost:8000'
-FRONTEND_URL = 'http://localhost:3000'
-SSO_SESSION_TIMEOUT = 3600  # 1 hour
-CELERY_TIMEZONE = TIME_ZONE
+BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+SSO_SESSION_TIMEOUT = int(os.getenv('SSO_SESSION_TIMEOUT', '3600'))  # 1 hour
+
+# OAuth Configuration
+OAUTH_CLIENT_ID = os.getenv('OAUTH_CLIENT_ID', '')
+OAUTH_CLIENT_SECRET = os.getenv('OAUTH_CLIENT_SECRET', '')
+OAUTH_REDIRECT_URI = os.getenv('OAUTH_REDIRECT_URI', '')
+
+# Sentry Error Tracking
+SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+if SENTRY_DSN and not DEBUG:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=0.1,
+        environment='production' if not DEBUG else 'development',
+    )

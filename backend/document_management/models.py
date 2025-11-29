@@ -5,11 +5,57 @@ Document Management Models
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 import uuid
 import os
+import magic
 
 User = get_user_model()
+
+
+def validate_file_content(file):
+    """Validate file content matches its extension using magic numbers"""
+    if not file:
+        return
+    
+    # Get file content type using python-magic
+    try:
+        file_content = file.read()
+        file.seek(0)  # Reset file pointer
+        
+        # Use magic to detect content type
+        detected_mime = magic.from_buffer(file_content, mime=True)
+        
+        # Map of allowed MIME types
+        allowed_mimes = {
+            'application/pdf': ['pdf'],
+            'application/msword': ['doc'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
+            'application/vnd.ms-excel': ['xls'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
+            'application/vnd.ms-powerpoint': ['ppt'],
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
+            'text/plain': ['txt'],
+            'text/csv': ['csv'],
+            'image/jpeg': ['jpg', 'jpeg'],
+            'image/png': ['png'],
+            'image/gif': ['gif'],
+        }
+        
+        # Check if detected MIME type is allowed
+        if detected_mime not in allowed_mimes:
+            raise ValidationError(f'File content type {detected_mime} is not allowed.')
+        
+        # Check if file extension matches content type
+        filename = file.name.lower()
+        extension = filename.split('.')[-1] if '.' in filename else ''
+        
+        if extension not in allowed_mimes.get(detected_mime, []):
+            raise ValidationError(f'File extension .{extension} does not match content type {detected_mime}.')
+            
+    except Exception as e:
+        raise ValidationError(f'File validation failed: {str(e)}')
 
 
 def document_upload_path(instance, filename):
@@ -60,10 +106,13 @@ class Document(models.Model):
     # File
     file = models.FileField(
         upload_to=document_upload_path,
-        validators=[FileExtensionValidator(
-            allowed_extensions=['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
-                              'txt', 'csv', 'jpg', 'jpeg', 'png', 'gif']
-        )]
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
+                                  'txt', 'csv', 'jpg', 'jpeg', 'png', 'gif']
+            ),
+            validate_file_content
+        ]
     )
     file_size = models.BigIntegerField(help_text="File size in bytes")
     mime_type = models.CharField(max_length=100)

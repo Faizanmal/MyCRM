@@ -165,7 +165,7 @@ Edit `/src/app/globals.css`:
 
 ```css
 .my-gradient {
-  @apply bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500;
+  @apply bg-linear-to-r from-blue-500 via-purple-500 to-pink-500;
 }
 ```
 

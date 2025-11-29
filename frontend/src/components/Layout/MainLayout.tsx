@@ -72,7 +72,7 @@ const toolsNavigation = [
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-theme">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50/30 to-purple-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-theme">
       {/* Header with glass morphism */}
       <header className="glass sticky top-0 z-40 px-4 lg:px-6 py-3.5 shadow-sm">
         <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ const toolsNavigation = [
             </Button>
 
             <Link href="/dashboard" className="flex items-center space-x-2 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <div className="w-9 h-9 bg-linear-to-br from-blue-600 via-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                 <Sparkles className="text-white w-5 h-5" />
               </div>
               <div className="hidden sm:block">
@@ -121,7 +121,7 @@ const toolsNavigation = [
             <NotificationsDropdown />
             
             <div className="flex items-center space-x-2 pl-2 border-l border-border/50">
-              <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
+              <div className="w-9 h-9 bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer">
                 <span className="text-sm font-bold text-white">
                   {user?.first_name?.[0] || user?.username?.[0] || 'U'}
                 </span>
@@ -172,7 +172,7 @@ const toolsNavigation = [
                       className={cn(
                         "w-full justify-start transition-all duration-200 rounded-xl",
                         isActive 
-                          ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
                           : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                         !sidebarOpen && "justify-center px-2"
                       )}
@@ -203,7 +203,7 @@ const toolsNavigation = [
                       className={cn(
                         "w-full justify-start transition-all duration-200 rounded-xl",
                         isActive 
-                          ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
                           : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                         !sidebarOpen && "justify-center px-2"
                       )}
@@ -234,7 +234,7 @@ const toolsNavigation = [
                       className={cn(
                         "w-full justify-start transition-all duration-200 rounded-xl",
                         isActive 
-                          ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
                           : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                         !sidebarOpen && "justify-center px-2"
                       )}
@@ -265,7 +265,7 @@ const toolsNavigation = [
                       className={cn(
                         "w-full justify-start transition-all duration-200 rounded-xl",
                         isActive 
-                          ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
                           : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                         !sidebarOpen && "justify-center px-2"
                       )}
@@ -315,7 +315,7 @@ const toolsNavigation = [
                           className={cn(
                             "w-full justify-start transition-all duration-200 rounded-xl",
                             isActive 
-                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
                               : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
@@ -341,7 +341,7 @@ const toolsNavigation = [
                           className={cn(
                             "w-full justify-start transition-all duration-200 rounded-xl",
                             isActive 
-                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
                               : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
@@ -367,7 +367,7 @@ const toolsNavigation = [
                           className={cn(
                             "w-full justify-start transition-all duration-200 rounded-xl",
                             isActive 
-                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
                               : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
@@ -393,7 +393,7 @@ const toolsNavigation = [
                           className={cn(
                             "w-full justify-start transition-all duration-200 rounded-xl",
                             isActive 
-                              ? "bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
                               : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
                           )}
                         >

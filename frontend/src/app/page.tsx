@@ -246,7 +246,7 @@ export default function Home() {
           <main className="flex-1 p-6">
             <div className="space-y-6">
               {/* Welcome Section */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
+              <div className="bg-linear-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
                 <h2 className="text-2xl font-bold mb-2">
                   Welcome back, {user?.first_name || user?.username || 'User'}!
                 </h2>

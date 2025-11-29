@@ -18,7 +18,6 @@ import {
   UsersIcon,
   ArrowPathIcon,
   CheckCircleIcon,
-  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +52,15 @@ export default function GamificationPage() {
   // Challenges
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [myChallenges, setMyChallenges] = useState<Challenge[]>([]);
+
+  const loadLeaderboardRankings = useCallback(async (leaderboardId: string) => {
+    try {
+      const response = await gamificationAPI.getLeaderboardRankings(leaderboardId);
+      setRankings(response.data);
+    } catch (error) {
+      console.error('Failed to load rankings:', error);
+    }
+  }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -90,20 +98,11 @@ export default function GamificationPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, selectedLeaderboard]);
+  }, [activeTab, selectedLeaderboard, loadLeaderboardRankings]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  const loadLeaderboardRankings = useCallback(async (leaderboardId: string) => {
-    try {
-      const response = await gamificationAPI.getLeaderboardRankings(leaderboardId);
-      setRankings(response.data);
-    } catch (error) {
-      console.error('Failed to load rankings:', error);
-    }
-  }, []);
 
   const handleJoinChallenge = useCallback(async (challengeId: string) => {
     try {
@@ -245,7 +244,7 @@ export default function GamificationPage() {
             <div className="space-y-6">
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white">
+                <Card className="bg-linear-to-br from-yellow-400 to-orange-500 text-white">
                   <CardHeader className="pb-2">
                     <CardDescription className="text-yellow-50">Total Points</CardDescription>
                   </CardHeader>
@@ -440,7 +439,7 @@ export default function GamificationPage() {
                         <div
                           key={ranking.user?.id || index}
                           className={`flex items-center justify-between p-4 rounded-lg ${
-                            index < 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50' : 'bg-gray-50'
+                            index < 3 ? 'bg-linear-to-r from-yellow-50 to-orange-50' : 'bg-gray-50'
                           }`}
                         >
                           <div className="flex items-center gap-4">

@@ -122,7 +122,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -473,19 +473,19 @@ export default function OnboardingPage() {
                     <h3 className="font-semibold text-blue-900 mb-2">What&apos;s Next?</h3>
                     <ul className="space-y-2 text-sm text-blue-700">
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                         <span>Explore your personalized dashboard</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                         <span>Add your first contacts and leads</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                         <span>Set up workflows to automate tasks</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                         <span>Customize your sales pipeline</span>
                       </li>
                     </ul>

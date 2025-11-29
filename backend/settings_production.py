@@ -3,6 +3,28 @@
 # Add these to your settings.py for better performance
 
 from pathlib import Path
+import os
+import socket
+
+
+# Helper used in production tuning snippets: attempt to resolve the ENV host and
+# fall back to a local address if resolution fails. This prevents confusing
+# getaddrinfo failures for people running production settings locally for
+# testing/debugging.
+def _resolve_env_host(env_name: str, default: str = 'db') -> str:
+    host = os.getenv(env_name, default)
+    try:
+        socket.getaddrinfo(host, None)
+        return host
+    except Exception:
+        fallback = '127.0.0.1'
+        if host != fallback:
+            import warnings
+            warnings.warn(
+                f"Configured production host {host!r} is not resolvable; falling back to {fallback!r}. "
+                "If you expect to use a Docker service name here, be sure to run inside the same Docker network."
+            )
+        return fallback
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -10,11 +32,11 @@ BASE_DIR = Path(__file__).resolve().parent
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mycrm_db',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'db',
-        'PORT': '5432',
+        'NAME': os.getenv('DATABASE_NAME', 'mycrm_db'),
+        'USER': os.getenv('DATABASE_USER', 'mycrm_user'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+        'HOST': _resolve_env_host('DATABASE_HOST', 'db'),
+        'PORT': os.getenv('DATABASE_PORT', '5432'),
         'CONN_MAX_AGE': 600,  # Connection pooling
         'OPTIONS': {
             'connect_timeout': 10,

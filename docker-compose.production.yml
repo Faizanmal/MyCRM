@@ -8,13 +8,16 @@ services:
     environment:
       POSTGRES_DB: mycrm_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password required}
       POSTGRES_INITDB_ARGS: "-E UTF8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backup:/backup
-    ports:
-      - "5432:5432"
+    # SECURITY: Do not expose database port in production
+    # ports:
+    #   - "5432:5432"
+    expose:
+      - "5432"
     command: >
       postgres
       -c shared_buffers=256MB
@@ -47,10 +50,14 @@ services:
       --maxmemory-policy allkeys-lru
       --save 60 1000
       --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?Redis password required}
     volumes:
       - redis_data:/data
-    ports:
-      - "6379:6379"
+    # SECURITY: Do not expose Redis port in production
+    # ports:
+    #   - "6379:6379"
+    expose:
+      - "6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -80,17 +87,19 @@ services:
       --error-logfile -
       --log-level info
     volumes:
-      - ./backend:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-    ports:
-      - "8000:8000"
+    # SECURITY: Backend only accessible through nginx, not directly exposed
+    # ports:
+    #   - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - DEBUG=False
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/mycrm_db
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:?Database password required}@db:5432/mycrm_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:?Django SECRET_KEY required}
       - ALLOWED_HOSTS=localhost,127.0.0.1
       - DJANGO_SETTINGS_MODULE=backend.settings
     depends_on:
@@ -123,10 +132,10 @@ services:
       - media_volume:/app/media
     environment:
       - DEBUG=False
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/mycrm_db
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:?Database password required}@db:5432/mycrm_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:?Django SECRET_KEY required}
     depends_on:
       - db
       - redis
@@ -144,10 +153,10 @@ services:
       - ./backend:/app
     environment:
       - DEBUG=False
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/mycrm_db
-      - REDIS_URL=redis://redis:6379/1
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:?Database password required}@db:5432/mycrm_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:?Django SECRET_KEY required}
     depends_on:
       - db
       - redis

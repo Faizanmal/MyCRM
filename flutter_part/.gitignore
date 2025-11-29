@@ -1,0 +1,236 @@
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS related
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# Exceptions to above rules
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.perspectivev3
+
+# macOS
+**/macos/**/*.mode1v3
+**/macos/**/*.mode2v3
+**/macos/**/*.moved-aside
+**/macos/**/*.pbxuser
+**/macos/**/*.perspectivev3
+**/macos/**/*sync/
+**/macos/**/.sconsign.dblite
+**/macos/**/.tags*
+**/macos/**/.vagrant/
+**/macos/**/DerivedData/
+**/macos/**/Icon?
+**/macos/**/Pods/
+**/macos/**/.symlinks/
+**/macos/**/profile
+**/macos/**/xcuserdata
+**/macos/.generated/
+**/macos/Flutter/.last_build_id
+**/macos/Flutter/App.framework
+**/macos/Flutter/Flutter.framework
+**/macos/Flutter/Flutter.podspec
+**/macos/Flutter/Generated.xcconfig
+**/macos/Flutter/ephemeral
+**/macos/Flutter/app.flx
+**/macos/Flutter/app.zip
+**/macos/Flutter/flutter_assets/
+**/macos/Flutter/flutter_export_environment.sh
+**/macos/ServiceDefinitions.json
+**/macos/Runner/GeneratedPluginRegistrant.*
+
+# Exceptions to above rules.
+!**/macos/**/default.mode1v3
+!**/macos/**/default.mode2v3
+!**/macos/**/default.pbxuser
+!**/macos/**/default.perspectivev3
+
+# Windows
+**/windows/**/*.mode1v3
+**/windows/**/*.mode2v3
+**/windows/**/*.moved-aside
+**/windows/**/*.pbxuser
+**/windows/**/*.perspectivev3
+**/windows/**/*sync/
+**/windows/**/.sconsign.dblite
+**/windows/**/.tags*
+**/windows/**/.vagrant/
+**/windows/**/DerivedData/
+**/windows/**/Icon?
+**/windows/**/Pods/
+**/windows/**/.symlinks/
+**/windows/**/profile
+**/windows/**/xcuserdata
+**/windows/.generated/
+**/windows/Flutter/.last_build_id
+**/windows/Flutter/App.framework
+**/windows/Flutter/Flutter.framework
+**/windows/Flutter/Flutter.podspec
+**/windows/Flutter/Generated.xcconfig
+**/windows/Flutter/ephemeral
+**/windows/Flutter/app.flx
+**/windows/Flutter/app.zip
+**/windows/Flutter/flutter_assets/
+**/windows/Flutter/flutter_export_environment.sh
+**/windows/ServiceDefinitions.json
+**/windows/Runner/GeneratedPluginRegistrant.*
+
+# Exceptions to above rules.
+!**/windows/**/default.mode1v3
+!**/windows/**/default.mode2v3
+!**/windows/**/default.pbxuser
+!**/windows/**/default.perspectivev3
+
+# Linux
+**/linux/**/*.mode1v3
+**/linux/**/*.mode2v3
+**/linux/**/*.moved-aside
+**/linux/**/*.pbxuser
+**/linux/**/*.perspectivev3
+**/linux/**/*sync/
+**/linux/**/.sconsign.dblite
+**/linux/**/.tags*
+**/linux/**/.vagrant/
+**/linux/**/DerivedData/
+**/linux/**/Icon?
+**/linux/**/Pods/
+**/linux/**/.symlinks/
+**/linux/**/profile
+**/linux/**/xcuserdata
+**/linux/.generated/
+**/linux/Flutter/.last_build_id
+**/linux/Flutter/App.framework
+**/linux/Flutter/Flutter.framework
+**/linux/Flutter/Flutter.podspec
+**/linux/Flutter/Generated.xcconfig
+**/linux/Flutter/ephemeral
+**/linux/Flutter/app.flx
+**/linux/Flutter/app.zip
+**/linux/Flutter/flutter_assets/
+**/linux/Flutter/flutter_export_environment.sh
+**/linux/ServiceDefinitions.json
+**/linux/Runner/GeneratedPluginRegistrant.*
+
+# Exceptions to above rules.
+!**/linux/**/default.mode1v3
+!**/linux/**/default.mode2v3
+!**/linux/**/default.pbxuser
+!**/linux/**/default.perspectivev3
+
+# Web related
+/web/*.js
+/web/*.js.map
+
+# Except for the web folder
+!web/index.html
+
+# Firebase
+**/ios/Runner/GoogleService-Info.plist
+**/android/app/google-services.json
+firebase.json
+.firebaserc
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.config.dart
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Hive
+*.hive
+*.lock
+
+# API Keys (if stored locally)
+**/lib/config/api_keys.dart
+**/lib/config/secrets.dart
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/

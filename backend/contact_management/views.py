@@ -137,9 +137,14 @@ class ContactViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_404_NOT_FOUND
                 )
         
-        # Apply additional filters
+        # Apply additional filters with whitelist validation
+        # SECURITY: Only allow filtering on safe fields to prevent ORM injection
+        ALLOWED_FILTER_FIELDS = {
+            'status', 'company', 'city', 'state', 'country', 'source',
+            'created_at', 'updated_at', 'tags', 'assigned_to'
+        }
         for key, value in filters.items():
-            if hasattr(Contact, key):
+            if key in ALLOWED_FILTER_FIELDS and hasattr(Contact, key):
                 queryset = queryset.filter(**{key: value})
         
         if format_type == 'csv':

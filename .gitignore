@@ -6,10 +6,30 @@
 *.swp
 *.swo
 *~
-.env
-.env.local
-.env.*.local
 *.log
+.github/
+
+# === SECURITY: Environment & Secrets ===
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.key
+*.pem
+*.crt
+*.csr
+secrets/
+ssl/
+*.secret
+.secrets
+
+# === Database & Backups ===
+*.sqlite3
+*.db
+db.sqlite3
+backups/
+*.sql
+*.dump
 
 # === Python/Django Backend ===
 

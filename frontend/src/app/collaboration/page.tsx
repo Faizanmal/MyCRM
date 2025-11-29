@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { 
   Building2, MessageSquare, FileText, CheckCircle2, 
-  Plus, Lock, Users, Calendar, Clock, Send, 
-  Upload, Download, ThumbsUp, MessageCircle, Eye,
-  Search, Filter, ArrowRight, Settings, MoreVertical,
-  UserPlus, Shield, Unlock, Reply, Heart
+  Plus, Lock, Users, Calendar, Send, 
+  Upload, Download, MessageCircle, Eye,
+  Search, ArrowRight, Settings, MoreVertical,
+  Shield, Unlock, Reply
 } from 'lucide-react';
 
 // Deal Room Types
@@ -68,7 +68,6 @@ interface Approval {
 
 export default function CollaborationPage() {
   const [activeTab, setActiveTab] = useState<'deal-rooms' | 'channels' | 'documents' | 'approvals'>('deal-rooms');
-  const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -257,12 +256,22 @@ export default function CollaborationPage() {
     }
   };
 
-  const getDocumentIcon = (type: string) => {
+  const getDocumentIcon = () => {
     return <FileText className="w-5 h-5" />;
   };
 
+  const [selectedRoom, setSelectedRoomState] = useState<number | null>(null);
+
+  function setSelectedRoom(id: number): void {
+    // mark the room as selected, ensure the Deal Rooms tab is active
+    setSelectedRoomState(id);
+    setActiveTab('deal-rooms');
+    // clear any selected channel when switching context
+    setSelectedChannel(null);
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">
@@ -489,7 +498,7 @@ export default function CollaborationPage() {
                     <div className="p-4 space-y-4 max-h-96 overflow-y-auto">
                       {messages.map((message) => (
                         <div key={message.id} className="flex space-x-3">
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0">
                             <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
                               {message.sender.split(' ').map(n => n[0]).join('')}
                             </div>
@@ -606,7 +615,7 @@ export default function CollaborationPage() {
                       <tr key={doc.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            {getDocumentIcon(doc.document_type)}
+                            {getDocumentIcon()}
                             <div className="ml-3">
                               <p className="text-sm font-medium text-gray-900">{doc.title}</p>
                               <p className="text-sm text-gray-500 capitalize">{doc.document_type}</p>

@@ -9,8 +9,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.template import Template, Context
 
+from campaign_management.models import EmailTemplate
 from campaign_management.email_models import (
-    EmailCampaign, EmailTemplate, EmailRecipient, 
+    EmailCampaign, EmailRecipient, 
     EmailLink, EmailUnsubscribe
 )
 from rest_framework import serializers

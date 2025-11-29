@@ -178,10 +178,19 @@ class CSVExportView(views.APIView):
         model_class = self.SUPPORTED_MODELS[resource_type]
         queryset = model_class.objects.all()
         
-        # Apply filters from query params
+        # SECURITY: Whitelist allowed filter fields per resource type
+        ALLOWED_FILTERS = {
+            'leads': {'status', 'priority', 'lead_source', 'assigned_to', 'created_at', 'updated_at'},
+            'contacts': {'status', 'contact_type', 'company_name', 'created_at', 'updated_at'},
+            'opportunities': {'stage', 'assigned_to', 'created_at', 'updated_at'},
+            'tasks': {'status', 'priority', 'task_type', 'assigned_to', 'created_at', 'updated_at'}
+        }
+        
+        # Apply filters from query params with whitelist validation
         filters = {}
+        allowed_fields = ALLOWED_FILTERS.get(resource_type, set())
         for key, value in request.query_params.items():
-            if key not in ['format', 'fields']:
+            if key not in ['format', 'fields'] and key in allowed_fields:
                 filters[key] = value
         
         if filters:

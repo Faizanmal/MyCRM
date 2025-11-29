@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 import pyotp
+from django.utils.decorators import method_decorator
+from ratelimit.decorators import ratelimit
 import qrcode
 import io
 import base64
@@ -15,6 +17,7 @@ from .serializers import (
 )
 
 
+@method_decorator(ratelimit(key='ip', rate='10/h', block=True), name='post')
 class CustomTokenObtainPairView(TokenObtainPairView):
     """Custom JWT token view with 2FA support"""
     
@@ -23,7 +26,14 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         
-        # Check if 2FA is enabled
+        # Require admins to have 2FA enabled
+        if getattr(user, 'role', None) == 'admin' and not getattr(user, 'two_factor_enabled', False):
+            return Response(
+                {'error': 'Admin accounts must have 2FA enabled. Please set up 2FA before logging in.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Check if 2FA is enabled for regular users
         if user.two_factor_enabled:
             # Generate temporary token for 2FA verification
             temp_token = RefreshToken.for_user(user)

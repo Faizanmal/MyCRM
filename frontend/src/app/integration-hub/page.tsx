@@ -230,7 +230,7 @@ export default function IntegrationHubPage() {
                       <CardHeader>
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl font-bold">
+                            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl font-bold">
                               {integration.provider.name.charAt(0)}
                             </div>
                             <div>
@@ -317,7 +317,7 @@ export default function IntegrationHubPage() {
                   <Card key={provider.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl font-bold">
+                        <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl font-bold">
                           {provider.name.charAt(0)}
                         </div>
                         <div>

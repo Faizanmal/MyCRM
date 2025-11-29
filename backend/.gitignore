@@ -42,6 +42,27 @@ htmlcov/
 celerybeat-schedule
 celerybeat.pid
 
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Pytype
+.pytype/
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# Mkdocs
+site/
+
 # Database
 *.sqlite
 *.sqlite3

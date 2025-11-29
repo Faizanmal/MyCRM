@@ -44,42 +44,62 @@ class TenantMiddleware(MiddlewareMixin):
         if request.path.startswith(('/admin/', '/api/auth/', '/static/', '/media/')):
             return None
         
-        # Method 1: Check for organization in header (API requests)
-        org_slug = request.headers.get('X-Organization-Slug')
-        if org_slug:
-            try:
-                organization = Organization.objects.get(slug=org_slug, status='active')
-            except Organization.DoesNotExist:
-                pass
-        
-        # Method 2: Check for custom domain
-        if not organization:
-            host = request.get_host().split(':')[0]  # Remove port
-            try:
-                organization = Organization.objects.get(domain=host, status='active')
-            except Organization.DoesNotExist:
-                pass
-        
-        # Method 3: Check for subdomain
-        if not organization:
-            host = request.get_host().split(':')[0]
-            parts = host.split('.')
-            if len(parts) > 2:  # Has subdomain
-                subdomain = parts[0]
-                if subdomain not in ['www', 'api', 'admin']:
-                    try:
-                        organization = Organization.objects.get(slug=subdomain, status='active')
-                    except Organization.DoesNotExist:
-                        pass
-        
-        # Method 4: Check session (fallback for web interface)
-        if not organization and request.user.is_authenticated:
-            org_id = request.session.get('organization_id')
-            if org_id:
+        try:
+            # Method 1: Check for organization in header (API requests)
+            org_slug = request.headers.get('X-Organization-Slug')
+            if org_slug:
                 try:
-                    organization = Organization.objects.get(id=org_id, status='active')
+                    organization = Organization.objects.get(slug=org_slug, status='active')
                 except Organization.DoesNotExist:
                     pass
+            
+            # Method 2: Check for custom domain
+            if not organization:
+                host = request.get_host().split(':')[0]  # Remove port
+                try:
+                    organization = Organization.objects.get(domain=host, status='active')
+                except Organization.DoesNotExist:
+                    pass
+            
+            # Method 3: Check for subdomain
+            if not organization:
+                host = request.get_host().split(':')[0]
+                parts = host.split('.')
+                if len(parts) > 2:  # Has subdomain
+                    subdomain = parts[0]
+                    if subdomain not in ['www', 'api', 'admin']:
+                        try:
+                            organization = Organization.objects.get(slug=subdomain, status='active')
+                        except Organization.DoesNotExist:
+                            pass
+            
+            # Method 4: Check session (fallback for web interface)
+            if not organization and request.user.is_authenticated:
+                org_id = request.session.get('organization_id')
+                if org_id:
+                    try:
+                        organization = Organization.objects.get(id=org_id, status='active')
+                    except Organization.DoesNotExist:
+                        pass
+            
+            # Method 5: Create default organization for development
+            if not organization:
+                try:
+                    organization, created = Organization.objects.get_or_create(
+                        slug='default',
+                        defaults={
+                            'name': 'Default Organization',
+                            'domain': '127.0.0.1',
+                            'email': 'admin@example.com',
+                            'status': 'active'
+                        }
+                    )
+                except Exception:
+                    # If database issues, skip for now
+                    pass
+        except Exception:
+            # If database tables don't exist yet (during initial setup), skip tenant logic
+            pass
         
         # Set organization in thread-local storage
         if organization:

@@ -245,7 +245,10 @@ class LeadScoringEngine:
         return factors
     
     def save_model(self, filename):
-        """Save trained model to file"""
+        """Save trained model to file using joblib (safer than pickle)"""
+        import joblib
+        import hashlib
+        
         model_data = {
             'model': self.model,
             'scaler': self.scaler,
@@ -253,15 +256,35 @@ class LeadScoringEngine:
             'model_type': self.model_type
         }
         
-        with open(filename, 'wb') as f:
-            pickle.dump(model_data, f)
+        # Save using joblib (more secure for sklearn objects)
+        joblib.dump(model_data, filename)
+        
+        # Create checksum file for integrity verification
+        with open(filename, 'rb') as f:
+            checksum = hashlib.sha256(f.read()).hexdigest()
+        with open(f"{filename}.sha256", 'w') as f:
+            f.write(checksum)
         
         logger.info(f"Model saved to {filename}")
     
     def load_model(self, filename):
-        """Load trained model from file"""
-        with open(filename, 'rb') as f:
-            model_data = pickle.load(f)
+        """Load trained model from file with integrity verification"""
+        import joblib
+        import hashlib
+        import os
+        
+        # Verify file integrity if checksum exists
+        checksum_file = f"{filename}.sha256"
+        if os.path.exists(checksum_file):
+            with open(checksum_file, 'r') as f:
+                expected_checksum = f.read().strip()
+            with open(filename, 'rb') as f:
+                actual_checksum = hashlib.sha256(f.read()).hexdigest()
+            if expected_checksum != actual_checksum:
+                raise ValueError(f"Model file integrity check failed for {filename}")
+        
+        # Load using joblib (safer than pickle)
+        model_data = joblib.load(filename)
         
         self.model = model_data['model']
         self.scaler = model_data['scaler']

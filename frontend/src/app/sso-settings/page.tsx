@@ -270,6 +270,7 @@ export default function SSOSettingsPage() {
       auto_update_user_info: true,
       default_role: 'member',
     });
+  };
   const getStatusBadge = (status: string): string => {
     const styles: Record<string, string> = {
       active: 'bg-green-100 text-green-800',
@@ -330,7 +331,7 @@ export default function SSOSettingsPage() {
           {/* Info Banner */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
             <div className="flex items-start">
-              <ShieldCheckIcon className="h-6 w-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+              <ShieldCheckIcon className="h-6 w-6 text-blue-600 mr-3 shrink-0 mt-0.5" />
               <div>
                 <h3 className="text-sm font-medium text-blue-900">Secure Authentication</h3>
                 <p className="text-sm text-blue-700 mt-1">
