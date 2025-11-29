@@ -3,11 +3,9 @@ Next Best Action recommendation engine
 """
 from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Q, Count, Avg, Sum
 from lead_management.models import Lead
 from contact_management.models import Contact
 from opportunity_management.models import Opportunity
-from task_management.models import Task
 from .models import NextBestAction
 import logging
 

@@ -57,6 +57,17 @@ urlpatterns = [
     path('api/v1/sso/', include('sso_integration.urls')),
     path('api/v1/collaboration/', include('collaboration.urls')),
     path('api/v1/gdpr/', include('gdpr_compliance.urls')),
+    
+    # Premium Revenue Features
+    path('api/v1/revenue-intelligence/', include('revenue_intelligence.urls')),
+    path('api/v1/email-tracking/', include('email_tracking.urls')),
+    path('api/v1/scheduling/', include('smart_scheduling.urls')),
+    path('api/v1/ai-assistant/', include('ai_sales_assistant.urls')),
+    path('api/v1/social-selling/', include('social_selling.urls')),
+    path('api/v1/documents/', include('document_esign.urls')),
+    path('api/v1/conversation-intelligence/', include('conversation_intelligence.urls')),
+    path('api/v1/white-label/', include('white_label.urls')),
+    path('api/v1/customer-success/', include('customer_success.urls')),
 ]
 
 if settings.DEBUG:

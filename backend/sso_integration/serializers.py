@@ -73,7 +73,7 @@ class SSOProviderSerializer(serializers.ModelSerializer):
             for field in required_fields:
                 if not data.get(field):
                     raise serializers.ValidationError({
-                        field: f"This field is required for OAuth2 providers."
+                        field: "This field is required for OAuth2 providers."
                     })
         
         elif provider_type and provider_type.startswith('saml_'):
@@ -82,7 +82,7 @@ class SSOProviderSerializer(serializers.ModelSerializer):
             for field in required_fields:
                 if not data.get(field):
                     raise serializers.ValidationError({
-                        field: f"This field is required for SAML providers."
+                        field: "This field is required for SAML providers."
                     })
         
         return data

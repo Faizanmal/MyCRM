@@ -2,11 +2,11 @@
 Advanced Analytics API
 Sales forecasting, conversion funnels, cohort analysis, and custom metrics
 """
-from rest_framework import views, status
+from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Count, Sum, Avg, Q, F
-from django.db.models.functions import TruncDate, TruncMonth, TruncWeek
+from django.db.models import Count, Sum, Avg
+from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
 from collections import defaultdict
@@ -26,7 +26,6 @@ class SalesForecastView(views.APIView):
     
     def get(self, request):
         """Get sales forecast for next periods"""
-        period = request.query_params.get('period', 'month')  # month, quarter, year
         periods_ahead = int(request.query_params.get('periods', 3))
         
         # Get current pipeline weighted value

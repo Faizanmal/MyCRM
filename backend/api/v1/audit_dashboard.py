@@ -1,7 +1,7 @@
 """
 Audit Trail and Dashboard API Views
 """
-from rest_framework import viewsets, views, status, filters
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -9,8 +9,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from datetime import timedelta
+from django.db import models
 
-from core.audit_models import AuditTrail, FieldHistory, DataSnapshot
+from core.audit_models import AuditTrail, FieldHistory
 from core.dashboard_models import DashboardWidget, UserDashboard, DashboardWidgetPlacement, WidgetDataCache
 from rest_framework import serializers
 
@@ -361,4 +362,4 @@ class UserDashboardViewSet(viewsets.ModelViewSet):
         return Response({'success': True})
 
 
-from django.db import models
+

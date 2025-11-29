@@ -10,7 +10,6 @@ from django.http import HttpResponse
 from django.utils import timezone
 import csv
 import io
-import json
 
 from lead_management.models import Lead
 from contact_management.models import Contact

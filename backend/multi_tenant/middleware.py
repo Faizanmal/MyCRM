@@ -1,7 +1,6 @@
 from threading import local
 from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import redirect
-from django.urls import reverse
 from .models import Organization, OrganizationMember
 
 _thread_locals = local()

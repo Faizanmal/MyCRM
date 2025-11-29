@@ -7,4 +7,4 @@ class CollaborationConfig(AppConfig):
     verbose_name = 'Advanced Collaboration Tools'
     
     def ready(self):
-        import collaboration.signals
+        pass

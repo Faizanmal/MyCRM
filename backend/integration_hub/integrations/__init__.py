@@ -1,4 +1,3 @@
-from .base import BaseIntegrationClient
 from .slack import SlackClient
 from .google import GoogleWorkspaceClient
 from .zapier import ZapierClient

@@ -3,7 +3,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth import login
@@ -311,7 +310,6 @@ class SSOCallbackView(viewsets.ViewSet):
         
         # Get authorization code from query params
         code = request.GET.get('code')
-        state = request.GET.get('state')
         error = request.GET.get('error')
         
         if error:

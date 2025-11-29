@@ -85,7 +85,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
         try:
             response = self.get('oauth2/v2/userinfo')
             return 'email' in response
-        except:
+        except Exception:
             return False
     
     def sync_contacts(self, crm_contacts: List[Dict]) -> Dict[str, int]:
@@ -111,7 +111,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                 
                 self.post('people/v1/people:createContact', contact_data)
                 synced += 1
-            except:
+            except Exception:
                 continue
         
         return {'synced': synced}
@@ -142,7 +142,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                 })
             
             return contacts
-        except:
+        except Exception:
             return []
     
     def create_task(self, task_data: Dict) -> Dict:
@@ -171,7 +171,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
         try:
             # Would implement Gmail API email sending
             return True
-        except:
+        except Exception:
             return False
     
     def create_calendar_event(self, event_data: Dict) -> Dict:

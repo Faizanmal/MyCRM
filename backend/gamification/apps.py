@@ -7,4 +7,4 @@ class GamificationConfig(AppConfig):
     verbose_name = 'Gamification'
     
     def ready(self):
-        import gamification.signals
+        pass

@@ -6,16 +6,12 @@ from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
-from datetime import datetime, timedelta
 
 from activity_feed.models import Activity
 from core.audit_models import AuditTrail
 from task_management.models import Task
 from opportunity_management.models import Opportunity
-from lead_management.models import Lead
-from contact_management.models import Contact
 
 
 class ActivityTimelineView(views.APIView):
@@ -42,7 +38,6 @@ class ActivityTimelineView(views.APIView):
         end_date = request.query_params.get('end_date')
         entity_type = request.query_params.get('entity_type')
         entity_id = request.query_params.get('entity_id')
-        activity_types = request.query_params.get('activity_types', '').split(',') if request.query_params.get('activity_types') else []
         user_id = request.query_params.get('user_id')
         limit = min(int(request.query_params.get('limit', 50)), 500)
         

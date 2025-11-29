@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -34,14 +34,10 @@ import {
 import { 
   UserPlus, 
   Search,
-  Filter,
   MoreVertical,
-  Mail,
-  Phone,
   Edit,
   Trash2,
   TrendingUp,
-  MapPin,
   DollarSign,
   Star,
   Flame,
@@ -93,7 +89,7 @@ export default function LeadsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
-  const [selectedStage, setSelectedStage] = useState<string>('all');
+  const [selectedStage] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -154,7 +150,7 @@ export default function LeadsPage() {
 
   useEffect(() => {
     fetchLeads();
-  }, [fetchLeads]);
+  }, [currentPage, pageSize, searchQuery, selectedStage, fetchLeads]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -162,7 +158,7 @@ export default function LeadsPage() {
       fetchLeads();
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, selectedStage]);
+  }, [searchQuery, selectedStage, fetchLeads]);
 
   const handleRefresh = () => {
     fetchLeads(true);

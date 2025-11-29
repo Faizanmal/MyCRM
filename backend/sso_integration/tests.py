@@ -4,7 +4,7 @@ SSO Integration Tests
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import SSOProvider, SSOConnection, SSOSession, SSOMapping
+from .models import SSOProvider, SSOConnection, SSOSession
 
 User = get_user_model()
 

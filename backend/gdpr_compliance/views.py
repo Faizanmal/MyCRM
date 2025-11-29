@@ -1,12 +1,11 @@
-from rest_framework import viewsets, filters, status
+from rest_framework import viewsets, filters, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from django.db.models import Q, Count
+from django.db.models import Count
 from datetime import timedelta
-import json
 
 from .models import (
     ConsentType, UserConsent, DataExportRequest, DataDeletionRequest,
@@ -138,7 +137,7 @@ class DataExportRequestViewSet(viewsets.ModelViewSet):
                 'You already have a pending export request. Please wait for it to complete.'
             )
         
-        export_request = serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user)
         
         # Trigger async export task (implement with Celery)
         # from .tasks import process_data_export

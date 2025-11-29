@@ -86,6 +86,16 @@ INSTALLED_APPS = [
     'sso_integration',
     'collaboration',
     'gdpr_compliance',
+    # Premium Revenue Features
+    'revenue_intelligence',
+    'email_tracking',
+    'smart_scheduling',
+    'ai_sales_assistant',
+    'social_selling',
+    'document_esign',
+    'conversation_intelligence',
+    'white_label',
+    'customer_success',
 ]
 
 MIDDLEWARE = [

@@ -63,7 +63,7 @@ class SlackClient(BaseIntegrationClient):
         try:
             response = self.get('auth.test')
             return response.get('ok', False)
-        except:
+        except Exception:
             return False
     
     def send_notification(self, message: str, channel: str = None) -> bool:
@@ -75,7 +75,7 @@ class SlackClient(BaseIntegrationClient):
             }
             response = self.post('chat.postMessage', data)
             return response.get('ok', False)
-        except:
+        except Exception:
             return False
     
     def sync_contacts(self, crm_contacts: List[Dict]) -> Dict[str, int]:
@@ -99,7 +99,7 @@ class SlackClient(BaseIntegrationClient):
                     if not user.get('is_bot', False)
                 ]
             return []
-        except:
+        except Exception:
             return []
     
     def create_task(self, task_data: Dict) -> Dict:
@@ -108,7 +108,7 @@ class SlackClient(BaseIntegrationClient):
             message = f"Task: {task_data.get('title')}\nDue: {task_data.get('due_date')}"
             self.send_notification(message, task_data.get('channel'))
             return {'success': True}
-        except:
+        except Exception:
             return {'success': False}
     
     def post_lead_notification(self, lead_data: Dict, channel: str = '#sales'):

@@ -30,7 +30,15 @@ import {
   LayoutDashboard,
   Sparkles,
   Puzzle,
-  Trophy
+  Trophy,
+  DollarSign,
+  Eye,
+  Clock,
+  Brain,
+  Heart,
+  Mic,
+  FileSignature,
+  Share2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationsDropdown from '@/components/NotificationsDropdown';
@@ -46,6 +54,7 @@ const navigation = [
 
 const analyticsNavigation = [
   { name: 'Pipeline Analytics', href: '/analytics/pipeline', icon: PieChart },
+  { name: 'Revenue Intelligence', href: '/revenue-intelligence', icon: DollarSign },
   { name: 'Lead Scoring', href: '/lead-qualification', icon: Target },
   { name: 'Advanced Reports', href: '/advanced-reporting', icon: LayoutDashboard },
   { name: 'Reports', href: '/reports', icon: FileText },
@@ -54,7 +63,17 @@ const analyticsNavigation = [
 const advancedNavigation = [
   { name: 'Integration Hub', href: '/integration-hub', icon: Puzzle },
   { name: 'AI Insights', href: '/ai-insights', icon: Sparkles },
+  { name: 'AI Sales Assistant', href: '/ai-assistant', icon: Brain },
   { name: 'Gamification', href: '/gamification', icon: Trophy },
+];
+
+const premiumNavigation = [
+  { name: 'Email Tracking', href: '/email-tracking', icon: Eye },
+  { name: 'Smart Scheduling', href: '/scheduling', icon: Clock },
+  { name: 'Customer Success', href: '/customer-success', icon: Heart },
+  { name: 'Call Intelligence', href: '/conversation-intelligence', icon: Mic },
+  { name: 'E-Signatures', href: '/document-esign', icon: FileSignature },
+  { name: 'Social Selling', href: '/social-selling', icon: Share2 },
 ];
 
 const toolsNavigation = [
@@ -247,6 +266,37 @@ const toolsNavigation = [
                 );
               })}
             </div>
+
+            <div className="space-y-1">
+              <h3 className={cn(
+                "text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2",
+                !sidebarOpen && "text-center px-0"
+              )}>
+                {sidebarOpen ? '💎 Premium' : '💎'}
+              </h3>
+              
+              {premiumNavigation.map((item) => {
+                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                return (
+                  <Link key={item.name} href={item.href}>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start transition-all duration-200 rounded-xl",
+                        isActive 
+                          ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
+                        !sidebarOpen && "justify-center px-2"
+                      )}
+                      title={!sidebarOpen ? item.name : undefined}
+                    >
+                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3", isActive && "animate-pulse")} />
+                      {sidebarOpen && <span className="font-medium">{item.name}</span>}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </div>
             
             <div className="space-y-1">
               <h3 className={cn(
@@ -359,6 +409,32 @@ const toolsNavigation = [
                   </h3>
                   
                   {advancedNavigation.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start transition-all duration-200 rounded-xl",
+                            isActive 
+                              ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
+                          )}
+                        >
+                          <item.icon className="w-4 h-4 mr-3" />
+                          <span className="font-medium">{item.name}</span>
+                        </Button>
+                      </Link>
+                    );
+                  })}
+                </div>
+                
+                <div className="space-y-1">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+                    💎 Premium
+                  </h3>
+                  
+                  {premiumNavigation.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                       <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>

@@ -1,4 +1,4 @@
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from rest_framework.test import APIClient
@@ -28,14 +28,14 @@ class LoginProtectionTests(TestCase):
         self.client = APIClient()
 
     def test_admin_login_requires_2fa(self):
-        admin = User.objects.create_user(username='adminx', email='adminx@example.com', password='adminpass', role='admin')
+        User.objects.create_user(username='adminx', email='adminx@example.com', password='adminpass', role='admin')
         # admin doesn't have 2FA enabled by default
         resp = self.client.post('/api/auth/login/', {'username': 'adminx', 'password': 'adminpass'}, format='json')
         self.assertEqual(resp.status_code, 403)
         self.assertIn('2FA', str(resp.data.get('error', '')))
 
     def test_login_rate_limit(self):
-        user = User.objects.create_user(username='ratetest', email='ratetest@example.com', password='testpass')
+        User.objects.create_user(username='ratetest', email='ratetest@example.com', password='testpass')
         # Hit login 11 times to exceed the 10/h limit
         last_resp = None
         for i in range(11):

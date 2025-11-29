@@ -171,12 +171,6 @@ def import_csv_data(self, resource_type, file_path, mapping, user_id):
     Import CSV data in background
     """
     try:
-        from django.contrib.auth import get_user_model
-        import csv
-        
-        User = get_user_model()
-        user = User.objects.get(id=user_id)
-        
         # Import logic here (similar to CSV import view)
         # This is a placeholder for the actual implementation
         

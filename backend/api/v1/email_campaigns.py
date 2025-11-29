@@ -6,13 +6,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from django.utils import timezone
 from django.template import Template, Context
 
 from campaign_management.models import EmailTemplate
 from campaign_management.email_models import (
-    EmailCampaign, EmailRecipient, 
-    EmailLink, EmailUnsubscribe
+    EmailCampaign, EmailRecipient
 )
 from rest_framework import serializers
 

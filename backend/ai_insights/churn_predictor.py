@@ -2,15 +2,12 @@
 AI-powered churn prediction engine
 """
 import numpy as np
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Count, Avg, Sum, Q
+from django.db.models import Sum
 from contact_management.models import Contact
-from opportunity_management.models import Opportunity
 from task_management.models import Task
 from .models import ChurnPrediction
 import logging

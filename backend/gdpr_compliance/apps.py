@@ -7,4 +7,4 @@ class GdprComplianceConfig(AppConfig):
     verbose_name = 'GDPR Compliance'
 
     def ready(self):
-        import gdpr_compliance.signals
+        pass

@@ -4,12 +4,11 @@ Lead Scoring API Views
 from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.utils import timezone
 from django.db import models
 
 from lead_management.models import Lead
-from core.lead_scoring import LeadScoringEngine, RuleBasedScoring
-from core.tasks import score_lead, bulk_score_leads, retrain_lead_scoring_model
+from core.lead_scoring import LeadScoringEngine
+from core.tasks import bulk_score_leads, retrain_lead_scoring_model
 
 
 class LeadScoringView(views.APIView):

@@ -4,7 +4,7 @@ Gamification Tests
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import Achievement, UserAchievement, UserPoints, Challenge
+from .models import Achievement, UserPoints, Challenge
 
 User = get_user_model()
 

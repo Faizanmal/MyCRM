@@ -371,7 +371,9 @@ export default function CollaborationPage() {
                 {dealRooms.map((room) => (
                   <div
                     key={room.id}
-                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                    className={`bg-white border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer ${
+                      selectedRoom === room.id ? 'border-blue-500 shadow-md' : 'border-gray-200'
+                    }`}
                     onClick={() => setSelectedRoom(room.id)}
                   >
                     <div className="flex items-start justify-between mb-4">

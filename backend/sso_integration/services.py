@@ -5,8 +5,8 @@ import requests
 import base64
 import hashlib
 import secrets
-from typing import Dict, Any, Optional, Tuple
-from urllib.parse import urlencode, parse_qs, urlparse
+from typing import Dict, Any, Tuple
+from urllib.parse import urlencode
 from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -191,7 +191,6 @@ class SAMLService:
         """
         from django.conf import settings
         import uuid
-        from datetime import datetime
         
         request_id = f"_{uuid.uuid4()}"
         issue_instant = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')

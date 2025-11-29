@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
 from .models import Organization, OrganizationMember, OrganizationInvitation
 from .serializers import (
     OrganizationSerializer,
@@ -51,7 +50,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_create(self, serializer):
-        organization = serializer.save()
+        serializer.save()
         # Owner membership is created by signal
 
     @action(detail=True, methods=['post'])

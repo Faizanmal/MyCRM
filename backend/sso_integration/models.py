@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from multi_tenant.models import Organization
 import uuid
-import json
 
 User = get_user_model()
 

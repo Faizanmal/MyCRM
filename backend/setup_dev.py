@@ -43,7 +43,7 @@ def setup_dev_data():
     )
 
     print('User and organization created successfully')
-    print(f'Username: admin')
+    print('Username: admin')
     print(f'Password: {os.getenv("ADMIN_PASSWORD", "ChangeThisSecurePassword123!")}')
     print(f'Organization: {org.name}')
 

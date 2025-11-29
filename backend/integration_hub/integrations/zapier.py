@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
+import requests
+from django.utils import timezone
 from .base import BaseIntegrationClient
-from django.conf import settings
 
 
 class ZapierClient(BaseIntegrationClient):
@@ -28,14 +29,14 @@ class ZapierClient(BaseIntegrationClient):
             return False
         
         try:
-            import requests
             response = requests.post(
                 self.access_token,
                 json={'test': True, 'event': 'connection_test'},
                 timeout=5
             )
             return response.status_code == 200
-        except:
+        except Exception:
+            return False
             return False
     
     def send_webhook(self, event_type: str, data: Dict) -> bool:
@@ -57,7 +58,7 @@ class ZapierClient(BaseIntegrationClient):
                 timeout=10
             )
             return response.status_code == 200
-        except:
+        except Exception:
             return False
     
     def sync_contacts(self, crm_contacts: List[Dict]) -> Dict[str, int]:

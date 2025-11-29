@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from django.db.models import Sum, Count, Q
+from django.db.models import Count, Q
 
 from .models import Achievement, UserAchievement, Leaderboard, UserPoints, PointTransaction, Challenge, ChallengeProgress
 from .serializers import (

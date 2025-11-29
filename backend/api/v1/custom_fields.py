@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.contenttypes.models import ContentType
 
-from core.custom_fields import CustomField, CustomFieldValue, CustomFieldGroup
+from core.custom_fields import CustomField, CustomFieldValue
 from rest_framework import serializers
 
 

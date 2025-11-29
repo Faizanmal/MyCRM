@@ -49,7 +49,7 @@ class NextBestActionSerializer(serializers.ModelSerializer):
                 from opportunity_management.models import Opportunity
                 entity = Opportunity.objects.get(id=obj.entity_id)
                 return entity.name
-        except:
+        except Exception:
             return ''
         return ''
 

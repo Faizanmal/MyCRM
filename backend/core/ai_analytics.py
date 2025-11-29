@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Count, Sum, Avg, F
+from django.db.models import Count, Sum, Avg
 from django.contrib.auth import get_user_model
 from contact_management.models import Contact
 from lead_management.models import Lead

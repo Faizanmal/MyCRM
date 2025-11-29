@@ -7,4 +7,4 @@ class MultiTenantConfig(AppConfig):
     verbose_name = 'Multi-Tenant Management'
 
     def ready(self):
-        import multi_tenant.signals
+        pass
