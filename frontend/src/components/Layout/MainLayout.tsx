@@ -38,7 +38,11 @@ import {
   Heart,
   Mic,
   FileSignature,
-  Share2
+  Share2,
+  MailCheck,
+  Route,
+  Database,
+  CalendarClock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationsDropdown from '@/components/NotificationsDropdown';
@@ -65,6 +69,14 @@ const advancedNavigation = [
   { name: 'AI Insights', href: '/ai-insights', icon: Sparkles },
   { name: 'AI Sales Assistant', href: '/ai-assistant', icon: Brain },
   { name: 'Gamification', href: '/gamification', icon: Trophy },
+];
+
+const aiWorkflowNavigation = [
+  { name: 'Email Sequences', href: '/email-sequences', icon: MailCheck },
+  { name: 'Lead Routing', href: '/lead-routing', icon: Route },
+  { name: 'Smart Scheduling AI', href: '/scheduling/ai', icon: CalendarClock },
+  { name: 'Data Enrichment', href: '/data-enrichment', icon: Database },
+  { name: 'Voice Intelligence', href: '/voice-intelligence', icon: Mic },
 ];
 
 const premiumNavigation = [
@@ -272,6 +284,37 @@ const toolsNavigation = [
                 "text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2",
                 !sidebarOpen && "text-center px-0"
               )}>
+                {sidebarOpen ? '🤖 AI Workflows' : '🤖'}
+              </h3>
+              
+              {aiWorkflowNavigation.map((item) => {
+                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                return (
+                  <Link key={item.name} href={item.href}>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start transition-all duration-200 rounded-xl",
+                        isActive 
+                          ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm dark:from-blue-500/20 dark:to-purple-500/20" 
+                          : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
+                        !sidebarOpen && "justify-center px-2"
+                      )}
+                      title={!sidebarOpen ? item.name : undefined}
+                    >
+                      <item.icon className={cn("w-4 h-4", sidebarOpen && "mr-3", isActive && "animate-pulse")} />
+                      {sidebarOpen && <span className="font-medium">{item.name}</span>}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="space-y-1">
+              <h3 className={cn(
+                "text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2",
+                !sidebarOpen && "text-center px-0"
+              )}>
                 {sidebarOpen ? '💎 Premium' : '💎'}
               </h3>
               
@@ -409,6 +452,32 @@ const toolsNavigation = [
                   </h3>
                   
                   {advancedNavigation.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start transition-all duration-200 rounded-xl",
+                            isActive 
+                              ? "bg-linear-to-r from-blue-500/10 to-purple-500/10 text-primary border border-primary/20 shadow-sm" 
+                              : "text-foreground/80 hover:bg-accent hover:text-accent-foreground"
+                          )}
+                        >
+                          <item.icon className="w-4 h-4 mr-3" />
+                          <span className="font-medium">{item.name}</span>
+                        </Button>
+                      </Link>
+                    );
+                  })}
+                </div>
+                
+                <div className="space-y-1">
+                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2">
+                    🤖 AI Workflows
+                  </h3>
+                  
+                  {aiWorkflowNavigation.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                       <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>

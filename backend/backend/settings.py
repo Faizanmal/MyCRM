@@ -96,6 +96,11 @@ INSTALLED_APPS = [
     'conversation_intelligence',
     'white_label',
     'customer_success',
+    # AI Workflow Automation Features
+    'email_sequence_automation',
+    'predictive_lead_routing',
+    'data_enrichment',
+    'voice_intelligence',
 ]
 
 MIDDLEWARE = [

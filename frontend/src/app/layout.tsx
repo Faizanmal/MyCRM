@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { QueryProvider } from "@/components/QueryProvider";
+import { RealtimeProvider } from "@/components/enterprise/RealtimeProvider";
 import InstallPrompt from "@/components/InstallPrompt";
 
 const geistSans = Geist({
@@ -60,10 +62,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            {children}
-            <InstallPrompt />
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <RealtimeProvider>
+                {children}
+                <InstallPrompt />
+              </RealtimeProvider>
+            </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

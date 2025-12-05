@@ -1,0 +1,266 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  namespace: mycrm
+  labels:
+    app.kubernetes.io/name: mycrm
+    app.kubernetes.io/component: celery-worker
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mycrm
+      app.kubernetes.io/component: celery-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mycrm
+        app.kubernetes.io/component: celery-worker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9808"
+    spec:
+      serviceAccountName: mycrm-backend
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/component: celery-worker
+              topologyKey: kubernetes.io/hostname
+      
+      initContainers:
+      - name: wait-for-redis
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z redis-master 6379; do echo waiting for redis; sleep 2; done']
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      
+      containers:
+      - name: celery-worker
+        image: mycrm/backend:latest
+        imagePullPolicy: Always
+        command: ['celery', '-A', 'backend', 'worker', '-l', 'INFO', '--concurrency=4', '-Q', 'default,high_priority,low_priority']
+        
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secrets
+        
+        env:
+        - name: C_FORCE_ROOT
+          value: "false"
+        - name: CELERY_WORKER_PREFETCH_MULTIPLIER
+          value: "4"
+        
+        resources:
+          limits:
+            cpu: "2"
+            memory: 2Gi
+          requests:
+            cpu: "500m"
+            memory: 512Mi
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        
+        livenessProbe:
+          exec:
+            command:
+            - celery
+            - -A
+            - backend
+            - inspect
+            - ping
+            - --timeout
+            - "10"
+          initialDelaySeconds: 30
+          periodSeconds: 60
+          timeoutSeconds: 15
+          failureThreshold: 3
+      
+      - name: celery-exporter
+        image: danihodovic/celery-exporter:0.9.1
+        ports:
+        - containerPort: 9808
+          name: metrics
+        env:
+        - name: CE_BROKER_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: CELERY_BROKER_URL
+        resources:
+          limits:
+            cpu: "100m"
+            memory: 128Mi
+          requests:
+            cpu: "50m"
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      
+      terminationGracePeriodSeconds: 120
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-beat
+  namespace: mycrm
+  labels:
+    app.kubernetes.io/name: mycrm
+    app.kubernetes.io/component: celery-beat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mycrm
+      app.kubernetes.io/component: celery-beat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mycrm
+        app.kubernetes.io/component: celery-beat
+    spec:
+      serviceAccountName: mycrm-backend
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      
+      initContainers:
+      - name: wait-for-redis
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z redis-master 6379; do echo waiting for redis; sleep 2; done']
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      
+      containers:
+      - name: celery-beat
+        image: mycrm/backend:latest
+        imagePullPolicy: Always
+        command: ['celery', '-A', 'backend', 'beat', '-l', 'INFO', '--scheduler', 'django_celery_beat.schedulers:DatabaseScheduler']
+        
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secrets
+        
+        resources:
+          limits:
+            cpu: "500m"
+            memory: 512Mi
+          requests:
+            cpu: "100m"
+            memory: 128Mi
+        
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: celerybeat-schedule
+          mountPath: /app/celerybeat-schedule
+      
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: celerybeat-schedule
+        persistentVolumeClaim:
+          claimName: celerybeat-schedule-pvc
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: celery-worker-hpa
+  namespace: mycrm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: celery-worker
+  minReplicas: 3
+  maxReplicas: 15
+  metrics:
+  - type: External
+    external:
+      metric:
+        name: celery_queue_length
+        selector:
+          matchLabels:
+            queue: default
+      target:
+        type: AverageValue
+        averageValue: "100"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 30
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: celery-worker-pdb
+  namespace: mycrm
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: celery-worker

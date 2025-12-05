@@ -1,8 +1,8 @@
-# MyCRM - Open Source CRM Platform
+# MyCRM - Enterprise CRM Platform
 
-> **🔒 Security Hardened | 🚀 Production Ready | 🎯 Feature-Tiered**
+> **🔒 Security Hardened | 🚀 Production Ready | 🎯 Enterprise Features**
 
-A full-stack Customer Relationship Management (CRM) system built with Django REST Framework and Next.js. Now with production-grade security, proper deployment procedures, and a clear product strategy.
+A comprehensive Customer Relationship Management (CRM) platform built with Django REST Framework, Next.js, and Flutter. Delivers production-grade security, professional deployment procedures, and complete feature set for enterprise teams.
 
 ## 🎯 **NEW: Security & Architecture Updates (Nov 2025)**
 
@@ -171,7 +171,7 @@ A full-stack Customer Relationship Management (CRM) system built with Django RES
 - **Security**: bcrypt 4.1.2, cryptography 42.0.5, 2FA (pyotp 2.9.0)
 - **Documentation**: drf-spectacular 0.27.0
 
-### Frontend
+### Frontend (Web)
 - **Framework**: Next.js 14+ (React 19)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
@@ -180,6 +180,13 @@ A full-stack Customer Relationship Management (CRM) system built with Django RES
 - **Forms**: React Hook Form
 - **Animation**: Framer Motion
 - **Charts**: D3.js, Recharts
+- **Document Canvas**: Fabric.js
+
+### Mobile (Flutter)
+- **Framework**: Flutter
+- **Language**: Dart
+- **Platforms**: iOS, Android, Web, Windows, Linux, macOS
+- **UI Framework**: Flutter Material & Cupertino design
 
 ### DevOps
 - **Containerization**: Docker & Docker Compose
@@ -428,12 +435,17 @@ MyCRM/
 │   └── package.json          # Node dependencies
 │
 ├── docker-compose.yml        # Docker composition
-├── setup.sh                 # 🆕 Quick setup script
-├── FEATURES.md              # 🆕 Complete feature documentation
-├── IMPLEMENTATION_SUMMARY.md # 🆕 Implementation details
-├── api_examples.py          # 🆕 Python API usage examples
-├── .gitignore               # Git ignore rules
-└── README.md                # This file
+├── docker-compose.production.yml  # Production Docker config
+├── docker-compose.production.secure.yml  # Secure production config
+├── nginx/                    # Nginx reverse proxy configuration
+├── flutter_part/             # Flutter mobile application
+├── setup.sh                  # Quick setup script
+├── FEATURES.md               # Complete feature documentation
+├── IMPLEMENTATION_SUMMARY.md  # Implementation details
+├── api_examples.py           # Python API usage examples
+├── advanced_features_examples.py # Advanced features examples
+├── .gitignore                # Git ignore rules
+└── README.md                 # This file
 ```
 
 ## 📚 Documentation
@@ -534,6 +546,17 @@ curl http://localhost:8000/api/v1/opportunities/pipeline/ \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
+## 📱 Mobile Application
+
+The Flutter mobile application provides full access to CRM features on iOS and Android devices:
+
+- **Cross-platform support**: iOS, Android, Web, Windows, Linux, macOS
+- **Offline capabilities**: Work without internet connection
+- **Native performance**: Direct access to device features
+- **Consistent experience**: Same data and features as web application
+
+For mobile app development and deployment, see `flutter_part/README.md`
+
 ## 🔐 Authentication
 
 The API uses JWT (JSON Web Tokens) for authentication:
@@ -584,11 +607,7 @@ The API uses JWT (JSON Web Tokens) for authentication:
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Internal contributions and improvements are welcome. Contact the development team for access and contribution guidelines.
 
 ## 📝 License
 
@@ -602,15 +621,14 @@ Please check the [Issues](https://github.com/yourusername/mycrm/issues) page for
 
 For support, email support@yourcrm.com or open an issue on GitHub.
 
-## 👥 Authors
+## 👥 Development Team
 
-- Your Name - [GitHub Profile](https://github.com/yourusername)
+- Developed by: Faizanmal Team
 
 ## 🙏 Acknowledgments
 
-- Django REST Framework team
-- Next.js team
-- All open-source contributors
+- Built with Django REST Framework and Next.js
+- Powered by modern open-source technologies
 
 ## 📈 Roadmap
 
@@ -631,15 +649,15 @@ For support, email support@yourcrm.com or open an issue on GitHub.
 - [x] Email campaign management
 
 ### 🔄 Future Enhancements
-- [ ] Mobile app (React Native)
-- [ ] Advanced AI predictions (revenue forecasting, lead scoring)
-- [ ] Integration with more third-party services (Salesforce, HubSpot)
-- [ ] Advanced workflow builder UI
+- [ ] Advanced AI predictions (revenue forecasting, predictive analytics)
+- [ ] Additional third-party service integrations
 - [ ] Video conferencing integration
-- [ ] Advanced reporting and business intelligence
-- [ ] API marketplace for custom integrations
-- [ ] Enhanced reporting dashboards
+- [ ] Advanced business intelligence dashboards
+- [ ] Custom API marketplace
+- [ ] Enhanced mobile capabilities
+- [ ] Real-time collaboration features
+- [ ] Advanced workflow visualizations
 
 ---
 
-Made with ❤️ by Your Team
+**MyCRM** - Enterprise CRM for Modern Sales Teams

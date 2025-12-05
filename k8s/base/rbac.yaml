@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mycrm-backend
+  namespace: mycrm
+  annotations:
+    iam.gke.io/gcp-service-account: mycrm-backend@project-id.iam.gserviceaccount.com
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mycrm-frontend
+  namespace: mycrm
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mycrm-celery
+  namespace: mycrm
+  annotations:
+    iam.gke.io/gcp-service-account: mycrm-celery@project-id.iam.gserviceaccount.com
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mycrm-backend-role
+  namespace: mycrm
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mycrm-backend-rolebinding
+  namespace: mycrm
+subjects:
+- kind: ServiceAccount
+  name: mycrm-backend
+  namespace: mycrm
+roleRef:
+  kind: Role
+  name: mycrm-backend-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mycrm-celery-role
+  namespace: mycrm
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mycrm-celery-rolebinding
+  namespace: mycrm
+subjects:
+- kind: ServiceAccount
+  name: mycrm-celery
+  namespace: mycrm
+roleRef:
+  kind: Role
+  name: mycrm-celery-role
+  apiGroup: rbac.authorization.k8s.io

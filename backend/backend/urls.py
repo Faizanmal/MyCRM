@@ -68,6 +68,13 @@ urlpatterns = [
     path('api/v1/conversation-intelligence/', include('conversation_intelligence.urls')),
     path('api/v1/white-label/', include('white_label.urls')),
     path('api/v1/customer-success/', include('customer_success.urls')),
+    
+    # AI Workflow Automation Features
+    path('api/v1/email-sequences/', include('email_sequence_automation.urls')),
+    path('api/v1/lead-routing/', include('predictive_lead_routing.urls')),
+    path('api/v1/data-enrichment/', include('data_enrichment.urls')),
+    path('api/v1/voice-intelligence/', include('voice_intelligence.urls')),
+    path('api/v1/scheduling/ai/', include('smart_scheduling.ai_urls')),
 ]
 
 if settings.DEBUG:
