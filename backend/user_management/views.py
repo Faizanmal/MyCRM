@@ -9,12 +9,15 @@ from django_ratelimit.decorators import ratelimit
 import qrcode
 import io
 import base64
-from .models import User, Permission, RolePermission, AuditLog
+from django.contrib.auth import get_user_model
+from .models import Permission, RolePermission, AuditLog
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
     LoginSerializer, PasswordChangeSerializer, TwoFactorVerifySerializer, PermissionSerializer, RolePermissionSerializer,
     AuditLogSerializer
 )
+
+User = get_user_model()
 
 
 @method_decorator(ratelimit(key='ip', rate='10/h', block=True), name='post')
@@ -26,15 +29,18 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         
-        # Require admins to have 2FA enabled
-        if getattr(user, 'role', None) == 'admin' and not getattr(user, 'two_factor_enabled', False):
+        # Require admins to have 2FA enabled (if using custom User model)
+        user_role = getattr(user, 'role', None)
+        two_factor_enabled = getattr(user, 'two_factor_enabled', False)
+        
+        if user_role == 'admin' and not two_factor_enabled:
             return Response(
                 {'error': 'Admin accounts must have 2FA enabled. Please set up 2FA before logging in.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
         # Check if 2FA is enabled for regular users
-        if user.two_factor_enabled:
+        if two_factor_enabled:
             # Generate temporary token for 2FA verification
             temp_token = RefreshToken.for_user(user)
             return Response({
@@ -87,7 +93,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Users can only see users in their organization or themselves
-        if self.request.user.role == 'admin':
+        if getattr(self.request.user, 'role', None) == 'admin' or self.request.user.is_superuser:
             return User.objects.all()
         return User.objects.filter(id=self.request.user.id)
     
@@ -134,7 +140,7 @@ class UserViewSet(viewsets.ModelViewSet):
         """Setup 2FA for user"""
         user = request.user
         
-        if user.two_factor_enabled:
+        if getattr(user, 'two_factor_enabled', False):
             return Response(
                 {'error': '2FA is already enabled'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -174,7 +180,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user = request.user
         token = serializer.validated_data['token']
         
-        if not user.two_factor_secret:
+        if not getattr(user, 'two_factor_secret', None):
             return Response(
                 {'error': '2FA setup not initiated'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -255,6 +261,6 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         # Users can only see their own audit logs unless they're admin
-        if self.request.user.role == 'admin':
+        if getattr(self.request.user, 'role', None) == 'admin' or self.request.user.is_superuser:
             return AuditLog.objects.all()
         return AuditLog.objects.filter(user=self.request.user)

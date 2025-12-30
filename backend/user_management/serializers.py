@@ -1,7 +1,9 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
-from .models import User, UserProfile, Permission, RolePermission, AuditLog
+from .models import UserProfile, Permission, RolePermission, AuditLog
+
+User = get_user_model()
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -12,16 +14,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
-    full_name = serializers.ReadOnlyField()
+    full_name = serializers.ReadOnlyField(source='get_full_name')
+    role = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 'full_name',
-            'role', 'phone', 'avatar', 'department', 'is_active', 'profile',
-            'last_login', 'date_joined', 'created_at', 'updated_at'
+            'role', 'is_active', 'profile',
+            'last_login', 'date_joined'
         ]
-        read_only_fields = ['id', 'last_login', 'date_joined', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'last_login', 'date_joined']
+
+    def get_role(self, obj):
+        if obj.is_superuser:
+            return 'admin'
+        # Fallback or check groups/profile if we implemented that
+        return getattr(obj, 'role', 'user')
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -32,7 +41,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'username', 'email', 'first_name', 'last_name', 'password',
-            'password_confirm', 'role', 'phone', 'department'
+            'password_confirm'
         ]
     
     def validate(self, attrs):
@@ -53,8 +62,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'first_name', 'last_name', 'email', 'phone', 'avatar',
-            'department', 'is_active'
+            'first_name', 'last_name', 'email', 'is_active'
         ]
 
 

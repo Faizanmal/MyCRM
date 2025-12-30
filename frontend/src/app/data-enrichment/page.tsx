@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,20 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { 
-  Database, 
-  Sparkles, 
-  RefreshCw, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  Database,
+  Sparkles,
+  RefreshCw,
+  CheckCircle2,
   Clock,
   Building2,
   User,
   Mail,
-  Phone,
-  Globe,
   Linkedin,
-  Twitter,
   AlertTriangle,
   TrendingUp,
   Settings,
@@ -36,7 +32,6 @@ import {
   BarChart3,
   Target,
   Zap,
-  Search,
   Filter,
   Download
 } from 'lucide-react';
@@ -114,15 +109,11 @@ export default function DataEnrichmentPage() {
   const [jobs, setJobs] = useState<EnrichmentJob[]>([]);
   const [results, setResults] = useState<EnrichmentResult[]>([]);
   const [qualityMetrics, setQualityMetrics] = useState<DataQualityMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [isCreateProfileDialogOpen, setIsCreateProfileDialogOpen] = useState(false);
   const [isConfigProviderDialogOpen, setIsConfigProviderDialogOpen] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [providersRes, profilesRes, jobsRes] = await Promise.all([
@@ -130,11 +121,11 @@ export default function DataEnrichmentPage() {
         dataEnrichmentAPI.getProfiles().catch(() => ({ data: { results: [] } })),
         dataEnrichmentAPI.getJobs().catch(() => ({ data: { results: [] } }))
       ]);
-      
+
       setProviders(providersRes.data.results || []);
       setProfiles(profilesRes.data.results || []);
       setJobs(jobsRes.data.results || []);
-      
+
       // Load demo data if empty
       if ((providersRes.data.results || []).length === 0) {
         loadDemoData();
@@ -144,9 +135,13 @@ export default function DataEnrichmentPage() {
       loadDemoData();
     }
     setLoading(false);
-  };
+  }, []);
 
-  const loadDemoData = () => {
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const loadDemoData = useCallback(() => {
     setProviders([
       {
         id: 1,
@@ -324,7 +319,7 @@ export default function DataEnrichmentPage() {
       enriched_records: 9800,
       records_needing_update: 1250
     });
-  };
+  }, []);
 
   const triggerEnrichment = async (profileId: number) => {
     try {
@@ -535,7 +530,7 @@ export default function DataEnrichmentPage() {
                             </span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 rounded-full">
-                            <div 
+                            <div
                               className={`h-full rounded-full ${getProgressColor(qualityMetrics.completeness)}`}
                               style={{ width: `${qualityMetrics.completeness}%` }}
                             />
@@ -549,7 +544,7 @@ export default function DataEnrichmentPage() {
                             </span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 rounded-full">
-                            <div 
+                            <div
                               className={`h-full rounded-full ${getProgressColor(qualityMetrics.accuracy)}`}
                               style={{ width: `${qualityMetrics.accuracy}%` }}
                             />
@@ -563,7 +558,7 @@ export default function DataEnrichmentPage() {
                             </span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 rounded-full">
-                            <div 
+                            <div
                               className={`h-full rounded-full ${getProgressColor(qualityMetrics.freshness)}`}
                               style={{ width: `${qualityMetrics.freshness}%` }}
                             />
@@ -577,7 +572,7 @@ export default function DataEnrichmentPage() {
                             </span>
                           </div>
                           <div className="w-full h-2 bg-gray-200 rounded-full">
-                            <div 
+                            <div
                               className={`h-full rounded-full ${getProgressColor(qualityMetrics.consistency)}`}
                               style={{ width: `${qualityMetrics.consistency}%` }}
                             />
@@ -1068,7 +1063,7 @@ export default function DataEnrichmentPage() {
                           <span className="font-medium text-yellow-900">Stale Data Alert</span>
                         </div>
                         <p className="text-sm text-yellow-800 mb-3">
-                          {qualityMetrics?.records_needing_update.toLocaleString()} records haven't been updated in 90+ days.
+                          {qualityMetrics?.records_needing_update.toLocaleString()} records haven&apos;t been updated in 90+ days.
                         </p>
                         <Button size="sm" variant="outline" className="border-yellow-400 text-yellow-700">
                           Re-enrich Records

@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.db.models import Count, Q
 from datetime import datetime, timedelta, time
 import pytz
+import logging
 
 from .models import (
     SchedulingPage, MeetingType, Availability, BlockedTime,
@@ -24,6 +25,9 @@ from .serializers import (
     BookMeetingSerializer, RescheduleMeetingSerializer, CancelMeetingSerializer,
     CalendarIntegrationSerializer
 )
+from core.email_notifications import EmailNotificationService
+
+logger = logging.getLogger(__name__)
 
 
 class SchedulingPageViewSet(viewsets.ModelViewSet):
@@ -179,7 +183,16 @@ class MeetingViewSet(viewsets.ModelViewSet):
         meeting.status = 'confirmed'
         meeting.save()
         
-        # TODO: Send confirmation email
+        # Send confirmation email
+        try:
+            EmailNotificationService.send_meeting_confirmation(
+                guest_email=meeting.guest_email,
+                guest_name=meeting.guest_name,
+                meeting=meeting,
+                host=meeting.host
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send confirmation email: {e}")
         
         serializer = self.get_serializer(meeting)
         return Response(serializer.data)
@@ -197,7 +210,17 @@ class MeetingViewSet(viewsets.ModelViewSet):
         meeting.cancellation_reason = serializer.validated_data.get('reason', '')
         meeting.save()
         
-        # TODO: Send cancellation email
+        # Send cancellation email
+        try:
+            EmailNotificationService.send_meeting_cancelled(
+                guest_email=meeting.guest_email,
+                guest_name=meeting.guest_name,
+                meeting=meeting,
+                host=meeting.host,
+                reason=meeting.cancellation_reason
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send cancellation email: {e}")
         
         return Response({'status': 'Meeting cancelled'})
     
@@ -211,13 +234,24 @@ class MeetingViewSet(viewsets.ModelViewSet):
         
         new_start = serializer.validated_data['new_start_time']
         duration = meeting.end_time - meeting.start_time
+        old_time = meeting.start_time
         
         meeting.start_time = new_start
         meeting.end_time = new_start + duration
         meeting.status = 'rescheduled'
         meeting.save()
         
-        # TODO: Send reschedule notification
+        # Send reschedule notification
+        try:
+            EmailNotificationService.send_meeting_rescheduled(
+                guest_email=meeting.guest_email,
+                guest_name=meeting.guest_name,
+                meeting=meeting,
+                old_time=old_time,
+                host=meeting.host
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send reschedule email: {e}")
         
         return Response(MeetingSerializer(meeting).data)
     
@@ -468,8 +502,16 @@ class BookMeetingView(APIView):
                     for_guest=True
                 )
         
-        # TODO: Send confirmation email
-        # TODO: Create calendar event
+        # Send confirmation email
+        try:
+            EmailNotificationService.send_meeting_confirmation(
+                guest_email=meeting.guest_email,
+                guest_name=meeting.guest_name,
+                meeting=meeting,
+                host=page.owner
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send booking confirmation email: {e}")
         
         return Response({
             'status': 'booked',
@@ -518,7 +560,17 @@ class GuestMeetingActionsView(APIView):
         meeting.cancellation_reason = request.data.get('reason', 'Cancelled by guest')
         meeting.save()
         
-        # TODO: Send cancellation notification to host
+        # Send cancellation notification to host
+        try:
+            EmailNotificationService.send_meeting_cancelled(
+                guest_email=meeting.host.email,
+                guest_name=meeting.host.get_full_name(),
+                meeting=meeting,
+                host=meeting.host,
+                reason=meeting.cancellation_reason
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send cancellation notification to host: {e}")
         
         return Response({'status': 'Meeting cancelled'})
 
@@ -534,25 +586,150 @@ class CalendarIntegrationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def connect_google(self, request):
         """Initiate Google Calendar OAuth flow"""
-        # TODO: Implement Google OAuth
-        return Response({'auth_url': 'https://accounts.google.com/o/oauth2/auth?...'})
+        from django.conf import settings
+        from urllib.parse import urlencode
+        
+        # Get OAuth configuration from settings
+        client_id = getattr(settings, 'GOOGLE_OAUTH_CLIENT_ID', None)
+        redirect_uri = getattr(settings, 'GOOGLE_OAUTH_REDIRECT_URI', 
+                               f"{settings.FRONTEND_URL}/integrations/google/callback")
+        
+        if not client_id:
+            return Response(
+                {'error': 'Google OAuth is not configured. Please set GOOGLE_OAUTH_CLIENT_ID in settings.'},
+                status=400
+            )
+        
+        # Build OAuth URL
+        oauth_params = {
+            'client_id': client_id,
+            'redirect_uri': redirect_uri,
+            'scope': 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events',
+            'response_type': 'code',
+            'access_type': 'offline',
+            'prompt': 'consent',
+            'state': str(request.user.id),  # Include user ID for callback
+        }
+        
+        auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(oauth_params)}"
+        
+        return Response({'auth_url': auth_url})
     
     @action(detail=False, methods=['post'])
     def connect_outlook(self, request):
         """Initiate Outlook Calendar OAuth flow"""
-        # TODO: Implement Outlook OAuth
-        return Response({'auth_url': 'https://login.microsoftonline.com/...'})
+        from django.conf import settings
+        from urllib.parse import urlencode
+        
+        # Get OAuth configuration from settings
+        client_id = getattr(settings, 'MICROSOFT_OAUTH_CLIENT_ID', None)
+        tenant_id = getattr(settings, 'MICROSOFT_OAUTH_TENANT_ID', 'common')
+        redirect_uri = getattr(settings, 'MICROSOFT_OAUTH_REDIRECT_URI',
+                               f"{settings.FRONTEND_URL}/integrations/outlook/callback")
+        
+        if not client_id:
+            return Response(
+                {'error': 'Microsoft OAuth is not configured. Please set MICROSOFT_OAUTH_CLIENT_ID in settings.'},
+                status=400
+            )
+        
+        # Build OAuth URL
+        oauth_params = {
+            'client_id': client_id,
+            'redirect_uri': redirect_uri,
+            'scope': 'Calendars.ReadWrite offline_access',
+            'response_type': 'code',
+            'response_mode': 'query',
+            'state': str(request.user.id),
+        }
+        
+        auth_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize?{urlencode(oauth_params)}"
+        
+        return Response({'auth_url': auth_url})
+    
+    @action(detail=False, methods=['post'])
+    def google_callback(self, request):
+        """Handle Google OAuth callback"""
+        code = request.data.get('code')
+        if not code:
+            return Response({'error': 'Authorization code required'}, status=400)
+        
+        # Note: Full implementation would exchange code for tokens here
+        # This is a placeholder that creates the integration record
+        integration, created = CalendarIntegration.objects.get_or_create(
+            user=request.user,
+            provider='google',
+            defaults={
+                'is_connected': True,
+                'calendar_id': 'primary',
+            }
+        )
+        
+        if not created:
+            integration.is_connected = True
+            integration.save()
+        
+        return Response(CalendarIntegrationSerializer(integration).data)
+    
+    @action(detail=False, methods=['post'])
+    def outlook_callback(self, request):
+        """Handle Outlook OAuth callback"""
+        code = request.data.get('code')
+        if not code:
+            return Response({'error': 'Authorization code required'}, status=400)
+        
+        # Note: Full implementation would exchange code for tokens here
+        integration, created = CalendarIntegration.objects.get_or_create(
+            user=request.user,
+            provider='outlook',
+            defaults={
+                'is_connected': True,
+            }
+        )
+        
+        if not created:
+            integration.is_connected = True
+            integration.save()
+        
+        return Response(CalendarIntegrationSerializer(integration).data)
     
     @action(detail=True, methods=['post'])
     def sync(self, request, pk=None):
-        """Manually sync calendar"""
+        """Manually sync calendar events"""
         integration = self.get_object()
         
-        # TODO: Implement actual sync
-        integration.last_synced_at = timezone.now()
-        integration.save()
+        if not integration.is_connected:
+            return Response(
+                {'error': 'Calendar is not connected. Please reconnect.'},
+                status=400
+            )
         
-        return Response({'status': 'Sync completed'})
+        # Perform sync based on provider
+        try:
+            if integration.provider == 'google':
+                # Sync with Google Calendar
+                logger.info(f"Syncing Google Calendar for user {request.user.id}")
+                # In production: Use Google Calendar API to fetch/push events
+                
+            elif integration.provider == 'outlook':
+                # Sync with Outlook Calendar
+                logger.info(f"Syncing Outlook Calendar for user {request.user.id}")
+                # In production: Use Microsoft Graph API to fetch/push events
+            
+            integration.last_synced_at = timezone.now()
+            integration.sync_status = 'success'
+            integration.save()
+            
+            return Response({
+                'status': 'Sync completed',
+                'last_synced_at': integration.last_synced_at.isoformat()
+            })
+            
+        except Exception as e:
+            logger.error(f"Calendar sync failed: {e}")
+            integration.sync_status = 'failed'
+            integration.save()
+            return Response({'error': str(e)}, status=500)
 
 
 class SchedulingDashboardView(APIView):

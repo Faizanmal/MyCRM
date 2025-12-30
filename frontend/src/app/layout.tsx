@@ -6,6 +6,13 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { QueryProvider } from "@/components/QueryProvider";
 import { RealtimeProvider } from "@/components/enterprise/RealtimeProvider";
 import InstallPrompt from "@/components/InstallPrompt";
+import CommandPalette from "@/components/CommandPalette";
+import FloatingAIAssistant from "@/components/FloatingAIAssistant";
+import { AchievementProvider } from "@/components/AchievementToast";
+import KeyboardShortcutsModal from "@/components/KeyboardShortcutsModal";
+import ProductTour from "@/components/ProductTour";
+import QuickActionsFab from "@/components/QuickActionsFab";
+import OnboardingChecklist from "@/components/OnboardingChecklist";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,10 +71,18 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              <RealtimeProvider>
-                {children}
-                <InstallPrompt />
-              </RealtimeProvider>
+              <AchievementProvider>
+                <RealtimeProvider>
+                  {children}
+                  <CommandPalette />
+                  <FloatingAIAssistant />
+                  <InstallPrompt />
+                  <KeyboardShortcutsModal />
+                  <ProductTour />
+                  <QuickActionsFab />
+                  <OnboardingChecklist />
+                </RealtimeProvider>
+              </AchievementProvider>
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

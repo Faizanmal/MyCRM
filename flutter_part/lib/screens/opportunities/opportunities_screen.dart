@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../models/crm_models.dart';
+import 'opportunity_detail_screen.dart';
+import 'add_opportunity_screen.dart';
 
 class OpportunitiesScreen extends StatefulWidget {
   const OpportunitiesScreen({super.key});
@@ -59,6 +61,30 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
     });
   }
   
+  void _navigateToAddOpportunity() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddOpportunityScreen()),
+    );
+    
+    if (result == true) {
+      _loadOpportunities();
+    }
+  }
+  
+  void _navigateToOpportunityDetail(Opportunity opportunity) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OpportunityDetailScreen(opportunity: opportunity),
+      ),
+    );
+    
+    if (result == true) {
+      _loadOpportunities();
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,9 +105,7 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
                     ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to add opportunity screen
-        },
+        onPressed: _navigateToAddOpportunity,
         child: const Icon(Icons.add),
       ),
     );
@@ -91,19 +115,22 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
     Color stageColor = _getStageColor(opportunity.stage ?? '');
     
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.paddingMd),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    opportunity.name,
-                    style: const TextStyle(
-                      fontSize: AppSizes.fontLg,
-                      fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: () => _navigateToOpportunityDetail(opportunity),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSizes.paddingMd),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      opportunity.name,
+                      style: const TextStyle(
+                        fontSize: AppSizes.fontLg,
+                        fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -233,6 +260,7 @@ class _OpportunitiesScreenState extends State<OpportunitiesScreen> {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

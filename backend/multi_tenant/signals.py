@@ -2,8 +2,10 @@ from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from .models import Organization, OrganizationMember, OrganizationInvitation
+import logging
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender=Organization)
@@ -31,15 +33,12 @@ def send_invitation_email(sender, instance, created, **kwargs):
     Send an email when a new invitation is created.
     """
     if created and instance.status == 'pending':
-        # TODO: Send invitation email
-        # from django.core.mail import send_mail
-        # send_mail(
-        #     subject=f'Invitation to join {instance.organization.name}',
-        #     message=f'You have been invited to join {instance.organization.name}...',
-        #     from_email='noreply@mycrm.com',
-        #     recipient_list=[instance.email],
-        # )
-        pass
+        try:
+            from core.email_notifications import EmailNotificationService
+            EmailNotificationService.send_organization_invitation(instance)
+            logger.info(f"Invitation email sent to {instance.email} for org {instance.organization.name}")
+        except Exception as e:
+            logger.error(f"Failed to send invitation email to {instance.email}: {e}")
 
 
 @receiver(pre_delete, sender=OrganizationMember)

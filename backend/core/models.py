@@ -714,3 +714,14 @@ class EmailCampaign(models.Model):
     
     def __str__(self):
         return self.name
+
+
+# Import settings models to make them available from core.models
+from .settings_models import (  # noqa: E402, F401
+    UserPreference,
+    NotificationPreference,
+    NotificationTypeSetting,
+    ExportJob,
+    UserRole,
+    UserRoleAssignment,
+)

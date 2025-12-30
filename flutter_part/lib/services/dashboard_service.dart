@@ -6,7 +6,7 @@ class DashboardService {
   
   Future<Map<String, dynamic>?> getDashboardStats() async {
     try {
-      final response = await _apiClient.get(ApiConstants.dashboardStats);
+      final response = await _apiClient.get(ApiConstants.dashboardMetrics);
       
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
@@ -20,7 +20,7 @@ class DashboardService {
   
   Future<Map<String, dynamic>?> getDashboardCharts() async {
     try {
-      final response = await _apiClient.get(ApiConstants.dashboardCharts);
+      final response = await _apiClient.get(ApiConstants.salesPipeline);
       
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
@@ -35,7 +35,7 @@ class DashboardService {
   Future<List<Map<String, dynamic>>> getRecentActivity({int limit = 10}) async {
     try {
       final response = await _apiClient.get(
-        '${ApiConstants.dashboardStats}recent-activity/',
+        ApiConstants.activityFeed,
         queryParameters: {'limit': limit.toString()},
       );
       

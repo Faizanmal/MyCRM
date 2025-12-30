@@ -32,7 +32,8 @@ class LeadViewSet(viewsets.ModelViewSet):
         queryset = Lead.objects.all()
         
         # Filter by assigned user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(assigned_to=self.request.user) | Q(owner=self.request.user)
             )
@@ -144,7 +145,8 @@ class LeadViewSet(viewsets.ModelViewSet):
         
         # Check permissions
         leads = Lead.objects.filter(id__in=lead_ids)
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             leads = leads.filter(
                 Q(assigned_to=self.request.user) | Q(owner=self.request.user)
             )
@@ -169,7 +171,8 @@ class LeadViewSet(viewsets.ModelViewSet):
         
         # Check permissions
         leads = Lead.objects.filter(id__in=lead_ids)
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             leads = leads.filter(
                 Q(assigned_to=self.request.user) | Q(owner=self.request.user)
             )
@@ -198,7 +201,8 @@ class LeadActivityViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(lead_id=lead_id)
         
         # Filter by user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(user=self.request.user) | Q(lead__assigned_to=self.request.user)
             )
@@ -230,7 +234,8 @@ class LeadConversionViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         # Users can only see conversions they made or for their leads
-        if self.request.user.role == 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role == 'admin' or self.request.user.is_superuser:
             return LeadConversion.objects.all()
         return LeadConversion.objects.filter(
             Q(converted_by=self.request.user) | 

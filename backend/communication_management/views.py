@@ -34,7 +34,8 @@ class CommunicationViewSet(viewsets.ModelViewSet):
         queryset = Communication.objects.all()
         
         # Filter by user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(from_user=self.request.user) | Q(to_user=self.request.user)
             )
@@ -127,7 +128,8 @@ class CommunicationViewSet(viewsets.ModelViewSet):
         
         # Check permissions
         communications = Communication.objects.filter(id__in=communication_ids)
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             communications = communications.filter(
                 Q(from_user=self.request.user) | Q(to_user=self.request.user)
             )
@@ -252,6 +254,7 @@ class CommunicationLogViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         # Users can only see logs for rules they created
-        if self.request.user.role == 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role == 'admin' or self.request.user.is_superuser:
             return CommunicationLog.objects.all()
         return CommunicationLog.objects.filter(rule__created_by=self.request.user)

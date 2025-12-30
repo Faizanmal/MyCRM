@@ -41,7 +41,8 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = AuditLog.objects.all()
         
         # Non-admin users can only see their own audit logs
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(user=self.request.user)
         
         # Filter by date range
@@ -63,7 +64,8 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def security_summary(self, request):
         """Get security summary from audit logs"""
-        if request.user.role != 'admin':
+        user_role = getattr(request.user, 'role', None)
+        if user_role != 'admin' and not request.user.is_superuser:
             return Response(
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -111,12 +113,14 @@ class SystemConfigurationViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Only admins can access system configuration
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             return SystemConfiguration.objects.none()
         return SystemConfiguration.objects.all()
     
     def perform_create(self, serializer):
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             raise permissions.PermissionDenied("Admin access required")
         
         serializer.save(created_by=self.request.user)
@@ -139,7 +143,8 @@ class APIKeyViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Users can only see their own API keys, admins see all
-        if self.request.user.role == 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role == 'admin' or self.request.user.is_superuser:
             return APIKey.objects.all()
         return APIKey.objects.filter(user=self.request.user)
     
@@ -194,14 +199,16 @@ class DataBackupViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         # Only admins can access backup information
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             return DataBackup.objects.none()
         return DataBackup.objects.all()
     
     @action(detail=False, methods=['post'])
     def create_backup(self, request):
         """Initiate a new backup"""
-        if request.user.role != 'admin':
+        user_role = getattr(request.user, 'role', None)
+        if user_role != 'admin' and not request.user.is_superuser:
             return Response(
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -242,7 +249,8 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Users can see workflows they created or if they're admin
-        if self.request.user.role == 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role == 'admin' or self.request.user.is_superuser:
             return Workflow.objects.all()
         return Workflow.objects.filter(created_by=self.request.user)
     
@@ -279,7 +287,8 @@ class WorkflowExecutionViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         # Users can see executions of their workflows or if they're admin
-        if self.request.user.role == 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role == 'admin' or self.request.user.is_superuser:
             return WorkflowExecution.objects.all()
         return WorkflowExecution.objects.filter(workflow__created_by=self.request.user)
 
@@ -296,7 +305,8 @@ class IntegrationViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Users can see integrations they created or if they're admin
-        if self.request.user.role == 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role == 'admin' or self.request.user.is_superuser:
             return Integration.objects.all()
         return Integration.objects.filter(created_by=self.request.user)
     
@@ -337,7 +347,8 @@ class NotificationTemplateViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Users can see templates they created or if they're admin
-        if self.request.user.role == 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role == 'admin' or self.request.user.is_superuser:
             return NotificationTemplate.objects.all()
         return NotificationTemplate.objects.filter(created_by=self.request.user)
 
@@ -351,7 +362,8 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         # Only admins can access system health data
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             return SystemHealth.objects.none()
         
         # Get latest health check for each component
@@ -373,7 +385,8 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def dashboard(self, request):
         """Get system health dashboard data"""
-        if request.user.role != 'admin':
+        user_role = getattr(request.user, 'role', None)
+        if user_role != 'admin' and not request.user.is_superuser:
             return Response(
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -409,7 +422,8 @@ class SecurityDashboardViewSet(viewsets.ViewSet):
     
     def list(self, request):
         """Get security dashboard data"""
-        if request.user.role != 'admin':
+        user_role = getattr(request.user, 'role', None)
+        if user_role != 'admin' and not request.user.is_superuser:
             return Response(
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -461,7 +475,8 @@ class AdvancedAnalyticsViewSet(viewsets.ViewSet):
     
     def list(self, request):
         """Get advanced analytics data"""
-        if request.user.role not in ['admin', 'manager']:
+        user_role = getattr(request.user, 'role', None)
+        if user_role not in ['admin', 'manager'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -549,7 +564,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
             lead = Lead.objects.get(id=lead_id)
             
             # Check permissions
-            if request.user.role not in ['admin', 'manager'] and lead.assigned_to != request.user:
+            user_role = getattr(request.user, 'role', None)
+            if user_role not in ['admin', 'manager'] and not request.user.is_superuser and lead.assigned_to != request.user:
                 return Response(
                     {'error': 'Permission denied'},
                     status=status.HTTP_403_FORBIDDEN
@@ -567,7 +583,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def customer_segmentation(self, request):
         """Get customer segmentation analysis"""
-        if request.user.role not in ['admin', 'manager']:
+        user_role = getattr(request.user, 'role', None)
+        if user_role not in ['admin', 'manager'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -579,7 +596,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def churn_prediction(self, request):
         """Get churn risk predictions"""
-        if request.user.role not in ['admin', 'manager']:
+        user_role = getattr(request.user, 'role', None)
+        if user_role not in ['admin', 'manager'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -612,7 +630,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def ai_insights_dashboard(self, request):
         """Get comprehensive AI insights dashboard"""
-        if request.user.role not in ['admin', 'manager']:
+        user_role = getattr(request.user, 'role', None)
+        if user_role not in ['admin', 'manager'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
@@ -633,7 +652,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
         """Get comprehensive pipeline analytics"""
         from .ai_analytics import PipelineAnalytics
         
-        if request.user.role not in ['admin', 'manager', 'sales_rep']:
+        user_role = getattr(request.user, 'role', None)
+        if user_role not in ['admin', 'manager', 'sales_rep'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Insufficient permissions'},
                 status=status.HTTP_403_FORBIDDEN
@@ -652,7 +672,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def detailed_sales_forecast(self, request):
         """Get detailed sales forecast with role-based access"""
-        if request.user.role not in ['admin', 'manager']:
+        user_role = getattr(request.user, 'role', None)
+        if user_role not in ['admin', 'manager'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN

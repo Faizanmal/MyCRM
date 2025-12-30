@@ -11,6 +11,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Create a client with enterprise defaults
+function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -50,8 +51,6 @@ function getQueryClient() {
   }
 }
 
-export function QueryProvider({ children }: { children: React.ReactNode }) {
-  const queryClient = getQueryClient();
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 

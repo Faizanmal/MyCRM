@@ -7,7 +7,7 @@ from .views import LeadViewSet, ContactViewSet, OpportunityViewSet, TaskViewSet
 from .import_export import CSVImportView, CSVExportView
 from .scoring import LeadScoringView
 from .workflows import WorkflowViewSet, NotificationTemplateViewSet
-from .analytics import SalesForecastView, ConversionFunnelView, CohortAnalysisView, CustomMetricsView
+from .analytics import SalesForecastView, ConversionFunnelView, CohortAnalysisView, CustomMetricsView, DashboardAnalyticsView
 from .email_campaigns import EmailTemplateViewSet, EmailCampaignViewSet
 from .audit_dashboard import (
     AuditTrailViewSet, FieldHistoryViewSet, 
@@ -59,10 +59,15 @@ urlpatterns = [
     path('analytics/funnel/', ConversionFunnelView.as_view(), name='analytics-funnel'),
     path('analytics/cohort/', CohortAnalysisView.as_view(), name='analytics-cohort'),
     path('analytics/metrics/', CustomMetricsView.as_view(), name='analytics-metrics'),
+    path('analytics/dashboard/', DashboardAnalyticsView.as_view(), name='analytics-dashboard'),
     
     # Activity timeline endpoints
     path('timeline/', ActivityTimelineView.as_view(), name='activity-timeline'),
     path('timeline/<str:entity_type>/<int:entity_id>/', EntityTimelineView.as_view(), name='entity-timeline'),
     path('timeline/user/', UserActivityView.as_view(), name='user-activity'),
     path('timeline/user/<int:user_id>/', UserActivityView.as_view(), name='user-activity-by-id'),
+    
+    # Interactive features (user preferences, onboarding, AI recommendations, search)
+    path('interactive/', include('core.interactive_urls')),
 ]
+

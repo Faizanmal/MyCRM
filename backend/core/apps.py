@@ -13,3 +13,13 @@ class CoreConfig(AppConfig):
     def ready(self):
         """Initialize the app when Django starts"""
         # Import signal handlers
+        try:
+            from . import signals  # noqa: F401
+        except ImportError:
+            pass
+        
+        # Import notification signal handlers
+        try:
+            from . import notification_signals  # noqa: F401
+        except ImportError:
+            pass

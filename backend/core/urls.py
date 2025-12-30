@@ -25,6 +25,14 @@ router.register(r'email-templates', EmailTemplateViewSet, basename='email-templa
 
 urlpatterns = [
     path('', include(router.urls)),
+    # Authentication APIs
+    path('auth/', include('core.auth_urls')),
+    # Settings and RBAC APIs
+    path('settings/', include('core.settings_urls')),
+    # Health check endpoints
+    path('', include('core.health_urls')),
+    # Interactive features APIs
+    path('interactive/', include('core.interactive_urls')),
     # Analytics endpoints (legacy compatibility)
     path('analytics/ai_insights_dashboard/', views.AIAnalyticsViewSet.as_view({'get': 'ai_insights_dashboard'}), name='ai-insights-dashboard'),
     path('analytics/sales_forecast/', views.AIAnalyticsViewSet.as_view({'get': 'sales_forecast'}), name='sales-forecast'),

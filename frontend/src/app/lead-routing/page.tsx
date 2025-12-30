@@ -36,9 +36,7 @@ import {
   Target,
   TrendingUp,
   Clock,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
+
   RefreshCw,
   Plus,
   Search,
@@ -46,16 +44,11 @@ import {
   BarChart3,
   ArrowRight,
   Shuffle,
-  Filter,
   MoreVertical,
   Zap,
   Award,
-  Briefcase,
   MapPin,
   Building2,
-  Star,
-  ThumbsUp,
-  ThumbsDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { leadRoutingAPI } from '@/lib/ai-workflow-api';

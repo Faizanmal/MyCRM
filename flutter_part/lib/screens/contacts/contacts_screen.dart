@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/crm_models.dart';
+import 'contact_detail_screen.dart';
+import 'add_contact_screen.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -62,6 +64,30 @@ class _ContactsScreenState extends State<ContactsScreen> {
     });
   }
   
+  void _navigateToAddContact() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddContactScreen()),
+    );
+    
+    if (result == true) {
+      _loadContacts();
+    }
+  }
+  
+  void _navigateToContactDetail(Contact contact) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ContactDetailScreen(contact: contact),
+      ),
+    );
+    
+    if (result == true) {
+      _loadContacts();
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,9 +108,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to add contact screen
-        },
+        onPressed: _navigateToAddContact,
         child: const Icon(Icons.add),
       ),
     );
@@ -147,9 +171,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
         ),
         isThreeLine: true,
-        onTap: () {
-          // TODO: Navigate to contact detail screen
-        },
+        onTap: () => _navigateToContactDetail(contact),
       ),
     );
   }

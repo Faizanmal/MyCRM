@@ -46,7 +46,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
         document = self.get_object()
         
         # Check permissions
-        if document.access_level == 'restricted' and request.user.role not in ['admin', 'manager']:
+        # Check permissions
+        user_role = getattr(request.user, 'role', None)
+        if document.access_level == 'restricted' and user_role not in ['admin', 'manager'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Insufficient permissions'},
                 status=status.HTTP_403_FORBIDDEN
@@ -283,7 +285,8 @@ class DocumentApprovalViewSet(viewsets.ModelViewSet):
         """Filter to show user's approval requests"""
         queryset = super().get_queryset()
         
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             # Show approvals where user is approver or requester
             queryset = queryset.filter(
                 Q(approver=self.request.user) |

@@ -33,7 +33,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         queryset = Opportunity.objects.all()
         
         # Filter by assigned user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(assigned_to=self.request.user) | Q(owner=self.request.user)
             )
@@ -155,7 +156,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         
         # Check permissions
         opportunities = Opportunity.objects.filter(id__in=opportunity_ids)
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             opportunities = opportunities.filter(
                 Q(assigned_to=self.request.user) | Q(owner=self.request.user)
             )
@@ -196,7 +198,8 @@ class OpportunityActivityViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(opportunity_id=opportunity_id)
         
         # Filter by user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(user=self.request.user) | Q(opportunity__assigned_to=self.request.user)
             )

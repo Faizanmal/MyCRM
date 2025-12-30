@@ -1,426 +1,312 @@
 'use client';
 
-// FIXME: Add all missing imports for components and icons.
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { motion } from 'framer-motion';
 import {
-  Search, Bell, LogOut, BarChart3, Users, UserPlus,
-  TrendingUp, Calendar, Mail, Settings, Phone,
-  Puzzle, Sparkles, Trophy, MessageSquare, Shield
-} from 'lucide-react'; // (Or your icon library)
-
+  Users, TrendingUp, 
+  Sparkles, ArrowRight, Zap, Shield, 
+  Target, Globe, Clock, CheckCircle
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-// (Import any other components you use)
 
-// We are keeping these imports for now, but the router and useEffect are removed below.
-import ProtectedRoute from "@/components/ProtectedRoute";
-
-// If this is your main dashboard page, you can name it DashboardPage,
-// or keep 'Home' if it's the file 'app/dashboard/page.tsx'
+// Landing page that redirects authenticated users to dashboard
 export default function Home() {
   const router = useRouter();
-  // const router = useRouter(); // No longer needed if this IS the dashboard
+  const { user, isLoading } = useAuth();
 
-  // FIXME: This redirect was incorrect.
-  // A dashboard page should not redirect to itself.
-  // I have removed this logic.
-  /*
   useEffect(() => {
-    // Redirect to dashboard
-    router.replace('/dashboard');
-  }, [router]);
-  */
+    if (!isLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isLoading, router]);
 
-  // FIXME: You must provide the 'user' object and 'logout' function.
-  // They might come from a context or a custom hook, e.g.:
-  // const { user, logout } = useAuth();
-  
-  // Placeholder data so the file runs without errors:
-  const user = { 
-    first_name: 'Jane', 
-    last_name: 'Doe', 
-    username: 'janedoe' 
-  };
-  const logout = () => { 
-    console.log("Logging out..."); 
-  };
-  
-  // The main error was that all the UI code below was *outside*
-  // the component. I have moved it inside the 'return' statement
-  // and wrapped it in the <ProtectedRoute>.
+  // Show loading while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full"
+        />
+      </div>
+    );
+  }
+
+  // If authenticated, show loading while redirecting
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full mx-auto mb-4"
+          />
+          <p className="text-gray-400">Redirecting to dashboard...</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const features = [
+    { icon: Users, title: 'Contact Management', description: 'Organize and track all customer relationships' },
+    { icon: Target, title: 'Lead Scoring', description: 'AI-powered lead qualification and prioritization' },
+    { icon: TrendingUp, title: 'Pipeline Analytics', description: 'Real-time insights into your sales pipeline' },
+    { icon: Zap, title: 'Workflow Automation', description: 'Automate repetitive tasks and follow-ups' },
+    { icon: Shield, title: 'Enterprise Security', description: 'GDPR compliant with advanced security features' },
+    { icon: Globe, title: 'Multi-channel', description: 'Email, calls, and social selling in one place' },
+  ];
+
+  const stats = [
+    { value: '10K+', label: 'Active Users' },
+    { value: '50M+', label: 'Contacts Managed' },
+    { value: '99.9%', label: 'Uptime' },
+    { value: '4.9/5', label: 'User Rating' },
+  ];
+
   return (
-    <ProtectedRoute>
-      <div className="flex flex-col min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">CRM</span>
-                </div>
-                <h1 className="text-xl font-semibold text-gray-900">MyCRM</h1>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search contacts, leads, opportunities..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <Button variant="ghost" size="sm">
-                <Bell className="w-5 h-5" />
+    <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            x: [0, 100, 0],
+            y: [0, -100, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-40 -left-40 w-96 h-96 bg-linear-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+            scale: [1.2, 1, 1.2],
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute top-1/2 -right-40 w-96 h-96 bg-linear-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, 50, 0],
+            y: [0, 50, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-40 left-1/3 w-72 h-72 bg-linear-to-r from-cyan-500/15 to-blue-500/15 rounded-full blur-3xl"
+        />
+      </div>
+
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-size-[50px_50px] pointer-events-none" />
+
+      {/* Navigation */}
+      <motion.nav
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 flex items-center justify-between px-6 lg:px-12 py-6"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-xl font-bold">MyCRM</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            className="text-gray-300 hover:text-white"
+            onClick={() => router.push('/login')}
+          >
+            Sign In
+          </Button>
+          <Button 
+            variant="premium"
+            onClick={() => router.push('/login')}
+          >
+            Get Started
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </motion.nav>
+
+      {/* Hero Section */}
+      <section className="relative z-10 px-6 lg:px-12 py-20 lg:py-32">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-sm text-gray-300">Now with AI-Powered Insights</span>
+            </motion.div>
+
+            <h1 className="text-5xl lg:text-7xl font-bold leading-tight mb-6">
+              The{' '}
+              <span className="bg-linear-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Modern CRM
+              </span>
+              <br />
+              for Growing Teams
+            </h1>
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+              Transform customer relationships with AI-powered insights, 
+              seamless automation, and enterprise-grade security.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button 
+                variant="premium" 
+                size="xl"
+                onClick={() => router.push('/login')}
+                className="min-w-[200px]"
+              >
+                Start Free Trial
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-700">
-                    {user?.first_name?.[0] || user?.username?.[0] || 'U'}
-                  </span>
+              <Button 
+                variant="glass" 
+                size="xl"
+                className="min-w-[200px]"
+              >
+                Watch Demo
+                <Clock className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="relative z-10 px-6 lg:px-12 py-16">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+                className="text-center"
+              >
+                <div className="text-3xl lg:text-4xl font-bold bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  {stat.value}
                 </div>
-                <span className="text-sm font-medium text-gray-700">
-                  {user?.first_name && user?.last_name 
-                    ? `${user.first_name} ${user.last_name}` 
-                    : user?.username || 'User'
-                  }
-                </span>
-                <Button variant="ghost" size="sm" onClick={logout}>
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
+                <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="relative z-10 px-6 lg:px-12 py-20">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+              Everything you need to{' '}
+              <span className="bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                close more deals
+              </span>
+            </h2>
+            <p className="text-gray-400 max-w-xl mx-auto">
+              A complete suite of tools designed to help you manage, nurture, and convert leads into loyal customers.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
+                className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <feature.icon className="w-6 h-6 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-400">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 px-6 lg:px-12 py-20">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="max-w-4xl mx-auto text-center p-12 rounded-3xl bg-linear-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-white/10"
+        >
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+            Ready to transform your sales?
+          </h2>
+          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+            Join thousands of teams already using MyCRM to close more deals and build lasting relationships.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button 
+              variant="premium" 
+              size="lg"
+              onClick={() => router.push('/login')}
+            >
+              Start Free Trial
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <CheckCircle className="w-4 h-4 text-green-400" />
+              No credit card required
             </div>
           </div>
-        </header>
+        </motion.div>
+      </section>
 
-        <div className="flex flex-1">
-          {/* Sidebar */}
-          <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
-            <nav className="p-4 space-y-2">
-              <div className="space-y-1">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Main</h3>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/dashboard')}
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Dashboard
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/contacts')}
-                >
-                  <Users className="w-4 h-4 mr-3" />
-                  Contacts
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/leads')}
-                >
-                  <UserPlus className="w-4 h-4 mr-3" />
-                  Leads
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/opportunities')}
-                >
-                  <TrendingUp className="w-4 h-4 mr-3" />
-                  Opportunities
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/tasks')}
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Tasks & Calendar
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/communications')}
-                >
-                  <Mail className="w-4 h-4 mr-3" />
-                  Communications
-                </Button>
-              </div>
-              
-              <div className="space-y-1 mt-6">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Advanced</h3>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/integration-hub')}
-                >
-                  <Puzzle className="w-4 h-4 mr-3" />
-                  Integration Hub
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/ai-insights')}
-                >
-                  <Sparkles className="w-4 h-4 mr-3" />
-                  AI Insights
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/gamification')}
-                >
-                  <Trophy className="w-4 h-4 mr-3" />
-                  Gamification
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/organizations')}
-                >
-                  <Users className="w-4 h-4 mr-3" />
-                  Organizations
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/collaboration')}
-                >
-                  <MessageSquare className="w-4 h-4 mr-3" />
-                  Collaboration
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/gdpr-compliance')}
-                >
-                  <Shield className="w-4 h-4 mr-3" />
-                  GDPR Compliance
-                </Button>
-              </div>
-              
-              <div className="space-y-1 mt-6">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tools</h3>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/sso-settings')}
-                >
-                  <Settings className="w-4 h-4 mr-3" />
-                  SSO Settings
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  onClick={() => router.push('/settings')}
-                >
-                  <Settings className="w-4 h-4 mr-3" />
-                  Settings
-                </Button>
-              </div>
-            </nav>
-          </aside>
-
-          {/* Main Content */}
-          <main className="flex-1 p-6">
-            <div className="space-y-6">
-              {/* Welcome Section */}
-              <div className="bg-linear-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
-                <h2 className="text-2xl font-bold mb-2">
-                  Welcome back, {user?.first_name || user?.username || 'User'}!
-                </h2>
-                <p className="text-blue-100">Here&apos;s what&apos;s happening with your CRM today.</p>
-              </div>
-
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Contacts</CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">1,234</div>
-                    <p className="text-xs text-muted-foreground">
-                      +12% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Active Leads</CardTitle>
-                    <UserPlus className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">456</div>
-                    <p className="text-xs text-muted-foreground">
-                      +8% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Opportunities</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">89</div>
-                    <p className="text-xs text-muted-foreground">
-                      +23% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">$45,231</div>
-                    <p className="text-xs text-muted-foreground">
-                      +15% from last month
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activities</CardTitle>
-                    <CardDescription>Latest updates from your CRM</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">New lead added</p>
-                        <p className="text-xs text-gray-500">Sarah Johnson from TechCorp</p>
-                      </div>
-                      <span className="text-xs text-gray-400">2 min ago</span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Opportunity updated</p>
-                        <p className="text-xs text-gray-500">Deal with ABC Company moved to Proposal stage</p>
-                      </div>
-                      <span className="text-xs text-gray-400">15 min ago</span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-4">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Task completed</p>
-                        <p className="text-xs text-gray-500">Follow up call with XYZ Corp</p>
-                      </div>
-                      <span className="text-xs text-gray-400">1 hour ago</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upcoming Tasks</CardTitle>
-                    <CardDescription>Tasks due today and tomorrow</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                        <div>
-                          <p className="text-sm font-medium">Call prospect</p>
-                          <p className="text-xs text-gray-500">Mike Smith - TechStart Inc</p>
-                        </div>
-                      </div>
-                      <Badge variant="destructive">High</Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <div>
-                          <p className="text-sm font-medium">Send proposal</p>
-                          <p className="text-xs text-gray-500">ABC Corporation</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary">Medium</Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <div>
-                          <p className="text-sm font-medium">Follow up email</p>
-                          <p className="text-xs text-gray-500">Sarah Wilson - Design Co</p>
-                        </div>
-                      </div>
-                      <Badge variant="outline">Low</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>Common tasks and shortcuts</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Button variant="outline" className="h-20 flex flex-col space-y-2">
-                      <UserPlus className="w-6 h-6" />
-                      <span>Add Contact</span>
-                    </Button>
-                    
-                    <Button variant="outline" className="h-20 flex flex-col space-y-2">
-                      <Phone className="w-6 h-6" />
-                      <span>Log Call</span>
-                    </Button>
-                    
-                    <Button variant="outline" className="h-20 flex flex-col space-y-2">
-                      <Mail className="w-6 h-6" />
-                      <span>Send Email</span>
-                    </Button>
-                    
-                    <Button variant="outline" className="h-20 flex flex-col space-y-2">
-                      <Calendar className="w-6 h-6" />
-                      <span>Schedule Meeting</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* Footer */}
+      <footer className="relative z-10 px-6 lg:px-12 py-8 border-t border-white/10">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-linear-to-br from-blue-500 via-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-          </main>
+            <span className="font-semibold">MyCRM</span>
+          </div>
+          <p className="text-sm text-gray-500">
+            © 2024 MyCRM. All rights reserved.
+          </p>
         </div>
-      </div>
-    </ProtectedRoute>
+      </footer>
+    </div>
   );
 }

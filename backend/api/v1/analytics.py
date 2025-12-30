@@ -16,6 +16,10 @@ from lead_management.models import Lead
 from contact_management.models import Contact
 from opportunity_management.models import Opportunity
 from task_management.models import Task
+from activity_feed.models import Activity
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class SalesForecastView(views.APIView):
@@ -370,5 +374,204 @@ class CustomMetricsView(views.APIView):
                     'tasks_per_opportunity': round(tasks.count() / total_opportunities if total_opportunities > 0 else 0, 2),
                     'revenue_per_lead': float(total_revenue / total_leads) if total_leads > 0 else 0
                 }
+            }
+        })
+
+
+class DashboardAnalyticsView(views.APIView):
+    """
+    Aggregated dashboard analytics for the main dashboard
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Get dashboard analytics data"""
+        today = timezone.now()
+        thirty_days_ago = today - timedelta(days=30)
+        sixty_days_ago = today - timedelta(days=60)
+        
+        # 1. Revenue Metrics
+        current_revenue = Opportunity.objects.filter(
+            stage='closed_won',
+            actual_close_date__gte=thirty_days_ago,
+            actual_close_date__lte=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        previous_revenue = Opportunity.objects.filter(
+            stage='closed_won',
+            actual_close_date__gte=sixty_days_ago,
+            actual_close_date__lt=thirty_days_ago
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        revenue_change = ((current_revenue - previous_revenue) / previous_revenue * 100) if previous_revenue > 0 else 0
+        
+        # 2. Deals Won Metrics
+        current_deals = Opportunity.objects.filter(
+            stage='closed_won',
+            actual_close_date__gte=thirty_days_ago,
+            actual_close_date__lte=today
+        ).count()
+        
+        previous_deals = Opportunity.objects.filter(
+            stage='closed_won',
+            actual_close_date__gte=sixty_days_ago,
+            actual_close_date__lt=thirty_days_ago
+        ).count()
+        
+        deals_change = ((current_deals - previous_deals) / previous_deals * 100) if previous_deals > 0 else 0
+        
+        # 3. New Leads Metrics
+        current_leads = Lead.objects.filter(
+            created_at__gte=thirty_days_ago,
+            created_at__lte=today
+        ).count()
+        
+        previous_leads = Lead.objects.filter(
+            created_at__gte=sixty_days_ago,
+            created_at__lt=thirty_days_ago
+        ).count()
+        
+        leads_change = ((current_leads - previous_leads) / previous_leads * 100) if previous_leads > 0 else 0
+        
+        # 4. Conversion Rate (Closed Won / Total Opportunities created in period)
+        # Note: This is an approximation. Ideally track cohort conversion.
+        current_opps_created = Opportunity.objects.filter(
+            created_at__gte=thirty_days_ago,
+            created_at__lte=today
+        ).count()
+        
+        previous_opps_created = Opportunity.objects.filter(
+            created_at__gte=sixty_days_ago,
+            created_at__lt=thirty_days_ago
+        ).count()
+        
+        current_conversion = (current_deals / current_opps_created * 100) if current_opps_created > 0 else 0
+        previous_conversion = (previous_deals / previous_opps_created * 100) if previous_opps_created > 0 else 0
+        
+        conversion_change = ((current_conversion - previous_conversion) / previous_conversion * 100) if previous_conversion > 0 else 0
+        
+        # 5. Pipeline Overview
+        pipeline_stages = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won']
+        pipeline_data = []
+        
+        stage_colors = {
+            'prospecting': '#3b82f6',
+            'qualification': '#8b5cf6',
+            'proposal': '#f59e0b',
+            'negotiation': '#22c55e',
+            'closed_won': '#ef4444' # Usually won is green, but following the mock data colors
+        }
+        
+        for stage in pipeline_stages:
+            opps = Opportunity.objects.filter(stage=stage)
+            count = opps.count()
+            value = opps.aggregate(total=Sum('amount'))['total'] or 0
+            
+            pipeline_data.append({
+                'name': stage.title().replace('_', ' '),
+                'count': count,
+                'value': float(value),
+                'color': stage_colors.get(stage, '#cbd5e1')
+            })
+            
+        # 6. Recent Activities
+        recent_activities = []
+        activities = Activity.objects.select_related('user', 'content_type').order_by('-timestamp')[:10]
+        
+        icons = {
+            'lead': 'users',
+            'contact': 'users',
+            'opportunity': 'dollar-sign',
+            'task': 'calendar',
+            'note': 'file-text'
+        }
+        
+        for activity in activities:
+            entity_type = activity.content_type.model if activity.content_type else 'activity'
+            recent_activities.append({
+                'id': str(activity.id),
+                'type': entity_type,
+                'title': activity.description or f"New {entity_type}",
+                'description': activity.object_repr or '',
+                'timestamp': activity.timestamp.isoformat(),
+                'icon_name': icons.get(entity_type, 'activity')
+            })
+            
+        # 7. Top Performers (by revenue)
+        top_performers = []
+        users = User.objects.all()
+        
+        for user in users:
+            revenue = Opportunity.objects.filter(
+                owner=user,
+                stage='closed_won',
+                actual_close_date__gte=thirty_days_ago
+            ).aggregate(total=Sum('amount'))['total'] or 0
+            
+            deals_count = Opportunity.objects.filter(
+                owner=user,
+                stage='closed_won',
+                actual_close_date__gte=thirty_days_ago
+            ).count()
+            
+            if revenue > 0 or deals_count > 0:
+                top_performers.append({
+                    'name': user.get_full_name() or user.username,
+                    'deals': deals_count,
+                    'revenue': float(revenue)
+                })
+        
+        top_performers.sort(key=lambda x: x['revenue'], reverse=True)
+        top_performers = top_performers[:5]
+        
+        # 8. Weekly Goal
+        # For now, hardcoded target, current is revenue this week
+        start_of_week = today - timedelta(days=today.weekday())
+        weekly_revenue = Opportunity.objects.filter(
+            stage='closed_won',
+            actual_close_date__gte=start_of_week
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        weekly_target = 100000 # Example target
+        
+        return Response({
+            'revenue': {
+                'value': float(current_revenue),
+                'previousValue': float(previous_revenue),
+                'change': round(revenue_change, 1),
+                'trend': 'up' if revenue_change >= 0 else 'down',
+                'label': 'Revenue',
+                'format': 'currency'
+            },
+            'deals': {
+                'value': current_deals,
+                'previousValue': previous_deals,
+                'change': round(deals_change, 1),
+                'trend': 'up' if deals_change >= 0 else 'down',
+                'label': 'Deals Won',
+                'format': 'number'
+            },
+            'leads': {
+                'value': current_leads,
+                'previousValue': previous_leads,
+                'change': round(leads_change, 1),
+                'trend': 'up' if leads_change >= 0 else 'down',
+                'label': 'New Leads',
+                'format': 'number'
+            },
+            'conversionRate': {
+                'value': round(current_conversion, 1),
+                'previousValue': round(previous_conversion, 1),
+                'change': round(conversion_change, 1),
+                'trend': 'up' if conversion_change >= 0 else 'down',
+                'label': 'Conversion',
+                'format': 'percentage'
+            },
+            'pipeline': pipeline_data,
+            'recentActivities': recent_activities,
+            'topPerformers': top_performers,
+            'weeklyGoal': {
+                'current': float(weekly_revenue),
+                'target': weekly_target
             }
         })

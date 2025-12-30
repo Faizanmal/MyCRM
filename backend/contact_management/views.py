@@ -40,7 +40,8 @@ class ContactViewSet(viewsets.ModelViewSet):
         queryset = Contact.objects.all()
         
         # Filter by assigned user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(assigned_to=self.request.user) | Q(created_by=self.request.user)
             )
@@ -75,7 +76,8 @@ class ContactViewSet(viewsets.ModelViewSet):
         
         # Check permissions
         contacts = Contact.objects.filter(id__in=contact_ids)
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             contacts = contacts.filter(
                 Q(assigned_to=self.request.user) | Q(created_by=self.request.user)
             )
@@ -100,7 +102,8 @@ class ContactViewSet(viewsets.ModelViewSet):
         
         # Check permissions
         contacts = Contact.objects.filter(id__in=contact_ids)
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             contacts = contacts.filter(
                 Q(assigned_to=self.request.user) | Q(created_by=self.request.user)
             )

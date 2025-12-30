@@ -7,10 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Users, 
-  UserPlus, 
-  TrendingUp, 
+import {
+  Users,
+  UserPlus,
+  TrendingUp,
   DollarSign,
   ArrowUpRight,
   ArrowDownRight,
@@ -26,6 +26,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { dashboardAPI, contactsAPI, leadsAPI, opportunitiesAPI, tasksAPI } from '@/lib/api';
 import { toast } from 'sonner';
+import AIRecommendations from '@/components/AIRecommendations';
 
 interface DashboardMetrics {
   contacts: {
@@ -174,13 +175,13 @@ export default function DashboardPage() {
         }
 
         // Build from individual responses
-        const contactCount = contactsRes.status === 'fulfilled' ? 
+        const contactCount = contactsRes.status === 'fulfilled' ?
           (contactsRes.value?.count || contactsRes.value?.results?.length || 0) : 0;
-        const leadCount = leadsRes.status === 'fulfilled' ? 
+        const leadCount = leadsRes.status === 'fulfilled' ?
           (leadsRes.value?.count || leadsRes.value?.results?.length || 0) : 0;
-        const oppCount = opportunitiesRes.status === 'fulfilled' ? 
+        const oppCount = opportunitiesRes.status === 'fulfilled' ?
           (opportunitiesRes.value?.count || opportunitiesRes.value?.results?.length || 0) : 0;
-        const taskCount = tasksRes.status === 'fulfilled' ? 
+        const taskCount = tasksRes.status === 'fulfilled' ?
           (tasksRes.value?.count || tasksRes.value?.results?.length || 0) : 0;
 
         return {
@@ -306,14 +307,14 @@ export default function DashboardPage() {
             <div className="relative z-10 flex justify-between items-start">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-bold mb-3 flex items-center gap-3">
-                  Welcome back, {user?.first_name || user?.username || 'User'}! 
+                  Welcome back, {user?.first_name || user?.username || 'User'}!
                   <span className="inline-block animate-bounce">👋</span>
                 </h2>
                 <p className="text-blue-50 text-lg">Here&apos;s what&apos;s happening with your CRM today.</p>
               </div>
-              <Button 
-                variant="secondary" 
-                size="sm" 
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
                 className="bg-white/20 hover:bg-white/30 text-white border-0"
@@ -358,6 +359,9 @@ export default function DashboardPage() {
             />
           </div>
 
+          {/* AI Recommendations */}
+          <AIRecommendations />
+
           {/* Charts and Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Sales Pipeline */}
@@ -379,7 +383,7 @@ export default function DashboardPage() {
                     const totalValue = pipeline.reduce((sum, s) => sum + s.total_value, 0);
                     const percentage = totalValue > 0 ? (stage.total_value / totalValue) * 100 : 0;
                     const colors = ['bg-blue-600', 'bg-indigo-600', 'bg-purple-600', 'bg-green-600', 'bg-yellow-600'];
-                    
+
                     return (
                       <div key={stage.stage} className="space-y-2">
                         <div className="flex justify-between text-sm">
@@ -389,8 +393,8 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`${colors[index % colors.length]} h-2 rounded-full transition-all duration-500`} 
+                          <div
+                            className={`${colors[index % colors.length]} h-2 rounded-full transition-all duration-500`}
                             style={{ width: `${Math.max(percentage, 2)}%` }}
                           ></div>
                         </div>
@@ -429,7 +433,7 @@ export default function DashboardPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{opp.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {formatCurrency(opp.amount)} 
+                          {formatCurrency(opp.amount)}
                           {opp.closed_at && ` • Closed ${formatTimeAgo(opp.closed_at)}`}
                         </p>
                       </div>
@@ -550,35 +554,35 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="h-24 flex flex-col space-y-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950"
                   onClick={() => window.location.href = '/contacts?action=add'}
                 >
                   <UserPlus className="w-6 h-6 text-blue-600" />
                   <span className="text-sm">Add Contact</span>
                 </Button>
-                
-                <Button 
-                  variant="outline" 
+
+                <Button
+                  variant="outline"
                   className="h-24 flex flex-col space-y-2 hover:bg-green-50 hover:border-green-300 dark:hover:bg-green-950"
                   onClick={() => window.location.href = '/communications?action=call'}
                 >
                   <Phone className="w-6 h-6 text-green-600" />
                   <span className="text-sm">Log Call</span>
                 </Button>
-                
-                <Button 
-                  variant="outline" 
+
+                <Button
+                  variant="outline"
                   className="h-24 flex flex-col space-y-2 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-950"
                   onClick={() => window.location.href = '/campaigns'}
                 >
                   <Mail className="w-6 h-6 text-purple-600" />
                   <span className="text-sm">Send Email</span>
                 </Button>
-                
-                <Button 
-                  variant="outline" 
+
+                <Button
+                  variant="outline"
                   className="h-24 flex flex-col space-y-2 hover:bg-orange-50 hover:border-orange-300 dark:hover:bg-orange-950"
                   onClick={() => window.location.href = '/tasks?action=add'}
                 >
@@ -601,8 +605,8 @@ export default function DashboardPage() {
                   {metrics?.leads.conversion_rate || 0}%
                 </div>
                 <div className="mt-2 h-2 bg-gray-200 rounded-full">
-                  <div 
-                    className="h-2 bg-linear-to-r from-green-500 to-green-600 rounded-full transition-all duration-500" 
+                  <div
+                    className="h-2 bg-linear-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
                     style={{ width: `${metrics?.leads.conversion_rate || 0}%` }}
                   ></div>
                 </div>

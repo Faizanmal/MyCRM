@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/crm_models.dart';
+import 'lead_detail_screen.dart';
+import 'add_lead_screen.dart';
 
 class LeadsScreen extends StatefulWidget {
   const LeadsScreen({super.key});
@@ -64,6 +66,30 @@ class _LeadsScreenState extends State<LeadsScreen> {
     });
   }
   
+  void _navigateToAddLead() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddLeadScreen()),
+    );
+    
+    if (result == true) {
+      _loadLeads();
+    }
+  }
+  
+  void _navigateToLeadDetail(Lead lead) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LeadDetailScreen(lead: lead),
+      ),
+    );
+    
+    if (result == true) {
+      _loadLeads();
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,9 +110,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
                     ),
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to add lead screen
-        },
+        onPressed: _navigateToAddLead,
         child: const Icon(Icons.add),
       ),
     );
@@ -198,9 +222,7 @@ class _LeadsScreenState extends State<LeadsScreen> {
           ],
         ),
         isThreeLine: true,
-        onTap: () {
-          // TODO: Navigate to lead detail screen
-        },
+        onTap: () => _navigateToLeadDetail(lead),
       ),
     );
   }

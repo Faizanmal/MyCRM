@@ -24,7 +24,7 @@ def user_created_or_updated(sender, instance, created, **kwargs):
         metadata={
             'username': instance.username,
             'email': instance.email,
-            'role': instance.role,
+            'role': getattr(instance, 'role', 'unknown'),
             'is_active': instance.is_active
         },
         risk_level='medium' if action == 'user_created' else 'low'

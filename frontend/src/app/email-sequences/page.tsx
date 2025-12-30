@@ -27,25 +27,18 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import {
   Mail,
-  Send,
   Plus,
   Search,
   Play,
   Pause,
   Copy,
-  Trash2,
   BarChart3,
   Users,
-  Clock,
   Zap,
   Target,
-  ArrowRight,
-  Settings,
   Sparkles,
-  TrendingUp,
   Eye,
   MousePointer,
   Reply,
@@ -73,17 +66,7 @@ interface EmailSequence {
   created_at: string;
 }
 
-interface SequenceStep {
-  id: string;
-  order: number;
-  step_type: 'email' | 'wait' | 'condition';
-  subject: string;
-  delay_days: number;
-  delay_hours: number;
-  email_sent_count: number;
-  open_rate: number;
-  click_rate: number;
-}
+
 
 interface Enrollment {
   id: string;

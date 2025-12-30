@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../models/crm_models.dart';
+import 'task_detail_screen.dart';
+import 'add_task_screen.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -74,6 +76,30 @@ class _TasksScreenState extends State<TasksScreen> {
     return _tasks.where((task) => task.status == _filterStatus).toList();
   }
   
+  void _navigateToAddTask() async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddTaskScreen()),
+    );
+    
+    if (result == true) {
+      _loadTasks();
+    }
+  }
+  
+  void _navigateToTaskDetail(Task task) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TaskDetailScreen(task: task),
+      ),
+    );
+    
+    if (result == true) {
+      _loadTasks();
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,9 +127,7 @@ class _TasksScreenState extends State<TasksScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to add task screen
-        },
+        onPressed: _navigateToAddTask,
         child: const Icon(Icons.add),
       ),
     );
@@ -264,9 +288,7 @@ class _TasksScreenState extends State<TasksScreen> {
           ],
         ),
         isThreeLine: true,
-        onTap: () {
-          // TODO: Navigate to task detail screen
-        },
+        onTap: () => _navigateToTaskDetail(task),
       ),
     );
   }

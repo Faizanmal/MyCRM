@@ -39,7 +39,7 @@ class EmailSequence(models.Model):
     description = models.TextField(blank=True)
     
     # Owner and sharing
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_sequences')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='automation_email_sequences')
     shared_with_team = models.BooleanField(default=False)
     
     # Status
@@ -73,7 +73,7 @@ class EmailSequence(models.Model):
     activated_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
-        db_table = 'email_sequences'
+        db_table = 'automation_email_sequences'
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['owner', 'status']),
@@ -242,7 +242,7 @@ class SequenceEnrollment(models.Model):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sequence = models.ForeignKey(EmailSequence, on_delete=models.CASCADE, related_name='enrollments')
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, related_name='sequence_enrollments')
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, related_name='automation_sequence_enrollments')
     lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, null=True, blank=True, related_name='sequence_enrollments')
     
     # Current position

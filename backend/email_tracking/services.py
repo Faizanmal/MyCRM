@@ -114,27 +114,130 @@ class EmailTrackingService:
     
     def _send_email(self, email):
         """Actually send the email via configured provider"""
-        # This would integrate with SendGrid, SES, etc.
-        # For now, we'll mark as sent
+        from django.conf import settings
+        from django.core.mail import EmailMultiAlternatives
         
         try:
-            # TODO: Integrate with actual email provider
-            # Example with SendGrid:
-            # from sendgrid import SendGridAPIClient
-            # sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            # response = sg.send(message)
+            provider = getattr(settings, 'EMAIL_PROVIDER', 'django')
             
-            email.status = 'sent'
-            email.sent_at = timezone.now()
-            email.save()
+            if provider == 'sendgrid':
+                # SendGrid integration
+                success = self._send_via_sendgrid(email)
+            elif provider == 'ses':
+                # AWS SES integration
+                success = self._send_via_ses(email)
+            else:
+                # Default Django email backend
+                success = self._send_via_django(email)
             
-            return True
+            if success:
+                email.status = 'sent'
+                email.sent_at = timezone.now()
+                email.save()
+                return True
+            else:
+                email.status = 'failed'
+                email.metadata['error'] = 'Failed to send via provider'
+                email.save()
+                return False
             
         except Exception as e:
             email.status = 'failed'
             email.metadata['error'] = str(e)
             email.save()
             return False
+    
+    def _send_via_django(self, email):
+        """Send using Django's default email backend"""
+        from django.core.mail import EmailMultiAlternatives
+        from django.utils.html import strip_tags
+        
+        msg = EmailMultiAlternatives(
+            subject=email.subject,
+            body=email.body_text or strip_tags(email.body_html),
+            from_email=f"{email.from_name} <{email.from_email}>" if email.from_name else email.from_email,
+            to=[email.to_email],
+        )
+        
+        if email.body_html:
+            msg.attach_alternative(email.body_html, "text/html")
+        
+        msg.send()
+        return True
+    
+    def _send_via_sendgrid(self, email):
+        """Send using SendGrid API"""
+        from django.conf import settings
+        import json
+        
+        try:
+            import requests
+            
+            api_key = getattr(settings, 'SENDGRID_API_KEY', None)
+            if not api_key:
+                # Fallback to Django email
+                return self._send_via_django(email)
+            
+            data = {
+                "personalizations": [{
+                    "to": [{"email": email.to_email, "name": email.to_name or ""}],
+                    "subject": email.subject
+                }],
+                "from": {
+                    "email": email.from_email,
+                    "name": email.from_name or ""
+                },
+                "content": [
+                    {"type": "text/plain", "value": email.body_text or ""},
+                    {"type": "text/html", "value": email.body_html}
+                ]
+            }
+            
+            response = requests.post(
+                "https://api.sendgrid.com/v3/mail/send",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                data=json.dumps(data)
+            )
+            
+            return response.status_code in [200, 202]
+            
+        except ImportError:
+            # requests not installed, fallback to Django
+            return self._send_via_django(email)
+    
+    def _send_via_ses(self, email):
+        """Send using AWS SES"""
+        from django.conf import settings
+        
+        try:
+            import boto3
+            from botocore.exceptions import ClientError
+            
+            region = getattr(settings, 'AWS_SES_REGION', 'us-east-1')
+            client = boto3.client('ses', region_name=region)
+            
+            response = client.send_email(
+                Source=f"{email.from_name} <{email.from_email}>" if email.from_name else email.from_email,
+                Destination={
+                    'ToAddresses': [email.to_email]
+                },
+                Message={
+                    'Subject': {'Data': email.subject},
+                    'Body': {
+                        'Text': {'Data': email.body_text or ''},
+                        'Html': {'Data': email.body_html}
+                    }
+                }
+            )
+            
+            return response.get('MessageId') is not None
+            
+        except (ImportError, ClientError):
+            # boto3 not installed or SES error, fallback to Django
+            return self._send_via_django(email)
     
     def render_template(self, template, context_data):
         """Render email template with context"""

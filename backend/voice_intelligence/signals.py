@@ -50,8 +50,16 @@ def on_recording_status_change(sender, instance, created, **kwargs):
                 ).first()
                 
                 if settings and settings.notify_on_completion:
-                    # TODO: Send notification
-                    pass
+                    # Send notification email
+                    try:
+                        from core.email_notifications import EmailNotificationService
+                        EmailNotificationService.send_call_analysis_complete(
+                            user=instance.owner,
+                            call_recording=instance
+                        )
+                        logger.info(f"Sent completion notification for recording {instance.id}")
+                    except Exception as email_err:
+                        logger.warning(f"Failed to send completion email: {email_err}")
                     
             except Exception as e:
                 logger.error(f"Error sending completion notification: {str(e)}")
@@ -85,8 +93,23 @@ def on_action_item_created(sender, instance, created, **kwargs):
                 ).first()
                 
                 if settings and settings.notify_on_high_priority_action:
-                    # TODO: Send notification
-                    pass
+                    # Create in-app notification for high priority action items
+                    try:
+                        from activity_feed.models import Notification
+                        Notification.objects.create(
+                            user=instance.recording.owner,
+                            notification_type='action_item',
+                            title=f'High Priority Action: {instance.title}',
+                            message=f'A {instance.priority} priority action item was identified from your call recording.',
+                            data={
+                                'action_item_id': str(instance.id),
+                                'recording_id': str(instance.recording_id),
+                                'priority': instance.priority
+                            }
+                        )
+                        logger.info(f"Created notification for high priority action item {instance.id}")
+                    except Exception as notif_err:
+                        logger.warning(f"Failed to create action item notification: {notif_err}")
                     
             except Exception as e:
                 logger.error(f"Error sending action item notification: {str(e)}")

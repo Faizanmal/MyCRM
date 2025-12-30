@@ -7,6 +7,7 @@ class EmptyState extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onAction;
   final String? actionLabel;
+  final Widget? action;
   
   const EmptyState({
     super.key,
@@ -15,6 +16,7 @@ class EmptyState extends StatelessWidget {
     required this.icon,
     this.onAction,
     this.actionLabel,
+    this.action,
   });
   
   @override
@@ -57,6 +59,10 @@ class EmptyState extends StatelessWidget {
                 icon: const Icon(Icons.add),
                 label: Text(actionLabel!),
               ),
+            ],
+            if (action != null) ...[
+              const SizedBox(height: AppSizes.paddingLg),
+              action!,
             ],
           ],
         ),

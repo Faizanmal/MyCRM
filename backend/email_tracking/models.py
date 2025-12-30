@@ -257,7 +257,7 @@ class EmailSequence(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_sequences')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tracking_email_sequences')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     
     # Sequence settings
@@ -280,7 +280,7 @@ class EmailSequence(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        db_table = 'email_sequences'
+        db_table = 'tracking_email_sequences'
         ordering = ['-created_at']
     
     def __str__(self):
@@ -369,7 +369,7 @@ class SequenceEnrollment(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.CASCADE,
-        related_name='sequence_enrollments'
+        related_name='tracking_sequence_enrollments'
     )
     
     enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)

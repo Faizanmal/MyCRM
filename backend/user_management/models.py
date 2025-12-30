@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.conf import settings
 
 class User(AbstractUser):
     """Extended User model with CRM-specific fields"""
@@ -16,7 +16,8 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     department = models.CharField(max_length=100, blank=True, null=True)
-    is_active = models.BooleanField(default=True)
+    # is_active is already in AbstractUser, but we can keep it explicit if needed.
+    # AbstractUser already has is_active, calling it out again is fine
     last_login_ip = models.GenericIPAddressField(blank=True, null=True)
     two_factor_enabled = models.BooleanField(default=False)
     two_factor_secret = models.CharField(max_length=32, blank=True, null=True)
@@ -49,7 +50,8 @@ class User(AbstractUser):
 
 class UserProfile(models.Model):
     """Additional user profile information"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    # Use settings.AUTH_USER_MODEL to refer to the active user model
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True, null=True)
     timezone = models.CharField(max_length=50, default='UTC')
     language = models.CharField(max_length=10, default='en')
@@ -102,7 +104,8 @@ class AuditLog(models.Model):
         ('logout', 'Logout'),
     ]
     
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_audit_logs')
+    # Use settings.AUTH_USER_MODEL here too
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_audit_logs')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     model_name = models.CharField(max_length=100)
     object_id = models.CharField(max_length=100, blank=True, null=True)

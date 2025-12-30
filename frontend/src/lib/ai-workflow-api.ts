@@ -459,7 +459,7 @@ export const voiceIntelligenceAPI = {
 // Alias for backward compatibility
 export const smartSchedulingAIAPI = schedulingAIAPI;
 
-export default {
+const api = {
   emailSequence: emailSequenceAPI,
   leadRouting: leadRoutingAPI,
   schedulingAI: schedulingAIAPI,
@@ -467,3 +467,5 @@ export default {
   dataEnrichment: dataEnrichmentAPI,
   voiceIntelligence: voiceIntelligenceAPI,
 };
+
+export default api;

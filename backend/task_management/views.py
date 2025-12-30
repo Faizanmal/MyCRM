@@ -34,7 +34,8 @@ class TaskViewSet(viewsets.ModelViewSet):
         queryset = Task.objects.all()
         
         # Filter by assigned user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(assigned_to=self.request.user) | Q(created_by=self.request.user)
             )
@@ -151,7 +152,8 @@ class TaskViewSet(viewsets.ModelViewSet):
         
         # Check permissions
         tasks = Task.objects.filter(id__in=task_ids)
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             tasks = tasks.filter(
                 Q(assigned_to=self.request.user) | Q(created_by=self.request.user)
             )
@@ -183,7 +185,8 @@ class CalendarEventViewSet(viewsets.ModelViewSet):
         queryset = CalendarEvent.objects.all()
         
         # Filter by user if not admin
-        if self.request.user.role != 'admin':
+        user_role = getattr(self.request.user, 'role', None)
+        if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(organizer=self.request.user) | Q(attendees=self.request.user)
             ).distinct()

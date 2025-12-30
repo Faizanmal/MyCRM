@@ -49,6 +49,13 @@ interface RealtimeContextType {
 
 const RealtimeContext = createContext<RealtimeContextType | null>(null);
 
+// Handle data updates from server
+interface DataUpdatePayload {
+  entity: string;
+  id?: string;
+  action: 'create' | 'update' | 'delete';
+}
+
 // =============================================================================
 // Provider
 // =============================================================================
@@ -71,6 +78,81 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const handleDataUpdate = useCallback(
+    (payload: DataUpdatePayload) => {
+      const { entity, id, action: _action } = payload;
+
+      // Map entities to query keys
+      const queryKeyMap: Record<string, string[]> = {
+        lead: ['leads'],
+        contact: ['contacts'],
+        opportunity: ['opportunities'],
+        task: ['tasks'],
+        deal: ['deals'],
+        activity: ['activities'],
+      };
+
+      const queryKeys = queryKeyMap[entity];
+      if (queryKeys) {
+        // Invalidate list queries
+        queryClient.invalidateQueries({ queryKey: queryKeys });
+
+        // Invalidate specific entity query
+        if (id) {
+          queryClient.invalidateQueries({ queryKey: [...queryKeys, id] });
+        }
+      }
+    },
+    [queryClient]
+  );
+
+  // Handle incoming messages
+  const handleMessage = useCallback(
+    (message: RealtimeMessage) => {
+      const { type, channel, payload } = message;
+
+      switch (type) {
+        case 'pong':
+          // Heartbeat response
+          break;
+
+        case 'message':
+          // Dispatch to channel subscribers
+          const subscribers = subscribersRef.current.get(channel);
+          if (subscribers) {
+            subscribers.forEach((callback) => callback(payload));
+          }
+          break;
+
+        case 'presence':
+          // Update presence list
+          setPresenceList(payload as PresenceUser[]);
+          break;
+
+        case 'data_update':
+          // Invalidate React Query cache
+          handleDataUpdate(payload as DataUpdatePayload);
+          break;
+
+        case 'notification':
+          // Show toast notification
+          {
+            const notif = payload as { title: string; message: string; type?: string };
+            toast({
+              title: notif.title,
+              description: notif.message,
+              variant: notif.type === 'error' ? 'destructive' : 'default',
+            });
+          }
+          break;
+
+        default:
+          console.log('[Realtime] Unknown message type:', type);
+      }
+    },
+    [toast, handleDataUpdate]
+  );
+
   // Connect to WebSocket
   const connect = useCallback(() => {
     const token = localStorage.getItem('auth_token');
@@ -79,9 +161,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const wsUrl = `${
-      process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'
-    }/ws/realtime?token=${token}`;
+    const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'
+      }/ws/realtime?token=${token}`;
 
     setConnectionState('connecting');
 
@@ -151,87 +232,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       console.error('[Realtime] Connection failed:', error);
       setConnectionState('disconnected');
     }
-  }, []);
-
-  // Handle incoming messages
-  const handleMessage = useCallback(
-    (message: RealtimeMessage) => {
-      const { type, channel, payload } = message;
-
-      switch (type) {
-        case 'pong':
-          // Heartbeat response
-          break;
-
-        case 'message':
-          // Dispatch to channel subscribers
-          const subscribers = subscribersRef.current.get(channel);
-          if (subscribers) {
-            subscribers.forEach((callback) => callback(payload));
-          }
-          break;
-
-        case 'presence':
-          // Update presence list
-          setPresenceList(payload as PresenceUser[]);
-          break;
-
-        case 'data_update':
-          // Invalidate React Query cache
-          handleDataUpdate(payload as DataUpdatePayload);
-          break;
-
-        case 'notification':
-          // Show toast notification
-          const notif = payload as { title: string; message: string; type?: string };
-          toast({
-            title: notif.title,
-            description: notif.message,
-            variant: notif.type === 'error' ? 'destructive' : 'default',
-          });
-          break;
-
-        default:
-          console.log('[Realtime] Unknown message type:', type);
-      }
-    },
-    [toast]
-  );
-
-  // Handle data updates from server
-  interface DataUpdatePayload {
-    entity: string;
-    id?: string;
-    action: 'create' | 'update' | 'delete';
-  }
-
-  const handleDataUpdate = useCallback(
-    (payload: DataUpdatePayload) => {
-      const { entity, id, action } = payload;
-
-      // Map entities to query keys
-      const queryKeyMap: Record<string, string[]> = {
-        lead: ['leads'],
-        contact: ['contacts'],
-        opportunity: ['opportunities'],
-        task: ['tasks'],
-        deal: ['deals'],
-        activity: ['activities'],
-      };
-
-      const queryKeys = queryKeyMap[entity];
-      if (queryKeys) {
-        // Invalidate list queries
-        queryClient.invalidateQueries({ queryKey: queryKeys });
-
-        // Invalidate specific entity query
-        if (id) {
-          queryClient.invalidateQueries({ queryKey: [...queryKeys, id] });
-        }
-      }
-    },
-    [queryClient]
-  );
+  }, [handleMessage]);
 
   // Subscribe to a channel
   const subscribe = useCallback(

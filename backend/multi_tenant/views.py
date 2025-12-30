@@ -366,6 +366,13 @@ class OrganizationInvitationViewSet(viewsets.ModelViewSet):
         invitation.expires_at = timezone.now() + timedelta(days=7)
         invitation.save()
         
-        # TODO: Resend email
+        # Resend email
+        try:
+            from core.email_notifications import EmailNotificationService
+            EmailNotificationService.send_organization_invitation(invitation)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to resend invitation email: {e}")
         
         return Response({'message': 'Invitation resent successfully'})

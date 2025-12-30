@@ -52,7 +52,7 @@ apiClient.interceptors.response.use(
         // Refresh failed - log error and redirect to login
         const errorMessage = refreshError instanceof Error ? refreshError.message : 'Token refresh failed';
         console.error('Token refresh error:', errorMessage);
-        
+
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login';
@@ -250,7 +250,7 @@ export const tasksAPI = {
   },
 
   completeTask: async (id: number) => {
-    const response = await apiClient.patch(`/tasks/tasks/${id}/`, { 
+    const response = await apiClient.patch(`/tasks/tasks/${id}/`, {
       status: 'completed',
       completed_at: new Date().toISOString()
     });
@@ -304,20 +304,26 @@ export const dashboardAPI = {
   },
 
   getRecentOpportunities: async (status?: string, limit: number = 5) => {
-    const response = await apiClient.get('/opportunities/opportunities/', { 
-      params: { status, page_size: limit, ordering: '-created_at' } 
+    const response = await apiClient.get('/opportunities/opportunities/', {
+      params: { status, page_size: limit, ordering: '-created_at' }
     });
     return response.data;
   },
 
   getUpcomingTasks: async (limit: number = 5) => {
-    const response = await apiClient.get('/tasks/tasks/', { 
-      params: { 
-        status__in: 'pending,in_progress', 
+    const response = await apiClient.get('/tasks/tasks/', {
+      params: {
+        status__in: 'pending,in_progress',
         ordering: 'due_date',
-        page_size: limit 
-      } 
+        page_size: limit
+      }
     });
+    return response.data;
+  },
+
+  // Get aggregated dashboard analytics data
+  getDashboardAnalytics: async () => {
+    const response = await apiClient.get('/v1/analytics/dashboard/');
     return response.data;
   },
 };
@@ -541,17 +547,17 @@ export const campaignAPI = {
   createCampaign: (data: Record<string, unknown>) => apiClient.post('/campaigns/campaigns/', data),
   updateCampaign: (id: string, data: Record<string, unknown>) => apiClient.put(`/campaigns/campaigns/${id}/`, data),
   deleteCampaign: (id: string) => apiClient.delete(`/campaigns/campaigns/${id}/`),
-  scheduleCampaign: (id: string, scheduledAt: string) => 
+  scheduleCampaign: (id: string, scheduledAt: string) =>
     apiClient.post(`/campaigns/campaigns/${id}/schedule/`, { scheduled_at: scheduledAt }),
   sendCampaignNow: (id: string) => apiClient.post(`/campaigns/campaigns/${id}/send_now/`),
   getCampaignAnalytics: (id: string) => apiClient.get(`/campaigns/campaigns/${id}/analytics/`),
   getCampaignStatistics: () => apiClient.get('/campaigns/campaigns/statistics/'),
-  
+
   // Segments
   getSegments: () => apiClient.get('/campaigns/segments/'),
   createSegment: (data: Record<string, unknown>) => apiClient.post('/campaigns/segments/', data),
   previewSegment: (id: string) => apiClient.get(`/campaigns/segments/${id}/preview/`),
-  
+
   // Templates
   getTemplates: () => apiClient.get('/campaigns/templates/'),
   createTemplate: (data: Record<string, unknown>) => apiClient.post('/campaigns/templates/', data),
@@ -561,7 +567,7 @@ export const campaignAPI = {
 // Pipeline Analytics API
 export const analyticsAPI = {
   getPipelineAnalytics: () => apiClient.get('/core/analytics/pipeline_analytics/'),
-  getSalesForecast: (months: number = 3) => 
+  getSalesForecast: (months: number = 3) =>
     apiClient.get(`/core/analytics/sales_forecast/?months=${months}`),
   getAIInsights: () => apiClient.get('/core/analytics/ai_insights_dashboard/'),
 };
@@ -571,11 +577,11 @@ export const documentAPI = {
   // Documents
   getDocuments: (params?: Record<string, unknown>) => apiClient.get('/documents/documents/', { params }),
   getDocument: (id: string) => apiClient.get(`/documents/documents/${id}/`),
-  uploadDocument: (formData: FormData) => 
+  uploadDocument: (formData: FormData) =>
     apiClient.post('/documents/documents/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
-  downloadDocument: (id: string) => 
+  downloadDocument: (id: string) =>
     apiClient.get(`/documents/documents/${id}/download/`, { responseType: 'blob' }),
   createDocumentVersion: (id: string, file: File) => {
     const formData = new FormData();
@@ -585,25 +591,25 @@ export const documentAPI = {
     });
   },
   getDocumentVersions: (id: string) => apiClient.get(`/documents/documents/${id}/versions/`),
-  shareDocument: (id: string, data: Record<string, unknown>) => 
+  shareDocument: (id: string, data: Record<string, unknown>) =>
     apiClient.post(`/documents/documents/${id}/share/`, data),
-  requestApproval: (id: string, approverId: string) => 
+  requestApproval: (id: string, approverId: string) =>
     apiClient.post(`/documents/documents/${id}/request_approval/`, { approver_id: approverId }),
-  
+
   // Templates
   getDocumentTemplates: () => apiClient.get('/documents/templates/'),
-  generateFromTemplate: (id: string, data: Record<string, unknown>) => 
+  generateFromTemplate: (id: string, data: Record<string, unknown>) =>
     apiClient.post(`/documents/templates/${id}/generate/`, data),
-  
+
   // Approvals
   getApprovals: () => apiClient.get('/documents/approvals/'),
-  approveDocument: (id: string, comments: string = '') => 
+  approveDocument: (id: string, comments: string = '') =>
     apiClient.post(`/documents/approvals/${id}/approve/`, { comments }),
-  rejectDocument: (id: string, comments: string) => 
+  rejectDocument: (id: string, comments: string) =>
     apiClient.post(`/documents/approvals/${id}/reject/`, { comments }),
-  
+
   // Comments
-  getDocumentComments: (documentId: string) => 
+  getDocumentComments: (documentId: string) =>
     apiClient.get(`/documents/comments/?document=${documentId}`),
   addComment: (data: Record<string, unknown>) => apiClient.post('/documents/comments/', data),
 };
@@ -614,17 +620,17 @@ export const integrationAPI = {
   getWebhooks: () => apiClient.get('/integrations/webhooks/'),
   createWebhook: (data: Record<string, unknown>) => apiClient.post('/integrations/webhooks/', data),
   testWebhook: (id: string) => apiClient.post(`/integrations/webhooks/${id}/test/`),
-  getWebhookDeliveries: (id: string) => 
+  getWebhookDeliveries: (id: string) =>
     apiClient.get(`/integrations/webhooks/${id}/deliveries/`),
   activateWebhook: (id: string) => apiClient.post(`/integrations/webhooks/${id}/activate/`),
   deactivateWebhook: (id: string) => apiClient.post(`/integrations/webhooks/${id}/deactivate/`),
-  
+
   // Integrations
   getIntegrations: () => apiClient.get('/integrations/integrations/'),
   createIntegration: (data: Record<string, unknown>) => apiClient.post('/integrations/integrations/', data),
   syncIntegration: (id: string) => apiClient.post(`/integrations/integrations/${id}/sync/`),
   testIntegration: (id: string) => apiClient.post(`/integrations/integrations/${id}/test/`),
-  getIntegrationLogs: (id: string) => 
+  getIntegrationLogs: (id: string) =>
     apiClient.get(`/integrations/integrations/${id}/logs/`),
 };
 
@@ -633,32 +639,32 @@ export const activityAPI = {
   // Activities
   getActivities: (params?: Record<string, unknown>) => apiClient.get('/activity/activities/', { params }),
   getMyFeed: () => apiClient.get('/activity/activities/my_feed/'),
-  getEntityActivities: (model: string, id: string) => 
+  getEntityActivities: (model: string, id: string) =>
     apiClient.get(`/activity/activities/for_entity/?model=${model}&id=${id}`),
-  
+
   // Comments
-  getComments: (model: string, id: string) => 
+  getComments: (model: string, id: string) =>
     apiClient.get(`/activity/comments/for_entity/?model=${model}&id=${id}`),
   addComment: (data: Record<string, unknown>) => apiClient.post('/activity/comments/', data),
   getReplies: (commentId: string) => apiClient.get(`/activity/comments/${commentId}/replies/`),
-  
+
   // Notifications
   getNotifications: () => apiClient.get('/activity/notifications/'),
-  markNotificationRead: (id: string) => 
+  markNotificationRead: (id: string) =>
     apiClient.post(`/activity/notifications/${id}/mark_read/`),
-  markAllNotificationsRead: () => 
+  markAllNotificationsRead: () =>
     apiClient.post('/activity/notifications/mark_all_read/'),
   getUnreadCount: () => apiClient.get('/activity/notifications/unread_count/'),
-  
+
   // Mentions
   getMentions: () => apiClient.get('/activity/mentions/'),
   markMentionRead: (id: string) => apiClient.post(`/activity/mentions/${id}/mark_read/`),
   markAllMentionsRead: () => apiClient.post('/activity/mentions/mark_all_read/'),
-  
+
   // Follows
-  followEntity: (model: string, id: string) => 
+  followEntity: (model: string, id: string) =>
     apiClient.post('/activity/follows/follow_entity/', { model, id }),
-  unfollowEntity: (model: string, id: string) => 
+  unfollowEntity: (model: string, id: string) =>
     apiClient.post('/activity/follows/unfollow_entity/', { model, id }),
   getFollows: () => apiClient.get('/activity/follows/'),
 };
@@ -668,51 +674,51 @@ export const leadQualificationAPI = {
   // Scoring Rules
   getScoringRules: () => apiClient.get('/lead-qualification/scoring-rules/'),
   createScoringRule: (data: Record<string, unknown>) => apiClient.post('/lead-qualification/scoring-rules/', data),
-  updateScoringRule: (id: string, data: Record<string, unknown>) => 
+  updateScoringRule: (id: string, data: Record<string, unknown>) =>
     apiClient.patch(`/lead-qualification/scoring-rules/${id}/`, data),
   deleteScoringRule: (id: string) => apiClient.delete(`/lead-qualification/scoring-rules/${id}/`),
   activateRule: (id: string) => apiClient.post(`/lead-qualification/scoring-rules/${id}/activate/`),
   deactivateRule: (id: string) => apiClient.post(`/lead-qualification/scoring-rules/${id}/deactivate/`),
-  
+
   // Qualification Criteria
   getQualificationCriteria: () => apiClient.get('/lead-qualification/qualification-criteria/'),
-  createQualificationCriteria: (data: Record<string, unknown>) => 
+  createQualificationCriteria: (data: Record<string, unknown>) =>
     apiClient.post('/lead-qualification/qualification-criteria/', data),
-  updateQualificationCriteria: (id: string, data: Record<string, unknown>) => 
+  updateQualificationCriteria: (id: string, data: Record<string, unknown>) =>
     apiClient.patch(`/lead-qualification/qualification-criteria/${id}/`, data),
-  deleteQualificationCriteria: (id: string) => 
+  deleteQualificationCriteria: (id: string) =>
     apiClient.delete(`/lead-qualification/qualification-criteria/${id}/`),
-  
+
   // Lead Scores
   getLeadScores: (params?: Record<string, unknown>) => apiClient.get('/lead-qualification/lead-scores/', { params }),
-  getLeadScore: (leadId: string) => 
+  getLeadScore: (leadId: string) =>
     apiClient.get(`/lead-qualification/lead-scores/by_lead/?lead_id=${leadId}`),
-  calculateScore: (leadId: string) => 
+  calculateScore: (leadId: string) =>
     apiClient.post(`/lead-qualification/lead-scores/calculate/`, { lead_id: leadId }),
   recalculateAll: () => apiClient.post('/lead-qualification/lead-scores/recalculate_all/'),
-  getScoreBreakdown: (id: string) => 
+  getScoreBreakdown: (id: string) =>
     apiClient.get(`/lead-qualification/lead-scores/${id}/breakdown/`),
   getHistory: (id: string) => apiClient.get(`/lead-qualification/lead-scores/${id}/history/`),
   getSummary: () => apiClient.get('/lead-qualification/lead-scores/summary/'),
-  
+
   // Qualification Workflows
   getWorkflows: () => apiClient.get('/lead-qualification/qualification-workflows/'),
   createWorkflow: (data: Record<string, unknown>) => apiClient.post('/lead-qualification/qualification-workflows/', data),
-  updateWorkflow: (id: string, data: Record<string, unknown>) => 
+  updateWorkflow: (id: string, data: Record<string, unknown>) =>
     apiClient.patch(`/lead-qualification/qualification-workflows/${id}/`, data),
-  deleteWorkflow: (id: string) => 
+  deleteWorkflow: (id: string) =>
     apiClient.delete(`/lead-qualification/qualification-workflows/${id}/`),
-  activateWorkflow: (id: string) => 
+  activateWorkflow: (id: string) =>
     apiClient.post(`/lead-qualification/qualification-workflows/${id}/activate/`),
-  deactivateWorkflow: (id: string) => 
+  deactivateWorkflow: (id: string) =>
     apiClient.post(`/lead-qualification/qualification-workflows/${id}/deactivate/`),
-  getWorkflowExecutions: (id: string) => 
+  getWorkflowExecutions: (id: string) =>
     apiClient.get(`/lead-qualification/qualification-workflows/${id}/executions/`),
-  
+
   // Lead Enrichment
-  enrichLead: (leadId: string) => 
+  enrichLead: (leadId: string) =>
     apiClient.post(`/lead-qualification/lead-enrichment/enrich/`, { lead_id: leadId }),
-  getEnrichmentData: (leadId: string) => 
+  getEnrichmentData: (leadId: string) =>
     apiClient.get(`/lead-qualification/lead-enrichment/by_lead/?lead_id=${leadId}`),
 };
 
@@ -722,61 +728,61 @@ export const advancedReportingAPI = {
   getDashboards: () => apiClient.get('/advanced-reporting/dashboards/'),
   createDashboard: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/dashboards/', data),
   getDashboard: (id: string) => apiClient.get(`/advanced-reporting/dashboards/${id}/`),
-  updateDashboard: (id: string, data: Record<string, unknown>) => 
+  updateDashboard: (id: string, data: Record<string, unknown>) =>
     apiClient.patch(`/advanced-reporting/dashboards/${id}/`, data),
   deleteDashboard: (id: string) => apiClient.delete(`/advanced-reporting/dashboards/${id}/`),
-  duplicateDashboard: (id: string) => 
+  duplicateDashboard: (id: string) =>
     apiClient.post(`/advanced-reporting/dashboards/${id}/duplicate/`),
-  shareDashboard: (id: string, data: Record<string, unknown>) => 
+  shareDashboard: (id: string, data: Record<string, unknown>) =>
     apiClient.post(`/advanced-reporting/dashboards/${id}/share/`, data),
   getDashboardData: (id: string) => apiClient.get(`/advanced-reporting/dashboards/${id}/data/`),
-  
+
   // Dashboard Widgets
   getWidgets: (dashboardId?: string) => {
     const params = dashboardId ? { dashboard: dashboardId } : {};
     return apiClient.get('/advanced-reporting/widgets/', { params });
   },
   createWidget: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/widgets/', data),
-  updateWidget: (id: string, data: Record<string, unknown>) => 
+  updateWidget: (id: string, data: Record<string, unknown>) =>
     apiClient.patch(`/advanced-reporting/widgets/${id}/`, data),
   deleteWidget: (id: string) => apiClient.delete(`/advanced-reporting/widgets/${id}/`),
   getWidgetData: (id: string) => apiClient.get(`/advanced-reporting/widgets/${id}/data/`),
-  
+
   // Reports
   getReports: () => apiClient.get('/advanced-reporting/reports/'),
   createReport: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/reports/', data),
   getReport: (id: string) => apiClient.get(`/advanced-reporting/reports/${id}/`),
-  updateReport: (id: string, data: Record<string, unknown>) => 
+  updateReport: (id: string, data: Record<string, unknown>) =>
     apiClient.patch(`/advanced-reporting/reports/${id}/`, data),
   deleteReport: (id: string) => apiClient.delete(`/advanced-reporting/reports/${id}/`),
   executeReport: (id: string) => apiClient.post(`/advanced-reporting/reports/${id}/execute/`),
   previewReport: (id: string) => apiClient.get(`/advanced-reporting/reports/${id}/preview/`),
-  scheduleReport: (id: string, data: Record<string, unknown>) => 
+  scheduleReport: (id: string, data: Record<string, unknown>) =>
     apiClient.post(`/advanced-reporting/reports/${id}/schedule/`, data),
-  
+
   // Report Schedules
   getSchedules: (reportId?: string) => {
     const params = reportId ? { report: reportId } : {};
     return apiClient.get('/advanced-reporting/schedules/', { params });
   },
   createSchedule: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/schedules/', data),
-  updateSchedule: (id: string, data: Record<string, unknown>) => 
+  updateSchedule: (id: string, data: Record<string, unknown>) =>
     apiClient.patch(`/advanced-reporting/schedules/${id}/`, data),
   deleteSchedule: (id: string) => apiClient.delete(`/advanced-reporting/schedules/${id}/`),
-  activateSchedule: (id: string) => 
+  activateSchedule: (id: string) =>
     apiClient.post(`/advanced-reporting/schedules/${id}/activate/`),
-  deactivateSchedule: (id: string) => 
+  deactivateSchedule: (id: string) =>
     apiClient.post(`/advanced-reporting/schedules/${id}/deactivate/`),
-  
+
   // Report Executions
   getExecutions: (reportId?: string) => {
     const params = reportId ? { report: reportId } : {};
     return apiClient.get('/advanced-reporting/executions/', { params });
   },
   getExecution: (id: string) => apiClient.get(`/advanced-reporting/executions/${id}/`),
-  downloadExecution: (id: string) => 
+  downloadExecution: (id: string) =>
     apiClient.get(`/advanced-reporting/executions/${id}/download/`),
-  
+
   // KPIs
   getKPIs: () => apiClient.get('/advanced-reporting/kpis/'),
   createKPI: (data: Record<string, unknown>) => apiClient.post('/advanced-reporting/kpis/', data),
@@ -784,14 +790,256 @@ export const advancedReportingAPI = {
   updateKPI: (id: string, data: Record<string, unknown>) => apiClient.patch(`/advanced-reporting/kpis/${id}/`, data),
   deleteKPI: (id: string) => apiClient.delete(`/advanced-reporting/kpis/${id}/`),
   calculateKPI: (id: string) => apiClient.post(`/advanced-reporting/kpis/${id}/calculate/`),
-  getKPIHistory: (id: string, days?: number) => 
+  getKPIHistory: (id: string, days?: number) =>
     apiClient.get(`/advanced-reporting/kpis/${id}/history/`, { params: { days } }),
   getKPISummary: () => apiClient.get('/advanced-reporting/kpis/summary/'),
-  
+
   // KPI Values
   getKPIValues: (kpiId?: string) => {
     const params = kpiId ? { kpi: kpiId } : {};
     return apiClient.get('/advanced-reporting/kpi-values/', { params });
+  },
+};
+
+// ==================== Interactive Features API ====================
+
+// User Preferences API
+export const preferencesAPI = {
+  // Get current user preferences
+  getPreferences: async () => {
+    const response = await apiClient.get('/v1/interactive/preferences/me/');
+    return response.data;
+  },
+
+  // Update preferences
+  updatePreferences: async (data: Record<string, unknown>) => {
+    const response = await apiClient.patch('/v1/interactive/preferences/me/', data);
+    return response.data;
+  },
+
+  // Save dashboard layout
+  saveDashboardLayout: async (widgets: Array<{ widget_id: string; visible: boolean; order: number; size?: string }>) => {
+    const response = await apiClient.post('/v1/interactive/preferences/dashboard/', { widgets });
+    return response.data;
+  },
+
+  // Add recent item
+  addRecentItem: async (type: string, id: string, title: string) => {
+    const response = await apiClient.post('/v1/interactive/preferences/recent-item/', { type, id, title });
+    return response.data;
+  },
+
+  // Get recent items
+  getRecentItems: async () => {
+    const prefs = await apiClient.get('/v1/interactive/preferences/me/');
+    return prefs.data.recent_items || [];
+  },
+};
+
+// Onboarding API
+export const onboardingAPI = {
+  // Get onboarding status
+  getStatus: async () => {
+    const response = await apiClient.get('/v1/interactive/onboarding/status/');
+    return response.data;
+  },
+
+  // Complete a step
+  completeStep: async (stepId: string, xpReward: number = 50) => {
+    const response = await apiClient.post('/v1/interactive/onboarding/step/', {
+      step_id: stepId,
+      xp_reward: xpReward,
+    });
+    return response.data;
+  },
+
+  // Complete the product tour
+  completeTour: async () => {
+    const response = await apiClient.post('/v1/interactive/onboarding/tour/complete/');
+    return response.data;
+  },
+
+  // Dismiss the tour
+  dismissTour: async () => {
+    const response = await apiClient.post('/v1/interactive/onboarding/tour/dismiss/');
+    return response.data;
+  },
+
+  // Reset onboarding (for testing)
+  reset: async () => {
+    const response = await apiClient.post('/v1/interactive/onboarding/reset/');
+    return response.data;
+  },
+};
+
+// AI Recommendations API
+export const recommendationsAPI = {
+  // Get active recommendations
+  getActive: async (params?: { type?: string; impact?: string; limit?: number }) => {
+    const response = await apiClient.get('/v1/interactive/recommendations/active/', { params });
+    return response.data;
+  },
+
+  // Dismiss a recommendation
+  dismiss: async (id: string) => {
+    const response = await apiClient.post(`/v1/interactive/recommendations/${id}/dismiss/`);
+    return response.data;
+  },
+
+  // Complete a recommendation
+  complete: async (id: string) => {
+    const response = await apiClient.post(`/v1/interactive/recommendations/${id}/complete/`);
+    return response.data;
+  },
+
+  // Generate new recommendations
+  generate: async () => {
+    const response = await apiClient.post('/v1/interactive/recommendations/generate/');
+    return response.data;
+  },
+};
+
+// Global Search API
+export const globalSearchAPI = {
+  // Perform global search
+  search: async (query: string, options?: { types?: string[]; limit?: number }) => {
+    const response = await apiClient.post('/v1/interactive/search/', {
+      query,
+      types: options?.types || ['contact', 'company', 'lead', 'opportunity', 'task'],
+      limit: options?.limit || 10,
+    });
+    return response.data;
+  },
+
+  // Get recent searches
+  getRecentSearches: async (limit: number = 10) => {
+    const response = await apiClient.get('/v1/interactive/search/recent/', { params: { limit } });
+    return response.data;
+  },
+
+  // Clear search history
+  clearHistory: async () => {
+    const response = await apiClient.delete('/v1/interactive/search/recent/');
+    return response.data;
+  },
+};
+
+// Smart Filters API
+export const smartFiltersAPI = {
+  // Get all filters
+  getFilters: async (entityType?: string) => {
+    const params = entityType ? { entity_type: entityType } : {};
+    const response = await apiClient.get('/v1/interactive/smart-filters/', { params });
+    return response.data;
+  },
+
+  // Create a filter
+  createFilter: async (data: {
+    name: string;
+    entity_type: string;
+    filter_config: Record<string, unknown>;
+    icon?: string;
+    color?: string;
+  }) => {
+    const response = await apiClient.post('/v1/interactive/smart-filters/', data);
+    return response.data;
+  },
+
+  // Update a filter
+  updateFilter: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/interactive/smart-filters/${id}/`, data);
+    return response.data;
+  },
+
+  // Delete a filter
+  deleteFilter: async (id: string) => {
+    const response = await apiClient.delete(`/v1/interactive/smart-filters/${id}/`);
+    return response.data;
+  },
+
+  // Record filter usage
+  useFilter: async (id: string) => {
+    const response = await apiClient.post(`/v1/interactive/smart-filters/${id}/use/`);
+    return response.data;
+  },
+};
+
+// Quick Actions API
+export const quickActionsAPI = {
+  // Get all quick actions
+  getActions: async () => {
+    const response = await apiClient.get('/v1/interactive/quick-actions/');
+    return response.data;
+  },
+
+  // Get pinned actions
+  getPinnedActions: async () => {
+    const response = await apiClient.get('/v1/interactive/quick-actions/pinned/');
+    return response.data;
+  },
+
+  // Create a quick action
+  createAction: async (data: {
+    name: string;
+    action_type: string;
+    action_config?: Record<string, unknown>;
+    url?: string;
+    icon?: string;
+    color?: string;
+    shortcut?: string;
+  }) => {
+    const response = await apiClient.post('/v1/interactive/quick-actions/', data);
+    return response.data;
+  },
+
+  // Update a quick action
+  updateAction: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/interactive/quick-actions/${id}/`, data);
+    return response.data;
+  },
+
+  // Delete a quick action
+  deleteAction: async (id: string) => {
+    const response = await apiClient.delete(`/v1/interactive/quick-actions/${id}/`);
+    return response.data;
+  },
+
+  // Toggle pin status
+  togglePin: async (id: string) => {
+    const response = await apiClient.post(`/v1/interactive/quick-actions/${id}/toggle_pin/`);
+    return response.data;
+  },
+
+  // Record action usage
+  recordUse: async (id: string) => {
+    const response = await apiClient.post(`/v1/interactive/quick-actions/${id}/record_use/`);
+    return response.data;
+  },
+};
+
+// Data Enrichment API (for AI features)
+export const dataEnrichmentAPI = {
+  // Get enrichment suggestions
+  getSuggestions: async (entityType: string, entityId: string) => {
+    const response = await apiClient.get('/data-enrichment/suggestions/', {
+      params: { entity_type: entityType, entity_id: entityId },
+    });
+    return response.data;
+  },
+
+  // Enrich entity data
+  enrichEntity: async (entityType: string, entityId: string) => {
+    const response = await apiClient.post('/data-enrichment/enrich/', {
+      entity_type: entityType,
+      entity_id: entityId,
+    });
+    return response.data;
+  },
+
+  // Get company insights
+  getCompanyInsights: async (companyId: string) => {
+    const response = await apiClient.get(`/data-enrichment/company-insights/${companyId}/`);
+    return response.data;
   },
 };
 

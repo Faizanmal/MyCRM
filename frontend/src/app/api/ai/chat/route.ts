@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Intent analysis
-type Intent = 
+type Intent =
   | 'draft_email'
   | 'meeting_prep'
   | 'deal_analysis'
@@ -167,7 +167,7 @@ function analyzeIntent(message: string): Intent {
 // Generate suggestions based on intent
 function generateSuggestions(
   intent: Intent,
-  context?: ChatRequest['context']
+  _context?: ChatRequest['context']
 ): string[] {
   const suggestionMap: Record<Intent, string[]> = {
     draft_email: [
