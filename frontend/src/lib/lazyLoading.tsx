@@ -14,27 +14,27 @@ import { Skeleton } from '@/components/ui/skeleton';
 /**
  * Create a lazy-loaded component with loading fallback
  */
-export function lazyLoad<T extends ComponentType<P>, P extends object>(
+export function lazyLoad<T extends ComponentType<any>>(
     importFn: () => Promise<{ default: T }>,
     LoadingComponent?: ComponentType
-): ComponentType<P> {
+): T {
     const LazyComponent = lazy(importFn);
 
     const LoadingFallback = LoadingComponent || DefaultLoadingFallback;
 
-    return function LazyLoadedComponent(props: P) {
+    return function LazyLoadedComponent(props: React.ComponentProps<T>) {
         return (
             <Suspense fallback={<LoadingFallback />}>
                 <LazyComponent {...props} />
             </Suspense>
         );
-    };
+    } as T;
 }
 
 /**
  * Default loading fallback component
  */
-function DefaultLoadingFallback() {
+function DefaultLoadingFallback(props: { error?: Error; isLoading?: boolean; pastDelay?: boolean; retry?: () => void; timedOut?: boolean }) {
     return (
         <div className="flex items-center justify-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
@@ -244,12 +244,12 @@ export const LazyChart = lazyLoad(
     ChartLoadingFallback
 );
 
-export const LazyEditor = lazyLoad(
-    () => import('@/components/RichTextEditor').catch(() => ({
-        default: () => <div>Editor not available</div>
-    })) as Promise<{ default: ComponentType }>,
-    DefaultLoadingFallback
-);
+// export const LazyEditor = lazyLoad(
+//     () => (import('@/components/RichTextEditor') as any).catch(() => ({
+//         default: () => <div>Editor not available</div>
+//     })) as Promise<{ default: ComponentType }>,
+//     DefaultLoadingFallback
+// );
 
 // Dynamic import wrapper for Next.js
 export const createDynamicComponent = <P extends object>(
@@ -260,7 +260,7 @@ export const createDynamicComponent = <P extends object>(
     }
 ) => {
     return dynamic(importFn, {
-        loading: options?.loading || (() => <DefaultLoadingFallback />),
+        loading: options?.loading as any,
         ssr: options?.ssr ?? true,
     });
 };

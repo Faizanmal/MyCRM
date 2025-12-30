@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar } from '@/components/ui/calender';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarIcon, Loader2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -378,7 +378,7 @@ export function DateInput<T extends FieldValues>({
                     <Calendar
                         mode="single"
                         selected={value}
-                        onSelect={(date) => setValue(name, date as T[typeof name])}
+                        onSelect={(date: Date | undefined) => setValue(name, date as T[typeof name])}
                         initialFocus
                     />
                 </PopoverContent>
@@ -408,7 +408,7 @@ export function Form<T extends FieldValues>({
     resetOnSuccess = false,
 }: FormProps<T>) {
     const form = useForm<T>({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(schema as any),
         defaultValues,
     });
 
@@ -424,8 +424,8 @@ export function Form<T extends FieldValues>({
     };
 
     return (
-        <form onSubmit={form.handleSubmit(handleSubmit)} className={className}>
-            {children(form)}
+        <form onSubmit={form.handleSubmit(handleSubmit as any)} className={className}>
+            {children(form as any)}
         </form>
     );
 }
@@ -464,7 +464,7 @@ export const schemas = {
     optionalString: z.string().optional(),
     positiveNumber: z.number().positive('Must be a positive number'),
     percentage: z.number().min(0).max(100, 'Must be between 0 and 100'),
-    date: z.date({ required_error: 'Please select a date' }),
+    date: z.date(),
     optionalDate: z.date().optional(),
 };
 

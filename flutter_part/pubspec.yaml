@@ -78,6 +78,18 @@ dependencies:
   # Image Picker
   image_picker: ^1.0.7
   file_picker: ^10.3.7
+  
+  # Connectivity & Offline
+  connectivity_plus: ^6.1.4
+  
+  # Push Notifications
+  flutter_local_notifications: ^19.2.1
+  
+  # Secure Storage
+  flutter_secure_storage: ^9.2.4
+  
+  # Biometric Auth
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:

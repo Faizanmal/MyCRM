@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Calendar as CalendarComponent } from '@/components/ui/calender';
 import { cn } from '@/lib/utils';
 
 /**
@@ -292,7 +292,7 @@ function FilterField({ config, value, onChange }: FilterFieldProps) {
                             <CalendarComponent
                                 mode="single"
                                 selected={value ? new Date(value as string) : undefined}
-                                onSelect={(date) => date && onChange(date.toISOString(), date.toLocaleDateString())}
+                                onSelect={(date: Date | undefined) => date && onChange(date.toISOString(), date.toLocaleDateString())}
                             />
                         </PopoverContent>
                     </Popover>

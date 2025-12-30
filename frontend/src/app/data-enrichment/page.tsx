@@ -55,6 +55,12 @@ interface EnrichmentProfile {
   id: number;
   name: string;
   profile_type: string;
+  description?: string;
+  provider?: string;
+  record_type?: string;
+  priority?: number;
+  field_mappings?: Record<string, string>;
+  filters?: Record<string, any>;
   fields_to_enrich: string[];
   auto_enrich: boolean;
   enrichment_triggers: string[];
@@ -67,13 +73,17 @@ interface EnrichmentProfile {
 
 interface EnrichmentJob {
   id: number;
+  profile_id?: number;
   profile_name: string;
   record_type: string;
   status: string;
   total_records: number;
   processed_records: number;
+  records_processed?: number;
+  records_enriched?: number;
   successful_records: number;
   failed_records: number;
+  records_failed?: number;
   started_at: string;
   completed_at?: string;
   error_message?: string;
@@ -81,6 +91,7 @@ interface EnrichmentJob {
 
 interface EnrichmentResult {
   id: number;
+  record_id?: number;
   contact_name?: string;
   company_name?: string;
   record_type: string;
@@ -112,34 +123,6 @@ export default function DataEnrichmentPage() {
   const [, setLoading] = useState(true);
   const [isCreateProfileDialogOpen, setIsCreateProfileDialogOpen] = useState(false);
   const [isConfigProviderDialogOpen, setIsConfigProviderDialogOpen] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [providersRes, profilesRes, jobsRes] = await Promise.all([
-        dataEnrichmentAPI.getProviders().catch(() => ({ data: { results: [] } })),
-        dataEnrichmentAPI.getProfiles().catch(() => ({ data: { results: [] } })),
-        dataEnrichmentAPI.getJobs().catch(() => ({ data: { results: [] } }))
-      ]);
-
-      setProviders(providersRes.data.results || []);
-      setProfiles(profilesRes.data.results || []);
-      setJobs(jobsRes.data.results || []);
-
-      // Load demo data if empty
-      if ((providersRes.data.results || []).length === 0) {
-        loadDemoData();
-      }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-      loadDemoData();
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   const loadDemoData = useCallback(() => {
     setProviders([
@@ -200,111 +183,106 @@ export default function DataEnrichmentPage() {
     setProfiles([
       {
         id: 1,
-        name: 'High-Value Lead Enrichment',
-        profile_type: 'contact',
-        fields_to_enrich: ['job_title', 'phone', 'linkedin_url', 'company_size', 'industry'],
-        auto_enrich: true,
-        enrichment_triggers: ['lead_score_above_70', 'new_contact_created'],
-        priority_score_threshold: 70,
+        name: 'Company Enrichment',
+        description: 'Enrich company data with revenue, employees, and technologies',
+        provider: 'Clearbit',
+        record_type: 'company',
         is_active: true,
-        created_at: '2024-01-01T00:00:00Z',
-        contacts_enriched: 2450,
-        companies_enriched: 0
+        priority: 1,
+        field_mappings: {
+          'name': 'company_name',
+          'domain': 'website',
+          'description': 'description'
+        },
+        filters: {},
+        schedule: 'daily',
+        last_run: new Date(Date.now() - 3600000).toISOString(),
+        success_rate: 94.5,
+        total_processed: 1250,
+        created_at: new Date(Date.now() - 86400000).toISOString()
       },
       {
         id: 2,
-        name: 'Company Intelligence',
-        profile_type: 'company',
-        fields_to_enrich: ['revenue', 'employee_count', 'technologies', 'funding_info', 'social_profiles'],
-        auto_enrich: true,
-        enrichment_triggers: ['new_company_created', 'opportunity_created'],
-        priority_score_threshold: 50,
+        name: 'Contact Enrichment',
+        description: 'Find and verify contact information',
+        provider: 'ZoomInfo',
+        record_type: 'contact',
         is_active: true,
-        created_at: '2024-01-05T00:00:00Z',
-        contacts_enriched: 0,
-        companies_enriched: 890
-      },
-      {
-        id: 3,
-        name: 'Email Verification',
-        profile_type: 'contact',
-        fields_to_enrich: ['email_verified', 'email_deliverability'],
-        auto_enrich: false,
-        enrichment_triggers: ['manual'],
-        priority_score_threshold: 0,
-        is_active: true,
-        created_at: '2024-01-10T00:00:00Z',
-        contacts_enriched: 5600,
-        companies_enriched: 0
+        priority: 1,
+        field_mappings: {
+          'first_name': 'first_name',
+          'last_name': 'last_name',
+          'email': 'email'
+        },
+        filters: { 'company_size': '50-200' },
+        schedule: 'weekly',
+        last_run: new Date(Date.now() - 604800000).toISOString(),
+        success_rate: 91.2,
+        total_processed: 890,
+        created_at: new Date(Date.now() - 172800000).toISOString()
       }
     ]);
 
     setJobs([
       {
         id: 1,
-        profile_name: 'High-Value Lead Enrichment',
-        record_type: 'contact',
+        profile_id: 1,
+        profile_name: 'Company Enrichment',
+        record_type: 'company',
         status: 'completed',
-        total_records: 250,
-        processed_records: 250,
-        successful_records: 238,
-        failed_records: 12,
+        total_records: 1250,
+        processed_records: 1250,
+        records_processed: 1250,
+        records_enriched: 1180,
+        successful_records: 1180,
+        failed_records: 70,
+        records_failed: 70,
         started_at: new Date(Date.now() - 3600000).toISOString(),
-        completed_at: new Date(Date.now() - 1800000).toISOString()
+        completed_at: new Date(Date.now() - 1800000).toISOString(),
+        duration_seconds: 1800,
+        error_message: undefined
       },
       {
         id: 2,
-        profile_name: 'Company Intelligence',
-        record_type: 'company',
-        status: 'running',
-        total_records: 150,
-        processed_records: 87,
-        successful_records: 82,
-        failed_records: 5,
-        started_at: new Date(Date.now() - 1200000).toISOString()
-      },
-      {
-        id: 3,
-        profile_name: 'Email Verification',
+        profile_id: 2,
+        profile_name: 'Contact Enrichment',
         record_type: 'contact',
-        status: 'pending',
+        status: 'running',
         total_records: 500,
-        processed_records: 0,
-        successful_records: 0,
-        failed_records: 0,
-        started_at: new Date().toISOString()
+        processed_records: 450,
+        records_processed: 450,
+        records_enriched: 420,
+        successful_records: 420,
+        failed_records: 30,
+        records_failed: 30,
+        started_at: new Date(Date.now() - 900000).toISOString(),
+        completed_at: undefined,
+        duration_seconds: null,
+        error_message: undefined
       }
     ]);
 
     setResults([
       {
         id: 1,
-        contact_name: 'John Smith',
-        record_type: 'contact',
-        provider: 'ZoomInfo',
-        fields_enriched: ['job_title', 'phone', 'linkedin_url'],
+        record_id: 101,
+        company_name: 'Acme Corp',
+        record_type: 'company',
+        provider: 'Clearbit',
+        fields_enriched: ['revenue', 'employee_count', 'technologies', 'industry'],
         data_quality_score: 95,
         enriched_at: new Date(Date.now() - 300000).toISOString(),
         is_verified: true
       },
       {
         id: 2,
+        record_id: 102,
         company_name: 'TechCorp Inc',
         record_type: 'company',
         provider: 'Clearbit',
         fields_enriched: ['revenue', 'employee_count', 'technologies', 'industry'],
         data_quality_score: 92,
         enriched_at: new Date(Date.now() - 600000).toISOString(),
-        is_verified: true
-      },
-      {
-        id: 3,
-        contact_name: 'Sarah Johnson',
-        record_type: 'contact',
-        provider: 'Hunter.io',
-        fields_enriched: ['email_verified'],
-        data_quality_score: 88,
-        enriched_at: new Date(Date.now() - 900000).toISOString(),
         is_verified: true
       }
     ]);
@@ -320,6 +298,34 @@ export default function DataEnrichmentPage() {
       records_needing_update: 1250
     });
   }, []);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [providersRes, profilesRes, jobsRes] = await Promise.all([
+        dataEnrichmentAPI.getProviders().catch(() => ({ data: { results: [] } })),
+        dataEnrichmentAPI.getProfiles().catch(() => ({ data: { results: [] } })),
+        dataEnrichmentAPI.getJobs().catch(() => ({ data: { results: [] } }))
+      ]);
+
+      setProviders(providersRes.data.results || []);
+      setProfiles(profilesRes.data.results || []);
+      setJobs(jobsRes.data.results || []);
+
+      // Load demo data if empty
+      if ((providersRes.data.results || []).length === 0) {
+        loadDemoData();
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      loadDemoData();
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const triggerEnrichment = async (profileId: number) => {
     try {

@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import { jest } from '@jest/globals';
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
@@ -41,18 +42,20 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
-    constructor(callback: IntersectionObserverCallback) {
+    constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
         this.callback = callback;
+        this.options = options;
     }
     callback: IntersectionObserverCallback;
+    options?: IntersectionObserverInit;
     root = null;
     rootMargin = '';
     thresholds = [];
     observe = jest.fn();
     unobserve = jest.fn();
     disconnect = jest.fn();
-    takeRecords = jest.fn().mockReturnValue([]);
-};
+    takeRecords = jest.fn().mockReturnValue([] as IntersectionObserverEntry[]);
+} as unknown as typeof IntersectionObserver;
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {

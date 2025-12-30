@@ -65,8 +65,8 @@ import { cn } from '@/lib/utils';
  * - Custom cell renderers
  */
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData> {
+    columns: ColumnDef<TData, any>[];
     data: TData[];
     searchKey?: string;
     searchPlaceholder?: string;
@@ -96,7 +96,7 @@ const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
     return cellValue.includes(searchValue);
 };
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
     columns,
     data,
     searchKey,
@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({
     className,
     stickyHeader = false,
     rowActions,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -163,7 +163,7 @@ export function DataTable<TData, TValue>({
         return cols;
     }, [columns, showRowSelection, rowActions]);
 
-    const table = useReactTable({
+    const table = useReactTable<TData>({
         data,
         columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
@@ -175,7 +175,7 @@ export function DataTable<TData, TValue>({
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
         onGlobalFilterChange: setGlobalFilter,
-        globalFilterFn: fuzzyFilter,
+        globalFilterFn: fuzzyFilter as FilterFn<TData>,
         state: {
             sorting,
             columnFilters,
@@ -196,14 +196,14 @@ export function DataTable<TData, TValue>({
             const selectedRows = table
                 .getSelectedRowModel()
                 .rows.map((row) => row.original);
-            onSelectionChange(selectedRows);
+            onSelectionChange(selectedRows as TData[]);
         }
     }, [rowSelection, onSelectionChange, table]);
 
     const handleExport = useCallback(() => {
         if (onExport) {
             const exportData = table.getFilteredRowModel().rows.map((row) => row.original);
-            onExport(exportData);
+            onExport(exportData as TData[]);
         }
     }, [onExport, table]);
 
@@ -351,7 +351,7 @@ export function DataTable<TData, TValue>({
                                             row.getIsSelected() && 'bg-blue-50',
                                             onRowClick && 'cursor-pointer'
                                         )}
-                                        onClick={() => onRowClick?.(row.original)}
+                                        onClick={() => onRowClick?.(row.original as TData)}
                                     >
                                         {row.getVisibleCells().map((cell) => (
                                             <td key={cell.id} className="px-4 py-4 text-sm text-gray-900">
@@ -401,7 +401,7 @@ export function DataTable<TData, TValue>({
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {pageSizeOptions.map((size) => (
+                                {pageSizeOptions.map((size: number) => (
                                     <SelectItem key={size} value={String(size)}>
                                         {size}
                                     </SelectItem>

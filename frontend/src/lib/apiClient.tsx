@@ -161,27 +161,27 @@ async function refreshToken(): Promise<boolean> {
 
 // API methods
 export const api = {
-    get: <T>(endpoint: string) => apiFetch<T>(endpoint),
+    get: <T,>(endpoint: string) => apiFetch<T>(endpoint),
 
-    post: <T>(endpoint: string, data?: unknown) =>
+    post: <T,>(endpoint: string, data?: unknown) =>
         apiFetch<T>(endpoint, {
             method: 'POST',
             body: data ? JSON.stringify(data) : undefined,
         }),
 
-    put: <T>(endpoint: string, data?: unknown) =>
+    put: <T,>(endpoint: string, data?: unknown) =>
         apiFetch<T>(endpoint, {
             method: 'PUT',
             body: data ? JSON.stringify(data) : undefined,
         }),
 
-    patch: <T>(endpoint: string, data?: unknown) =>
+    patch: <T,>(endpoint: string, data?: unknown) =>
         apiFetch<T>(endpoint, {
             method: 'PATCH',
             body: data ? JSON.stringify(data) : undefined,
         }),
 
-    delete: <T>(endpoint: string) =>
+    delete: <T,>(endpoint: string) =>
         apiFetch<T>(endpoint, { method: 'DELETE' }),
 };
 
