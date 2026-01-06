@@ -1,14 +1,13 @@
-// @ts-nocheck
 /**
  * Interactive Features Integration Tests
  * Tests for all interactive components and hooks
- * 
+ *
  * To run these tests, install testing dependencies:
  * npm install -D vitest @testing-library/react @testing-library/react-hooks
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock API module
 vi.mock('@/lib/api', () => ({

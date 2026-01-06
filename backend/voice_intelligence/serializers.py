@@ -4,19 +4,27 @@ DRF serializers for voice intelligence models
 """
 
 from rest_framework import serializers
+
 from .models import (
-    VoiceRecording, Transcription, ConversationSummary,
-    ActionItem, SentimentAnalysis, KeyMoment, CallScore,
-    VoiceNote, ConversationCategory, RecordingCategory,
-    TranscriptionSettings
+    ActionItem,
+    CallScore,
+    ConversationCategory,
+    ConversationSummary,
+    KeyMoment,
+    RecordingCategory,
+    SentimentAnalysis,
+    Transcription,
+    TranscriptionSettings,
+    VoiceNote,
+    VoiceRecording,
 )
 
 
 class TranscriptionSerializer(serializers.ModelSerializer):
     """Serializer for Transcription model"""
-    
+
     word_count = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Transcription
         fields = [
@@ -31,11 +39,11 @@ class TranscriptionSerializer(serializers.ModelSerializer):
 
 class ConversationSummarySerializer(serializers.ModelSerializer):
     """Serializer for ConversationSummary model"""
-    
+
     summary_type_display = serializers.CharField(
         source='get_summary_type_display', read_only=True
     )
-    
+
     class Meta:
         model = ConversationSummary
         fields = [
@@ -49,14 +57,14 @@ class ConversationSummarySerializer(serializers.ModelSerializer):
 
 class ActionItemSerializer(serializers.ModelSerializer):
     """Serializer for ActionItem model"""
-    
+
     priority_display = serializers.CharField(
         source='get_priority_display', read_only=True
     )
     status_display = serializers.CharField(
         source='get_status_display', read_only=True
     )
-    
+
     class Meta:
         model = ActionItem
         fields = [
@@ -71,11 +79,11 @@ class ActionItemSerializer(serializers.ModelSerializer):
 
 class SentimentAnalysisSerializer(serializers.ModelSerializer):
     """Serializer for SentimentAnalysis model"""
-    
+
     overall_sentiment_display = serializers.CharField(
         source='get_overall_sentiment_display', read_only=True
     )
-    
+
     class Meta:
         model = SentimentAnalysis
         fields = [
@@ -90,11 +98,11 @@ class SentimentAnalysisSerializer(serializers.ModelSerializer):
 
 class KeyMomentSerializer(serializers.ModelSerializer):
     """Serializer for KeyMoment model"""
-    
+
     moment_type_display = serializers.CharField(
         source='get_moment_type_display', read_only=True
     )
-    
+
     class Meta:
         model = KeyMoment
         fields = [
@@ -108,7 +116,7 @@ class KeyMomentSerializer(serializers.ModelSerializer):
 
 class CallScoreSerializer(serializers.ModelSerializer):
     """Serializer for CallScore model"""
-    
+
     class Meta:
         model = CallScore
         fields = [
@@ -127,9 +135,9 @@ class CallScoreSerializer(serializers.ModelSerializer):
 
 class ConversationCategorySerializer(serializers.ModelSerializer):
     """Serializer for ConversationCategory model"""
-    
+
     subcategories = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ConversationCategory
         fields = [
@@ -137,7 +145,7 @@ class ConversationCategorySerializer(serializers.ModelSerializer):
             'keywords', 'recording_count', 'subcategories', 'created_at'
         ]
         read_only_fields = ['id', 'recording_count', 'created_at']
-    
+
     def get_subcategories(self, obj):
         return ConversationCategorySerializer(
             obj.subcategories.all(), many=True
@@ -146,14 +154,14 @@ class ConversationCategorySerializer(serializers.ModelSerializer):
 
 class RecordingCategorySerializer(serializers.ModelSerializer):
     """Serializer for RecordingCategory model"""
-    
+
     category_name = serializers.CharField(
         source='category.name', read_only=True
     )
     category_color = serializers.CharField(
         source='category.color', read_only=True
     )
-    
+
     class Meta:
         model = RecordingCategory
         fields = [
@@ -165,7 +173,7 @@ class RecordingCategorySerializer(serializers.ModelSerializer):
 
 class VoiceRecordingListSerializer(serializers.ModelSerializer):
     """Serializer for VoiceRecording list view"""
-    
+
     source_type_display = serializers.CharField(
         source='get_source_type_display', read_only=True
     )
@@ -177,7 +185,7 @@ class VoiceRecordingListSerializer(serializers.ModelSerializer):
     has_summary = serializers.SerializerMethodField()
     action_items_count = serializers.SerializerMethodField()
     categories = RecordingCategorySerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = VoiceRecording
         fields = [
@@ -187,20 +195,20 @@ class VoiceRecordingListSerializer(serializers.ModelSerializer):
             'has_transcription', 'has_summary', 'action_items_count',
             'categories', 'contact', 'lead', 'opportunity'
         ]
-    
+
     def get_has_transcription(self, obj):
         return hasattr(obj, 'transcription')
-    
+
     def get_has_summary(self, obj):
         return obj.summaries.exists()
-    
+
     def get_action_items_count(self, obj):
         return obj.action_items.count()
 
 
 class VoiceRecordingDetailSerializer(serializers.ModelSerializer):
     """Serializer for VoiceRecording detail view"""
-    
+
     source_type_display = serializers.CharField(
         source='get_source_type_display', read_only=True
     )
@@ -215,7 +223,7 @@ class VoiceRecordingDetailSerializer(serializers.ModelSerializer):
     key_moments = KeyMomentSerializer(many=True, read_only=True)
     call_score = CallScoreSerializer(read_only=True)
     categories = RecordingCategorySerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = VoiceRecording
         fields = [
@@ -235,9 +243,9 @@ class VoiceRecordingDetailSerializer(serializers.ModelSerializer):
 
 class VoiceRecordingCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating a VoiceRecording"""
-    
+
     audio_file = serializers.FileField(write_only=True)
-    
+
     class Meta:
         model = VoiceRecording
         fields = [
@@ -245,14 +253,14 @@ class VoiceRecordingCreateSerializer(serializers.ModelSerializer):
             'participant_count', 'contact', 'lead', 'opportunity',
             'meeting', 'recorded_at'
         ]
-    
+
     def create(self, validated_data):
         audio_file = validated_data.pop('audio_file')
         user = self.context['request'].user
-        
+
         from .services import VoiceRecordingService
         service = VoiceRecordingService()
-        
+
         metadata = {
             'participants': validated_data.pop('participants', []),
             'participant_count': validated_data.pop('participant_count', 2),
@@ -261,7 +269,7 @@ class VoiceRecordingCreateSerializer(serializers.ModelSerializer):
             'opportunity_id': validated_data.pop('opportunity', None),
             'meeting_id': validated_data.pop('meeting', None),
         }
-        
+
         recording = service.create_recording(
             user=user,
             audio_file=audio_file,
@@ -269,13 +277,13 @@ class VoiceRecordingCreateSerializer(serializers.ModelSerializer):
             title=validated_data.get('title', ''),
             metadata=metadata
         )
-        
+
         return recording
 
 
 class VoiceNoteSerializer(serializers.ModelSerializer):
     """Serializer for VoiceNote model"""
-    
+
     class Meta:
         model = VoiceNote
         fields = [
@@ -289,16 +297,16 @@ class VoiceNoteSerializer(serializers.ModelSerializer):
 
 class VoiceNoteCreateSerializer(serializers.Serializer):
     """Serializer for creating a VoiceNote"""
-    
+
     audio_file = serializers.FileField()
     contact = serializers.UUIDField(required=False, allow_null=True)
     lead = serializers.UUIDField(required=False, allow_null=True)
     opportunity = serializers.UUIDField(required=False, allow_null=True)
-    
+
     def create(self, validated_data):
         audio_file = validated_data.pop('audio_file')
         user = self.context['request'].user
-        
+
         related_to = {}
         if validated_data.get('contact'):
             related_to['contact_id'] = validated_data['contact']
@@ -306,10 +314,10 @@ class VoiceNoteCreateSerializer(serializers.Serializer):
             related_to['lead_id'] = validated_data['lead']
         if validated_data.get('opportunity'):
             related_to['opportunity_id'] = validated_data['opportunity']
-        
+
         from .services import VoiceNoteService
         service = VoiceNoteService()
-        
+
         return service.create_voice_note(
             user=user,
             audio_file=audio_file,
@@ -319,7 +327,7 @@ class VoiceNoteCreateSerializer(serializers.Serializer):
 
 class TranscriptionSettingsSerializer(serializers.ModelSerializer):
     """Serializer for TranscriptionSettings model"""
-    
+
     class Meta:
         model = TranscriptionSettings
         fields = [
@@ -336,7 +344,7 @@ class TranscriptionSettingsSerializer(serializers.ModelSerializer):
 
 class TranscriptionEditSerializer(serializers.Serializer):
     """Serializer for editing transcription text"""
-    
+
     full_text = serializers.CharField()
     segments = serializers.ListField(
         child=serializers.DictField(),
@@ -346,7 +354,7 @@ class TranscriptionEditSerializer(serializers.Serializer):
 
 class ProcessRecordingSerializer(serializers.Serializer):
     """Serializer for triggering recording processing"""
-    
+
     transcribe = serializers.BooleanField(default=True)
     analyze = serializers.BooleanField(default=True)
     summarize = serializers.BooleanField(default=True)
@@ -356,7 +364,7 @@ class ProcessRecordingSerializer(serializers.Serializer):
 
 class BulkActionItemUpdateSerializer(serializers.Serializer):
     """Serializer for bulk updating action items"""
-    
+
     action_item_ids = serializers.ListField(
         child=serializers.UUIDField()
     )
@@ -373,7 +381,7 @@ class BulkActionItemUpdateSerializer(serializers.Serializer):
 
 class SearchRecordingsSerializer(serializers.Serializer):
     """Serializer for search parameters"""
-    
+
     query = serializers.CharField(required=False)
     source_type = serializers.ChoiceField(
         choices=['phone_call', 'video_meeting', 'voice_note', 'upload', 'live_capture'],
@@ -396,7 +404,7 @@ class SearchRecordingsSerializer(serializers.Serializer):
 
 class RecordingAnalyticsSerializer(serializers.Serializer):
     """Serializer for recording analytics response"""
-    
+
     total_recordings = serializers.IntegerField()
     total_duration_seconds = serializers.IntegerField()
     total_duration_formatted = serializers.CharField()

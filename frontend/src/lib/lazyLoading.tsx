@@ -3,6 +3,7 @@
 import React, { lazy, Suspense, ComponentType, ReactNode, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
+import Image, { ImageProps } from 'next/image';
 
 /**
  * Lazy Loading Utilities
@@ -14,27 +15,27 @@ import { Skeleton } from '@/components/ui/skeleton';
 /**
  * Create a lazy-loaded component with loading fallback
  */
-export function lazyLoad<T extends ComponentType<any>>(
+export function lazyLoad<T extends ComponentType<unknown>>(
     importFn: () => Promise<{ default: T }>,
-    LoadingComponent?: ComponentType
-): T {
-    const LazyComponent = lazy(importFn);
+    LoadingComponent?: ComponentType<unknown>
+): ComponentType<unknown> {
+    const LazyComponent = lazy(importFn) as unknown as ComponentType<unknown>;
 
     const LoadingFallback = LoadingComponent || DefaultLoadingFallback;
 
-    return function LazyLoadedComponent(props: React.ComponentProps<T>) {
+    return function LazyLoadedComponent(props: unknown) {
         return (
             <Suspense fallback={<LoadingFallback />}>
-                <LazyComponent {...props} />
+                <LazyComponent {...props as Record<string, unknown>} />
             </Suspense>
         );
-    } as T;
+    } as ComponentType<unknown>;
 }
 
 /**
  * Default loading fallback component
  */
-function DefaultLoadingFallback(props: { error?: Error; isLoading?: boolean; pastDelay?: boolean; retry?: () => void; timedOut?: boolean }) {
+function DefaultLoadingFallback(_props: { error?: Error; isLoading?: boolean; pastDelay?: boolean; retry?: () => void; timedOut?: boolean }) {
     return (
         <div className="flex items-center justify-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
@@ -141,7 +142,7 @@ export function LazyImage({
     alt: string;
     className?: string;
     placeholderColor?: string;
-} & React.ImgHTMLAttributes<HTMLImageElement>) {
+} & Omit<ImageProps, 'src' | 'alt' | 'className'>) {
     const [isLoaded, setIsLoaded] = useState(false);
     const [error, setError] = useState(false);
 
@@ -155,7 +156,7 @@ export function LazyImage({
                     <span className="text-sm">Failed to load</span>
                 </div>
             ) : (
-                <img
+                <Image
                     src={src}
                     alt={alt}
                     className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
@@ -183,7 +184,7 @@ export function LazyLoadOnView({
     rootMargin?: string;
     threshold?: number;
 }) {
-    const [isVisible, setIsVisible] = useState(false);
+    const [_isVisible, setIsVisible] = useState(false);
     const [hasBeenVisible, setHasBeenVisible] = useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -205,7 +206,7 @@ export function LazyLoadOnView({
         }
 
         return () => observer.disconnect();
-    }, [rootMargin, threshold]);
+    }, [rootMargin, threshold, setIsVisible]);
 
     return (
         <div ref={containerRef}>
@@ -240,7 +241,7 @@ export function PreloadModules({ modules }: { modules: string[] }) {
 
 // Pre-configured lazy components for common use cases
 export const LazyChart = lazyLoad(
-    () => import('recharts').then(m => ({ default: m.ResponsiveContainer as unknown as ComponentType })),
+    () => import('recharts').then(m => ({ default: m.ResponsiveContainer as unknown as ComponentType<unknown> })) as Promise<{ default: ComponentType<unknown> }>,
     ChartLoadingFallback
 );
 
@@ -255,17 +256,18 @@ export const LazyChart = lazyLoad(
 export const createDynamicComponent = <P extends object>(
     importFn: () => Promise<{ default: ComponentType<P> }>,
     options?: {
-        loading?: ComponentType;
+        loading?: ComponentType<unknown>;
         ssr?: boolean;
     }
 ) => {
+    const LoadingFn = options?.loading ? ((props: unknown) => React.createElement(options!.loading as ComponentType<unknown>, props as any)) : undefined; // eslint-disable-line @typescript-eslint/no-explicit-any
     return dynamic(importFn, {
-        loading: options?.loading as any,
+        loading: LoadingFn as ((loadingProps: any) => ReactNode) | undefined, // eslint-disable-line @typescript-eslint/no-explicit-any
         ssr: options?.ssr ?? true,
     });
 };
 
-export default {
+const lazyLoadingUtils = {
     lazyLoad,
     LazyImage,
     LazyLoadOnView,
@@ -276,3 +278,5 @@ export default {
     CardGridLoadingFallback,
     createDynamicComponent,
 };
+
+export default lazyLoadingUtils;

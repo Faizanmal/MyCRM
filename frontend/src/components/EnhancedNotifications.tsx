@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
+// import { Skeleton } from '@/components/ui/skeleton';
 import {
     Bell,
     X,
@@ -20,8 +20,6 @@ import {
     ExternalLink,
     Trash2,
     MoreHorizontal,
-    Wifi,
-    WifiOff,
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
@@ -137,7 +135,7 @@ export default function EnhancedNotifications() {
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
     const [filter, setFilter] = useState<'all' | NotificationType>('all');
-    const [isLoading, setIsLoading] = useState(true);
+    const [_isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
     // Real-time connection status
@@ -180,7 +178,7 @@ export default function EnhancedNotifications() {
             setNotifications(apiNotifications.length > 0 ? apiNotifications : mockNotifications);
         } catch (error) {
             // Use mock data on error
-            console.log('Using mock notifications');
+            console.log('Using mock notifications', error);
             setNotifications(mockNotifications);
         } finally {
             setIsLoading(false);
@@ -204,6 +202,7 @@ export default function EnhancedNotifications() {
             await activityAPI.markNotificationRead(id);
         } catch (error) {
             // Already updated locally
+            console.log('Failed to mark notification as read', error);
         }
     }, []);
 
@@ -213,6 +212,7 @@ export default function EnhancedNotifications() {
             await activityAPI.markAllNotificationsRead();
         } catch (error) {
             // Already updated locally
+            console.log('Failed to mark all notifications as read', error);
         }
         toast.success('All notifications marked as read');
     }, []);
@@ -423,7 +423,7 @@ export default function EnhancedNotifications() {
                                     <div className="p-8 text-center">
                                         <Bell className="w-12 h-12 text-gray-200 dark:text-gray-700 mx-auto mb-3" />
                                         <p className="text-gray-500">No notifications</p>
-                                        <p className="text-sm text-gray-400">You're all caught up!</p>
+                                        <p className="text-sm text-gray-400">You&apos;re all caught up!</p>
                                     </div>
                                 )}
                             </ScrollArea>

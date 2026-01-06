@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React from 'react';
+// import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -20,20 +19,16 @@ import {
   Target,
   Flame,
   Zap,
-  Star,
   Crown,
   Gift,
   Users,
-  TrendingUp,
   Award,
   Heart,
   Sparkles,
   ArrowUp,
   ArrowDown,
   Minus,
-  Calendar,
   Clock,
-  ChevronRight,
   Send,
 } from 'lucide-react';
 

@@ -1,8 +1,9 @@
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from django.conf import settings
-from rest_framework.test import APIClient
 from datetime import timedelta
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
@@ -38,7 +39,7 @@ class LoginProtectionTests(TestCase):
         User.objects.create_user(username='ratetest', email='ratetest@example.com', password='testpass')
         # Hit login 11 times to exceed the 10/h limit
         last_resp = None
-        for i in range(11):
+        for _i in range(11):
             last_resp = self.client.post('/api/auth/login/', {'username': 'ratetest', 'password': 'testpass'}, format='json')
         # Expect at least the last request to be rate limited (429)
         self.assertEqual(last_resp.status_code, 429)

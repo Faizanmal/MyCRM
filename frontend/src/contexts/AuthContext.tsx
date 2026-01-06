@@ -12,6 +12,9 @@ interface User {
   role: string;
   phone?: string;
   avatar?: string;
+  avatar_url?: string;
+  bio?: string;
+  location?: string;
   department?: string;
   is_active: boolean;
   two_factor_enabled: boolean;

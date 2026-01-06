@@ -237,6 +237,8 @@
                    radial-gradient(at 52% 99%, hsla(354, 98%, 61%, 0.08) 0px, transparent 50%), 
                    radial-gradient(at 10% 29%, hsla(256, 96%, 67%, 0.12) 0px, transparent 50%);
   
+  --gradient-light: linear-gradient(to bottom right, #f9fafb, #eff6ff, #faf5ff);
+  
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -290,6 +292,8 @@
   --gradient-mesh: radial-gradient(at 27% 37%, hsla(215, 98%, 61%, 0.08) 0px, transparent 50%), 
                    radial-gradient(at 97% 21%, hsla(256, 96%, 67%, 0.08) 0px, transparent 50%), 
                    radial-gradient(at 52% 99%, hsla(354, 98%, 61%, 0.05) 0px, transparent 50%);
+  
+  --gradient-dark: linear-gradient(to bottom right, #030712, #111827, #030712);
 }
 
 /* ----------------------------------------
@@ -306,10 +310,17 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-geist-sans), 'Inter', system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Emoji Support */
+.emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", "EmojiOne Mozilla", "Twemoji Mozilla", "Segoe UI", sans-serif;
+  font-variant-emoji: emoji;
+  text-rendering: optimizeLegibility;
 }
 
 /* ----------------------------------------
@@ -1344,4 +1355,8 @@ select:focus-visible {
     box-shadow: none;
     border: 1px solid #ccc;
   }
+}
+
+.bg-theme {
+  background: var(--background);
 }

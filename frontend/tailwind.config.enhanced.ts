@@ -1,4 +1,9 @@
 import type { Config } from 'tailwindcss'
+import animate from 'tailwindcss-animate'
+import scrollbarHide from 'tailwind-scrollbar-hide'
+import typography from '@tailwindcss/typography'
+import forms from '@tailwindcss/forms'
+import aspectRatio from '@tailwindcss/aspect-ratio'
 
 const config: Config = {
   darkMode: 'class',
@@ -264,16 +269,15 @@ const config: Config = {
     },
   },
   plugins: [
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('tailwindcss-animate'),
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('tailwind-scrollbar-hide'),
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@tailwindcss/typography'),
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@tailwindcss/forms'),
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@tailwindcss/aspect-ratio'),
+    animate,
+
+    scrollbarHide,
+
+    typography,
+
+    forms,
+
+    aspectRatio,
   ],
 }
 

@@ -3,15 +3,20 @@ AI Sales Assistant - Chatbot Serializers
 """
 
 from rest_framework import serializers
+
 from .chatbot_models import (
-    ConversationSession, ChatMessage, ChatIntent,
-    QuickAction, PredictiveDealIntelligence, SmartContent
+    ChatIntent,
+    ChatMessage,
+    ConversationSession,
+    PredictiveDealIntelligence,
+    QuickAction,
+    SmartContent,
 )
 
 
 class ChatMessageSerializer(serializers.ModelSerializer):
     """Serializer for chat messages"""
-    
+
     class Meta:
         model = ChatMessage
         fields = [
@@ -24,10 +29,10 @@ class ChatMessageSerializer(serializers.ModelSerializer):
 
 class ConversationSessionSerializer(serializers.ModelSerializer):
     """Serializer for conversation sessions"""
-    
+
     messages = ChatMessageSerializer(many=True, read_only=True)
     recent_messages = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ConversationSession
         fields = [
@@ -36,7 +41,7 @@ class ConversationSessionSerializer(serializers.ModelSerializer):
             'is_starred', 'created_at', 'messages', 'recent_messages'
         ]
         read_only_fields = ['id', 'message_count', 'last_activity', 'created_at']
-    
+
     def get_recent_messages(self, obj):
         """Get last 10 messages for preview"""
         messages = obj.messages.order_by('-created_at')[:10]
@@ -45,16 +50,16 @@ class ConversationSessionSerializer(serializers.ModelSerializer):
 
 class ConversationSessionListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for session lists"""
-    
+
     last_message = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ConversationSession
         fields = [
             'id', 'title', 'session_type', 'status', 'message_count',
             'last_activity', 'is_starred', 'last_message'
         ]
-    
+
     def get_last_message(self, obj):
         last = obj.messages.order_by('-created_at').first()
         if last:
@@ -68,7 +73,7 @@ class ConversationSessionListSerializer(serializers.ModelSerializer):
 
 class SendMessageSerializer(serializers.Serializer):
     """Serializer for sending a message"""
-    
+
     message = serializers.CharField(required=True)
     session_id = serializers.UUIDField(required=False, allow_null=True)
     context = serializers.DictField(required=False, default=dict)
@@ -76,7 +81,7 @@ class SendMessageSerializer(serializers.Serializer):
 
 class ChatIntentSerializer(serializers.ModelSerializer):
     """Serializer for chat intents"""
-    
+
     class Meta:
         model = ChatIntent
         fields = [
@@ -87,9 +92,9 @@ class ChatIntentSerializer(serializers.ModelSerializer):
 
 class QuickActionSerializer(serializers.ModelSerializer):
     """Serializer for quick actions"""
-    
+
     entity_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = QuickAction
         fields = [
@@ -99,7 +104,7 @@ class QuickActionSerializer(serializers.ModelSerializer):
             'created_at', 'expires_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_entity_name(self, obj):
         """Get the name of the referenced entity"""
         try:
@@ -122,7 +127,7 @@ class QuickActionSerializer(serializers.ModelSerializer):
 
 class PredictiveDealIntelligenceSerializer(serializers.ModelSerializer):
     """Serializer for predictive deal intelligence"""
-    
+
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
     opportunity_amount = serializers.DecimalField(
         source='opportunity.amount',
@@ -130,7 +135,7 @@ class PredictiveDealIntelligenceSerializer(serializers.ModelSerializer):
         read_only=True
     )
     opportunity_stage = serializers.CharField(source='opportunity.stage', read_only=True)
-    
+
     class Meta:
         model = PredictiveDealIntelligence
         fields = [
@@ -149,10 +154,10 @@ class PredictiveDealIntelligenceSerializer(serializers.ModelSerializer):
 
 class SmartContentSerializer(serializers.ModelSerializer):
     """Serializer for smart content"""
-    
+
     contact_name = serializers.SerializerMethodField()
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = SmartContent
         fields = [
@@ -163,7 +168,7 @@ class SmartContentSerializer(serializers.ModelSerializer):
             'rating', 'feedback', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_contact_name(self, obj):
         if obj.contact:
             return f"{obj.contact.first_name} {obj.contact.last_name}"
@@ -172,7 +177,7 @@ class SmartContentSerializer(serializers.ModelSerializer):
 
 class GenerateSmartContentSerializer(serializers.Serializer):
     """Serializer for generating smart content"""
-    
+
     content_type = serializers.ChoiceField(choices=[
         ('email', 'Email'),
         ('call_script', 'Call Script'),
@@ -197,18 +202,18 @@ class GenerateSmartContentSerializer(serializers.Serializer):
 
 class AnalyzeDealSerializer(serializers.Serializer):
     """Serializer for deal analysis request"""
-    
+
     opportunity_id = serializers.UUIDField(required=True)
 
 
 class MessageFeedbackSerializer(serializers.Serializer):
     """Serializer for message feedback"""
-    
+
     was_helpful = serializers.BooleanField(required=True)
     feedback = serializers.CharField(required=False, default='')
 
 
 class ActionCompleteSerializer(serializers.Serializer):
     """Serializer for completing an action"""
-    
+
     result = serializers.CharField(required=False, default='')

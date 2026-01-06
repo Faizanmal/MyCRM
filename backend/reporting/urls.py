@@ -1,8 +1,13 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    DashboardViewSet, ReportViewSet, ReportScheduleViewSet,
-    AnalyticsViewSet, KPIMetricViewSet, DataExportViewSet
+    AnalyticsViewSet,
+    DashboardViewSet,
+    DataExportViewSet,
+    KPIMetricViewSet,
+    ReportScheduleViewSet,
+    ReportViewSet,
 )
 
 router = DefaultRouter()

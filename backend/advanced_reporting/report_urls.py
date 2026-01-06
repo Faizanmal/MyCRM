@@ -2,13 +2,19 @@
 Custom Report Builder URLs
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .report_views import (
-    ReportTemplateViewSet, ReportWidgetViewSet, SavedReportViewSet,
-    ScheduledReportViewSet, ReportDashboardViewSet, DataSourceViewSet,
-    ReportFolderViewSet, ReportSubscriptionViewSet, PublicDashboardView
+    DataSourceViewSet,
+    PublicDashboardView,
+    ReportDashboardViewSet,
+    ReportFolderViewSet,
+    ReportSubscriptionViewSet,
+    ReportTemplateViewSet,
+    ReportWidgetViewSet,
+    SavedReportViewSet,
+    ScheduledReportViewSet,
 )
 
 router = DefaultRouter()

@@ -1,6 +1,12 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import LeadViewSet, LeadActivityViewSet, LeadAssignmentRuleViewSet, LeadConversionViewSet
+
+from .views import (
+    LeadActivityViewSet,
+    LeadAssignmentRuleViewSet,
+    LeadConversionViewSet,
+    LeadViewSet,
+)
 
 router = DefaultRouter()
 router.register(r'leads', LeadViewSet)

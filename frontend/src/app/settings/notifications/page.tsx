@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -321,6 +321,7 @@ export default function NotificationPreferencesPage() {
             setHasChanges(false);
             toast.success('Notification preferences saved');
         } catch (error) {
+            console.log("Failed to save preferences",error);
             toast.error('Failed to save preferences');
         } finally {
             setIsSaving(false);

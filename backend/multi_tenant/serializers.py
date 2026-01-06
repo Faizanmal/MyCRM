@@ -1,6 +1,7 @@
-from rest_framework import serializers
-from .models import Organization, OrganizationMember, OrganizationInvitation
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from .models import Organization, OrganizationInvitation, OrganizationMember
 
 User = get_user_model()
 
@@ -68,8 +69,9 @@ class OrganizationInvitationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         from datetime import timedelta
+
         from django.utils import timezone
-        
+
         validated_data['invited_by'] = self.context['request'].user
         validated_data['expires_at'] = timezone.now() + timedelta(days=7)
         return super().create(validated_data)

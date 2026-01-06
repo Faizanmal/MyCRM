@@ -3,15 +3,22 @@ Smart Scheduling Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    SchedulingPage, MeetingType, Availability, BlockedTime,
-    Meeting, MeetingReminder, CalendarIntegration, SchedulingAnalytics
+    Availability,
+    BlockedTime,
+    CalendarIntegration,
+    Meeting,
+    MeetingReminder,
+    MeetingType,
+    SchedulingAnalytics,
+    SchedulingPage,
 )
 
 
 class AvailabilitySerializer(serializers.ModelSerializer):
     day_name = serializers.CharField(source='get_day_of_week_display', read_only=True)
-    
+
     class Meta:
         model = Availability
         fields = '__all__'
@@ -20,7 +27,7 @@ class AvailabilitySerializer(serializers.ModelSerializer):
 
 class MeetingTypeSerializer(serializers.ModelSerializer):
     bookings_count = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = MeetingType
         fields = '__all__'
@@ -31,7 +38,7 @@ class MeetingTypePublicSerializer(serializers.ModelSerializer):
     """Public serializer for booking pages"""
     class Meta:
         model = MeetingType
-        fields = ['id', 'name', 'slug', 'description', 'duration_minutes', 
+        fields = ['id', 'name', 'slug', 'description', 'duration_minutes',
                   'location_type', 'color', 'custom_questions']
 
 
@@ -41,7 +48,7 @@ class SchedulingPageSerializer(serializers.ModelSerializer):
     booking_url = serializers.ReadOnlyField()
     conversion_rate = serializers.ReadOnlyField()
     owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
-    
+
     class Meta:
         model = SchedulingPage
         fields = '__all__'
@@ -52,10 +59,10 @@ class SchedulingPagePublicSerializer(serializers.ModelSerializer):
     """Public serializer for external booking page"""
     meeting_types = MeetingTypePublicSerializer(many=True, read_only=True)
     owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
-    
+
     class Meta:
         model = SchedulingPage
-        fields = ['name', 'slug', 'description', 'welcome_message', 'logo', 
+        fields = ['name', 'slug', 'description', 'welcome_message', 'logo',
                   'brand_color', 'timezone', 'meeting_types', 'owner_name']
 
 
@@ -73,11 +80,11 @@ class MeetingSerializer(serializers.ModelSerializer):
     is_past = serializers.ReadOnlyField()
     is_upcoming = serializers.ReadOnlyField()
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
-    
+
     class Meta:
         model = Meeting
         fields = '__all__'
-        read_only_fields = ['id', 'host', 'cancel_token', 'reschedule_token', 
+        read_only_fields = ['id', 'host', 'cancel_token', 'reschedule_token',
                            'created_at', 'updated_at']
 
 
@@ -85,10 +92,10 @@ class MeetingListSerializer(serializers.ModelSerializer):
     """Lighter serializer for list views"""
     meeting_type_name = serializers.CharField(source='meeting_type.name', read_only=True)
     duration_minutes = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Meeting
-        fields = ['id', 'guest_name', 'guest_email', 'meeting_type_name', 
+        fields = ['id', 'guest_name', 'guest_email', 'meeting_type_name',
                   'start_time', 'end_time', 'status', 'duration_minutes']
 
 
@@ -130,11 +137,11 @@ class MeetingReminderSerializer(serializers.ModelSerializer):
 
 class CalendarIntegrationSerializer(serializers.ModelSerializer):
     provider_display = serializers.CharField(source='get_provider_display', read_only=True)
-    
+
     class Meta:
         model = CalendarIntegration
         fields = ['id', 'provider', 'provider_display', 'calendar_id', 'calendar_name',
-                  'sync_enabled', 'check_conflicts', 'create_events', 'is_active', 
+                  'sync_enabled', 'check_conflicts', 'create_events', 'is_active',
                   'last_synced_at', 'created_at']
         read_only_fields = ['id', 'last_synced_at', 'created_at']
 

@@ -55,7 +55,7 @@ class AppDrawer extends StatelessWidget {
                 const Divider(),
                 _buildSection('Advanced'),
                 _buildNavItem(context, Icons.hub, 'Integrations', const IntegrationHubScreen()),
-                _buildNavItem(context, Icons.psychology, 'AI Insights', const AiInsightsScreen()),
+                _buildNavItem(context, Icons.psychology, 'AI Insights', const AIInsightsScreen()),
                 _buildNavItem(context, Icons.emoji_events, 'Gamification', const GamificationScreen()),
                 
                 const Divider(),

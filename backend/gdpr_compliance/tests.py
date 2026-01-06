@@ -1,9 +1,14 @@
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 from django.utils import timezone
+
 from .models import (
-    ConsentType, UserConsent, DataExportRequest, DataDeletionRequest,
-    DataBreachIncident, UserPrivacyPreference
+    ConsentType,
+    DataBreachIncident,
+    DataDeletionRequest,
+    DataExportRequest,
+    UserConsent,
+    UserPrivacyPreference,
 )
 
 

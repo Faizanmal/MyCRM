@@ -1,7 +1,8 @@
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils.text import slugify
 import uuid
+
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils.text import slugify
 
 User = get_user_model()
 
@@ -17,7 +18,7 @@ class Organization(models.Model):
         ('trial', 'Trial'),
         ('cancelled', 'Cancelled'),
     ]
-    
+
     PLAN_CHOICES = [
         ('free', 'Free'),
         ('starter', 'Starter'),
@@ -28,50 +29,50 @@ class Organization(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=100, unique=True, db_index=True)
-    
+
     # Organization details
     domain = models.CharField(
-        max_length=255, 
-        unique=True, 
-        null=True, 
+        max_length=255,
+        unique=True,
+        null=True,
         blank=True,
         help_text="Custom domain for this organization"
     )
     logo = models.ImageField(upload_to='organization_logos/', null=True, blank=True)
     website = models.URLField(max_length=500, null=True, blank=True)
-    
+
     # Contact information
     email = models.EmailField()
     phone = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
-    
+
     # Subscription details
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='trial')
     plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='free')
     max_users = models.PositiveIntegerField(default=5)
     max_contacts = models.PositiveIntegerField(default=1000)
     max_storage_mb = models.PositiveIntegerField(default=500)
-    
+
     # Billing
     billing_email = models.EmailField(null=True, blank=True)
     stripe_customer_id = models.CharField(max_length=100, null=True, blank=True)
     subscription_start = models.DateField(null=True, blank=True)
     subscription_end = models.DateField(null=True, blank=True)
     trial_ends_at = models.DateField(null=True, blank=True)
-    
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
         related_name='created_organizations'
     )
-    
+
     # Settings
     settings = models.JSONField(default=dict, blank=True)
-    
+
     class Meta:
         ordering = ['-created_at']
         indexes = [
@@ -121,33 +122,33 @@ class OrganizationMember(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(
-        Organization, 
-        on_delete=models.CASCADE, 
+        Organization,
+        on_delete=models.CASCADE,
         related_name='members'
     )
     user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='organization_memberships'
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='member')
-    
+
     # Permissions
     is_active = models.BooleanField(default=True)
     can_invite_users = models.BooleanField(default=False)
     can_manage_billing = models.BooleanField(default=False)
     can_manage_settings = models.BooleanField(default=False)
-    
+
     # Metadata
     joined_at = models.DateTimeField(auto_now_add=True)
     invited_by = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        null=True, 
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='invited_members'
     )
-    
+
     class Meta:
         unique_together = ('organization', 'user')
         ordering = ['-joined_at']
@@ -181,29 +182,29 @@ class OrganizationInvitation(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(
-        Organization, 
-        on_delete=models.CASCADE, 
+        Organization,
+        on_delete=models.CASCADE,
         related_name='invitations'
     )
     email = models.EmailField()
     role = models.CharField(
-        max_length=20, 
-        choices=OrganizationMember.ROLE_CHOICES, 
+        max_length=20,
+        choices=OrganizationMember.ROLE_CHOICES,
         default='member'
     )
     token = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    
+
     # Metadata
     invited_by = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='sent_invitations'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     accepted_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         ordering = ['-created_at']
         indexes = [

@@ -2,9 +2,10 @@
 SSO Integration Tests
 """
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import SSOProvider, SSOConnection, SSOSession
+from django.test import TestCase
+
+from .models import SSOConnection, SSOProvider, SSOSession
 
 User = get_user_model()
 
@@ -19,7 +20,7 @@ class SSOProviderTest(TestCase):
             sso_url='https://accounts.google.com/o/saml2/idp',
             entity_id='google-sso'
         )
-    
+
     def test_provider_creation(self):
         self.assertEqual(self.provider.name, 'Google SSO')
         self.assertEqual(self.provider.provider_type, 'saml')
@@ -41,7 +42,7 @@ class SSOConnectionTest(TestCase):
             email='test@example.com',
             is_active=True
         )
-    
+
     def test_connection_creation(self):
         self.assertEqual(self.connection.user, self.user)
         self.assertEqual(self.connection.provider, self.provider)
@@ -63,7 +64,7 @@ class SSOSessionTest(TestCase):
             ip_address='192.168.1.1',
             user_agent='Mozilla/5.0'
         )
-    
+
     def test_session_creation(self):
         self.assertEqual(self.session.user, self.user)
         self.assertEqual(self.session.session_token, 'test-token-123')

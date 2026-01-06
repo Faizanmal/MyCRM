@@ -2,18 +2,17 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-    LineChart, Line, AreaChart, Area, BarChart, Bar,
+    Line, AreaChart, Area, BarChart, Bar,
     PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, Legend,
     ResponsiveContainer, ComposedChart
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-    TrendingUp, TrendingDown, Users, DollarSign,
-    Target, Clock, Calendar, BarChart3, PieChart as PieChartIcon
+    TrendingUp, TrendingDown, BarChart3, PieChart as PieChartIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -343,7 +342,7 @@ interface LeaderboardProps {
 export function Leaderboard({
     title,
     data,
-    valueLabel = 'Value',
+    // valueLabel = 'Value',
     valueFormatter = (v) => v.toString(),
     className,
 }: LeaderboardProps) {
@@ -477,7 +476,7 @@ export const sampleActivityData = [
     { day: 'Fri', calls: 22, emails: 35, meetings: 4, tasks: 25 },
 ];
 
-export default {
+const dashboardAnalyticsComponents = {
     KPICard,
     RevenueChart,
     PipelineChart,
@@ -485,3 +484,5 @@ export default {
     Leaderboard,
     MetricsGrid,
 };
+
+export default dashboardAnalyticsComponents;

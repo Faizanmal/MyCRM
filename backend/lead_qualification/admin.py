@@ -1,7 +1,12 @@
 from django.contrib import admin
+
 from .models import (
-    ScoringRule, QualificationCriteria, LeadScore,
-    QualificationWorkflow, WorkflowExecution, LeadEnrichmentData
+    LeadEnrichmentData,
+    LeadScore,
+    QualificationCriteria,
+    QualificationWorkflow,
+    ScoringRule,
+    WorkflowExecution,
 )
 
 
@@ -12,7 +17,7 @@ class ScoringRuleAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description', 'field_name']
     ordering = ['-priority', 'name']
     readonly_fields = ['created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'description', 'rule_type', 'is_active')
@@ -34,7 +39,7 @@ class QualificationCriteriaAdmin(admin.ModelAdmin):
     search_fields = ['name']
     ordering = ['stage', 'minimum_score']
     readonly_fields = ['created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'stage', 'is_active')
@@ -58,10 +63,10 @@ class LeadScoreAdmin(admin.ModelAdmin):
     readonly_fields = ['lead', 'score', 'previous_score', 'score_breakdown', 'qualification_stage',
                        'demographic_score', 'behavioral_score', 'firmographic_score', 'engagement_score',
                        'calculated_at']
-    
+
     def has_add_permission(self, request):
         return False
-    
+
     def has_change_permission(self, request, obj=None):
         return False
 
@@ -73,7 +78,7 @@ class QualificationWorkflowAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description']
     ordering = ['-priority', 'name']
     readonly_fields = ['execution_count', 'last_executed_at', 'created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'description', 'is_active', 'priority')
@@ -105,12 +110,12 @@ class WorkflowExecutionAdmin(admin.ModelAdmin):
     list_filter = ['status', 'started_at', 'workflow']
     search_fields = ['workflow__name', 'lead__name', 'lead__email']
     ordering = ['-started_at']
-    readonly_fields = ['workflow', 'lead', 'status', 'trigger_data', 'result_data', 
+    readonly_fields = ['workflow', 'lead', 'status', 'trigger_data', 'result_data',
                        'error_message', 'started_at', 'completed_at']
-    
+
     def has_add_permission(self, request):
         return False
-    
+
     def has_change_permission(self, request, obj=None):
         return False
 
@@ -122,7 +127,7 @@ class LeadEnrichmentDataAdmin(admin.ModelAdmin):
     search_fields = ['lead__name', 'lead__email', 'company_industry', 'job_title']
     ordering = ['-enriched_at']
     readonly_fields = ['enriched_at']
-    
+
     fieldsets = (
         ('Lead Information', {
             'fields': ('lead', 'source', 'is_verified', 'confidence_score')

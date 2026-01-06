@@ -29,7 +29,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
   }
   
   void _initControllers() {
-    _titleController = TextEditingController(text: _lead.title);
+    _titleController = TextEditingController(text: _lead.title ?? '');
     _companyController = TextEditingController(text: _lead.company ?? '');
     _emailController = TextEditingController(text: _lead.email ?? '');
     _phoneController = TextEditingController(text: _lead.phone ?? '');
@@ -51,7 +51,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Convert to Opportunity'),
-        content: Text('Convert "${_lead.title}" to an opportunity?'),
+        content: Text('Convert "${_lead.title ?? 'Unknown Lead'}" to an opportunity?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -163,7 +163,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
               )
             else
               Text(
-                _lead.title,
+                _lead.title ?? 'No Title',
                 style: const TextStyle(
                   fontSize: AppSizes.fontXl,
                   fontWeight: FontWeight.bold,

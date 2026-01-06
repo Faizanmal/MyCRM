@@ -14,7 +14,6 @@ import {
     VisibilityState,
     RowSelectionState,
     FilterFn,
-    Row,
 } from '@tanstack/react-table';
 import {
     ChevronDown,
@@ -66,7 +65,7 @@ import { cn } from '@/lib/utils';
  */
 
 interface DataTableProps<TData> {
-    columns: ColumnDef<TData, any>[];
+    columns: ColumnDef<TData, unknown>[];
     data: TData[];
     searchKey?: string;
     searchPlaceholder?: string;
@@ -86,7 +85,7 @@ interface DataTableProps<TData> {
 }
 
 // Fuzzy filter function for global search
-const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
+const fuzzyFilter: FilterFn<unknown> = (row, columnId, value) => {
     const itemValue = row.getValue(columnId);
     if (itemValue == null) return false;
 
@@ -99,7 +98,6 @@ const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
 export function DataTable<TData>({
     columns,
     data,
-    searchKey,
     searchPlaceholder = 'Search...',
     pageSize = 10,
     pageSizeOptions = [10, 20, 30, 50],
@@ -354,7 +352,7 @@ export function DataTable<TData>({
                                         onClick={() => onRowClick?.(row.original as TData)}
                                     >
                                         {row.getVisibleCells().map((cell) => (
-                                            <td key={cell.id} className="px-4 py-4 text-sm text-gray-900">
+                                            <td key={cell.id} className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </td>
                                         ))}

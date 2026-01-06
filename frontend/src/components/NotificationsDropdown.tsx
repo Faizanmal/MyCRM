@@ -6,6 +6,7 @@ import {
   BellIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
+import { useRealtime } from '@/components/enterprise/RealtimeProvider';
 
 interface Notification {
   id: string;
@@ -21,13 +22,20 @@ export default function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isLoadingCount = useRef(false);
+
+  const realtime = useRealtime();
 
   const loadUnreadCount = useCallback(async () => {
+    if (isLoadingCount.current) return; // Prevent concurrent calls
+    isLoadingCount.current = true;
     try {
       const response = await activityAPI.getUnreadCount();
       setUnreadCount(response.data.unread_count || 0);
     } catch (error) {
       console.error('Failed to load unread count:', error);
+    } finally {
+      isLoadingCount.current = false;
     }
   }, []);
 
@@ -45,10 +53,29 @@ export default function NotificationsDropdown() {
 
   useEffect(() => {
     loadUnreadCount();
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(loadUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [loadUnreadCount]);
+
+    // Subscribe to real-time notification updates
+    if (realtime) {
+      const unsubscribe = realtime.subscribe('notifications', (data: unknown) => {
+        const typedData = data as { type?: string; count?: number };
+        // Only update if page is visible
+        if (document.visibilityState === 'visible') {
+          if (typedData.type === 'unread_count_update') {
+            setUnreadCount(typedData.count || 0);
+          } else if (typedData.type === 'new_notification') {
+            // Optionally refresh notifications if dropdown is open
+            if (isOpen) {
+              loadNotifications();
+            }
+            // Update count
+            setUnreadCount(prev => prev + 1);
+          }
+        }
+      });
+
+      return unsubscribe;
+    }
+  }, [loadUnreadCount, realtime, isOpen,loadNotifications]);
 
   useEffect(() => {
     if (isOpen) {
@@ -112,7 +139,7 @@ export default function NotificationsDropdown() {
       {/* Bell Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className="relative p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
       >
         <BellIcon className="w-6 h-6" />
         {unreadCount > 0 && (
@@ -124,10 +151,10 @@ export default function NotificationsDropdown() {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+        <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-50">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
@@ -145,29 +172,28 @@ export default function NotificationsDropdown() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
             ) : notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-gray-500">
-                <BellIcon className="mx-auto h-12 w-12 text-gray-400 mb-3" />
+              <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                <BellIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" />
                 <p>No notifications</p>
                 <p className="text-sm mt-1">You&apos;re all caught up!</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`px-4 py-3 hover:bg-gray-50 transition-colors ${
-                      !notification.is_read ? 'bg-blue-50' : ''
-                    }`}
+                    className={`px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${!notification.is_read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                      }`}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="shrink-0 text-2xl">
                         {getNotificationIcon()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm ${!notification.is_read ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
+                        <p className={`text-sm ${!notification.is_read ? 'font-medium text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                           {notification.message}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {formatTimeAgo(notification.created_at)}
                         </p>
                       </div>

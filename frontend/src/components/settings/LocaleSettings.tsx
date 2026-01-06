@@ -31,14 +31,11 @@ import {
   DollarSign,
   Calendar,
   Check,
-  ChevronRight,
-  Settings,
   Sparkles,
   Upload,
   Download,
   Search,
-  RefreshCw,
-  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 
 // Language Settings Component
@@ -473,7 +470,7 @@ const DateTimeSettings: React.FC = () => {
 
 // Main Component
 export default function LocaleSettings() {
-  const { locale, isLoading, t } = useI18n();
+  const { locale, isLoading } = useI18n();
 
   if (isLoading) {
     return (

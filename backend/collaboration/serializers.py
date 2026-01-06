@@ -1,10 +1,19 @@
-from rest_framework import serializers
-from .models import (
-    DealRoom, DealRoomParticipant, Channel, ChannelMembership,
-    Message, CollaborativeDocument, DocumentComment,
-    ApprovalWorkflow, ApprovalStep, ApprovalInstance, ApprovalAction
-)
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from .models import (
+    ApprovalAction,
+    ApprovalInstance,
+    ApprovalStep,
+    ApprovalWorkflow,
+    Channel,
+    ChannelMembership,
+    CollaborativeDocument,
+    DealRoom,
+    DealRoomParticipant,
+    DocumentComment,
+    Message,
+)
 
 User = get_user_model()
 
@@ -13,7 +22,7 @@ class DealRoomParticipantSerializer(serializers.ModelSerializer):
     """Serializer for deal room participants."""
     user_name = serializers.SerializerMethodField()
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = DealRoomParticipant
         fields = [
@@ -23,7 +32,7 @@ class DealRoomParticipantSerializer(serializers.ModelSerializer):
             'email_notifications', 'push_notifications'
         ]
         read_only_fields = ['id', 'joined_at']
-    
+
     def get_user_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.email
 
@@ -33,7 +42,7 @@ class DealRoomSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
     participants = DealRoomParticipantSerializer(many=True, read_only=True)
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True, allow_null=True)
-    
+
     class Meta:
         model = DealRoom
         fields = [
@@ -43,9 +52,9 @@ class DealRoomSerializer(serializers.ModelSerializer):
             'message_count', 'document_count', 'participant_count',
             'participants'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'message_count', 
+        read_only_fields = ['id', 'created_at', 'updated_at', 'message_count',
                            'document_count', 'participant_count']
-    
+
     def get_owner_name(self, obj):
         return f"{obj.owner.first_name} {obj.owner.last_name}".strip() or obj.owner.email
 
@@ -53,7 +62,7 @@ class DealRoomSerializer(serializers.ModelSerializer):
 class DealRoomListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing deal rooms."""
     owner_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DealRoom
         fields = [
@@ -61,7 +70,7 @@ class DealRoomListSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at',
             'message_count', 'document_count', 'participant_count'
         ]
-    
+
     def get_owner_name(self, obj):
         return f"{obj.owner.first_name} {obj.owner.last_name}".strip() or obj.owner.email
 
@@ -70,7 +79,7 @@ class ChannelMembershipSerializer(serializers.ModelSerializer):
     """Serializer for channel membership."""
     user_name = serializers.SerializerMethodField()
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = ChannelMembership
         fields = [
@@ -79,7 +88,7 @@ class ChannelMembershipSerializer(serializers.ModelSerializer):
             'is_admin', 'can_post', 'can_invite'
         ]
         read_only_fields = ['id', 'joined_at']
-    
+
     def get_user_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.email
 
@@ -89,7 +98,7 @@ class ChannelSerializer(serializers.ModelSerializer):
     created_by_name = serializers.SerializerMethodField()
     memberships = ChannelMembershipSerializer(source='channelmembership_set', many=True, read_only=True)
     unread_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Channel
         fields = [
@@ -101,12 +110,12 @@ class ChannelSerializer(serializers.ModelSerializer):
             'memberships', 'unread_count'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'message_count', 'member_count']
-    
+
     def get_created_by_name(self, obj):
         if obj.created_by:
             return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip() or obj.created_by.email
         return None
-    
+
     def get_unread_count(self, obj):
         user = self.context.get('request').user if self.context.get('request') else None
         if user:
@@ -120,7 +129,7 @@ class ChannelListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing channels."""
     created_by_name = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Channel
         fields = [
@@ -128,12 +137,12 @@ class ChannelListSerializer(serializers.ModelSerializer):
             'is_archived', 'created_at', 'updated_at',
             'message_count', 'member_count', 'unread_count'
         ]
-    
+
     def get_created_by_name(self, obj):
         if obj.created_by:
             return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip() or obj.created_by.email
         return None
-    
+
     def get_unread_count(self, obj):
         user = self.context.get('request').user if self.context.get('request') else None
         if user:
@@ -148,7 +157,7 @@ class MessageSerializer(serializers.ModelSerializer):
     sender_name = serializers.SerializerMethodField()
     sender_email = serializers.EmailField(source='sender.email', read_only=True, allow_null=True)
     reply_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Message
         fields = [
@@ -159,12 +168,12 @@ class MessageSerializer(serializers.ModelSerializer):
             'is_pinned', 'is_edited', 'is_deleted', 'reply_count'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'thread_reply_count']
-    
+
     def get_sender_name(self, obj):
         if obj.sender:
             return f"{obj.sender.first_name} {obj.sender.last_name}".strip() or obj.sender.email
         return "System"
-    
+
     def get_reply_count(self, obj):
         return obj.replies.count()
 
@@ -174,7 +183,7 @@ class CollaborativeDocumentSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
     locked_by_name = serializers.SerializerMethodField()
     deal_room_name = serializers.CharField(source='deal_room.name', read_only=True, allow_null=True)
-    
+
     class Meta:
         model = CollaborativeDocument
         fields = [
@@ -186,12 +195,12 @@ class CollaborativeDocumentSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at',
             'view_count', 'download_count', 'comment_count'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'view_count', 
+        read_only_fields = ['id', 'created_at', 'updated_at', 'view_count',
                            'download_count', 'comment_count', 'version']
-    
+
     def get_owner_name(self, obj):
         return f"{obj.owner.first_name} {obj.owner.last_name}".strip() or obj.owner.email
-    
+
     def get_locked_by_name(self, obj):
         if obj.locked_by:
             return f"{obj.locked_by.first_name} {obj.locked_by.last_name}".strip() or obj.locked_by.email
@@ -203,7 +212,7 @@ class DocumentCommentSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     resolved_by_name = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentComment
         fields = [
@@ -213,15 +222,15 @@ class DocumentCommentSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'reply_count'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_author_name(self, obj):
         return f"{obj.author.first_name} {obj.author.last_name}".strip() or obj.author.email
-    
+
     def get_resolved_by_name(self, obj):
         if obj.resolved_by:
             return f"{obj.resolved_by.first_name} {obj.resolved_by.last_name}".strip() or obj.resolved_by.email
         return None
-    
+
     def get_reply_count(self, obj):
         return obj.replies.count()
 
@@ -229,7 +238,7 @@ class DocumentCommentSerializer(serializers.ModelSerializer):
 class ApprovalStepSerializer(serializers.ModelSerializer):
     """Serializer for approval steps."""
     approver_names = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ApprovalStep
         fields = [
@@ -239,7 +248,7 @@ class ApprovalStepSerializer(serializers.ModelSerializer):
             'timeout_hours', 'timeout_action'
         ]
         read_only_fields = ['id']
-    
+
     def get_approver_names(self, obj):
         return [
             f"{user.first_name} {user.last_name}".strip() or user.email
@@ -251,7 +260,7 @@ class ApprovalWorkflowSerializer(serializers.ModelSerializer):
     """Serializer for approval workflows."""
     created_by_name = serializers.SerializerMethodField()
     steps = ApprovalStepSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = ApprovalWorkflow
         fields = [
@@ -263,7 +272,7 @@ class ApprovalWorkflowSerializer(serializers.ModelSerializer):
             'steps'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'total_instances', 'completed_instances']
-    
+
     def get_created_by_name(self, obj):
         if obj.created_by:
             return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip() or obj.created_by.email
@@ -275,7 +284,7 @@ class ApprovalActionSerializer(serializers.ModelSerializer):
     actor_name = serializers.SerializerMethodField()
     delegated_to_name = serializers.SerializerMethodField()
     step_name = serializers.CharField(source='step.name', read_only=True)
-    
+
     class Meta:
         model = ApprovalAction
         fields = [
@@ -285,10 +294,10 @@ class ApprovalActionSerializer(serializers.ModelSerializer):
             'created_at', 'ip_address'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_actor_name(self, obj):
         return f"{obj.actor.first_name} {obj.actor.last_name}".strip() or obj.actor.email
-    
+
     def get_delegated_to_name(self, obj):
         if obj.delegated_to:
             return f"{obj.delegated_to.first_name} {obj.delegated_to.last_name}".strip() or obj.delegated_to.email
@@ -302,7 +311,7 @@ class ApprovalInstanceSerializer(serializers.ModelSerializer):
     current_step_name = serializers.CharField(source='current_step.name', read_only=True, allow_null=True)
     actions = ApprovalActionSerializer(many=True, read_only=True)
     pending_approvers = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ApprovalInstance
         fields = [
@@ -314,17 +323,17 @@ class ApprovalInstanceSerializer(serializers.ModelSerializer):
             'actions', 'pending_approvers'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_requested_by_name(self, obj):
         return f"{obj.requested_by.first_name} {obj.requested_by.last_name}".strip() or obj.requested_by.email
-    
+
     def get_pending_approvers(self, obj):
         if obj.current_step:
             approved_users = obj.actions.filter(
                 step=obj.current_step,
                 action='approved'
             ).values_list('actor_id', flat=True)
-            
+
             pending = obj.current_step.approvers.exclude(id__in=approved_users)
             return [
                 {
@@ -341,13 +350,13 @@ class ApprovalInstanceListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing approval instances."""
     workflow_name = serializers.CharField(source='workflow.name', read_only=True)
     requested_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ApprovalInstance
         fields = [
             'id', 'workflow_name', 'requested_by_name', 'title',
             'status', 'created_at', 'updated_at', 'completed_at'
         ]
-    
+
     def get_requested_by_name(self, obj):
         return f"{obj.requested_by.first_name} {obj.requested_by.last_name}".strip() or obj.requested_by.email

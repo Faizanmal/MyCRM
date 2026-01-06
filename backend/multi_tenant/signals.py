@@ -1,8 +1,10 @@
+import logging
+
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from django.contrib.auth import get_user_model
-from .models import Organization, OrganizationMember, OrganizationInvitation
-import logging
+
+from .models import Organization, OrganizationInvitation, OrganizationMember
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -52,6 +54,6 @@ def prevent_last_owner_deletion(sender, instance, **kwargs):
             role='owner',
             is_active=True
         ).count()
-        
+
         if owner_count <= 1:
             raise ValueError("Cannot remove the last owner from an organization.")

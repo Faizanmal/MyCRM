@@ -3,12 +3,13 @@ Campaign Management Serializers
 """
 
 from rest_framework import serializers
-from .models import Campaign, CampaignSegment, CampaignRecipient, CampaignClick, EmailTemplate
+
+from .models import Campaign, CampaignClick, CampaignRecipient, CampaignSegment, EmailTemplate
 
 
 class CampaignSegmentSerializer(serializers.ModelSerializer):
     """Serializer for Campaign Segments"""
-    
+
     class Meta:
         model = CampaignSegment
         fields = [
@@ -20,12 +21,12 @@ class CampaignSegmentSerializer(serializers.ModelSerializer):
 
 class CampaignSerializer(serializers.ModelSerializer):
     """Serializer for Campaigns"""
-    
+
     segment_details = CampaignSegmentSerializer(source='segment', read_only=True)
     open_rate = serializers.FloatField(read_only=True)
     click_rate = serializers.FloatField(read_only=True)
     bounce_rate = serializers.FloatField(read_only=True)
-    
+
     class Meta:
         model = Campaign
         fields = [
@@ -45,7 +46,7 @@ class CampaignSerializer(serializers.ModelSerializer):
             'opened_count', 'clicked_count', 'bounced_count', 'unsubscribed_count',
             'created_at', 'updated_at'
         ]
-    
+
     def validate_scheduled_at(self, value):
         """Ensure scheduled time is in the future"""
         from django.utils import timezone
@@ -56,7 +57,7 @@ class CampaignSerializer(serializers.ModelSerializer):
 
 class CampaignRecipientSerializer(serializers.ModelSerializer):
     """Serializer for Campaign Recipients"""
-    
+
     class Meta:
         model = CampaignRecipient
         fields = [
@@ -70,7 +71,7 @@ class CampaignRecipientSerializer(serializers.ModelSerializer):
 
 class CampaignClickSerializer(serializers.ModelSerializer):
     """Serializer for Campaign Clicks"""
-    
+
     class Meta:
         model = CampaignClick
         fields = [
@@ -82,7 +83,7 @@ class CampaignClickSerializer(serializers.ModelSerializer):
 
 class EmailTemplateSerializer(serializers.ModelSerializer):
     """Serializer for Email Templates"""
-    
+
     class Meta:
         model = EmailTemplate
         fields = [
@@ -96,7 +97,7 @@ class EmailTemplateSerializer(serializers.ModelSerializer):
 
 class CampaignStatsSerializer(serializers.Serializer):
     """Campaign statistics summary"""
-    
+
     total_campaigns = serializers.IntegerField()
     active_campaigns = serializers.IntegerField()
     total_sent = serializers.IntegerField()

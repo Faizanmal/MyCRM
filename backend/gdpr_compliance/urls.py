@@ -1,10 +1,16 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    ConsentTypeViewSet, UserConsentViewSet, DataExportRequestViewSet,
-    DataDeletionRequestViewSet, DataProcessingActivityViewSet,
-    DataBreachIncidentViewSet, DataAccessLogViewSet,
-    PrivacyNoticeViewSet, UserPrivacyPreferenceViewSet
+    ConsentTypeViewSet,
+    DataAccessLogViewSet,
+    DataBreachIncidentViewSet,
+    DataDeletionRequestViewSet,
+    DataExportRequestViewSet,
+    DataProcessingActivityViewSet,
+    PrivacyNoticeViewSet,
+    UserConsentViewSet,
+    UserPrivacyPreferenceViewSet,
 )
 
 app_name = 'gdpr_compliance'

@@ -60,7 +60,7 @@ interface EnrichmentProfile {
   record_type?: string;
   priority?: number;
   field_mappings?: Record<string, string>;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   fields_to_enrich: string[];
   auto_enrich: boolean;
   enrichment_triggers: string[];
@@ -69,6 +69,10 @@ interface EnrichmentProfile {
   created_at: string;
   contacts_enriched: number;
   companies_enriched: number;
+  schedule?: string;
+  last_run?: string;
+  success_rate?: number;
+  total_processed?: number;
 }
 
 interface EnrichmentJob {
@@ -87,6 +91,7 @@ interface EnrichmentJob {
   started_at: string;
   completed_at?: string;
   error_message?: string;
+  duration_seconds?: number | null;
 }
 
 interface EnrichmentResult {
@@ -184,6 +189,7 @@ export default function DataEnrichmentPage() {
       {
         id: 1,
         name: 'Company Enrichment',
+        profile_type: 'company',
         description: 'Enrich company data with revenue, employees, and technologies',
         provider: 'Clearbit',
         record_type: 'company',
@@ -195,6 +201,12 @@ export default function DataEnrichmentPage() {
           'description': 'description'
         },
         filters: {},
+        fields_to_enrich: ['revenue', 'employee_count', 'technologies', 'industry'],
+        auto_enrich: true,
+        enrichment_triggers: ['new_record', 'data_stale'],
+        priority_score_threshold: 50,
+        contacts_enriched: 0,
+        companies_enriched: 1250,
         schedule: 'daily',
         last_run: new Date(Date.now() - 3600000).toISOString(),
         success_rate: 94.5,
@@ -204,6 +216,7 @@ export default function DataEnrichmentPage() {
       {
         id: 2,
         name: 'Contact Enrichment',
+        profile_type: 'contact',
         description: 'Find and verify contact information',
         provider: 'ZoomInfo',
         record_type: 'contact',
@@ -215,6 +228,12 @@ export default function DataEnrichmentPage() {
           'email': 'email'
         },
         filters: { 'company_size': '50-200' },
+        fields_to_enrich: ['job_title', 'phone', 'linkedin_url'],
+        auto_enrich: false,
+        enrichment_triggers: ['manual_trigger'],
+        priority_score_threshold: 30,
+        contacts_enriched: 890,
+        companies_enriched: 0,
         schedule: 'weekly',
         last_run: new Date(Date.now() - 604800000).toISOString(),
         success_rate: 91.2,
@@ -321,10 +340,13 @@ export default function DataEnrichmentPage() {
       loadDemoData();
     }
     setLoading(false);
-  }, []);
+  }, [loadDemoData]);
 
   useEffect(() => {
-    fetchData();
+    // call fetchData asynchronously to avoid synchronous setState in effect
+    Promise.resolve().then(fetchData).catch((err) => {
+      console.error('Failed to fetch data (async):', err);
+    });
   }, [fetchData]);
 
   const triggerEnrichment = async (profileId: number) => {
@@ -333,6 +355,7 @@ export default function DataEnrichmentPage() {
       toast.success('Enrichment job started');
       fetchData();
     } catch (error) {
+      console.error('Failed to trigger enrichment:', error);
       toast.info('Enrichment job queued (demo)');
     }
   };

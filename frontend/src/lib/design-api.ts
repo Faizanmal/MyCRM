@@ -51,8 +51,7 @@ export interface Project {
   canvas_width: number;
   canvas_height: number;
   canvas_background: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  design_data: Record<string, any>;
+  design_data: Record<string, unknown>;
   ai_prompt: string;
   color_palette: string[];
   suggested_fonts: string[];
@@ -68,8 +67,7 @@ export interface DesignComponent {
   id: number;
   project: number;
   component_type: 'text' | 'image' | 'shape' | 'button' | 'icon' | 'group' | 'frame' | 'map' | 'chart';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   z_index: number;
   ai_generated: boolean;
   ai_prompt: string;
@@ -82,10 +80,8 @@ export interface AIGenerationRequest {
   request_type: 'layout' | 'logo' | 'color_palette' | 'text_content' | 'image' | 'refinement';
   status: 'pending' | 'processing' | 'completed' | 'failed';
   prompt: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parameters: Record<string, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  result: Record<string, any> | null;
+  parameters: Record<string, unknown>;
+  result: Record<string, unknown> | null;
   error_message: string;
   model_used: string;
   tokens_used: number | null;
@@ -98,8 +94,7 @@ export interface Template {
   name: string;
   description: string;
   category: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  design_data: Record<string, any>;
+  design_data: Record<string, unknown>;
   thumbnail_url: string;
   width: number;
   height: number;

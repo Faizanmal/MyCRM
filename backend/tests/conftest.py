@@ -1,11 +1,11 @@
 # MyCRM Backend - Enhanced Test Suite Configuration
 
+import factory
 import pytest
 from django.conf import settings
+from faker import Faker
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-import factory
-from faker import Faker
 
 fake = Faker()
 
@@ -22,7 +22,7 @@ def pytest_configure(config):
     settings.EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     settings.CELERY_TASK_ALWAYS_EAGER = True
     settings.CELERY_TASK_EAGER_PROPAGATES = True
-    
+
 
 # =============================================================================
 # Fixtures - Authentication
@@ -149,7 +149,7 @@ def contact_factory(db, organization):
     class ContactFactory(factory.django.DjangoModelFactory):
         class Meta:
             model = 'contact_management.Contact'
-        
+
         first_name = factory.Faker('first_name')
         last_name = factory.Faker('last_name')
         email = factory.Sequence(lambda n: f'contact{n}@example.com')
@@ -157,7 +157,7 @@ def contact_factory(db, organization):
         company = factory.Faker('company')
         job_title = factory.Faker('job')
         organization = factory.LazyAttribute(lambda _: organization)
-    
+
     return ContactFactory
 
 
@@ -184,7 +184,7 @@ def lead_factory(db, organization):
     class LeadFactory(factory.django.DjangoModelFactory):
         class Meta:
             model = 'lead_management.Lead'
-        
+
         name = factory.Sequence(lambda n: f'Lead {n}')
         company = factory.Faker('company')
         email = factory.Sequence(lambda n: f'lead{n}@example.com')
@@ -192,7 +192,7 @@ def lead_factory(db, organization):
         status = factory.Iterator(['new', 'contacted', 'qualified'])
         estimated_value = factory.Faker('random_int', min=10000, max=100000)
         organization = factory.LazyAttribute(lambda _: organization)
-    
+
     return LeadFactory
 
 
@@ -200,13 +200,13 @@ def lead_factory(db, organization):
 def opportunity(db, user, contact, organization):
     """Create an opportunity."""
     from opportunity_management.models import Opportunity, OpportunityStage
-    
+
     # Create default stages if needed
     stage, _ = OpportunityStage.objects.get_or_create(
         name='Prospecting',
         defaults={'probability': 10, 'order': 1, 'organization': organization}
     )
-    
+
     return Opportunity.objects.create(
         name='Test Deal',
         contact=contact,
@@ -244,7 +244,7 @@ def task(db, user, organization):
 def pipeline(db, organization):
     """Create a sales pipeline."""
     from opportunity_management.models import OpportunityStage
-    
+
     stages = [
         ('Prospecting', 10, 1),
         ('Qualification', 25, 2),
@@ -253,7 +253,7 @@ def pipeline(db, organization):
         ('Closed Won', 100, 5),
         ('Closed Lost', 0, 6),
     ]
-    
+
     created_stages = []
     for name, prob, order in stages:
         stage = OpportunityStage.objects.create(
@@ -263,7 +263,7 @@ def pipeline(db, organization):
             organization=organization
         )
         created_stages.append(stage)
-    
+
     return created_stages
 
 
@@ -273,7 +273,7 @@ def pipeline(db, organization):
 
 class TestDataBuilder:
     """Utility class for building test data."""
-    
+
     @staticmethod
     def create_contacts_batch(organization, owner, count=10):
         """Create a batch of contacts."""
@@ -290,7 +290,7 @@ class TestDataBuilder:
             )
             contacts.append(contact)
         return contacts
-    
+
     @staticmethod
     def create_leads_batch(organization, owner, count=10):
         """Create a batch of leads."""
@@ -298,7 +298,7 @@ class TestDataBuilder:
         leads = []
         sources = ['website', 'referral', 'cold_call', 'event', 'other']
         statuses = ['new', 'contacted', 'qualified']
-        
+
         for i in range(count):
             lead = Lead.objects.create(
                 name=f'{fake.company()} Lead',
@@ -326,37 +326,37 @@ def test_data_builder():
 
 class APIAssertions:
     """Assertion helpers for API tests."""
-    
+
     @staticmethod
     def assert_success(response, status_code=200):
         """Assert successful response."""
         assert response.status_code == status_code, f"Expected {status_code}, got {response.status_code}: {response.content}"
-    
+
     @staticmethod
     def assert_created(response):
         """Assert resource created."""
         assert response.status_code == 201, f"Expected 201, got {response.status_code}: {response.content}"
-    
+
     @staticmethod
     def assert_bad_request(response):
         """Assert bad request."""
         assert response.status_code == 400, f"Expected 400, got {response.status_code}: {response.content}"
-    
+
     @staticmethod
     def assert_unauthorized(response):
         """Assert unauthorized."""
         assert response.status_code == 401, f"Expected 401, got {response.status_code}: {response.content}"
-    
+
     @staticmethod
     def assert_forbidden(response):
         """Assert forbidden."""
         assert response.status_code == 403, f"Expected 403, got {response.status_code}: {response.content}"
-    
+
     @staticmethod
     def assert_not_found(response):
         """Assert not found."""
         assert response.status_code == 404, f"Expected 404, got {response.status_code}: {response.content}"
-    
+
     @staticmethod
     def assert_pagination(response, expected_count=None):
         """Assert pagination structure."""

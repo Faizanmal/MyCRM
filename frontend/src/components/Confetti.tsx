@@ -48,21 +48,7 @@ export default function Confetti({
     const animationRef = useRef<number | undefined>(undefined);
     const particlesRef = useRef<ConfettiPiece[]>([]);
     const startTimeRef = useRef<number>(0);
-
-    const createParticle = useCallback((index: number): ConfettiPiece => {
-        return {
-            id: index,
-            x: Math.random() * window.innerWidth,
-            y: -20 - Math.random() * 100,
-            rotation: Math.random() * 360,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            scale: 0.5 + Math.random() * 0.5,
-            velocityX: (Math.random() - 0.5) * 10,
-            velocityY: 3 + Math.random() * 5,
-            rotationSpeed: (Math.random() - 0.5) * 20,
-            shape: shapes[Math.floor(Math.random() * shapes.length)],
-        };
-    }, []);
+    const animateRef = useRef<((timestamp: number) => void) | null>(null);
 
     const drawShape = useCallback((
         ctx: CanvasRenderingContext2D,
@@ -151,12 +137,31 @@ export default function Confetti({
 
         // Continue animation or complete
         if (progress < 1 && particlesRef.current.length > 0) {
-            animationRef.current = requestAnimationFrame(animate);
+            animationRef.current = requestAnimationFrame(animateRef.current!);
         } else {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             onComplete?.();
         }
     }, [duration, drawShape, onComplete]);
+
+    useEffect(() => {
+        animateRef.current = animate;
+    }, [animate]);
+
+    const createParticle = useCallback((index: number): ConfettiPiece => {
+        return {
+            id: index,
+            x: Math.random() * window.innerWidth,
+            y: -20 - Math.random() * 100,
+            rotation: Math.random() * 360,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            scale: 0.5 + Math.random() * 0.5,
+            velocityX: (Math.random() - 0.5) * 10,
+            velocityY: 3 + Math.random() * 5,
+            rotationSpeed: (Math.random() - 0.5) * 20,
+            shape: shapes[Math.floor(Math.random() * shapes.length)],
+        };
+    }, []);
 
     useEffect(() => {
         if (active) {

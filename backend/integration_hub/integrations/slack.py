@@ -1,18 +1,20 @@
-from typing import Dict, Any, List
-from .base import BaseIntegrationClient
-from django.conf import settings
+from typing import Any
+
 import requests
+from django.conf import settings
+
+from .base import BaseIntegrationClient
 
 
 class SlackClient(BaseIntegrationClient):
     """Slack integration client"""
-    
+
     def __init__(self):
         super().__init__()
         self.base_url = 'https://slack.com/api'
         self.client_id = getattr(settings, 'SLACK_CLIENT_ID', '')
         self.client_secret = getattr(settings, 'SLACK_CLIENT_SECRET', '')
-    
+
     def get_authorization_url(self, redirect_uri: str, state: str = None) -> str:
         """Get Slack OAuth URL"""
         scopes = [
@@ -21,7 +23,7 @@ class SlackClient(BaseIntegrationClient):
             'users:read',
             'users:read.email',
         ]
-        
+
         params = {
             'client_id': self.client_id,
             'redirect_uri': redirect_uri,
@@ -29,11 +31,11 @@ class SlackClient(BaseIntegrationClient):
         }
         if state:
             params['state'] = state
-        
+
         query_string = '&'.join([f'{k}={v}' for k, v in params.items()])
         return f'https://slack.com/oauth/v2/authorize?{query_string}'
-    
-    def exchange_code(self, code: str, redirect_uri: str) -> Dict[str, Any]:
+
+    def exchange_code(self, code: str, redirect_uri: str) -> dict[str, Any]:
         """Exchange code for access token"""
         response = requests.post(
             'https://slack.com/api/oauth.v2.access',
@@ -45,7 +47,7 @@ class SlackClient(BaseIntegrationClient):
             }
         )
         data = response.json()
-        
+
         if data.get('ok'):
             return {
                 'access_token': data['access_token'],
@@ -53,11 +55,11 @@ class SlackClient(BaseIntegrationClient):
                 'team_name': data['team']['name'],
             }
         raise Exception(f"Failed to exchange code: {data.get('error')}")
-    
-    def refresh_access_token(self) -> Dict[str, Any]:
+
+    def refresh_access_token(self) -> dict[str, Any]:
         """Slack tokens don't expire"""
         return {'access_token': self.access_token}
-    
+
     def test_connection(self) -> bool:
         """Test Slack connection"""
         try:
@@ -65,7 +67,7 @@ class SlackClient(BaseIntegrationClient):
             return response.get('ok', False)
         except Exception:
             return False
-    
+
     def send_notification(self, message: str, channel: str = None) -> bool:
         """Send message to Slack channel"""
         try:
@@ -77,12 +79,12 @@ class SlackClient(BaseIntegrationClient):
             return response.get('ok', False)
         except Exception:
             return False
-    
-    def sync_contacts(self, crm_contacts: List[Dict]) -> Dict[str, int]:
+
+    def sync_contacts(self, crm_contacts: list[dict]) -> dict[str, int]:
         """Slack doesn't have contact sync - notification only"""
         return {'synced': 0}
-    
-    def fetch_contacts(self) -> List[Dict]:
+
+    def fetch_contacts(self) -> list[dict]:
         """Fetch Slack users"""
         try:
             response = self.get('users.list')
@@ -101,8 +103,8 @@ class SlackClient(BaseIntegrationClient):
             return []
         except Exception:
             return []
-    
-    def create_task(self, task_data: Dict) -> Dict:
+
+    def create_task(self, task_data: dict) -> dict:
         """Create task reminder in Slack"""
         try:
             message = f"Task: {task_data.get('title')}\nDue: {task_data.get('due_date')}"
@@ -110,8 +112,8 @@ class SlackClient(BaseIntegrationClient):
             return {'success': True}
         except Exception:
             return {'success': False}
-    
-    def post_lead_notification(self, lead_data: Dict, channel: str = '#sales'):
+
+    def post_lead_notification(self, lead_data: dict, channel: str = '#sales'):
         """Post new lead notification"""
         message = f"""
 🎯 *New Lead Assigned*
@@ -121,8 +123,8 @@ class SlackClient(BaseIntegrationClient):
 *Score:* {lead_data.get('lead_score', 'N/A')}
         """.strip()
         return self.send_notification(message, channel)
-    
-    def post_deal_won(self, opportunity_data: Dict, channel: str = '#sales'):
+
+    def post_deal_won(self, opportunity_data: dict, channel: str = '#sales'):
         """Post deal won celebration"""
         message = f"""
 🎉 *Deal Won!*

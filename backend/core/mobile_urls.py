@@ -2,18 +2,17 @@
 Mobile App Enhancement URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .mobile_views import (
-    DeviceRegistrationViewSet,
-    OfflineSyncViewSet,
     BusinessCardScanViewSet,
+    DeviceRegistrationViewSet,
     LocationCheckInViewSet,
+    MobileActivityLogViewSet,
+    OfflineSyncViewSet,
     VoiceNoteViewSet,
-    MobileActivityLogViewSet
 )
-
 
 router = DefaultRouter()
 router.register(r'devices', DeviceRegistrationViewSet, basename='devices')

@@ -51,11 +51,11 @@ export function useThrottle<T extends (...args: Parameters<T>) => ReturnType<T>>
     callback: T,
     delay: number
 ): T {
-    const lastRan = useRef(Date.now());
+    const lastRan = useRef(0);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    return useCallback(
-        ((...args: Parameters<T>) => {
+    const throttledFunction = useCallback(
+        (...args: Parameters<T>) => {
             const now = Date.now();
             const timeSinceLastRan = now - lastRan.current;
 
@@ -69,9 +69,11 @@ export function useThrottle<T extends (...args: Parameters<T>) => ReturnType<T>>
                     callback(...args);
                 }, delay - timeSinceLastRan);
             }
-        }) as T,
+        },
         [callback, delay]
     );
+
+    return throttledFunction as T;
 }
 
 /**
@@ -241,12 +243,15 @@ export function useWindowSize() {
  * Hook for media query matching
  */
 export function useMediaQuery(query: string): boolean {
-    const [matches, setMatches] = useState(false);
+    const [matches, setMatches] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.matchMedia(query).matches;
+        }
+        return false;
+    });
 
     useEffect(() => {
         const mediaQuery = window.matchMedia(query);
-        setMatches(mediaQuery.matches);
-
         const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
         mediaQuery.addEventListener('change', handler);
         return () => mediaQuery.removeEventListener('change', handler);
@@ -259,13 +264,13 @@ export function useMediaQuery(query: string): boolean {
  * Hook for previous value
  */
 export function usePrevious<T>(value: T): T | undefined {
-    const ref = useRef<T | undefined>(undefined);
+    const [previous, setPrevious] = useState<T | undefined>(undefined);
 
     useEffect(() => {
-        ref.current = value;
+        setPrevious(value);
     }, [value]);
 
-    return ref.current;
+    return previous;
 }
 
 /**

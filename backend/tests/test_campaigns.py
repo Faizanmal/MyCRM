@@ -1,10 +1,9 @@
 # MyCRM Backend - Comprehensive Test Suite for Campaigns
 
-import pytest
-from django.urls import reverse
-from rest_framework import status
-from decimal import Decimal
 from datetime import datetime, timedelta
+
+import pytest
+from rest_framework import status
 
 
 @pytest.mark.django_db

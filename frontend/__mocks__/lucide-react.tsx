@@ -64,7 +64,7 @@ export const X = createIcon('X');
 export const Zap = createIcon('Zap');
 
 // Default export for icons that might be imported differently
-export default {
+const lucideReactMock = {
     AlertTriangle,
     ArrowDown,
     ArrowUp,
@@ -114,3 +114,5 @@ export default {
     X,
     Zap,
 };
+
+export default lucideReactMock;

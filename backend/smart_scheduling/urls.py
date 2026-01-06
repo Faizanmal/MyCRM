@@ -2,13 +2,21 @@
 Smart Scheduling URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    SchedulingPageViewSet, MeetingTypeViewSet, AvailabilityViewSet,
-    BlockedTimeViewSet, MeetingViewSet, CalendarIntegrationViewSet,
-    PublicSchedulingPageView, AvailableSlotsView, BookMeetingView,
-    GuestMeetingActionsView, SchedulingDashboardView
+    AvailabilityViewSet,
+    AvailableSlotsView,
+    BlockedTimeViewSet,
+    BookMeetingView,
+    CalendarIntegrationViewSet,
+    GuestMeetingActionsView,
+    MeetingTypeViewSet,
+    MeetingViewSet,
+    PublicSchedulingPageView,
+    SchedulingDashboardView,
+    SchedulingPageViewSet,
 )
 
 router = DefaultRouter()
@@ -22,7 +30,7 @@ router.register(r'calendar-integrations', CalendarIntegrationViewSet, basename='
 urlpatterns = [
     path('', include(router.urls)),
     path('dashboard/', SchedulingDashboardView.as_view(), name='scheduling-dashboard'),
-    
+
     # Public endpoints (no auth required)
     path('public/<slug:slug>/', PublicSchedulingPageView.as_view(), name='public-page'),
     path('public/<slug:slug>/<slug:meeting_type_slug>/slots/', AvailableSlotsView.as_view(), name='available-slots'),

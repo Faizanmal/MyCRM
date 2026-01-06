@@ -3,23 +3,24 @@ Enhanced Communication Hub Serializers
 """
 
 from rest_framework import serializers
+
 from .enhanced_models import (
-    UnifiedInboxMessage,
+    AdvancedEmailTracking,
+    CampaignRecipient,
+    CampaignStep,
+    CommunicationPreference,
+    EmailTrackingEvent,
     InboxLabel,
     MultiChannelCampaign,
-    CampaignStep,
-    CampaignRecipient,
-    AdvancedEmailTracking,
-    EmailTrackingEvent,
-    CommunicationPreference
+    UnifiedInboxMessage,
 )
 
 
 class UnifiedInboxMessageSerializer(serializers.ModelSerializer):
     """Serializer for unified inbox messages"""
-    
+
     reply_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = UnifiedInboxMessage
         fields = [
@@ -36,14 +37,14 @@ class UnifiedInboxMessageSerializer(serializers.ModelSerializer):
             'received_at', 'read_at', 'replied_at', 'created_at'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'reply_count']
-    
+
     def get_reply_count(self, obj):
         return obj.replies.count()
 
 
 class UnifiedInboxMessageListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for inbox list view"""
-    
+
     class Meta:
         model = UnifiedInboxMessage
         fields = [
@@ -58,14 +59,14 @@ class UnifiedInboxMessageListSerializer(serializers.ModelSerializer):
 
 class InboxLabelSerializer(serializers.ModelSerializer):
     """Serializer for inbox labels"""
-    
+
     message_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = InboxLabel
         fields = ['id', 'name', 'color', 'icon', 'is_smart', 'rules', 'message_count', 'created_at']
         read_only_fields = ['id', 'created_at', 'message_count']
-    
+
     def get_message_count(self, obj):
         return UnifiedInboxMessage.objects.filter(
             user=obj.user,
@@ -75,7 +76,7 @@ class InboxLabelSerializer(serializers.ModelSerializer):
 
 class CampaignStepSerializer(serializers.ModelSerializer):
     """Serializer for campaign steps"""
-    
+
     class Meta:
         model = CampaignStep
         fields = [
@@ -86,16 +87,16 @@ class CampaignStepSerializer(serializers.ModelSerializer):
             'sent_count', 'delivered_count', 'opened_count',
             'clicked_count', 'replied_count', 'is_active'
         ]
-        read_only_fields = ['id', 'sent_count', 'delivered_count', 
+        read_only_fields = ['id', 'sent_count', 'delivered_count',
                           'opened_count', 'clicked_count', 'replied_count']
 
 
 class MultiChannelCampaignSerializer(serializers.ModelSerializer):
     """Serializer for multi-channel campaigns"""
-    
+
     steps = CampaignStepSerializer(many=True, read_only=True)
     recipient_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = MultiChannelCampaign
         fields = [
@@ -114,14 +115,14 @@ class MultiChannelCampaignSerializer(serializers.ModelSerializer):
             'total_clicks', 'total_conversions', 'spent',
             'created_at', 'updated_at'
         ]
-    
+
     def get_recipient_count(self, obj):
         return obj.recipients.count()
 
 
 class MultiChannelCampaignListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for campaign list"""
-    
+
     class Meta:
         model = MultiChannelCampaign
         fields = [
@@ -133,7 +134,7 @@ class MultiChannelCampaignListSerializer(serializers.ModelSerializer):
 
 class CampaignRecipientSerializer(serializers.ModelSerializer):
     """Serializer for campaign recipients"""
-    
+
     class Meta:
         model = CampaignRecipient
         fields = [
@@ -150,7 +151,7 @@ class CampaignRecipientSerializer(serializers.ModelSerializer):
 
 class EmailTrackingEventSerializer(serializers.ModelSerializer):
     """Serializer for email tracking events"""
-    
+
     class Meta:
         model = EmailTrackingEvent
         fields = [
@@ -163,9 +164,9 @@ class EmailTrackingEventSerializer(serializers.ModelSerializer):
 
 class AdvancedEmailTrackingSerializer(serializers.ModelSerializer):
     """Serializer for advanced email tracking"""
-    
+
     events = EmailTrackingEventSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = AdvancedEmailTracking
         fields = [
@@ -197,7 +198,7 @@ class AdvancedEmailTrackingSerializer(serializers.ModelSerializer):
 
 class AdvancedEmailTrackingListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for tracking list"""
-    
+
     class Meta:
         model = AdvancedEmailTracking
         fields = [
@@ -209,7 +210,7 @@ class AdvancedEmailTrackingListSerializer(serializers.ModelSerializer):
 
 class CommunicationPreferenceSerializer(serializers.ModelSerializer):
     """Serializer for communication preferences"""
-    
+
     class Meta:
         model = CommunicationPreference
         fields = [
@@ -232,7 +233,7 @@ class CommunicationPreferenceSerializer(serializers.ModelSerializer):
 
 class InboxSearchSerializer(serializers.Serializer):
     """Serializer for inbox search request"""
-    
+
     query = serializers.CharField(required=False, allow_blank=True)
     channels = serializers.ListField(
         child=serializers.CharField(), required=False
@@ -251,7 +252,7 @@ class InboxSearchSerializer(serializers.Serializer):
 
 class BulkUpdateStatusSerializer(serializers.Serializer):
     """Serializer for bulk status update"""
-    
+
     message_ids = serializers.ListField(
         child=serializers.UUIDField()
     )
@@ -260,7 +261,7 @@ class BulkUpdateStatusSerializer(serializers.Serializer):
 
 class ApplyLabelSerializer(serializers.Serializer):
     """Serializer for applying labels"""
-    
+
     message_ids = serializers.ListField(
         child=serializers.UUIDField()
     )
@@ -270,19 +271,19 @@ class ApplyLabelSerializer(serializers.Serializer):
 
 class SnoozeMessageSerializer(serializers.Serializer):
     """Serializer for snoozing a message"""
-    
+
     snooze_until = serializers.DateTimeField()
 
 
 class GenerateAIReplySerializer(serializers.Serializer):
     """Serializer for AI reply generation request"""
-    
+
     pass  # No input needed, uses message_id from URL
 
 
 class CreateCampaignSerializer(serializers.Serializer):
     """Serializer for creating a campaign"""
-    
+
     name = serializers.CharField(max_length=200)
     description = serializers.CharField(required=False, allow_blank=True)
     channels = serializers.ListField(
@@ -297,7 +298,7 @@ class CreateCampaignSerializer(serializers.Serializer):
 
 class AddCampaignStepSerializer(serializers.Serializer):
     """Serializer for adding a campaign step"""
-    
+
     step_type = serializers.ChoiceField(choices=[
         'email', 'sms', 'linkedin_message', 'linkedin_connect',
         'twitter_dm', 'call_task', 'delay', 'condition', 'ab_test'
@@ -314,7 +315,7 @@ class AddCampaignStepSerializer(serializers.Serializer):
 
 class ABTestSerializer(serializers.Serializer):
     """Serializer for A/B test configuration"""
-    
+
     variants = serializers.ListField(
         child=serializers.DictField()
     )
@@ -322,7 +323,7 @@ class ABTestSerializer(serializers.Serializer):
 
 class CreateTrackingSerializer(serializers.Serializer):
     """Serializer for creating email tracking"""
-    
+
     recipient_email = serializers.EmailField()
     subject = serializers.CharField(max_length=500)
     contact_id = serializers.UUIDField(required=False)
@@ -330,7 +331,7 @@ class CreateTrackingSerializer(serializers.Serializer):
 
 class RecordEventSerializer(serializers.Serializer):
     """Serializer for recording tracking events"""
-    
+
     event_type = serializers.ChoiceField(choices=[
         'delivered', 'opened', 'clicked', 'replied',
         'bounced', 'unsubscribed', 'complained'
@@ -342,7 +343,7 @@ class RecordEventSerializer(serializers.Serializer):
 
 class UnsubscribeSerializer(serializers.Serializer):
     """Serializer for unsubscribe request"""
-    
+
     contact_id = serializers.UUIDField()
     reason = serializers.CharField(required=False, allow_blank=True)
     topics = serializers.ListField(

@@ -1,30 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+// import { Label } from '@/components/ui/label';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
-import { 
-  Mic, 
-  MicOff,
-  Phone, 
+import {
+  Mic,
+  Phone,
   PhoneIncoming,
   PhoneOutgoing,
-  Play, 
-  Pause, 
+  Play,
+  Pause,
   Clock,
   User,
-  Building2,
   FileText,
   CheckCircle2,
   AlertTriangle,
@@ -40,7 +37,6 @@ import {
   Minus,
   Download,
   Search,
-  Filter,
   RefreshCw,
   Volume2,
   Settings,
@@ -153,31 +149,12 @@ export default function VoiceIntelligencePage() {
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [callScore, setCallScore] = useState<CallScore | null>(null);
   const [analytics, setAnalytics] = useState<CallAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    fetchRecordings();
-    loadDemoAnalytics();
-  }, []);
-
-  const fetchRecordings = async () => {
-    setLoading(true);
-    try {
-      const response = await voiceIntelligenceAPI.getRecordings();
-      setRecordings(response.data.results || []);
-      if ((response.data.results || []).length === 0) {
-        loadDemoData();
-      }
-    } catch (error) {
-      console.error('Failed to fetch recordings:', error);
-      loadDemoData();
-    }
-    setLoading(false);
-  };
-
   const loadDemoData = () => {
+    const now = Date.now();
     setRecordings([
       {
         id: 1,
@@ -187,8 +164,8 @@ export default function VoiceIntelligencePage() {
         direction: 'outbound',
         duration_seconds: 1845,
         recording_url: '/recordings/call-001.mp3',
-        call_start_time: new Date(Date.now() - 7200000).toISOString(),
-        call_end_time: new Date(Date.now() - 5355000).toISOString(),
+        call_start_time: new Date(now - 7200000).toISOString(),
+        call_end_time: new Date(now - 5355000).toISOString(),
         phone_number: '+1 (555) 123-4567',
         user_name: 'Sarah Johnson',
         status: 'completed',
@@ -203,8 +180,8 @@ export default function VoiceIntelligencePage() {
         direction: 'inbound',
         duration_seconds: 923,
         recording_url: '/recordings/call-002.mp3',
-        call_start_time: new Date(Date.now() - 86400000).toISOString(),
-        call_end_time: new Date(Date.now() - 85477000).toISOString(),
+        call_start_time: new Date(now - 86400000).toISOString(),
+        call_end_time: new Date(now - 85477000).toISOString(),
         phone_number: '+1 (555) 987-6543',
         user_name: 'Mike Wilson',
         status: 'completed',
@@ -219,8 +196,8 @@ export default function VoiceIntelligencePage() {
         direction: 'outbound',
         duration_seconds: 2156,
         recording_url: '/recordings/call-003.mp3',
-        call_start_time: new Date(Date.now() - 172800000).toISOString(),
-        call_end_time: new Date(Date.now() - 170644000).toISOString(),
+        call_start_time: new Date(now - 172800000).toISOString(),
+        call_end_time: new Date(now - 170644000).toISOString(),
         phone_number: '+1 (555) 456-7890',
         user_name: 'Sarah Johnson',
         status: 'completed',
@@ -229,6 +206,22 @@ export default function VoiceIntelligencePage() {
       }
     ]);
   };
+
+  const fetchRecordings = useCallback(async () => {
+    // Defer setting loading to avoid synchronous setState inside useEffect
+    Promise.resolve().then(() => setLoading(true));
+    try {
+      const response = await voiceIntelligenceAPI.getRecordings();
+      setRecordings(response.data.results || []);
+      if ((response.data.results || []).length === 0) {
+        loadDemoData();
+      }
+    } catch (error) {
+      console.error('Failed to fetch recordings:', error);
+      loadDemoData();
+    }
+    setLoading(false);
+  }, []);
 
   const loadDemoAnalytics = () => {
     setAnalytics({
@@ -257,7 +250,7 @@ export default function VoiceIntelligencePage() {
 
   const selectRecording = async (recording: VoiceRecording) => {
     setSelectedRecording(recording);
-    
+
     // Load demo transcription and summary
     setTranscription({
       id: 1,
@@ -320,7 +313,7 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
         recording_id: recording.id,
         description: 'Send product demo recording and follow-up materials',
         assigned_to: 'Sarah Johnson',
-        due_date: new Date(Date.now() + 86400000).toISOString(),
+        due_date: new Date(new Date().getTime() + 86400000).toISOString(),
         priority: 'high',
         status: 'pending',
         created_at: new Date().toISOString(),
@@ -331,7 +324,7 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
         recording_id: recording.id,
         description: 'Prepare ROI analysis comparing spreadsheet vs CRM costs',
         assigned_to: 'Sarah Johnson',
-        due_date: new Date(Date.now() + 172800000).toISOString(),
+        due_date: new Date(new Date().getTime() + 172800000).toISOString(),
         priority: 'high',
         status: 'pending',
         created_at: new Date().toISOString(),
@@ -342,7 +335,7 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
         recording_id: recording.id,
         description: 'Find and send case study from 50+ seat deployment',
         assigned_to: 'Sarah Johnson',
-        due_date: new Date(Date.now() + 86400000).toISOString(),
+        due_date: new Date(new Date().getTime() + 86400000).toISOString(),
         priority: 'medium',
         status: 'pending',
         created_at: new Date().toISOString(),
@@ -420,6 +413,14 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
     if (score >= 60) return 'text-yellow-600';
     return 'text-red-600';
   };
+
+  useEffect(() => {
+    // Defer calls to avoid synchronous setState inside effect
+    Promise.resolve().then(() => {
+      fetchRecordings();
+      loadDemoAnalytics();
+    });
+  }, [fetchRecordings]);
 
   return (
     <ProtectedRoute>
@@ -526,8 +527,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                 </CardTitle>
                 <div className="relative mt-2">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input 
-                    placeholder="Search calls..." 
+                  <Input
+                    placeholder="Search calls..."
                     className="pl-9"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -537,11 +538,10 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
               <CardContent>
                 <div className="space-y-3 max-h-[600px] overflow-y-auto">
                   {recordings.map(recording => (
-                    <div 
+                    <div
                       key={recording.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        selectedRecording?.id === recording.id ? 'border-violet-500 bg-violet-50' : 'hover:bg-gray-50'
-                      }`}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${selectedRecording?.id === recording.id ? 'border-violet-500 bg-violet-50' : 'hover:bg-gray-50'
+                        }`}
                       onClick={() => selectRecording(recording)}
                     >
                       <div className="flex items-start justify-between mb-2">
@@ -570,11 +570,10 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                       </div>
                       <div className="mt-2 flex items-center gap-2">
                         <Badge variant="outline" className="text-xs capitalize">{recording.direction}</Badge>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${
-                            recording.transcription_status === 'completed' ? 'text-green-600' : 'text-yellow-600'
-                          }`}
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${recording.transcription_status === 'completed' ? 'text-green-600' : 'text-yellow-600'
+                            }`}
                         >
                           {recording.transcription_status}
                         </Badge>
@@ -675,11 +674,11 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                                         <span>Customer: {summary.talk_ratio.customer}%</span>
                                       </div>
                                       <div className="w-full h-3 bg-gray-200 rounded-full flex overflow-hidden">
-                                        <div 
+                                        <div
                                           className="bg-violet-500 h-full"
                                           style={{ width: `${summary.talk_ratio.rep}%` }}
                                         />
-                                        <div 
+                                        <div
                                           className="bg-blue-500 h-full"
                                           style={{ width: `${summary.talk_ratio.customer}%` }}
                                         />
@@ -795,11 +794,11 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                           <div key={action.id} className="border rounded-lg p-4">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex items-start gap-3">
-                                <input 
-                                  type="checkbox" 
+                                <input
+                                  type="checkbox"
                                   checked={action.status === 'completed'}
                                   className="mt-1 h-4 w-4 rounded border-gray-300"
-                                  onChange={() => {}}
+                                  onChange={() => { }}
                                 />
                                 <div>
                                   <p className={`font-medium ${action.status === 'completed' ? 'line-through text-gray-400' : ''}`}>
@@ -839,10 +838,9 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                         {callScore && (
                           <>
                             <div className="text-center py-6">
-                              <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${
-                                callScore.overall_score >= 80 ? 'bg-green-100' :
-                                callScore.overall_score >= 60 ? 'bg-yellow-100' : 'bg-red-100'
-                              }`}>
+                              <div className={`inline-flex items-center justify-center w-24 h-24 rounded-full ${callScore.overall_score >= 80 ? 'bg-green-100' :
+                                  callScore.overall_score >= 60 ? 'bg-yellow-100' : 'bg-red-100'
+                                }`}>
                                 <span className={`text-3xl font-bold ${getScoreColor(callScore.overall_score)}`}>
                                   {callScore.overall_score}
                                 </span>
@@ -985,8 +983,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                       </div>
                       <span className="font-semibold">{analytics.calls_by_direction.outbound}</span>
                     </div>
-                    <Progress 
-                      value={(analytics.calls_by_direction.outbound / analytics.total_calls) * 100} 
+                    <Progress
+                      value={(analytics.calls_by_direction.outbound / analytics.total_calls) * 100}
                       className="h-2"
                     />
                     <div className="flex items-center justify-between">
@@ -996,8 +994,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                       </div>
                       <span className="font-semibold">{analytics.calls_by_direction.inbound}</span>
                     </div>
-                    <Progress 
-                      value={(analytics.calls_by_direction.inbound / analytics.total_calls) * 100} 
+                    <Progress
+                      value={(analytics.calls_by_direction.inbound / analytics.total_calls) * 100}
                       className="h-2"
                     />
                   </div>

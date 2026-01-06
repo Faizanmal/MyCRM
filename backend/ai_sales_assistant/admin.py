@@ -1,7 +1,14 @@
 from django.contrib import admin
+
 from .models import (
-    AIEmailDraft, SalesCoachAdvice, ObjectionResponse,
-    CallScript, DealInsight, WinLossAnalysis, PersonaProfile, ContactPersonaMatch
+    AIEmailDraft,
+    CallScript,
+    ContactPersonaMatch,
+    DealInsight,
+    ObjectionResponse,
+    PersonaProfile,
+    SalesCoachAdvice,
+    WinLossAnalysis,
 )
 
 

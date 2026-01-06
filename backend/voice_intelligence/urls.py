@@ -3,12 +3,15 @@ Voice Intelligence URLs
 URL routing for voice intelligence endpoints
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    VoiceRecordingViewSet, ActionItemViewSet,
-    VoiceNoteViewSet, ConversationCategoryViewSet,
-    TranscriptionSettingsViewSet
+    ActionItemViewSet,
+    ConversationCategoryViewSet,
+    TranscriptionSettingsViewSet,
+    VoiceNoteViewSet,
+    VoiceRecordingViewSet,
 )
 
 app_name = 'voice_intelligence'

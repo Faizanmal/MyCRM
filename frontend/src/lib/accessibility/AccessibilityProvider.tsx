@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Speech Recognition types
 declare global {
@@ -226,6 +226,11 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [settings.keyboardShortcutsEnabled, shortcuts]);
 
+  const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
+    setAnnouncement({ message: '', priority });
+    setTimeout(() => setAnnouncement({ message, priority }), 100);
+  }, []);
+
   // Voice recognition setup
   useEffect(() => {
     if (!settings.voiceCommandsEnabled) return;
@@ -260,7 +265,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     return () => {
       recognition.stop();
     };
-  }, [settings.voiceCommandsEnabled, settings.voiceLanguage, voiceCommands]);
+  }, [settings.voiceCommandsEnabled, settings.voiceLanguage, voiceCommands, announce]);
 
   // Focus trap implementation
   useEffect(() => {
@@ -301,11 +306,6 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 
   const updateSettings = useCallback((updates: Partial<AccessibilitySettings>) => {
     setSettings((prev) => ({ ...prev, ...updates }));
-  }, []);
-
-  const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
-    setAnnouncement({ message: '', priority });
-    setTimeout(() => setAnnouncement({ message, priority }), 100);
   }, []);
 
   const registerVoiceCommand = useCallback((command: VoiceCommand) => {

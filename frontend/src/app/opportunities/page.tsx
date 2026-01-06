@@ -156,8 +156,8 @@ export default function OpportunitiesPage() {
       fetchOpportunities();
     }, 300);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, selectedStage]);
+
+  }, [searchQuery, selectedStage, fetchOpportunities]);
 
   const handleRefresh = () => {
     fetchOpportunities(true);

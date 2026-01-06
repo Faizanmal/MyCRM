@@ -2,20 +2,20 @@
 Data Enrichment URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    EnrichmentProviderViewSet,
-    EnrichmentProfileViewSet,
     CompanyEnrichmentViewSet,
+    EmailVerificationViewSet,
+    EnrichmentActivityViewSet,
+    EnrichmentDashboardViewSet,
+    EnrichmentJobViewSet,
+    EnrichmentProfileViewSet,
+    EnrichmentProviderViewSet,
+    EnrichmentRuleViewSet,
     IntentSignalViewSet,
     NewsAlertViewSet,
-    EmailVerificationViewSet,
-    EnrichmentJobViewSet,
-    EnrichmentRuleViewSet,
-    EnrichmentActivityViewSet,
-    EnrichmentDashboardViewSet
 )
 
 router = DefaultRouter()

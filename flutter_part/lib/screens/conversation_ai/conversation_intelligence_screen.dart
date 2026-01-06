@@ -530,7 +530,7 @@ class _ConversationIntelligenceScreenState extends State<ConversationIntelligenc
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: metrics.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final metric = metrics[index];
           return ListTile(
@@ -641,7 +641,7 @@ class _ConversationIntelligenceScreenState extends State<ConversationIntelligenc
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: areas.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final area = areas[index];
           final isPositive = (area['change'] as String).startsWith('+');

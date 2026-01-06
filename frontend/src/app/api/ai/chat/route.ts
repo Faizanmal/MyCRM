@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     // Enhance response with suggestions based on intent
     const enhancedResponse = {
       ...data,
-      suggestions: data.suggestions || generateSuggestions(intent, body.context),
+      suggestions: data.suggestions || generateSuggestions(intent),
       actions: data.actions || generateActions(intent, body.context),
     };
 
@@ -167,7 +167,7 @@ function analyzeIntent(message: string): Intent {
 // Generate suggestions based on intent
 function generateSuggestions(
   intent: Intent,
-  _context?: ChatRequest['context']
+  // _context?: ChatRequest['context']
 ): string[] {
   const suggestionMap: Record<Intent, string[]> = {
     draft_email: [

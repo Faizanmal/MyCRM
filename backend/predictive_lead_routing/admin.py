@@ -1,8 +1,16 @@
 from django.contrib import admin
+
 from .models import (
-    SalesRepProfile, RoutingRule, LeadAssignment, EscalationRule,
-    RebalancingEvent, RoutingAnalytics, SkillCertification,
-    RepSkillAssignment, TerritoryDefinition, LeadQualityScore
+    EscalationRule,
+    LeadAssignment,
+    LeadQualityScore,
+    RebalancingEvent,
+    RepSkillAssignment,
+    RoutingAnalytics,
+    RoutingRule,
+    SalesRepProfile,
+    SkillCertification,
+    TerritoryDefinition,
 )
 
 

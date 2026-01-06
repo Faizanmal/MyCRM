@@ -3,9 +3,10 @@ Activity Feed Signals
 Automatically create activity records for CRM actions
 """
 
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.contenttypes.models import ContentType
+
 from .models import Activity
 
 
@@ -112,4 +113,33 @@ def campaign_activity(sender, instance, created, **kwargs):
             content_type=ContentType.objects.get_for_model(sender),
             object_id=str(instance.id),
             description=f"Completed campaign: {instance.name}"
+        )
+
+
+@receiver(post_save, sender='activity_feed.Notification')
+def notification_created(sender, instance, created, **kwargs):
+    """Send real-time notification via WebSocket"""
+    if created:
+
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+
+        channel_layer = get_channel_layer()
+
+        # Send to user's notification channel
+        async_to_sync(channel_layer.group_send)(
+            'notifications',
+            {
+                'type': 'notification_update',
+                'message_type': 'new_notification',
+                'data': {
+                    'id': str(instance.id),
+                    'type': instance.notification_type,
+                    'title': instance.title,
+                    'message': instance.message,
+                    'is_read': instance.is_read,
+                    'created_at': instance.created_at.isoformat(),
+                    'user_id': instance.user.id
+                }
+            }
         )

@@ -1,8 +1,15 @@
 from django.contrib import admin
+
 from .models import (
-    EmailSequence, SequenceStep, SequenceEmail, SequenceEnrollment,
-    SequenceActivity, ABTest, AutomatedTrigger, EmailPersonalizationToken,
-    SequenceAnalytics
+    ABTest,
+    AutomatedTrigger,
+    EmailPersonalizationToken,
+    EmailSequence,
+    SequenceActivity,
+    SequenceAnalytics,
+    SequenceEmail,
+    SequenceEnrollment,
+    SequenceStep,
 )
 
 

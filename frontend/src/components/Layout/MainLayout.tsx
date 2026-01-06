@@ -103,7 +103,7 @@ const toolsNavigation = [
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50/30 to-purple-50/20 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-theme">
+    <div className="min-h-screen bg-theme transition-theme">
       {/* Header with glass morphism */}
       <header className="glass sticky top-0 z-40 px-4 lg:px-6 py-3.5 shadow-sm">
         <div className="flex items-center justify-between">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAccessibility } from '@/lib/accessibility/AccessibilityProvider';
 import {
   Card,
@@ -30,9 +30,7 @@ import {
   Mic,
   MicOff,
   Monitor,
-  Volume2,
   Type,
-  MousePointer,
   Brain,
   Contrast,
   Palette,
@@ -549,7 +547,7 @@ const VoiceControlSettingsTab: React.FC = () => {
                 key={cmd.phrase}
                 className="flex items-center justify-between py-2 border-b last:border-0"
               >
-                <span className="text-sm font-medium">"{cmd.phrase}"</span>
+                <span className="text-sm font-medium">&quot;{cmd.phrase}&quot;</span>
                 <span className="text-sm text-muted-foreground">{cmd.action}</span>
               </div>
             ))}

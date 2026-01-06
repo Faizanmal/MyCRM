@@ -2,16 +2,16 @@
 Unified Activity Timeline API
 Consolidated view of all activities across entities
 """
-from rest_framework import views, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
+from rest_framework import status, views
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from activity_feed.models import Activity
 from core.audit_models import AuditTrail
-from task_management.models import Task
 from opportunity_management.models import Opportunity
+from task_management.models import Task
 
 
 class ActivityTimelineView(views.APIView):
@@ -19,11 +19,11 @@ class ActivityTimelineView(views.APIView):
     Unified activity timeline combining multiple sources
     """
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         """
         Get unified activity timeline
-        
+
         Query params:
         - start_date: Filter activities after this date
         - end_date: Filter activities before this date
@@ -40,12 +40,12 @@ class ActivityTimelineView(views.APIView):
         entity_id = request.query_params.get('entity_id')
         user_id = request.query_params.get('user_id')
         limit = min(int(request.query_params.get('limit', 50)), 500)
-        
+
         timeline = []
-        
+
         # 1. Activity Feed
         activities = Activity.objects.select_related('user', 'content_type').all()
-        
+
         if start_date:
             activities = activities.filter(timestamp__gte=start_date)
         if end_date:
@@ -58,7 +58,7 @@ class ActivityTimelineView(views.APIView):
                 pass
         if user_id:
             activities = activities.filter(user_id=user_id)
-        
+
         for activity in activities[:limit]:
             timeline.append({
                 'id': f'activity_{activity.id}',
@@ -76,10 +76,10 @@ class ActivityTimelineView(views.APIView):
                 'metadata': activity.metadata,
                 'timestamp': activity.timestamp.isoformat()
             })
-        
+
         # 2. Audit Trail
         audit_entries = AuditTrail.objects.select_related('user', 'content_type').all()
-        
+
         if start_date:
             audit_entries = audit_entries.filter(timestamp__gte=start_date)
         if end_date:
@@ -92,7 +92,7 @@ class ActivityTimelineView(views.APIView):
                 pass
         if user_id:
             audit_entries = audit_entries.filter(user_id=user_id)
-        
+
         for audit in audit_entries[:limit]:
             timeline.append({
                 'id': f'audit_{audit.id}',
@@ -112,17 +112,17 @@ class ActivityTimelineView(views.APIView):
                 'new_values': audit.new_values,
                 'timestamp': audit.timestamp.isoformat()
             })
-        
+
         # 3. Task updates
         tasks = Task.objects.select_related('assigned_to', 'created_by').all()
-        
+
         if start_date:
             tasks = tasks.filter(updated_at__gte=start_date)
         if end_date:
             tasks = tasks.filter(updated_at__lte=end_date)
         if user_id:
             tasks = tasks.filter(Q(assigned_to_id=user_id) | Q(created_by_id=user_id))
-        
+
         for task in tasks[:limit]:
             timeline.append({
                 'id': f'task_{task.id}',
@@ -144,11 +144,11 @@ class ActivityTimelineView(views.APIView):
                 },
                 'timestamp': task.updated_at.isoformat()
             })
-        
+
         # 4. Opportunity stage changes
         if not entity_type or entity_type == 'opportunity':
             opportunities = Opportunity.objects.select_related('owner').all()
-            
+
             if start_date:
                 opportunities = opportunities.filter(updated_at__gte=start_date)
             if end_date:
@@ -157,7 +157,7 @@ class ActivityTimelineView(views.APIView):
                 opportunities = opportunities.filter(id=entity_id)
             if user_id:
                 opportunities = opportunities.filter(owner_id=user_id)
-            
+
             for opp in opportunities[:limit]:
                 timeline.append({
                     'id': f'opportunity_{opp.id}',
@@ -179,13 +179,13 @@ class ActivityTimelineView(views.APIView):
                     },
                     'timestamp': opp.updated_at.isoformat()
                 })
-        
+
         # Sort by timestamp (descending)
         timeline.sort(key=lambda x: x['timestamp'], reverse=True)
-        
+
         # Apply limit
         timeline = timeline[:limit]
-        
+
         return Response({
             'count': len(timeline),
             'results': timeline
@@ -197,7 +197,7 @@ class EntityTimelineView(views.APIView):
     Get timeline for a specific entity
     """
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, entity_type, entity_id):
         """
         Get all activities related to a specific entity
@@ -209,15 +209,15 @@ class EntityTimelineView(views.APIView):
                 {'error': 'Invalid entity type'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         timeline = []
-        
+
         # Activity Feed
         activities = Activity.objects.filter(
             content_type=ct,
             object_id=entity_id
         ).select_related('user').order_by('-timestamp')
-        
+
         for activity in activities:
             timeline.append({
                 'id': f'activity_{activity.id}',
@@ -228,13 +228,13 @@ class EntityTimelineView(views.APIView):
                 'metadata': activity.metadata,
                 'timestamp': activity.timestamp.isoformat()
             })
-        
+
         # Audit Trail
         audit_entries = AuditTrail.objects.filter(
             content_type=ct,
             object_id=entity_id
         ).select_related('user').order_by('-timestamp')
-        
+
         for audit in audit_entries:
             timeline.append({
                 'id': f'audit_{audit.id}',
@@ -245,10 +245,10 @@ class EntityTimelineView(views.APIView):
                 'changes': audit.changes,
                 'timestamp': audit.timestamp.isoformat()
             })
-        
+
         # Sort by timestamp
         timeline.sort(key=lambda x: x['timestamp'], reverse=True)
-        
+
         return Response({
             'entity_type': entity_type,
             'entity_id': entity_id,
@@ -262,21 +262,21 @@ class UserActivityView(views.APIView):
     Get activity timeline for a specific user
     """
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, user_id=None):
         """
         Get all activities performed by a user
         """
         if not user_id:
             user_id = request.user.id
-        
+
         timeline = []
-        
+
         # User's activities
         activities = Activity.objects.filter(
             user_id=user_id
         ).select_related('content_type').order_by('-timestamp')[:100]
-        
+
         for activity in activities:
             timeline.append({
                 'id': f'activity_{activity.id}',
@@ -288,12 +288,12 @@ class UserActivityView(views.APIView):
                 'entity_name': activity.object_repr,
                 'timestamp': activity.timestamp.isoformat()
             })
-        
+
         # User's audit trail
         audit_entries = AuditTrail.objects.filter(
             user_id=user_id
         ).select_related('content_type').order_by('-timestamp')[:100]
-        
+
         for audit in audit_entries:
             timeline.append({
                 'id': f'audit_{audit.id}',
@@ -305,10 +305,10 @@ class UserActivityView(views.APIView):
                 'entity_name': audit.object_repr,
                 'timestamp': audit.timestamp.isoformat()
             })
-        
+
         # Sort by timestamp
         timeline.sort(key=lambda x: x['timestamp'], reverse=True)
-        
+
         return Response({
             'user_id': user_id,
             'count': len(timeline),

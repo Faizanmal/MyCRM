@@ -74,6 +74,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const connectRef = useRef<(() => void) | null>(null);
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -164,7 +165,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
     const wsUrl = `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'
       }/ws/realtime?token=${token}`;
 
-    setConnectionState('connecting');
+    // Defer setting connection state so calling connect from an effect doesn't synchronously set state
+    Promise.resolve().then(() => setConnectionState('connecting'));
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -221,7 +223,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
         setConnectionState('reconnecting');
         reconnectTimeoutRef.current = setTimeout(() => {
-          connect();
+          connectRef.current?.();
         }, delay);
       };
 
@@ -233,6 +235,10 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       setConnectionState('disconnected');
     }
   }, [handleMessage]);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   // Subscribe to a channel
   const subscribe = useCallback(
@@ -308,7 +314,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
   // Connect on mount
   useEffect(() => {
-    connect();
+    // Defer connect to avoid synchronous setState inside effect
+    Promise.resolve().then(() => connect());
 
     return () => {
       if (wsRef.current) {

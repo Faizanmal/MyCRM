@@ -1,8 +1,9 @@
 # MyCRM Backend - Email Tracking Tests
 
+from datetime import datetime
+
 import pytest
 from rest_framework import status
-from datetime import datetime, timedelta
 
 
 @pytest.mark.django_db

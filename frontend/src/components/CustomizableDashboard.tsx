@@ -1,20 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
     GripVertical,
-    Plus,
-    X,
     Settings,
     TrendingUp,
     Users,
     Target,
     Calendar,
     DollarSign,
-    BarChart3,
     Clock,
     CheckCircle2,
     AlertCircle,
@@ -158,27 +155,25 @@ function DashboardWidget({ widget, data, isEditing, onToggleVisibility }: Dashbo
 }
 
 export default function CustomizableDashboard() {
-    const [widgets, setWidgets] = useState<Widget[]>(defaultWidgets);
-    const [isEditing, setIsEditing] = useState(false);
-    const [isDirty, setIsDirty] = useState(false);
-
-    // Load saved widget configuration
-    useEffect(() => {
+    const [widgets, setWidgets] = useState<Widget[]>(() => {
         const saved = localStorage.getItem(WIDGETS_STORAGE_KEY);
         if (saved) {
             try {
                 const savedWidgets = JSON.parse(saved);
                 // Merge with default widgets to handle new widgets
-                const mergedWidgets = defaultWidgets.map(defaultWidget => {
+                return defaultWidgets.map(defaultWidget => {
                     const savedWidget = savedWidgets.find((w: Widget) => w.id === defaultWidget.id);
                     return savedWidget ? { ...defaultWidget, ...savedWidget } : defaultWidget;
                 });
-                setWidgets(mergedWidgets);
             } catch {
                 // Use defaults if parse fails
+                return defaultWidgets;
             }
         }
-    }, []);
+        return defaultWidgets;
+    });
+    const [isEditing, setIsEditing] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
 
     const toggleWidgetVisibility = (widgetId: string) => {
         setWidgets(prev => prev.map(w =>
@@ -291,7 +286,7 @@ export default function CustomizableDashboard() {
             {/* Hidden widgets hint */}
             {!isEditing && widgets.filter(w => !w.visible).length > 0 && (
                 <p className="text-xs text-gray-400 text-center">
-                    {widgets.filter(w => !w.visible).length} hidden widgets • Click "Customize" to show them
+                    {widgets.filter(w => !w.visible).length} hidden widgets • Click &quot;Customize&quot; to show them
                 </p>
             )}
         </div>

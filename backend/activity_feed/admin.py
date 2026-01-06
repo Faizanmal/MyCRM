@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Activity, Comment, Mention, Notification, Follow
+
+from .models import Activity, Comment, Follow, Mention, Notification
 
 
 @admin.register(Activity)

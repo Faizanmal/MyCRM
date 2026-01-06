@@ -2,12 +2,18 @@
 AI Sales Assistant URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    AIEmailDraftViewSet, SalesCoachAdviceViewSet, ObjectionResponseViewSet,
-    CallScriptViewSet, DealInsightViewSet, PersonaProfileViewSet,
-    ContactPersonaMatchViewSet, AICoachDashboardView
+    AICoachDashboardView,
+    AIEmailDraftViewSet,
+    CallScriptViewSet,
+    ContactPersonaMatchViewSet,
+    DealInsightViewSet,
+    ObjectionResponseViewSet,
+    PersonaProfileViewSet,
+    SalesCoachAdviceViewSet,
 )
 
 router = DefaultRouter()

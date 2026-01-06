@@ -2,10 +2,11 @@
 Django signals for enterprise features
 """
 
-from django.db.models.signals import post_save, post_delete, pre_save
-from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_delete, post_save, pre_save
+from django.dispatch import receiver
 from django.utils import timezone
+
 from .models import SystemHealth
 from .security import SecurityAuditLog
 
@@ -16,7 +17,7 @@ User = get_user_model()
 def user_created_or_updated(sender, instance, created, **kwargs):
     """Log user creation or updates"""
     action = 'user_created' if created else 'user_updated'
-    
+
     SecurityAuditLog.log_event(
         user=instance if not created else None,
         action=action,
@@ -38,7 +39,7 @@ def model_deleted(sender, instance, **kwargs):
     important_models = [
         'Contact', 'Lead', 'Opportunity', 'Task', 'User'
     ]
-    
+
     if sender.__name__ in important_models:
         SecurityAuditLog.log_event(
             user=getattr(instance, 'deleted_by', None),
@@ -56,11 +57,11 @@ def model_updated(sender, instance, **kwargs):
     important_models = [
         'Contact', 'Lead', 'Opportunity', 'Task'
     ]
-    
+
     if sender.__name__ in important_models and instance.pk:
         try:
             old_instance = sender.objects.get(pk=instance.pk)
-            
+
             # Check for significant changes
             significant_fields = getattr(sender, 'AUDIT_FIELDS', [])
             if significant_fields:
@@ -73,7 +74,7 @@ def model_updated(sender, instance, **kwargs):
                             'old': str(old_value),
                             'new': str(new_value)
                         }
-                
+
                 if changes:
                     SecurityAuditLog.log_event(
                         user=getattr(instance, 'updated_by', None),
@@ -89,7 +90,7 @@ def model_updated(sender, instance, **kwargs):
 def schedule_health_checks():
     """Schedule periodic system health checks"""
     from django.core.management import call_command
-    
+
     # This would typically be called by a task scheduler like Celery
     try:
         call_command('check_system_health')

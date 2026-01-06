@@ -14,26 +14,26 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from django.contrib import admin
+from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    
+
     # Unified API (versioned)
     path('api/', include('api.urls')),
-    
+
     # Enterprise Core APIs
     path('api/core/', include('core.urls')),
-    
+
     # CRM Module APIs (legacy, consider deprecating in favor of unified API)
     path('api/auth/', include('user_management.urls')),
     path('api/contacts/', include('contact_management.urls')),
@@ -48,7 +48,7 @@ urlpatterns = [
     path('api/lead-qualification/', include('lead_qualification.urls')),
     path('api/advanced-reporting/', include('advanced_reporting.urls')),
     path('api/reports/', include('reporting.urls')),
-    
+
     # New Advanced Features
     path('api/v1/integration-hub/', include('integration_hub.urls')),
     path('api/v1/ai-insights/', include('ai_insights.urls')),
@@ -57,7 +57,7 @@ urlpatterns = [
     path('api/v1/sso/', include('sso_integration.urls')),
     path('api/v1/collaboration/', include('collaboration.urls')),
     path('api/v1/gdpr/', include('gdpr_compliance.urls')),
-    
+
     # Premium Revenue Features
     path('api/v1/revenue-intelligence/', include('revenue_intelligence.urls')),
     path('api/v1/email-tracking/', include('email_tracking.urls')),
@@ -68,7 +68,7 @@ urlpatterns = [
     path('api/v1/conversation-intelligence/', include('conversation_intelligence.urls')),
     path('api/v1/white-label/', include('white_label.urls')),
     path('api/v1/customer-success/', include('customer_success.urls')),
-    
+
     # AI Workflow Automation Features
     path('api/v1/email-sequences/', include('email_sequence_automation.urls')),
     path('api/v1/lead-routing/', include('predictive_lead_routing.urls')),

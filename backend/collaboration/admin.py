@@ -1,8 +1,17 @@
 from django.contrib import admin
+
 from .models import (
-    DealRoom, DealRoomParticipant, Channel, ChannelMembership,
-    Message, CollaborativeDocument, DocumentComment,
-    ApprovalWorkflow, ApprovalStep, ApprovalInstance, ApprovalAction
+    ApprovalAction,
+    ApprovalInstance,
+    ApprovalStep,
+    ApprovalWorkflow,
+    Channel,
+    ChannelMembership,
+    CollaborativeDocument,
+    DealRoom,
+    DealRoomParticipant,
+    DocumentComment,
+    Message,
 )
 
 
@@ -20,7 +29,7 @@ class DealRoomAdmin(admin.ModelAdmin):
     autocomplete_fields = ['opportunity', 'owner']
     inlines = [DealRoomParticipantInline]
     readonly_fields = ['participant_count', 'message_count', 'document_count', 'created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'description', 'opportunity')
@@ -81,7 +90,7 @@ class MessageAdmin(admin.ModelAdmin):
     search_fields = ['content', 'sender__username', 'channel__name']
     autocomplete_fields = ['sender', 'channel', 'deal_room', 'parent_message']
     readonly_fields = ['thread_reply_count', 'created_at', 'edited_at']
-    
+
     fieldsets = (
         ('Message Details', {
             'fields': ('sender', 'content', 'channel', 'deal_room', 'parent_message')
@@ -107,7 +116,7 @@ class CollaborativeDocumentAdmin(admin.ModelAdmin):
     search_fields = ['title', 'description', 'deal_room__name']
     autocomplete_fields = ['deal_room', 'owner', 'locked_by', 'parent_version']
     readonly_fields = ['version', 'comment_count', 'created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Document Information', {
             'fields': ('title', 'description', 'doc_type', 'deal_room')
@@ -156,7 +165,7 @@ class ApprovalWorkflowAdmin(admin.ModelAdmin):
     autocomplete_fields = ['created_by']
     inlines = [ApprovalStepInline]
     readonly_fields = ['total_instances', 'completed_instances', 'created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Workflow Information', {
             'fields': ('name', 'description', 'is_active')

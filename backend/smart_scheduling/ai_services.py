@@ -4,11 +4,11 @@ Core service layer for AI-enhanced scheduling features
 """
 
 import logging
-from typing import List, Dict, Optional
 from datetime import datetime, timedelta
-from django.utils import timezone
-from django.db import transaction
+
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils import timezone
 
 from .ai_time_finder import AITimeFinder, NoShowPredictor
 from .meeting_prep_ai import MeetingPrepGenerator, SmartReminderOptimizer
@@ -19,32 +19,32 @@ User = get_user_model()
 
 class AISchedulingService:
     """Main service for AI-enhanced scheduling operations"""
-    
+
     def __init__(self, user):
         self.user = user
-    
+
     @transaction.atomic
     def find_optimal_times(
         self,
         meeting_type_id: str,
         duration_minutes: int,
         date_range_days: int = 14,
-        participant_email: Optional[str] = None,
+        participant_email: str | None = None,
         num_suggestions: int = 5
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Find optimal meeting times using AI"""
-        from .models import MeetingType
         from .ai_models import AITimeSuggestion
-        
+        from .models import MeetingType
+
         try:
             meeting_type = MeetingType.objects.get(id=meeting_type_id)
         except MeetingType.DoesNotExist:
             raise ValueError(f"Meeting type {meeting_type_id} not found")
-        
+
         # Calculate date range
         start_date = timezone.now()
         end_date = start_date + timedelta(days=date_range_days)
-        
+
         # Use AI Time Finder
         finder = AITimeFinder(self.user)
         suggestions = finder.find_optimal_times(
@@ -55,7 +55,7 @@ class AISchedulingService:
             participant_email=participant_email,
             num_suggestions=num_suggestions
         )
-        
+
         # Save suggestions to database
         saved_suggestions = []
         for suggestion in suggestions:
@@ -88,24 +88,24 @@ class AISchedulingService:
                 },
                 'reasons': suggestion.reasons
             })
-        
+
         return saved_suggestions
-    
+
     @transaction.atomic
-    def predict_no_show(self, meeting_id: str) -> Dict:
+    def predict_no_show(self, meeting_id: str) -> dict:
         """Predict no-show probability for a meeting"""
-        from .models import Meeting
         from .ai_models import NoShowPrediction
-        
+        from .models import Meeting
+
         try:
             meeting = Meeting.objects.get(id=meeting_id)
         except Meeting.DoesNotExist:
             raise ValueError(f"Meeting {meeting_id} not found")
-        
+
         # Run prediction
         predictor = NoShowPredictor()
         prediction_data = predictor.predict(meeting)
-        
+
         # Save or update prediction
         prediction, created = NoShowPrediction.objects.update_or_create(
             meeting=meeting,
@@ -121,7 +121,7 @@ class AISchedulingService:
                 'day_of_week': meeting.start_time.weekday()
             }
         )
-        
+
         return {
             'id': str(prediction.id),
             'meeting_id': str(meeting.id),
@@ -132,7 +132,7 @@ class AISchedulingService:
             'extra_reminder_suggested': prediction.extra_reminder_suggested,
             'confirmation_call_suggested': prediction.confirmation_call_suggested
         }
-    
+
     def _get_time_of_day(self, hour: int) -> str:
         """Get time of day category"""
         if hour < 9:
@@ -145,22 +145,22 @@ class AISchedulingService:
             return 'afternoon'
         else:
             return 'evening'
-    
+
     @transaction.atomic
-    def generate_meeting_prep(self, meeting_id: str) -> Dict:
+    def generate_meeting_prep(self, meeting_id: str) -> dict:
         """Generate AI meeting preparation materials"""
-        from .models import Meeting
         from .ai_models import MeetingPrepAI
-        
+        from .models import Meeting
+
         try:
             meeting = Meeting.objects.get(id=meeting_id)
         except Meeting.DoesNotExist:
             raise ValueError(f"Meeting {meeting_id} not found")
-        
+
         # Generate prep materials
         generator = MeetingPrepGenerator(meeting)
         prep_data = generator.generate_prep_materials()
-        
+
         # Save to database
         prep, created = MeetingPrepAI.objects.update_or_create(
             meeting=meeting,
@@ -185,36 +185,36 @@ class AISchedulingService:
                 'recommended_next_steps': prep_data['recommended_next_steps']
             }
         )
-        
+
         return {
             'id': str(prep.id),
             'meeting_id': str(meeting.id),
             **prep_data
         }
-    
+
     @transaction.atomic
-    def setup_smart_reminders(self, meeting_id: str) -> List[Dict]:
+    def setup_smart_reminders(self, meeting_id: str) -> list[dict]:
         """Setup AI-optimized reminders for a meeting"""
-        from .models import Meeting
         from .ai_models import SmartReminder
-        
+        from .models import Meeting
+
         try:
             meeting = Meeting.objects.get(id=meeting_id)
         except Meeting.DoesNotExist:
             raise ValueError(f"Meeting {meeting_id} not found")
-        
+
         # Get optimal reminders
         optimizer = SmartReminderOptimizer(meeting)
         optimal_reminders = optimizer.get_optimal_reminders()
-        
+
         # Delete existing smart reminders
         SmartReminder.objects.filter(meeting=meeting).delete()
-        
+
         # Create new reminders
         created_reminders = []
         for reminder_data in optimal_reminders:
             scheduled_at = datetime.fromisoformat(reminder_data['scheduled_at'])
-            
+
             reminder = SmartReminder.objects.create(
                 meeting=meeting,
                 scheduled_at=scheduled_at,
@@ -229,7 +229,7 @@ class AISchedulingService:
                 recipient_type='guest',
                 recipient_email=meeting.guest_email
             )
-            
+
             created_reminders.append({
                 'id': str(reminder.id),
                 'scheduled_at': reminder.scheduled_at.isoformat(),
@@ -237,19 +237,19 @@ class AISchedulingService:
                 'channel': reminder.optimal_channel,
                 'optimization_reason': reminder.optimization_reason
             })
-        
+
         return created_reminders
-    
+
     def _generate_reminder_message(self, meeting, minutes_before: int) -> str:
         """Generate reminder message content"""
-        
+
         if minutes_before >= 1440:
             time_str = f"{minutes_before // 1440} day(s)"
         elif minutes_before >= 60:
             time_str = f"{minutes_before // 60} hour(s)"
         else:
             time_str = f"{minutes_before} minutes"
-        
+
         message = f"""Hi {meeting.guest_name},
 
 This is a friendly reminder that you have a meeting scheduled in {time_str}.
@@ -261,30 +261,30 @@ Meeting Details:
 - Duration: {meeting.duration_minutes} minutes
 
 """
-        
+
         if meeting.video_link:
             message += f"Join Meeting: {meeting.video_link}\n\n"
-        
+
         message += "See you there!"
-        
+
         return message
-    
+
     @transaction.atomic
     def suggest_reschedule(
         self,
         meeting_id: str,
         trigger_type: str = 'optimization',
         trigger_reason: str = ''
-    ) -> Dict:
+    ) -> dict:
         """Generate reschedule suggestions for a meeting"""
-        from .models import Meeting
         from .ai_models import SmartReschedule
-        
+        from .models import Meeting
+
         try:
             meeting = Meeting.objects.get(id=meeting_id)
         except Meeting.DoesNotExist:
             raise ValueError(f"Meeting {meeting_id} not found")
-        
+
         # Find alternative times
         finder = AITimeFinder(self.user)
         alternatives = finder.find_optimal_times(
@@ -295,13 +295,13 @@ Meeting Details:
             participant_email=meeting.guest_email,
             num_suggestions=5
         )
-        
+
         # Convert to dict format
         alt_list = [slot.to_dict() for slot in alternatives]
-        
+
         # Get best suggestion
         best = alternatives[0] if alternatives else None
-        
+
         # Create reschedule suggestion
         reschedule = SmartReschedule.objects.create(
             meeting=meeting,
@@ -315,7 +315,7 @@ Meeting Details:
             suggestion_score=best.overall_score if best else 0,
             expires_at=timezone.now() + timedelta(days=3)
         )
-        
+
         return {
             'id': str(reschedule.id),
             'meeting_id': str(meeting.id),
@@ -326,13 +326,13 @@ Meeting Details:
             'suggestion_score': reschedule.suggestion_score,
             'alternatives': alt_list
         }
-    
+
     @transaction.atomic
-    def learn_preferences(self) -> Dict:
+    def learn_preferences(self) -> dict:
         """Learn user's scheduling preferences from historical data"""
-        from .models import Meeting
         from .ai_models import AISchedulingPreference
-        
+        from .models import Meeting
+
         # Get completed meetings from last 90 days
         ninety_days_ago = timezone.now() - timedelta(days=90)
         meetings = Meeting.objects.filter(
@@ -340,38 +340,38 @@ Meeting Details:
             status='completed',
             start_time__gte=ninety_days_ago
         )
-        
+
         if not meetings.exists():
             return {'message': 'Not enough data to learn preferences'}
-        
+
         # Analyze meeting patterns
         time_counts = {}
         day_counts = {}
-        
+
         for meeting in meetings:
             hour = meeting.start_time.hour
             day = meeting.start_time.weekday()
-            
+
             time_counts[hour] = time_counts.get(hour, 0) + 1
             day_counts[day] = day_counts.get(day, 0) + 1
-        
+
         # Convert to preference scores (normalize)
         total_meetings = meetings.count()
-        
+
         time_prefs = {
             str(hour): round(count / total_meetings, 2)
             for hour, count in time_counts.items()
         }
-        
+
         day_prefs = {
             str(day): round(count / total_meetings, 2)
             for day, count in day_counts.items()
         }
-        
+
         # Find high/low energy hours based on meeting success
         # (Would use more sophisticated analysis in production)
         high_energy = [h for h, c in time_counts.items() if c >= total_meetings * 0.15]
-        
+
         # Update or create preferences
         prefs, created = AISchedulingPreference.objects.update_or_create(
             user=self.user,
@@ -384,7 +384,7 @@ Meeting Details:
                 'preference_confidence': min(total_meetings / 50, 1.0)  # Max confidence at 50 meetings
             }
         )
-        
+
         return {
             'preferences_updated': True,
             'data_points_analyzed': total_meetings,
@@ -393,18 +393,18 @@ Meeting Details:
             'high_energy_hours': high_energy,
             'confidence': prefs.preference_confidence
         }
-    
+
     @transaction.atomic
     def optimize_schedule(
         self,
         start_date: datetime,
         end_date: datetime,
         optimization_type: str = 'create_focus_time'
-    ) -> Dict:
+    ) -> dict:
         """Suggest schedule optimizations"""
-        from .models import Meeting
         from .ai_models import ScheduleOptimization
-        
+        from .models import Meeting
+
         # Get meetings in range
         meetings = Meeting.objects.filter(
             host=self.user,
@@ -412,10 +412,10 @@ Meeting Details:
             end_time__lte=end_date,
             status='confirmed'
         ).order_by('start_time')
-        
+
         # Analyze current schedule
         current_metrics = self._analyze_schedule_metrics(meetings)
-        
+
         # Generate optimization suggestions based on type
         if optimization_type == 'create_focus_time':
             suggestions = self._optimize_for_focus_time(meetings)
@@ -425,7 +425,7 @@ Meeting Details:
             suggestions = self._optimize_for_context_switching(meetings)
         else:
             suggestions = {'recommendations': [], 'optimized_metrics': current_metrics}
-        
+
         # Create optimization record
         optimization = ScheduleOptimization.objects.create(
             user=self.user,
@@ -451,7 +451,7 @@ Meeting Details:
             recommendations=suggestions.get('recommendations', []),
             explanation=suggestions.get('explanation', '')
         )
-        
+
         return {
             'id': str(optimization.id),
             'optimization_type': optimization_type,
@@ -463,10 +463,10 @@ Meeting Details:
             'focus_time_gained_minutes': suggestions.get('focus_time_gained_minutes', 0),
             'improvement_percentage': suggestions.get('improvement_percentage', 0)
         }
-    
-    def _analyze_schedule_metrics(self, meetings) -> Dict:
+
+    def _analyze_schedule_metrics(self, meetings) -> dict:
         """Analyze schedule metrics"""
-        
+
         if not meetings.exists():
             return {
                 'total_meetings': 0,
@@ -475,9 +475,9 @@ Meeting Details:
                 'focus_blocks': 0,
                 'overall_score': 100
             }
-        
+
         total_meeting_minutes = sum(m.duration_minutes for m in meetings)
-        
+
         # Count context switches (meetings with < 2 hours between)
         context_switches = 0
         meetings_list = list(meetings)
@@ -485,20 +485,20 @@ Meeting Details:
             gap = (meetings_list[i + 1].start_time - meetings_list[i].end_time).total_seconds() / 60
             if 0 < gap < 120:
                 context_switches += 1
-        
+
         # Estimate focus blocks (2+ hour gaps)
         focus_blocks = 0
         for i in range(len(meetings_list) - 1):
             gap = (meetings_list[i + 1].start_time - meetings_list[i].end_time).total_seconds() / 60
             if gap >= 120:
                 focus_blocks += 1
-        
+
         # Calculate overall score
         # Higher is better: fewer context switches, more focus blocks
         meeting_count = meetings.count()
         score = 100 - (context_switches * 10) + (focus_blocks * 5)
         score = max(0, min(100, score))
-        
+
         return {
             'total_meetings': meeting_count,
             'total_meeting_hours': round(total_meeting_minutes / 60, 1),
@@ -506,21 +506,21 @@ Meeting Details:
             'focus_blocks': focus_blocks,
             'overall_score': score
         }
-    
-    def _optimize_for_focus_time(self, meetings) -> Dict:
+
+    def _optimize_for_focus_time(self, meetings) -> dict:
         """Generate optimization suggestions for creating focus time"""
-        
+
         recommendations = []
-        
+
         # Analyze meetings and suggest batching on specific days
         meetings_by_day = {}
         for meeting in meetings:
             day = meeting.start_time.date()
             meetings_by_day.setdefault(day, []).append(meeting)
-        
+
         # Find days with sparse meetings that could be consolidated
         sparse_days = [day for day, mlist in meetings_by_day.items() if len(mlist) == 1]
-        
+
         if sparse_days:
             recommendations.append({
                 'type': 'batch_meetings',
@@ -528,7 +528,7 @@ Meeting Details:
                 'description': f'Consider moving {len(sparse_days)} isolated meetings to create full focus days',
                 'impact': 'Creates 4-8 hour focus blocks'
             })
-        
+
         # Find days that could become meeting-free
         recommendations.append({
             'type': 'meeting_free_day',
@@ -536,7 +536,7 @@ Meeting Details:
             'description': 'Consider designating 1-2 days per week as meeting-free',
             'impact': 'Creates guaranteed deep work time'
         })
-        
+
         return {
             'recommendations': recommendations,
             'optimized_metrics': {
@@ -548,34 +548,34 @@ Meeting Details:
             'improvement_percentage': 20,
             'explanation': 'Consolidating sparse meetings can create larger focus blocks'
         }
-    
-    def _optimize_for_batching(self, meetings) -> Dict:
+
+    def _optimize_for_batching(self, meetings) -> dict:
         """Generate optimization for meeting batching"""
-        
+
         recommendations = [{
             'type': 'batch_similar',
             'priority': 'high',
             'description': 'Group similar meeting types together',
             'impact': 'Reduces context switching by 50%'
         }]
-        
+
         return {
             'recommendations': recommendations,
             'optimized_metrics': {'overall_score': 80},
             'context_switches_reduced': 3,
             'improvement_percentage': 15
         }
-    
-    def _optimize_for_context_switching(self, meetings) -> Dict:
+
+    def _optimize_for_context_switching(self, meetings) -> dict:
         """Generate optimization to reduce context switching"""
-        
+
         recommendations = [{
             'type': 'add_buffers',
             'priority': 'medium',
             'description': 'Add 15-minute buffers between meetings',
             'impact': 'Allows mental transition between topics'
         }]
-        
+
         return {
             'recommendations': recommendations,
             'optimized_metrics': {'overall_score': 75},
@@ -586,20 +586,20 @@ Meeting Details:
 
 class AttendeeIntelligenceService:
     """Service for managing attendee intelligence"""
-    
+
     @staticmethod
     @transaction.atomic
     def update_attendee_intelligence(email: str, meeting_outcome: str):
         """Update intelligence based on meeting outcome"""
         from .ai_models import AttendeeIntelligence
-        
+
         intel, created = AttendeeIntelligence.objects.get_or_create(
             email=email,
             defaults={'name': ''}
         )
-        
+
         intel.total_meetings_scheduled += 1
-        
+
         if meeting_outcome == 'completed':
             intel.meetings_attended += 1
         elif meeting_outcome == 'no_show':
@@ -608,21 +608,21 @@ class AttendeeIntelligenceService:
             intel.meetings_cancelled += 1
         elif meeting_outcome == 'rescheduled':
             intel.meetings_rescheduled += 1
-        
+
         # Recalculate reliability score
         if intel.total_meetings_scheduled > 0:
             intel.reliability_score = intel.meetings_attended / intel.total_meetings_scheduled
-        
+
         intel.last_meeting_at = timezone.now()
         intel.save()
-        
+
         return intel
-    
+
     @staticmethod
-    def get_attendee_insights(email: str) -> Optional[Dict]:
+    def get_attendee_insights(email: str) -> dict | None:
         """Get insights about an attendee"""
         from .ai_models import AttendeeIntelligence
-        
+
         try:
             intel = AttendeeIntelligence.objects.get(email=email)
             return {

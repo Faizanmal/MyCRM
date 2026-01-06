@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Keyboard, Command, Search, User, Calendar, TrendingUp, Moon, Sun, ArrowUp, ArrowDown, CornerDownLeft, X as XIcon } from 'lucide-react';
+// import { Badge } from '@/components/ui/badge';
+import { Keyboard, Search, User, Calendar, Moon, ArrowUp, CornerDownLeft, X as XIcon } from 'lucide-react';
 
 interface ShortcutGroup {
     title: string;

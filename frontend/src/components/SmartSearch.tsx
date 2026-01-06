@@ -14,7 +14,6 @@ import {
     Target,
     FileText,
     Calendar,
-    Tag,
     Clock,
     ArrowRight,
     Sparkles,
@@ -121,6 +120,7 @@ export default function SmartSearch() {
                 setResults([]);
             }
         } catch (error) {
+            console.error("Failed", error)
             // Fallback to mock/local results
             const mockResults: SearchResult[] = [
                 { id: '1', type: 'contact' as const, title: 'John Smith', subtitle: 'CEO at TechCorp', metadata: 'Last contacted: 2 days ago', score: 98, starred: true },
@@ -360,7 +360,7 @@ export default function SmartSearch() {
                                 {query && !isLoading && results.length === 0 && (
                                     <div className="p-8 text-center">
                                         <Search className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                        <p className="text-gray-500">No results found for "{query}"</p>
+                                        <p className="text-gray-500">No results found for &quot;{query}&quot;</p>
                                         <p className="text-sm text-gray-400 mt-1">Try a different search term</p>
                                     </div>
                                 )}

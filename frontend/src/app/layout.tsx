@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ClientLayout } from '@/components/ClientLayout';
 import { QueryProvider } from "@/components/QueryProvider";
 import { RealtimeProvider } from "@/components/enterprise/RealtimeProvider";
 import InstallPrompt from "@/components/InstallPrompt";
@@ -59,16 +59,16 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#2563eb" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `!function(){try{var d=document.documentElement.classList;d.remove('light','dark');var e=localStorage.getItem('theme');if('system'===e||(!e&&true)){var m='(prefers-color-scheme: dark)',t=window.matchMedia(m);t.media!==m||t.matches?d.add('dark'):d.add('light')}else if(e) d.add(e)}catch(e){}}()`,
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ClientLayout>
           <QueryProvider>
             <AuthProvider>
               <AchievementProvider>
@@ -85,7 +85,7 @@ export default function RootLayout({
               </AchievementProvider>
             </AuthProvider>
           </QueryProvider>
-        </ThemeProvider>
+        </ClientLayout>
       </body>
     </html>
   );

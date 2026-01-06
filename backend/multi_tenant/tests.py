@@ -1,5 +1,6 @@
-from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
+from rest_framework.test import APITestCase
+
 from .models import Organization, OrganizationMember
 
 User = get_user_model()
@@ -18,7 +19,7 @@ class MultiTenantTestCase(APITestCase):
             email='user2@test.com',
             password='testpass123'
         )
-        
+
         # Create organizations
         self.org1 = Organization.objects.create(
             name='Test Org 1',
@@ -59,7 +60,7 @@ class MultiTenantTestCase(APITestCase):
             user=self.user1,
             role='member'
         )
-        
+
         self.client.force_authenticate(user=self.user1)
         response = self.client.post(f'/api/v1/multi-tenant/organizations/{self.org2.id}/switch/')
         self.assertEqual(response.status_code, 200)

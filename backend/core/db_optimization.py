@@ -11,13 +11,12 @@ Provides utilities for database query optimization including:
 import logging
 import time
 from functools import wraps
-from typing import Dict, List, Any, Optional, Type
-from contextlib import contextmanager
+from typing import Any
 
-from django.db import connection, reset_queries
-from django.db.models import QuerySet, Model, Prefetch
 from django.conf import settings
 from django.core.cache import cache
+from django.db import connection, reset_queries
+from django.db.models import Model, QuerySet
 
 logger = logging.getLogger(__name__)
 
@@ -26,30 +25,30 @@ class QueryProfiler:
     """
     Profile database queries for performance optimization.
     """
-    
+
     def __init__(self):
-        self.queries: List[Dict[str, Any]] = []
+        self.queries: list[dict[str, Any]] = []
         self.start_time: float = 0
         self.enabled = settings.DEBUG
-        
+
     def __enter__(self):
         if self.enabled:
             reset_queries()
             self.start_time = time.time()
         return self
-        
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.enabled:
             self.queries = list(connection.queries)
             self.elapsed_time = time.time() - self.start_time
-            
-    def get_stats(self) -> Dict[str, Any]:
+
+    def get_stats(self) -> dict[str, Any]:
         """Get query statistics."""
         if not self.queries:
             return {}
-            
+
         total_time = sum(float(q.get('time', 0)) for q in self.queries)
-        
+
         return {
             'query_count': len(self.queries),
             'total_db_time': round(total_time * 1000, 2),  # ms
@@ -57,25 +56,25 @@ class QueryProfiler:
             'avg_query_time': round((total_time / len(self.queries)) * 1000, 2) if self.queries else 0,
             'queries': self.queries if settings.DEBUG else [],
         }
-        
-    def detect_n_plus_one(self) -> List[Dict[str, Any]]:
+
+    def detect_n_plus_one(self) -> list[dict[str, Any]]:
         """Detect potential N+1 query patterns."""
         if not self.queries:
             return []
-            
+
         # Group similar queries
-        query_patterns: Dict[str, List[Dict]] = {}
+        query_patterns: dict[str, list[dict]] = {}
         for query in self.queries:
             sql = query.get('sql', '')
             # Normalize query (remove specific IDs)
             import re
             normalized = re.sub(r'\b\d+\b', '?', sql)
             normalized = re.sub(r"'[^']*'", '?', normalized)
-            
+
             if normalized not in query_patterns:
                 query_patterns[normalized] = []
             query_patterns[normalized].append(query)
-            
+
         # Find patterns with many similar queries
         n_plus_one = []
         for pattern, queries in query_patterns.items():
@@ -86,7 +85,7 @@ class QueryProfiler:
                     'total_time': sum(float(q.get('time', 0)) for q in queries),
                     'suggestion': 'Consider using select_related() or prefetch_related()'
                 })
-                
+
         return n_plus_one
 
 
@@ -96,25 +95,25 @@ def profile_queries(view_func):
     def wrapper(request, *args, **kwargs):
         if not settings.DEBUG:
             return view_func(request, *args, **kwargs)
-            
+
         with QueryProfiler() as profiler:
             response = view_func(request, *args, **kwargs)
-            
+
         stats = profiler.get_stats()
         n_plus_one = profiler.detect_n_plus_one()
-        
+
         if stats.get('query_count', 0) > 10:
             logger.warning(
                 f"High query count in {view_func.__name__}: "
                 f"{stats['query_count']} queries in {stats['elapsed_time']}ms"
             )
-            
+
         if n_plus_one:
             logger.warning(
                 f"Potential N+1 queries detected in {view_func.__name__}: "
                 f"{len(n_plus_one)} patterns"
             )
-            
+
         return response
     return wrapper
 
@@ -123,29 +122,29 @@ class CachedQuerySet:
     """
     Wrapper for QuerySet with automatic caching.
     """
-    
+
     def __init__(
         self,
         queryset: QuerySet,
         cache_key: str,
         timeout: int = 300,
-        version: Optional[int] = None
+        version: int | None = None
     ):
         self.queryset = queryset
         self.cache_key = cache_key
         self.timeout = timeout
         self.version = version
-        
-    def get(self) -> List[Model]:
+
+    def get(self) -> list[Model]:
         """Get results from cache or database."""
         cached = cache.get(self.cache_key, version=self.version)
         if cached is not None:
             return cached
-            
+
         results = list(self.queryset)
         cache.set(self.cache_key, results, timeout=self.timeout, version=self.version)
         return results
-        
+
     def invalidate(self) -> None:
         """Invalidate the cache."""
         cache.delete(self.cache_key, version=self.version)
@@ -154,7 +153,7 @@ class CachedQuerySet:
 def cached_query(
     cache_key: str,
     timeout: int = 300,
-    version: Optional[int] = None
+    version: int | None = None
 ):
     """Decorator to cache query results."""
     def decorator(func):
@@ -162,11 +161,11 @@ def cached_query(
         def wrapper(*args, **kwargs):
             # Generate cache key with args
             full_key = f"{cache_key}:{hash(str(args) + str(kwargs))}"
-            
+
             cached = cache.get(full_key, version=version)
             if cached is not None:
                 return cached
-                
+
             result = func(*args, **kwargs)
             cache.set(full_key, result, timeout=timeout, version=version)
             return result
@@ -178,49 +177,49 @@ class OptimizedQueryBuilder:
     """
     Build optimized queries with automatic relationship loading.
     """
-    
-    def __init__(self, model: Type[Model]):
+
+    def __init__(self, model: type[Model]):
         self.model = model
-        self.select_related_fields: List[str] = []
-        self.prefetch_related_fields: List[Any] = []
-        self.only_fields: List[str] = []
-        self.defer_fields: List[str] = []
-        
+        self.select_related_fields: list[str] = []
+        self.prefetch_related_fields: list[Any] = []
+        self.only_fields: list[str] = []
+        self.defer_fields: list[str] = []
+
     def with_related(self, *fields: str) -> 'OptimizedQueryBuilder':
         """Add select_related fields."""
         self.select_related_fields.extend(fields)
         return self
-        
+
     def with_prefetch(self, *fields) -> 'OptimizedQueryBuilder':
         """Add prefetch_related fields."""
         self.prefetch_related_fields.extend(fields)
         return self
-        
+
     def only(self, *fields: str) -> 'OptimizedQueryBuilder':
         """Limit fields loaded."""
         self.only_fields.extend(fields)
         return self
-        
+
     def defer(self, *fields: str) -> 'OptimizedQueryBuilder':
         """Defer loading of fields."""
         self.defer_fields.extend(fields)
         return self
-        
+
     def build(self) -> QuerySet:
         """Build the optimized queryset."""
         queryset = self.model.objects.all()
-        
+
         if self.select_related_fields:
             queryset = queryset.select_related(*self.select_related_fields)
-            
+
         if self.prefetch_related_fields:
             queryset = queryset.prefetch_related(*self.prefetch_related_fields)
-            
+
         if self.only_fields:
             queryset = queryset.only(*self.only_fields)
         elif self.defer_fields:
             queryset = queryset.defer(*self.defer_fields)
-            
+
         return queryset
 
 
@@ -255,10 +254,10 @@ def optimize_opportunity_query() -> QuerySet:
         .build()
 
 
-def get_index_recommendations(model: Type[Model]) -> List[Dict[str, Any]]:
+def get_index_recommendations(model: type[Model]) -> list[dict[str, Any]]:
     """Get index recommendations for a model based on common query patterns."""
     recommendations = []
-    
+
     # Analyze model fields
     for field in model._meta.get_fields():
         if hasattr(field, 'db_index'):
@@ -271,19 +270,19 @@ def get_index_recommendations(model: Type[Model]) -> List[Dict[str, Any]]:
                         'recommendation': f'Consider adding db_index=True to {field.name}',
                         'reason': 'Commonly used in filters and ordering'
                     })
-                    
+
     # Check for missing composite indexes
     if hasattr(model._meta, 'indexes'):
         existing_indexes = [idx.fields for idx in model._meta.indexes]
     else:
         existing_indexes = []
-        
+
     # Recommend common composite indexes
     composite_recommendations = [
         (['created_at', 'status'], 'Useful for date-based status queries'),
         (['assigned_to', 'status'], 'Useful for user workload queries'),
     ]
-    
+
     for fields, reason in composite_recommendations:
         if list(fields) not in existing_indexes:
             # Check if model has these fields
@@ -295,5 +294,5 @@ def get_index_recommendations(model: Type[Model]) -> List[Dict[str, Any]]:
                     'recommendation': f'Consider adding composite index on {fields}',
                     'reason': reason
                 })
-                
+
     return recommendations

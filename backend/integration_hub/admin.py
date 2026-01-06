@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Webhook, WebhookDelivery, ThirdPartyIntegration, IntegrationLog, APIEndpoint
+
+from .models import APIEndpoint, IntegrationLog, ThirdPartyIntegration, Webhook, WebhookDelivery
 
 
 @admin.register(Webhook)

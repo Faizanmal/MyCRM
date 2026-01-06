@@ -6,10 +6,10 @@ and API workflows.
 """
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -25,7 +25,7 @@ def test_user(db):
     """Create and return a test user."""
     return User.objects.create_user(
         username='integrationuser',
-        email='integration@example.com', 
+        email='integration@example.com',
         password='TestPass123!',
         first_name='Integration',
         last_name='User'
@@ -41,35 +41,35 @@ def authenticated_client(api_client, test_user):
 
 class TestHealthEndpoints:
     """Test health check endpoints."""
-    
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_health_check(self, api_client):
         """Test basic health check endpoint."""
         response = api_client.get('/api/v1/healthz/')
-        
+
         assert response.status_code == status.HTTP_200_OK
-        
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_ping_endpoint(self, api_client):
         """Test ping endpoint for load balancer."""
         response = api_client.get('/api/v1/ping/')
-        
+
         assert response.status_code == status.HTTP_200_OK
-        
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_ready_endpoint(self, api_client):
         """Test readiness check endpoint."""
         response = api_client.get('/api/v1/ready/')
-        
+
         assert response.status_code in [status.HTTP_200_OK, status.HTTP_503_SERVICE_UNAVAILABLE]
 
 
 class TestCRMWorkflow:
     """Test complete CRM workflows."""
-    
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_lead_to_opportunity_workflow(self, authenticated_client):
@@ -85,18 +85,18 @@ class TestCRMWorkflow:
             'source': 'website'
         }
         lead_response = authenticated_client.post(lead_url, lead_data, format='json')
-        
+
         assert lead_response.status_code == status.HTTP_201_CREATED
         lead_id = lead_response.data.get('id')
-        
+
         # Step 2: Update lead status to qualified
         update_url = reverse('api:v1:leads-detail', kwargs={'pk': lead_id})
         update_data = {'status': 'qualified'}
         update_response = authenticated_client.patch(update_url, update_data, format='json')
-        
+
         assert update_response.status_code == status.HTTP_200_OK
         assert update_response.data.get('status') == 'qualified'
-        
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_contact_with_tasks(self, authenticated_client):
@@ -110,10 +110,10 @@ class TestCRMWorkflow:
             'phone': '+1234567890'
         }
         contact_response = authenticated_client.post(contact_url, contact_data, format='json')
-        
+
         assert contact_response.status_code == status.HTTP_201_CREATED
         contact_id = contact_response.data.get('id')
-        
+
         # Step 2: Create a task for the contact
         task_url = reverse('api:v1:tasks-list')
         task_data = {
@@ -124,7 +124,7 @@ class TestCRMWorkflow:
             'contact_id': contact_id
         }
         task_response = authenticated_client.post(task_url, task_data, format='json')
-        
+
         # Task creation may succeed or fail based on model structure
         assert task_response.status_code in [
             status.HTTP_201_CREATED,
@@ -134,7 +134,7 @@ class TestCRMWorkflow:
 
 class TestAPIVersioning:
     """Test API versioning."""
-    
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_v1_endpoints_accessible(self, authenticated_client):
@@ -144,7 +144,7 @@ class TestAPIVersioning:
             '/api/v1/contacts/',
             '/api/v1/tasks/',
         ]
-        
+
         for endpoint in endpoints:
             response = authenticated_client.get(endpoint)
             assert response.status_code in [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND]
@@ -152,14 +152,14 @@ class TestAPIVersioning:
 
 class TestBulkOperations:
     """Test bulk operations on resources."""
-    
+
     @pytest.mark.django_db
     @pytest.mark.integration
     @pytest.mark.slow
     def test_bulk_lead_creation(self, authenticated_client):
         """Test creating multiple leads."""
         url = reverse('api:v1:leads-list')
-        
+
         leads_created = 0
         for i in range(5):
             data = {
@@ -171,19 +171,19 @@ class TestBulkOperations:
             response = authenticated_client.post(url, data, format='json')
             if response.status_code == status.HTTP_201_CREATED:
                 leads_created += 1
-                
+
         assert leads_created >= 3  # At least 3 should succeed
 
 
 class TestPagination:
     """Test pagination functionality."""
-    
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_leads_pagination(self, authenticated_client, test_user):
         """Test leads endpoint pagination."""
         from lead_management.models import Lead
-        
+
         # Create multiple leads
         for i in range(25):
             Lead.objects.create(
@@ -193,12 +193,12 @@ class TestPagination:
                 status='new',
                 created_by=test_user
             )
-            
+
         url = reverse('api:v1:leads-list')
         response = authenticated_client.get(url)
-        
+
         assert response.status_code == status.HTTP_200_OK
-        
+
         # Check pagination structure
         if 'results' in response.data:
             assert 'count' in response.data or 'next' in response.data
@@ -207,13 +207,13 @@ class TestPagination:
 
 class TestFilteringAndSearch:
     """Test filtering and search functionality."""
-    
+
     @pytest.mark.django_db
     @pytest.mark.integration
     def test_leads_complex_filter(self, authenticated_client, test_user):
         """Test complex filtering on leads."""
         from lead_management.models import Lead
-        
+
         # Create leads with different statuses
         Lead.objects.create(
             first_name='Active', last_name='Lead',
@@ -225,13 +225,13 @@ class TestFilteringAndSearch:
             email='qualified@example.com', status='qualified',
             created_by=test_user
         )
-        
+
         url = reverse('api:v1:leads-list')
-        
+
         # Test status filter
         response = authenticated_client.get(url, {'status': 'new'})
         assert response.status_code == status.HTTP_200_OK
-        
+
         # Test search
         response = authenticated_client.get(url, {'search': 'Active'})
         assert response.status_code == status.HTTP_200_OK

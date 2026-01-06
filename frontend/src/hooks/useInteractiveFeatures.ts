@@ -41,6 +41,7 @@ export function useUserPreferences() {
             setPreferences(data);
             setError(null);
         } catch (err) {
+            console.error("Failed to load preferences", err)
             setError('Failed to load preferences');
             // Use localStorage fallback
             const saved = localStorage.getItem('user_preferences');
@@ -120,6 +121,7 @@ export function useOnboarding() {
             setStatus(data);
         } catch (err) {
             // Use localStorage fallback
+            console.error("failed to onboarding", err)
             const saved = localStorage.getItem('mycrm_onboarding_checklist');
             if (saved) {
                 const items = JSON.parse(saved);
@@ -156,6 +158,7 @@ export function useOnboarding() {
             await onboardingAPI.completeTour();
             setStatus(prev => prev ? { ...prev, tour_completed: true } : null);
         } catch (err) {
+            console.error("Tour Failed", err)
             localStorage.setItem('mycrm_tour_completed', 'true');
         }
     }, []);
@@ -165,6 +168,7 @@ export function useOnboarding() {
             await onboardingAPI.dismissTour();
             setStatus(prev => prev ? { ...prev, tour_dismissed: true } : null);
         } catch (err) {
+            console.error("Failed to dismiss", err)
             localStorage.setItem('mycrm_tour_dismissed', 'true');
         }
     }, []);

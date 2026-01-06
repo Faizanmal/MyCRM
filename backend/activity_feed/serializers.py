@@ -3,16 +3,17 @@ Activity Feed Serializers
 """
 
 from rest_framework import serializers
-from .models import Activity, Comment, Mention, Notification, Follow
+
+from .models import Activity, Comment, Follow, Mention, Notification
 
 
 class ActivitySerializer(serializers.ModelSerializer):
     """Serializer for Activities"""
-    
+
     actor_name = serializers.CharField(source='actor.username', read_only=True)
     actor_email = serializers.CharField(source='actor.email', read_only=True)
     target_type = serializers.CharField(source='content_type.model', read_only=True)
-    
+
     class Meta:
         model = Activity
         fields = [
@@ -25,13 +26,13 @@ class ActivitySerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Serializer for Comments"""
-    
+
     author_name = serializers.CharField(source='author.username', read_only=True)
     author_email = serializers.CharField(source='author.email', read_only=True)
     target_type = serializers.CharField(source='content_type.model', read_only=True)
     replies_count = serializers.SerializerMethodField()
     mentions_list = serializers.PrimaryKeyRelatedField(source='mentions', many=True, read_only=True)
-    
+
     class Meta:
         model = Comment
         fields = [
@@ -41,18 +42,18 @@ class CommentSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'is_edited', 'replies_count'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'is_edited']
-    
+
     def get_replies_count(self, obj):
         return obj.replies.count()
 
 
 class MentionSerializer(serializers.ModelSerializer):
     """Serializer for Mentions"""
-    
+
     user_name = serializers.CharField(source='user.username', read_only=True)
     mentioned_by_name = serializers.CharField(source='mentioned_by.username', read_only=True)
     source_type = serializers.CharField(source='content_type.model', read_only=True)
-    
+
     class Meta:
         model = Mention
         fields = [
@@ -65,10 +66,10 @@ class MentionSerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     """Serializer for Notifications"""
-    
+
     actor_name = serializers.CharField(source='actor.username', read_only=True)
     target_type = serializers.CharField(source='content_type.model', read_only=True)
-    
+
     class Meta:
         model = Notification
         fields = [
@@ -82,10 +83,10 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     """Serializer for Follows"""
-    
+
     user_name = serializers.CharField(source='user.username', read_only=True)
     target_type = serializers.CharField(source='content_type.model', read_only=True)
-    
+
     class Meta:
         model = Follow
         fields = [

@@ -3,16 +3,24 @@ Advanced Workflow Engine Serializers
 """
 
 from rest_framework import serializers
+
 from .workflow_models import (
-    WorkflowDefinition, WorkflowNode, WorkflowConnection,
-    WorkflowInstance, WorkflowNodeExecution, WorkflowApprovalRequest,
-    WorkflowTrigger, WorkflowVariable, WorkflowTemplate, WorkflowLog
+    WorkflowApprovalRequest,
+    WorkflowConnection,
+    WorkflowDefinition,
+    WorkflowInstance,
+    WorkflowLog,
+    WorkflowNode,
+    WorkflowNodeExecution,
+    WorkflowTemplate,
+    WorkflowTrigger,
+    WorkflowVariable,
 )
 
 
 class WorkflowNodeSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowNode"""
-    
+
     class Meta:
         model = WorkflowNode
         fields = [
@@ -27,7 +35,7 @@ class WorkflowNodeSerializer(serializers.ModelSerializer):
 
 class WorkflowConnectionSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowConnection"""
-    
+
     class Meta:
         model = WorkflowConnection
         fields = [
@@ -41,7 +49,7 @@ class WorkflowConnectionSerializer(serializers.ModelSerializer):
 
 class WorkflowVariableSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowVariable"""
-    
+
     class Meta:
         model = WorkflowVariable
         fields = [
@@ -55,7 +63,7 @@ class WorkflowVariableSerializer(serializers.ModelSerializer):
 
 class WorkflowTriggerSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowTrigger"""
-    
+
     class Meta:
         model = WorkflowTrigger
         fields = [
@@ -69,15 +77,15 @@ class WorkflowTriggerSerializer(serializers.ModelSerializer):
 
 class WorkflowDefinitionSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowDefinition"""
-    
+
     nodes = WorkflowNodeSerializer(many=True, read_only=True)
     connections = WorkflowConnectionSerializer(many=True, read_only=True)
     variables = WorkflowVariableSerializer(many=True, read_only=True)
     triggers = WorkflowTriggerSerializer(many=True, read_only=True)
-    
+
     node_count = serializers.SerializerMethodField()
     success_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WorkflowDefinition
         fields = [
@@ -95,10 +103,10 @@ class WorkflowDefinitionSerializer(serializers.ModelSerializer):
             'id', 'run_count', 'success_count', 'failure_count',
             'created_at', 'updated_at'
         ]
-    
+
     def get_node_count(self, obj):
         return obj.nodes.count()
-    
+
     def get_success_rate(self, obj):
         if obj.run_count > 0:
             return round(obj.success_count / obj.run_count * 100, 1)
@@ -107,9 +115,9 @@ class WorkflowDefinitionSerializer(serializers.ModelSerializer):
 
 class WorkflowDefinitionListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing workflows"""
-    
+
     success_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WorkflowDefinition
         fields = [
@@ -119,7 +127,7 @@ class WorkflowDefinitionListSerializer(serializers.ModelSerializer):
             'success_rate',
             'created_at', 'updated_at'
         ]
-    
+
     def get_success_rate(self, obj):
         if obj.run_count > 0:
             return round(obj.success_count / obj.run_count * 100, 1)
@@ -128,10 +136,10 @@ class WorkflowDefinitionListSerializer(serializers.ModelSerializer):
 
 class WorkflowNodeExecutionSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowNodeExecution"""
-    
+
     node_name = serializers.SerializerMethodField()
     node_type = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WorkflowNodeExecution
         fields = [
@@ -142,21 +150,21 @@ class WorkflowNodeExecutionSerializer(serializers.ModelSerializer):
             'approval_status', 'approved_by', 'approval_comment',
             'created_at'
         ]
-    
+
     def get_node_name(self, obj):
         return obj.node.name if obj.node else None
-    
+
     def get_node_type(self, obj):
         return obj.node.node_type if obj.node else None
 
 
 class WorkflowInstanceSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowInstance"""
-    
+
     workflow_name = serializers.SerializerMethodField()
     node_executions = WorkflowNodeExecutionSerializer(many=True, read_only=True)
     duration = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WorkflowInstance
         fields = [
@@ -169,10 +177,10 @@ class WorkflowInstanceSerializer(serializers.ModelSerializer):
             'resume_at', 'resume_data',
             'node_executions', 'duration'
         ]
-    
+
     def get_workflow_name(self, obj):
         return obj.workflow.name if obj.workflow else None
-    
+
     def get_duration(self, obj):
         if obj.completed_at and obj.started_at:
             return int((obj.completed_at - obj.started_at).total_seconds())
@@ -181,9 +189,9 @@ class WorkflowInstanceSerializer(serializers.ModelSerializer):
 
 class WorkflowInstanceListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing instances"""
-    
+
     workflow_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WorkflowInstance
         fields = [
@@ -192,17 +200,17 @@ class WorkflowInstanceListSerializer(serializers.ModelSerializer):
             'started_at', 'completed_at',
             'error_message'
         ]
-    
+
     def get_workflow_name(self, obj):
         return obj.workflow.name if obj.workflow else None
 
 
 class WorkflowApprovalRequestSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowApprovalRequest"""
-    
+
     workflow_name = serializers.SerializerMethodField()
     approver_email = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WorkflowApprovalRequest
         fields = [
@@ -220,19 +228,19 @@ class WorkflowApprovalRequestSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id', 'reminder_sent_count', 'last_reminder_at', 'created_at'
         ]
-    
+
     def get_workflow_name(self, obj):
         if obj.node_execution and obj.node_execution.instance:
             return obj.node_execution.instance.workflow.name
         return None
-    
+
     def get_approver_email(self, obj):
         return obj.approver.email if obj.approver else None
 
 
 class WorkflowLogSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowLog"""
-    
+
     class Meta:
         model = WorkflowLog
         fields = [
@@ -244,7 +252,7 @@ class WorkflowLogSerializer(serializers.ModelSerializer):
 
 class WorkflowTemplateSerializer(serializers.ModelSerializer):
     """Serializer for WorkflowTemplate"""
-    
+
     class Meta:
         model = WorkflowTemplate
         fields = [
@@ -259,7 +267,7 @@ class WorkflowTemplateSerializer(serializers.ModelSerializer):
 # Request Serializers
 class CreateWorkflowSerializer(serializers.Serializer):
     """Request serializer for creating a workflow"""
-    
+
     name = serializers.CharField(max_length=255)
     description = serializers.CharField(required=False, allow_blank=True)
     category = serializers.ChoiceField(
@@ -282,7 +290,7 @@ class CreateWorkflowSerializer(serializers.Serializer):
 
 class AddNodeSerializer(serializers.Serializer):
     """Request serializer for adding a node"""
-    
+
     node_id = serializers.CharField(max_length=100)
     name = serializers.CharField(max_length=255)
     node_type = serializers.CharField(max_length=50)
@@ -299,7 +307,7 @@ class AddNodeSerializer(serializers.Serializer):
 
 class AddConnectionSerializer(serializers.Serializer):
     """Request serializer for adding a connection"""
-    
+
     source_node = serializers.CharField(max_length=100)
     target_node = serializers.CharField(max_length=100)
     source_port = serializers.CharField(max_length=50, default='output')
@@ -310,7 +318,7 @@ class AddConnectionSerializer(serializers.Serializer):
 
 class SaveCanvasSerializer(serializers.Serializer):
     """Request serializer for saving canvas"""
-    
+
     nodes = serializers.ListField(
         child=serializers.DictField(),
         required=False,
@@ -326,7 +334,7 @@ class SaveCanvasSerializer(serializers.Serializer):
 
 class StartWorkflowSerializer(serializers.Serializer):
     """Request serializer for starting a workflow"""
-    
+
     workflow_id = serializers.UUIDField()
     trigger_data = serializers.DictField(required=False, default=dict)
     target_content_type = serializers.CharField(required=False, allow_blank=True)
@@ -335,21 +343,21 @@ class StartWorkflowSerializer(serializers.Serializer):
 
 class ApprovalResponseSerializer(serializers.Serializer):
     """Request serializer for approval response"""
-    
+
     decision = serializers.CharField(max_length=50)
     comment = serializers.CharField(required=False, allow_blank=True)
 
 
 class DelegateApprovalSerializer(serializers.Serializer):
     """Request serializer for delegating approval"""
-    
+
     delegate_to_id = serializers.UUIDField()
     reason = serializers.CharField(required=False, allow_blank=True)
 
 
 class AddVariableSerializer(serializers.Serializer):
     """Request serializer for adding a variable"""
-    
+
     name = serializers.CharField(max_length=100)
     display_name = serializers.CharField(max_length=255)
     variable_type = serializers.ChoiceField(
@@ -368,7 +376,7 @@ class AddVariableSerializer(serializers.Serializer):
 
 class AddTriggerSerializer(serializers.Serializer):
     """Request serializer for adding a trigger"""
-    
+
     event_type = serializers.CharField(max_length=50)
     entity_type = serializers.CharField(required=False, allow_blank=True)
     conditions = serializers.ListField(
@@ -387,13 +395,13 @@ class AddTriggerSerializer(serializers.Serializer):
 
 class CloneWorkflowSerializer(serializers.Serializer):
     """Request serializer for cloning a workflow"""
-    
+
     new_name = serializers.CharField(max_length=255)
 
 
 class CreateFromTemplateSerializer(serializers.Serializer):
     """Request serializer for creating from template"""
-    
+
     template_id = serializers.UUIDField()
     name = serializers.CharField(max_length=255)
     customize = serializers.DictField(required=False, default=dict)

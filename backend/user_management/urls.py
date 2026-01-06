@@ -1,12 +1,13 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
+
 from .views import (
+    AuditLogViewSet,
     CustomTokenObtainPairView,
-    UserViewSet,
     PermissionViewSet,
     RolePermissionViewSet,
-    AuditLogViewSet
+    UserViewSet,
 )
 
 router = DefaultRouter()

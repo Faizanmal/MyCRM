@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -224,6 +225,11 @@ export function ProfileSkeleton({ className }: SkeletonProps) {
  * Loading state for charts and graphs
  */
 export function ChartSkeleton({ className }: SkeletonProps) {
+    const barHeights = useMemo(() =>
+        ['40%', '60%', '30%', '80%', '50%', '70%', '25%', '90%', '45%', '55%', '35%', '75%'],
+        []
+    );
+
     return (
         <Card className={className}>
             <CardHeader>
@@ -232,11 +238,11 @@ export function ChartSkeleton({ className }: SkeletonProps) {
             </CardHeader>
             <CardContent>
                 <div className="flex items-end justify-between h-48 gap-2">
-                    {[...Array(12)].map((_, i) => (
+                    {barHeights.map((height, i) => (
                         <Skeleton
                             key={i}
                             className="flex-1"
-                            style={{ height: `${Math.random() * 80 + 20}%` }}
+                            style={{ height }}
                         />
                     ))}
                 </div>

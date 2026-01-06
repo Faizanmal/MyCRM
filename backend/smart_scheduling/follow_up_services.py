@@ -4,14 +4,14 @@ AI-powered follow-up sequences after meetings
 """
 
 import logging
-from typing import List, Dict, Optional
-from datetime import datetime, timedelta
-from django.utils import timezone
-from django.db import transaction, models
-from django.contrib.auth import get_user_model
-from django.conf import settings
+from datetime import timedelta
 
-from .follow_up_models import MeetingFollowUp, FollowUpSequence, MeetingOutcome
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db import models, transaction
+from django.utils import timezone
+
+from .follow_up_models import FollowUpSequence, MeetingFollowUp, MeetingOutcome
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -19,24 +19,24 @@ User = get_user_model()
 
 class FollowUpService:
     """Service for managing automated follow-ups"""
-    
+
     def __init__(self, user):
         self.user = user
-    
+
     @transaction.atomic
     def schedule_follow_ups_for_meeting(
         self,
         meeting_id: str,
-        sequence_id: Optional[str] = None
-    ) -> List[Dict]:
+        sequence_id: str | None = None
+    ) -> list[dict]:
         """Schedule follow-up sequence for a meeting"""
         from .models import Meeting
-        
+
         try:
             meeting = Meeting.objects.get(id=meeting_id, host=self.user)
         except Meeting.DoesNotExist:
             raise ValueError(f"Meeting {meeting_id} not found")
-        
+
         # Get sequence
         if sequence_id:
             try:
@@ -52,17 +52,17 @@ class FollowUpService:
                 models.Q(apply_to_all=True) |
                 models.Q(meeting_types=meeting.meeting_type)
             ).first()
-        
+
         if not sequence:
             # Use default follow-up
             return self._create_default_follow_ups(meeting)
-        
+
         return self._apply_sequence(meeting, sequence)
-    
-    def _create_default_follow_ups(self, meeting) -> List[Dict]:
+
+    def _create_default_follow_ups(self, meeting) -> list[dict]:
         """Create default follow-up sequence"""
         follow_ups = []
-        
+
         # Thank you email - 1 hour after meeting
         thank_you = MeetingFollowUp.objects.create(
             meeting=meeting,
@@ -74,7 +74,7 @@ class FollowUpService:
             is_ai_generated=True
         )
         follow_ups.append(self._serialize_follow_up(thank_you))
-        
+
         # Summary email - 2 hours after meeting
         summary = MeetingFollowUp.objects.create(
             meeting=meeting,
@@ -86,24 +86,24 @@ class FollowUpService:
             is_ai_generated=True
         )
         follow_ups.append(self._serialize_follow_up(summary))
-        
+
         return follow_ups
-    
-    def _apply_sequence(self, meeting, sequence: FollowUpSequence) -> List[Dict]:
+
+    def _apply_sequence(self, meeting, sequence: FollowUpSequence) -> list[dict]:
         """Apply a follow-up sequence to a meeting"""
         follow_ups = []
-        
+
         for step in sequence.steps:
             delay_hours = step.get('delay_hours', 0) + step.get('delay_days', 0) * 24
             scheduled_at = meeting.end_time + timedelta(hours=delay_hours)
-            
+
             # Skip if scheduled in the past
             if scheduled_at <= timezone.now():
                 scheduled_at = timezone.now() + timedelta(minutes=5)
-            
+
             # Generate content
             subject, body = self._generate_step_content(meeting, step, sequence)
-            
+
             follow_up = MeetingFollowUp.objects.create(
                 meeting=meeting,
                 follow_up_type=step.get('type', 'custom'),
@@ -119,30 +119,30 @@ class FollowUpService:
                 }
             )
             follow_ups.append(self._serialize_follow_up(follow_up))
-        
+
         # Update sequence usage
         sequence.times_used += 1
         sequence.save(update_fields=['times_used'])
-        
+
         return follow_ups
-    
+
     def _generate_step_content(
         self,
         meeting,
-        step: Dict,
+        step: dict,
         sequence: FollowUpSequence
     ) -> tuple:
         """Generate content for a sequence step"""
-        
+
         # Use templates if provided
         if step.get('subject_template') and step.get('body_template'):
             subject = self._render_template(step['subject_template'], meeting)
             body = self._render_template(step['body_template'], meeting)
             return subject, body
-        
+
         # Generate based on type
         follow_up_type = step.get('type', 'custom')
-        
+
         if follow_up_type == 'thank_you':
             return self._generate_thank_you_content(meeting)
         elif follow_up_type == 'summary':
@@ -157,11 +157,11 @@ class FollowUpService:
             return self._generate_feedback_content(meeting)
         else:
             return "Follow-up", "Custom follow-up content"
-    
+
     def _generate_thank_you_content(self, meeting) -> tuple:
         """Generate thank you email content"""
         subject = f"Great connecting today - {meeting.meeting_type.name}"
-        
+
         body = f"""Hi {meeting.guest_name},
 
 Thank you for taking the time to meet with me today. I really enjoyed our conversation and learning more about your needs.
@@ -176,11 +176,11 @@ Best regards,
 {meeting.host.get_full_name() or meeting.host.username}
 """
         return subject, body
-    
+
     def _generate_summary_content(self, meeting) -> tuple:
         """Generate meeting summary content"""
         subject = f"Meeting Summary - {meeting.meeting_type.name}"
-        
+
         body = f"""Hi {meeting.guest_name},
 
 Here's a summary of our meeting today:
@@ -205,11 +205,11 @@ Best regards,
 {meeting.host.get_full_name() or meeting.host.username}
 """
         return subject, body
-    
+
     def _generate_action_items_content(self, meeting) -> tuple:
         """Generate action items reminder"""
         subject = f"Action Items from our meeting - {meeting.meeting_type.name}"
-        
+
         body = f"""Hi {meeting.guest_name},
 
 I wanted to follow up on the action items from our recent meeting:
@@ -229,11 +229,11 @@ Best regards,
 {meeting.host.get_full_name() or meeting.host.username}
 """
         return subject, body
-    
+
     def _generate_check_in_content(self, meeting) -> tuple:
         """Generate check-in email"""
         subject = f"Checking in - {meeting.meeting_type.name}"
-        
+
         body = f"""Hi {meeting.guest_name},
 
 I hope this message finds you well! I wanted to check in following our meeting last week.
@@ -246,11 +246,11 @@ Best regards,
 {meeting.host.get_full_name() or meeting.host.username}
 """
         return subject, body
-    
+
     def _generate_proposal_content(self, meeting) -> tuple:
         """Generate proposal follow-up"""
         subject = f"Proposal Following Our Discussion - {meeting.meeting_type.name}"
-        
+
         body = f"""Hi {meeting.guest_name},
 
 As discussed in our meeting, I've prepared a proposal that addresses your needs:
@@ -268,11 +268,11 @@ Best regards,
 {meeting.host.get_full_name() or meeting.host.username}
 """
         return subject, body
-    
+
     def _generate_feedback_content(self, meeting) -> tuple:
         """Generate feedback request"""
-        subject = f"Your feedback on our meeting"
-        
+        subject = "Your feedback on our meeting"
+
         body = f"""Hi {meeting.guest_name},
 
 I hope you found our recent meeting valuable. I'm always looking to improve, and your feedback would be greatly appreciated.
@@ -288,12 +288,12 @@ Best regards,
 {meeting.host.get_full_name() or meeting.host.username}
 """
         return subject, body
-    
+
     def _generate_thank_you_email(self, meeting) -> str:
         """Generate full thank you email body"""
         _, body = self._generate_thank_you_content(meeting)
         return body
-    
+
     def _render_template(self, template: str, meeting) -> str:
         """Render template with meeting context"""
         replacements = {
@@ -306,20 +306,20 @@ Best regards,
             '{{host_name}}': meeting.host.get_full_name() or meeting.host.username,
             '{{host_email}}': meeting.host.email
         }
-        
+
         result = template
         for key, value in replacements.items():
             result = result.replace(key, value)
-        
+
         return result
-    
+
     def _get_personalized_line(self, meeting) -> str:
         """Get a personalized line based on meeting context"""
         if meeting.contact:
             return f"It was great to continue building our relationship and discussing how we can help {meeting.contact.company_name or 'your team'}."
         return "I look forward to exploring how we can work together."
-    
-    def _serialize_follow_up(self, follow_up: MeetingFollowUp) -> Dict:
+
+    def _serialize_follow_up(self, follow_up: MeetingFollowUp) -> dict:
         """Serialize follow-up to dict"""
         return {
             'id': str(follow_up.id),
@@ -331,20 +331,20 @@ Best regards,
             'status': follow_up.status,
             'is_ai_generated': follow_up.is_ai_generated
         }
-    
-    def send_pending_follow_ups(self) -> Dict:
+
+    def send_pending_follow_ups(self) -> dict:
         """Send all pending follow-ups that are due"""
         now = timezone.now()
-        
+
         pending = MeetingFollowUp.objects.filter(
             meeting__host=self.user,
             status='pending',
             scheduled_at__lte=now
         )
-        
+
         sent_count = 0
         failed_count = 0
-        
+
         for follow_up in pending:
             try:
                 self._send_follow_up(follow_up)
@@ -356,17 +356,17 @@ Best regards,
                 follow_up.retry_count += 1
                 follow_up.save()
                 failed_count += 1
-        
+
         return {
             'sent': sent_count,
             'failed': failed_count,
             'remaining': pending.count() - sent_count - failed_count
         }
-    
+
     def _send_follow_up(self, follow_up: MeetingFollowUp):
         """Send a single follow-up email"""
         from django.core.mail import send_mail
-        
+
         # Check conditions if set
         if follow_up.personalization_context.get('condition') == 'no_reply':
             # Check if guest has replied to any previous follow-up
@@ -375,12 +375,12 @@ Best regards,
                 status='replied',
                 scheduled_at__lt=follow_up.scheduled_at
             ).exists()
-            
+
             if previous_replied:
                 follow_up.status = 'cancelled'
                 follow_up.save()
                 return
-        
+
         # Send email
         send_mail(
             subject=follow_up.subject,
@@ -389,27 +389,27 @@ Best regards,
             recipient_list=[follow_up.meeting.guest_email],
             fail_silently=False
         )
-        
+
         follow_up.status = 'sent'
         follow_up.sent_at = timezone.now()
         follow_up.save()
-    
+
     @transaction.atomic
     def record_meeting_outcome(
         self,
         meeting_id: str,
         outcome: str,
         notes: str = '',
-        action_items: Optional[List[Dict]] = None
-    ) -> Dict:
+        action_items: list[dict] | None = None
+    ) -> dict:
         """Record meeting outcome and generate AI summary"""
         from .models import Meeting
-        
+
         try:
             meeting = Meeting.objects.get(id=meeting_id, host=self.user)
         except Meeting.DoesNotExist:
             raise ValueError(f"Meeting {meeting_id} not found")
-        
+
         # Create or update outcome
         meeting_outcome, created = MeetingOutcome.objects.update_or_create(
             meeting=meeting,
@@ -420,7 +420,7 @@ Best regards,
                 'recorded_by': self.user
             }
         )
-        
+
         # Generate AI summary if notes provided
         if notes:
             ai_summary = self._generate_ai_summary(notes)
@@ -428,7 +428,7 @@ Best regards,
             meeting_outcome.key_points = ai_summary.get('key_points', [])
             meeting_outcome.sentiment_score = ai_summary.get('sentiment', 0)
             meeting_outcome.save()
-        
+
         # Update meeting status
         if outcome == 'no_show':
             meeting.status = 'no_show'
@@ -437,7 +437,7 @@ Best regards,
         else:
             meeting.status = 'completed'
         meeting.save()
-        
+
         return {
             'id': str(meeting_outcome.id),
             'meeting_id': str(meeting.id),
@@ -448,13 +448,13 @@ Best regards,
             'key_points': meeting_outcome.key_points,
             'sentiment_score': meeting_outcome.sentiment_score
         }
-    
-    def _generate_ai_summary(self, notes: str) -> Dict:
+
+    def _generate_ai_summary(self, notes: str) -> dict:
         """Generate AI summary from meeting notes"""
-        
+
         try:
             import openai
-            
+
             client = openai.OpenAI()
             response = client.chat.completions.create(
                 model="gpt-4",
@@ -475,10 +475,10 @@ Return as JSON: {"summary": "...", "key_points": [...], "sentiment": 0.5}"""
                 ],
                 response_format={"type": "json_object"}
             )
-            
+
             import json
             return json.loads(response.choices[0].message.content)
-        
+
         except Exception as e:
             logger.error(f"AI summary generation failed: {e}")
             return {
@@ -486,23 +486,23 @@ Return as JSON: {"summary": "...", "key_points": [...], "sentiment": 0.5}"""
                 'key_points': [],
                 'sentiment': 0
             }
-    
-    def get_follow_up_analytics(self, days: int = 30) -> Dict:
+
+    def get_follow_up_analytics(self, days: int = 30) -> dict:
         """Get analytics on follow-up performance"""
-        
+
         start_date = timezone.now() - timedelta(days=days)
-        
+
         follow_ups = MeetingFollowUp.objects.filter(
             meeting__host=self.user,
             created_at__gte=start_date
         )
-        
+
         total = follow_ups.count()
         sent = follow_ups.filter(status='sent').count()
         opened = follow_ups.filter(status='opened').count()
         clicked = follow_ups.filter(status='clicked').count()
         replied = follow_ups.filter(status='replied').count()
-        
+
         return {
             'period_days': days,
             'total_follow_ups': total,
@@ -515,34 +515,34 @@ Return as JSON: {"summary": "...", "key_points": [...], "sentiment": 0.5}"""
             'reply_rate': (replied / sent * 100) if sent > 0 else 0,
             'by_type': self._get_follow_up_by_type(follow_ups)
         }
-    
-    def _get_follow_up_by_type(self, follow_ups) -> Dict:
+
+    def _get_follow_up_by_type(self, follow_ups) -> dict:
         """Get follow-up stats by type"""
         types = {}
-        
+
         for follow_up in follow_ups:
             type_name = follow_up.follow_up_type
             if type_name not in types:
                 types[type_name] = {'total': 0, 'sent': 0, 'replied': 0}
-            
+
             types[type_name]['total'] += 1
             if follow_up.status in ['sent', 'opened', 'clicked', 'replied']:
                 types[type_name]['sent'] += 1
             if follow_up.status == 'replied':
                 types[type_name]['replied'] += 1
-        
+
         return types
 
 
 class SequenceTemplateService:
     """Service for managing follow-up sequence templates"""
-    
+
     def __init__(self, user):
         self.user = user
-    
-    def get_default_sequences(self) -> List[Dict]:
+
+    def get_default_sequences(self) -> list[dict]:
         """Get default sequence templates"""
-        
+
         return [
             {
                 'name': 'Standard Sales Meeting',
@@ -640,18 +640,18 @@ class SequenceTemplateService:
                 ]
             }
         ]
-    
+
     @transaction.atomic
-    def create_from_template(self, template_name: str) -> Dict:
+    def create_from_template(self, template_name: str) -> dict:
         """Create a sequence from a template"""
-        
+
         templates = {t['name']: t for t in self.get_default_sequences()}
-        
+
         if template_name not in templates:
             raise ValueError(f"Template '{template_name}' not found")
-        
+
         template = templates[template_name]
-        
+
         sequence = FollowUpSequence.objects.create(
             user=self.user,
             name=template['name'],
@@ -659,7 +659,7 @@ class SequenceTemplateService:
             steps=template['steps'],
             use_ai_personalization=True
         )
-        
+
         return {
             'id': str(sequence.id),
             'name': sequence.name,

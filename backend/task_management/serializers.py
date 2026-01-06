@@ -1,13 +1,14 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Task, CalendarEvent, Reminder, TaskTemplate
+from rest_framework import serializers
+
+from .models import CalendarEvent, Reminder, Task, TaskTemplate
 
 User = get_user_model()
 
 
 class TaskTemplateSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = TaskTemplate
         fields = [
@@ -24,7 +25,7 @@ class TaskSerializer(serializers.ModelSerializer):
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
     lead_name = serializers.CharField(source='lead.full_name', read_only=True)
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = Task
         fields = [
@@ -45,7 +46,7 @@ class TaskCreateSerializer(serializers.ModelSerializer):
             'priority', 'due_date', 'reminder_date', 'contact', 'lead',
             'opportunity', 'notes', 'tags', 'custom_fields'
         ]
-    
+
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
@@ -57,7 +58,7 @@ class CalendarEventSerializer(serializers.ModelSerializer):
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
     lead_name = serializers.CharField(source='lead.full_name', read_only=True)
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = CalendarEvent
         fields = [
@@ -68,7 +69,7 @@ class CalendarEventSerializer(serializers.ModelSerializer):
             'notes', 'tags', 'custom_fields', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'organizer', 'created_at', 'updated_at']
-    
+
     def get_attendees_names(self, obj):
         return [attendee.get_full_name() for attendee in obj.attendees.all()]
 
@@ -81,7 +82,7 @@ class CalendarEventCreateSerializer(serializers.ModelSerializer):
             'is_all_day', 'timezone', 'attendees', 'location', 'meeting_link',
             'contact', 'lead', 'opportunity', 'notes', 'tags', 'custom_fields'
         ]
-    
+
     def create(self, validated_data):
         validated_data['organizer'] = self.context['request'].user
         return super().create(validated_data)
@@ -94,7 +95,7 @@ class ReminderSerializer(serializers.ModelSerializer):
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
     lead_name = serializers.CharField(source='lead.full_name', read_only=True)
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = Reminder
         fields = [
@@ -114,7 +115,7 @@ class ReminderCreateSerializer(serializers.ModelSerializer):
             'title', 'description', 'reminder_type', 'reminder_time',
             'task', 'event', 'contact', 'lead', 'opportunity'
         ]
-    
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
@@ -123,7 +124,7 @@ class ReminderCreateSerializer(serializers.ModelSerializer):
 class TaskBulkUpdateSerializer(serializers.Serializer):
     task_ids = serializers.ListField(child=serializers.IntegerField())
     updates = serializers.DictField()
-    
+
     def validate_task_ids(self, value):
         if not value:
             raise serializers.ValidationError("At least one task ID is required.")

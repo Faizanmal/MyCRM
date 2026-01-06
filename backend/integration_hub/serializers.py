@@ -3,14 +3,15 @@ Integration Hub Serializers
 """
 
 from rest_framework import serializers
-from .models import Webhook, WebhookDelivery, ThirdPartyIntegration, IntegrationLog, APIEndpoint
+
+from .models import APIEndpoint, IntegrationLog, ThirdPartyIntegration, Webhook, WebhookDelivery
 
 
 class WebhookSerializer(serializers.ModelSerializer):
     """Serializer for Webhooks"""
-    
+
     success_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Webhook
         fields = [
@@ -24,7 +25,7 @@ class WebhookSerializer(serializers.ModelSerializer):
             'last_delivery_at', 'created_at', 'updated_at'
         ]
         extra_kwargs = {'secret_key': {'write_only': True}}
-    
+
     def get_success_rate(self, obj):
         """Calculate webhook success rate"""
         if obj.total_deliveries > 0:
@@ -34,9 +35,9 @@ class WebhookSerializer(serializers.ModelSerializer):
 
 class WebhookDeliverySerializer(serializers.ModelSerializer):
     """Serializer for Webhook Deliveries"""
-    
+
     webhook_name = serializers.CharField(source='webhook.name', read_only=True)
-    
+
     class Meta:
         model = WebhookDelivery
         fields = [
@@ -49,9 +50,9 @@ class WebhookDeliverySerializer(serializers.ModelSerializer):
 
 class ThirdPartyIntegrationSerializer(serializers.ModelSerializer):
     """Serializer for Third Party Integrations"""
-    
+
     is_token_expired = serializers.BooleanField(read_only=True)
-    
+
     class Meta:
         model = ThirdPartyIntegration
         fields = [
@@ -72,9 +73,9 @@ class ThirdPartyIntegrationSerializer(serializers.ModelSerializer):
 
 class IntegrationLogSerializer(serializers.ModelSerializer):
     """Serializer for Integration Logs"""
-    
+
     integration_name = serializers.CharField(source='integration.name', read_only=True)
-    
+
     class Meta:
         model = IntegrationLog
         fields = [
@@ -86,9 +87,9 @@ class IntegrationLogSerializer(serializers.ModelSerializer):
 
 class APIEndpointSerializer(serializers.ModelSerializer):
     """Serializer for API Endpoints"""
-    
+
     success_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = APIEndpoint
         fields = [
@@ -101,7 +102,7 @@ class APIEndpointSerializer(serializers.ModelSerializer):
             'id', 'total_calls', 'successful_calls', 'failed_calls',
             'created_at', 'updated_at'
         ]
-    
+
     def get_success_rate(self, obj):
         """Calculate endpoint success rate"""
         if obj.total_calls > 0:

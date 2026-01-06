@@ -3,26 +3,47 @@ Enterprise Core Views for MyCRM
 Advanced security, audit, and enterprise features API views
 """
 
-from rest_framework import viewsets, status, permissions, filters
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Max
 from django.utils import timezone
-from datetime import timedelta
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-from .models import (
-    AuditLog, SystemConfiguration, APIKey, DataBackup,
-    Workflow, WorkflowExecution, Integration, NotificationTemplate, SystemHealth
+from .ai_analytics import (
+    CustomerSegmentation,
+    LeadScoring,
+    PredictiveAnalytics,
+    SalesForecasting,
+    WorkflowAutomation,
 )
-from .serializers import (
-    AuditLogSerializer, SystemConfigurationSerializer, APIKeySerializer,
-    DataBackupSerializer, WorkflowSerializer, WorkflowExecutionSerializer,
-    IntegrationSerializer, NotificationTemplateSerializer, SystemHealthSerializer,
-    SecurityDashboardSerializer, AdvancedAnalyticsSerializer
+from .models import (
+    APIKey,
+    AuditLog,
+    DataBackup,
+    Integration,
+    NotificationTemplate,
+    SystemConfiguration,
+    SystemHealth,
+    Workflow,
+    WorkflowExecution,
 )
 from .security import SecurityAuditLog
-from .ai_analytics import SalesForecasting, LeadScoring, CustomerSegmentation, PredictiveAnalytics, WorkflowAutomation
+from .serializers import (
+    AdvancedAnalyticsSerializer,
+    APIKeySerializer,
+    AuditLogSerializer,
+    DataBackupSerializer,
+    IntegrationSerializer,
+    NotificationTemplateSerializer,
+    SecurityDashboardSerializer,
+    SystemConfigurationSerializer,
+    SystemHealthSerializer,
+    WorkflowExecutionSerializer,
+    WorkflowSerializer,
+)
 
 User = get_user_model()
 
@@ -36,31 +57,31 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['action', 'resource', 'user__username', 'ip_address']
     ordering_fields = ['timestamp', 'risk_level', 'action']
     ordering = ['-timestamp']
-    
+
     def get_queryset(self):
         queryset = AuditLog.objects.all()
-        
+
         # Non-admin users can only see their own audit logs
         user_role = getattr(self.request.user, 'role', None)
         if user_role != 'admin' and not self.request.user.is_superuser:
             queryset = queryset.filter(user=self.request.user)
-        
+
         # Filter by date range
         start_date = self.request.query_params.get('start_date')
         end_date = self.request.query_params.get('end_date')
-        
+
         if start_date:
             queryset = queryset.filter(timestamp__gte=start_date)
         if end_date:
             queryset = queryset.filter(timestamp__lte=end_date)
-        
+
         # Filter by risk level
         risk_level = self.request.query_params.get('risk_level')
         if risk_level:
             queryset = queryset.filter(risk_level=risk_level)
-        
+
         return queryset
-    
+
     @action(detail=False, methods=['get'])
     def security_summary(self, request):
         """Get security summary from audit logs"""
@@ -70,10 +91,10 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         today = timezone.now().date()
         yesterday = today - timedelta(days=1)
-        
+
         # Security metrics
         metrics = {
             'total_events_today': AuditLog.objects.filter(
@@ -101,7 +122,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
                 ).order_by('-count')[:5]
             )
         }
-        
+
         return Response(metrics)
 
 
@@ -110,21 +131,21 @@ class SystemConfigurationViewSet(viewsets.ModelViewSet):
     queryset = SystemConfiguration.objects.all()
     serializer_class = SystemConfigurationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         # Only admins can access system configuration
         user_role = getattr(self.request.user, 'role', None)
         if user_role != 'admin' and not self.request.user.is_superuser:
             return SystemConfiguration.objects.none()
         return SystemConfiguration.objects.all()
-    
+
     def perform_create(self, serializer):
         user_role = getattr(self.request.user, 'role', None)
         if user_role != 'admin' and not self.request.user.is_superuser:
             raise permissions.PermissionDenied("Admin access required")
-        
+
         serializer.save(created_by=self.request.user)
-        
+
         # Log configuration change
         SecurityAuditLog.log_event(
             self.request.user,
@@ -140,28 +161,28 @@ class APIKeyViewSet(viewsets.ModelViewSet):
     queryset = APIKey.objects.all()
     serializer_class = APIKeySerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         # Users can only see their own API keys, admins see all
         user_role = getattr(self.request.user, 'role', None)
         if user_role == 'admin' or self.request.user.is_superuser:
             return APIKey.objects.all()
         return APIKey.objects.filter(user=self.request.user)
-    
+
     def perform_create(self, serializer):
-        import secrets
         import hashlib
-        
+        import secrets
+
         # Generate API key
         api_key = f"crm_{secrets.token_urlsafe(32)}"
         key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-        
+
         serializer.save(user=self.request.user, key_hash=key_hash)
-        
+
         # Return the unhashed key only once
         response_data = serializer.data
         response_data['api_key'] = api_key
-        
+
         # Log API key creation
         SecurityAuditLog.log_event(
             self.request.user,
@@ -170,16 +191,16 @@ class APIKeyViewSet(viewsets.ModelViewSet):
             ip_address=self.request.META.get('REMOTE_ADDR'),
             risk_level='medium'
         )
-        
+
         return Response(response_data, status=status.HTTP_201_CREATED)
-    
+
     @action(detail=True, methods=['post'])
-    def revoke(self, request, pk=None):
+    def revoke(self, request, _pk=None):
         """Revoke an API key"""
         api_key = self.get_object()
         api_key.status = 'revoked'
         api_key.save()
-        
+
         SecurityAuditLog.log_event(
             request.user,
             'api_key_revoked',
@@ -187,7 +208,7 @@ class APIKeyViewSet(viewsets.ModelViewSet):
             ip_address=request.META.get('REMOTE_ADDR'),
             risk_level='medium'
         )
-        
+
         return Response({'message': 'API key revoked successfully'})
 
 
@@ -196,14 +217,14 @@ class DataBackupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = DataBackup.objects.all()
     serializer_class = DataBackupSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         # Only admins can access backup information
         user_role = getattr(self.request.user, 'role', None)
         if user_role != 'admin' and not self.request.user.is_superuser:
             return DataBackup.objects.none()
         return DataBackup.objects.all()
-    
+
     @action(detail=False, methods=['post'])
     def create_backup(self, request):
         """Initiate a new backup"""
@@ -213,19 +234,19 @@ class DataBackupViewSet(viewsets.ReadOnlyModelViewSet):
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         backup_type = request.data.get('backup_type', 'full')
-        
+
         # Create backup record
         backup = DataBackup.objects.create(
             backup_type=backup_type,
             file_path=f"backups/{timezone.now().strftime('%Y%m%d_%H%M%S')}_{backup_type}.sql",
             created_by=request.user
         )
-        
+
         # Here you would typically queue a background task to perform the backup
         # For now, we'll just return the backup record
-        
+
         SecurityAuditLog.log_event(
             request.user,
             'backup_initiated',
@@ -233,7 +254,7 @@ class DataBackupViewSet(viewsets.ReadOnlyModelViewSet):
             ip_address=request.META.get('REMOTE_ADDR'),
             risk_level='low'
         )
-        
+
         return Response(DataBackupSerializer(backup).data)
 
 
@@ -246,35 +267,35 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at', 'status']
     ordering = ['-created_at']
-    
+
     def get_queryset(self):
         # Users can see workflows they created or if they're admin
         user_role = getattr(self.request.user, 'role', None)
         if user_role == 'admin' or self.request.user.is_superuser:
             return Workflow.objects.all()
         return Workflow.objects.filter(created_by=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
-    def execute(self, request, pk=None):
+    def execute(self, request, _pk=None):
         """Manually execute a workflow"""
         workflow = self.get_object()
-        
+
         if workflow.status != 'active':
             return Response(
                 {'error': 'Workflow is not active'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Create execution record
         execution = WorkflowExecution.objects.create(
             workflow=workflow,
             trigger_data=request.data.get('trigger_data', {}),
             total_steps=len(workflow.actions)
         )
-        
+
         # Here you would typically queue the workflow execution
         # For now, we'll just return the execution record
-        
+
         return Response(WorkflowExecutionSerializer(execution).data)
 
 
@@ -284,7 +305,7 @@ class WorkflowExecutionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = WorkflowExecutionSerializer
     permission_classes = [permissions.IsAuthenticated]
     ordering = ['-started_at']
-    
+
     def get_queryset(self):
         # Users can see executions of their workflows or if they're admin
         user_role = getattr(self.request.user, 'role', None)
@@ -302,19 +323,19 @@ class IntegrationViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'provider', 'integration_type']
     ordering_fields = ['name', 'created_at', 'status']
     ordering = ['-created_at']
-    
+
     def get_queryset(self):
         # Users can see integrations they created or if they're admin
         user_role = getattr(self.request.user, 'role', None)
         if user_role == 'admin' or self.request.user.is_superuser:
             return Integration.objects.all()
         return Integration.objects.filter(created_by=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
-    def test_connection(self, request, pk=None):
+    def test_connection(self, request, _pk=None):
         """Test integration connection"""
         integration = self.get_object()
-        
+
         # Here you would implement actual connection testing
         # For now, we'll simulate it
         test_result = {
@@ -322,7 +343,7 @@ class IntegrationViewSet(viewsets.ModelViewSet):
             'message': 'Connection successful',
             'response_time': 150  # ms
         }
-        
+
         # Update last sync time if successful
         if test_result['success']:
             integration.last_sync = timezone.now()
@@ -331,7 +352,7 @@ class IntegrationViewSet(viewsets.ModelViewSet):
         else:
             integration.status = 'error'
             integration.save()
-        
+
         return Response(test_result)
 
 
@@ -344,7 +365,7 @@ class NotificationTemplateViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'notification_type']
     ordering_fields = ['name', 'created_at', 'notification_type']
     ordering = ['-created_at']
-    
+
     def get_queryset(self):
         # Users can see templates they created or if they're admin
         user_role = getattr(self.request.user, 'role', None)
@@ -359,18 +380,18 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SystemHealthSerializer
     permission_classes = [permissions.IsAuthenticated]
     ordering = ['-checked_at']
-    
+
     def get_queryset(self):
         # Only admins can access system health data
         user_role = getattr(self.request.user, 'role', None)
         if user_role != 'admin' and not self.request.user.is_superuser:
             return SystemHealth.objects.none()
-        
+
         # Get latest health check for each component
         latest_checks = SystemHealth.objects.values('component').annotate(
             latest_check=Max('checked_at')
         )
-        
+
         health_checks = []
         for check in latest_checks:
             health_checks.extend(
@@ -379,9 +400,9 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
                     checked_at=check['latest_check']
                 )
             )
-        
+
         return health_checks
-    
+
     @action(detail=False, methods=['get'])
     def dashboard(self, request):
         """Get system health dashboard data"""
@@ -391,11 +412,11 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Get latest health status for each component
         components = ['database', 'cache', 'email', 'storage', 'api', 'queue']
         health_data = {}
-        
+
         for component in components:
             latest = SystemHealth.objects.filter(component=component).first()
             health_data[component] = {
@@ -403,11 +424,11 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
                 'response_time': latest.response_time if latest else None,
                 'last_check': latest.checked_at if latest else None
             }
-        
+
         # Calculate overall health score
         healthy_count = sum(1 for data in health_data.values() if data['status'] == 'healthy')
         health_score = (healthy_count / len(components)) * 100
-        
+
         return Response({
             'components': health_data,
             'overall_health_score': health_score,
@@ -419,7 +440,7 @@ class SystemHealthViewSet(viewsets.ReadOnlyModelViewSet):
 class SecurityDashboardViewSet(viewsets.ViewSet):
     """Security dashboard with aggregated metrics"""
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def list(self, request):
         """Get security dashboard data"""
         user_role = getattr(request.user, 'role', None)
@@ -428,9 +449,9 @@ class SecurityDashboardViewSet(viewsets.ViewSet):
                 {'error': 'Admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         today = timezone.now().date()
-        
+
         # Aggregate security metrics
         dashboard_data = {
             'total_audit_logs': AuditLog.objects.count(),
@@ -452,27 +473,27 @@ class SecurityDashboardViewSet(viewsets.ViewSet):
                 started_at__date=today
             ).count()
         }
-        
+
         serializer = SecurityDashboardSerializer(dashboard_data)
         return Response(serializer.data)
-    
+
     def _calculate_health_score(self):
         """Calculate overall system health score"""
         components = ['database', 'cache', 'email', 'storage', 'api', 'queue']
         healthy_count = 0
-        
+
         for component in components:
             latest = SystemHealth.objects.filter(component=component).first()
             if latest and latest.status == 'healthy':
                 healthy_count += 1
-        
+
         return (healthy_count / len(components)) * 100 if components else 0
 
 
 class AdvancedAnalyticsViewSet(viewsets.ViewSet):
     """Advanced analytics and insights"""
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def list(self, request):
         """Get advanced analytics data"""
         user_role = getattr(request.user, 'role', None)
@@ -481,7 +502,7 @@ class AdvancedAnalyticsViewSet(viewsets.ViewSet):
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Generate analytics data
         analytics_data = {
             'user_activity_trend': self._get_user_activity_trend(),
@@ -492,38 +513,38 @@ class AdvancedAnalyticsViewSet(viewsets.ViewSet):
             'data_quality_score': self._calculate_data_quality_score(),
             'compliance_score': self._calculate_compliance_score()
         }
-        
+
         serializer = AdvancedAnalyticsSerializer(analytics_data)
         return Response(serializer.data)
-    
+
     def _get_user_activity_trend(self):
         """Get user activity trend over last 30 days"""
         # Implementation for user activity analysis
         return {'trend': 'increasing', 'data': []}
-    
+
     def _get_security_incidents_trend(self):
         """Get security incidents trend"""
         # Implementation for security incident analysis
         return {'trend': 'stable', 'data': []}
-    
+
     def _get_performance_metrics(self):
         """Get system performance metrics"""
         # Implementation for performance analysis
         return {'avg_response_time': 150, 'uptime': 99.9}
-    
+
     def _get_integration_summary(self):
         """Get integration status summary"""
         return Integration.objects.values('status').annotate(count=Count('status'))
-    
+
     def _get_workflow_performance(self):
         """Get workflow performance metrics"""
         return {'success_rate': 95.5, 'avg_execution_time': 30}
-    
+
     def _calculate_data_quality_score(self):
         """Calculate data quality score"""
         # Implementation for data quality assessment
         return 87.5
-    
+
     def _calculate_compliance_score(self):
         """Calculate compliance score"""
         # Implementation for compliance assessment
@@ -533,36 +554,36 @@ class AdvancedAnalyticsViewSet(viewsets.ViewSet):
 class AIAnalyticsViewSet(viewsets.ViewSet):
     """AI-powered analytics and insights"""
     permission_classes = [permissions.IsAuthenticated]
-    
+
     @action(detail=False, methods=['get'])
     def sales_forecast(self, request):
         """Get sales revenue forecast"""
         period_months = int(request.query_params.get('period', 3))
-        
+
         if period_months > 12:
             return Response(
                 {'error': 'Period cannot exceed 12 months'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         forecast = SalesForecasting.forecast_revenue(period_months)
         return Response(forecast)
-    
+
     @action(detail=False, methods=['post'])
     def lead_scoring(self, request):
         """Calculate lead score for a specific lead"""
         lead_id = request.data.get('lead_id')
-        
+
         if not lead_id:
             return Response(
                 {'error': 'lead_id is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             from lead_management.models import Lead
             lead = Lead.objects.get(id=lead_id)
-            
+
             # Check permissions
             user_role = getattr(request.user, 'role', None)
             if user_role not in ['admin', 'manager'] and not request.user.is_superuser and lead.assigned_to != request.user:
@@ -570,16 +591,16 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
                     {'error': 'Permission denied'},
                     status=status.HTTP_403_FORBIDDEN
                 )
-            
+
             score_data = LeadScoring.calculate_lead_score(lead)
             return Response(score_data)
-            
+
         except Lead.DoesNotExist:
             return Response(
                 {'error': 'Lead not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
-    
+
     @action(detail=False, methods=['get'])
     def customer_segmentation(self, request):
         """Get customer segmentation analysis"""
@@ -589,10 +610,10 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         segmentation = CustomerSegmentation.segment_customers()
         return Response(segmentation)
-    
+
     @action(detail=False, methods=['get'])
     def churn_prediction(self, request):
         """Get churn risk predictions"""
@@ -602,31 +623,31 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         churn_analysis = PredictiveAnalytics.predict_churn_risk()
         return Response(churn_analysis)
-    
+
     @action(detail=False, methods=['post'])
     def next_best_action(self, request):
         """Get AI-suggested next best actions"""
         record_type = request.data.get('record_type')
         record_id = request.data.get('record_id')
-        
+
         if not record_type or not record_id:
             return Response(
                 {'error': 'record_type and record_id are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if record_type not in ['lead', 'contact', 'opportunity']:
             return Response(
                 {'error': 'Invalid record_type'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         suggestions = WorkflowAutomation.suggest_next_actions(record_type, record_id)
         return Response({'suggestions': suggestions})
-    
+
     @action(detail=False, methods=['get'])
     def ai_insights_dashboard(self, request):
         """Get comprehensive AI insights dashboard"""
@@ -636,7 +657,7 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Combine multiple AI insights
         dashboard_data = {
             'sales_forecast': SalesForecasting.forecast_revenue(3),
@@ -644,21 +665,21 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
             'churn_risk': PredictiveAnalytics.predict_churn_risk(),
             'generated_at': timezone.now().isoformat()
         }
-        
+
         return Response(dashboard_data)
-    
+
     @action(detail=False, methods=['get'])
     def pipeline_analytics(self, request):
         """Get comprehensive pipeline analytics"""
         from .ai_analytics import PipelineAnalytics
-        
+
         user_role = getattr(request.user, 'role', None)
         if user_role not in ['admin', 'manager', 'sales_rep'] and not request.user.is_superuser:
             return Response(
                 {'error': 'Insufficient permissions'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         analytics_data = {
             'pipeline_health': PipelineAnalytics.get_pipeline_health(),
             'pipeline_forecast': PipelineAnalytics.get_pipeline_forecast(3),
@@ -666,9 +687,9 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
             'deal_velocity': PipelineAnalytics.get_deal_velocity(),
             'generated_at': timezone.now().isoformat()
         }
-        
+
         return Response(analytics_data)
-    
+
     @action(detail=False, methods=['get'])
     def detailed_sales_forecast(self, request):
         """Get detailed sales forecast with role-based access"""
@@ -678,8 +699,8 @@ class AIAnalyticsViewSet(viewsets.ViewSet):
                 {'error': 'Manager or admin access required'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         period_months = int(request.query_params.get('months', 3))
         forecast_data = SalesForecasting.forecast_revenue(period_months)
-        
+
         return Response(forecast_data)

@@ -186,7 +186,7 @@ class _AddOpportunityScreenState extends State<AddOpportunityScreen> {
               ),
               const SizedBox(height: AppSizes.paddingSm),
               DropdownButtonFormField<String>(
-                value: _selectedStage,
+                initialValue: _selectedStage,
                 decoration: const InputDecoration(
                   labelText: 'Stage',
                   border: OutlineInputBorder(),

@@ -17,7 +17,6 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
     useSortable,
-    verticalListSortingStrategy,
     rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -54,7 +53,6 @@ function SortableWidget({
     children,
     onRemove,
     onSettings,
-    onResize,
     isEditing = false
 }: SortableWidgetProps) {
     const [isExpanded, setIsExpanded] = useState(false);

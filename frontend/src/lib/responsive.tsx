@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -135,11 +135,9 @@ export function useIsDesktop(): boolean {
  * Hook to detect touch device
  */
 export function useIsTouchDevice(): boolean {
-    const [isTouch, setIsTouch] = useState(false);
-
-    useEffect(() => {
-        setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
-    }, []);
+    const [isTouch] = useState(() => 
+        typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    );
 
     return isTouch;
 }
@@ -390,22 +388,23 @@ export function useResponsiveValue<T>(values: {
  * Safe area insets for mobile (notch, home indicator)
  */
 export function useSafeAreaInsets() {
-    const [insets, setInsets] = useState({
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
+    const [insets] = useState(() => {
+        if (typeof document !== 'undefined') {
+            const style = getComputedStyle(document.documentElement);
+            return {
+                top: parseInt(style.getPropertyValue('--sat') || '0', 10),
+                right: parseInt(style.getPropertyValue('--sar') || '0', 10),
+                bottom: parseInt(style.getPropertyValue('--sab') || '0', 10),
+                left: parseInt(style.getPropertyValue('--sal') || '0', 10),
+            };
+        }
+        return {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+        };
     });
-
-    useEffect(() => {
-        const style = getComputedStyle(document.documentElement);
-        setInsets({
-            top: parseInt(style.getPropertyValue('--sat') || '0', 10),
-            right: parseInt(style.getPropertyValue('--sar') || '0', 10),
-            bottom: parseInt(style.getPropertyValue('--sab') || '0', 10),
-            left: parseInt(style.getPropertyValue('--sal') || '0', 10),
-        });
-    }, []);
 
     return insets;
 }

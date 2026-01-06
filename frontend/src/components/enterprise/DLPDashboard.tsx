@@ -4,20 +4,19 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+// import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+// import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+// import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Shield,
   AlertTriangle,
   Eye,
   FileSearch,
   Lock,
-  AlertCircle,
   CheckCircle,
   XCircle,
   Plus,
@@ -25,11 +24,10 @@ import {
   Download,
   Mail,
   Share2,
-  Filter,
   Search
 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, formatDistanceToNow } from 'date-fns';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
 
 // Types
 interface DataClassification {
@@ -169,7 +167,7 @@ const api = {
       policy_name: 'Warn on Financial Export',
     },
   ],
-  classifyContent: async (content: string): Promise<{
+  classifyContent: async (_content: string): Promise<{
     matches: { classification: string; level: string }[];
     highest_level: string;
   }> => ({

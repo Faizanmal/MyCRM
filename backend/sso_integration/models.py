@@ -1,7 +1,9 @@
-from django.db import models
-from django.contrib.auth import get_user_model
-from multi_tenant.models import Organization
 import uuid
+
+from django.contrib.auth import get_user_model
+from django.db import models
+
+from multi_tenant.models import Organization
 
 User = get_user_model()
 
@@ -21,7 +23,7 @@ class SSOProvider(models.Model):
         ('saml_azure', 'Azure AD SAML'),
         ('saml_custom', 'Custom SAML'),
     ]
-    
+
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
@@ -37,7 +39,7 @@ class SSOProvider(models.Model):
     provider_type = models.CharField(max_length=50, choices=PROVIDER_TYPE_CHOICES)
     provider_name = models.CharField(max_length=100)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='inactive')
-    
+
     # OAuth2 Configuration
     client_id = models.CharField(max_length=500, blank=True)
     client_secret = models.CharField(max_length=500, blank=True)
@@ -45,20 +47,20 @@ class SSOProvider(models.Model):
     token_url = models.URLField(max_length=500, blank=True)
     user_info_url = models.URLField(max_length=500, blank=True)
     scope = models.CharField(max_length=500, blank=True, default='openid profile email')
-    
+
     # SAML Configuration
     entity_id = models.CharField(max_length=500, blank=True)
     sso_url = models.URLField(max_length=500, blank=True)
     slo_url = models.URLField(max_length=500, blank=True, help_text='Single Logout URL')
     x509_cert = models.TextField(blank=True, help_text='X.509 Certificate')
-    
+
     # Attribute Mapping (JSON)
     attribute_mapping = models.JSONField(
         default=dict,
         blank=True,
         help_text='Map SSO attributes to user fields: {"email": "mail", "first_name": "givenName"}'
     )
-    
+
     # Settings
     auto_create_users = models.BooleanField(
         default=True,
@@ -78,7 +80,7 @@ class SSOProvider(models.Model):
         blank=True,
         help_text='Restrict SSO to specific email domains (e.g., ["company.com"])'
     )
-    
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -88,7 +90,7 @@ class SSOProvider(models.Model):
         null=True,
         related_name='created_sso_providers'
     )
-    
+
     # Statistics
     total_logins = models.PositiveIntegerField(default=0)
     last_used_at = models.DateTimeField(null=True, blank=True)
@@ -138,14 +140,14 @@ class SSOSession(models.Model):
         on_delete=models.CASCADE,
         related_name='sso_sessions'
     )
-    
+
     # Session data
     session_index = models.CharField(max_length=500, blank=True)  # SAML session index
     name_id = models.CharField(max_length=500, blank=True)  # SAML name ID
     sso_token = models.TextField(blank=True)  # OAuth2 access token
     refresh_token = models.TextField(blank=True)  # OAuth2 refresh token
     expires_at = models.DateTimeField(null=True, blank=True)
-    
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
@@ -187,16 +189,16 @@ class SSOLoginAttempt(models.Model):
         blank=True,
         related_name='sso_login_attempts'
     )
-    
+
     # Attempt details
     email = models.EmailField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     error_message = models.TextField(blank=True)
-    
+
     # SSO data
     sso_user_id = models.CharField(max_length=500, blank=True)
     sso_attributes = models.JSONField(default=dict, blank=True)
-    
+
     # Request metadata
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)

@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
 
@@ -14,7 +14,7 @@ class Opportunity(models.Model):
         ('closed_won', 'Closed Won'),
         ('closed_lost', 'Closed Lost'),
     ]
-    
+
     PROBABILITY_CHOICES = [
         (10, '10%'),
         (25, '25%'),
@@ -23,48 +23,48 @@ class Opportunity(models.Model):
         (90, '90%'),
         (100, '100%'),
     ]
-    
+
     # Basic Information
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    
+
     # Contact and Company
     contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, related_name='opportunities')
     company_name = models.CharField(max_length=200, blank=True, null=True)
-    
+
     # Sales Information
     stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default='prospecting')
     probability = models.IntegerField(choices=PROBABILITY_CHOICES, default=10)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='USD')
-    
+
     # Assignment and Ownership
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_opportunities')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_opportunities')
-    
+
     # Dates
     expected_close_date = models.DateField()
     actual_close_date = models.DateField(null=True, blank=True)
     last_activity_date = models.DateTimeField(null=True, blank=True)
-    
+
     # Additional Information
     notes = models.TextField(blank=True, null=True)
     tags = models.JSONField(default=list, blank=True)
     custom_fields = models.JSONField(default=dict, blank=True)
-    
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_opportunities'
         verbose_name = 'Opportunity'
         verbose_name_plural = 'Opportunities'
         ordering = ['-created_at']
-    
+
     def __str__(self):
         return f"{self.name} - {self.company_name}"
-    
+
     @property
     def weighted_amount(self):
         """Calculate weighted amount based on probability"""
@@ -81,13 +81,13 @@ class OpportunityStage(models.Model):
     is_won = models.BooleanField(default=False)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_opportunity_stages'
         verbose_name = 'Opportunity Stage'
         verbose_name_plural = 'Opportunity Stages'
         ordering = ['order']
-    
+
     def __str__(self):
         return self.name
 
@@ -104,14 +104,14 @@ class OpportunityActivity(models.Model):
         ('proposal_sent', 'Proposal Sent'),
         ('contract_sent', 'Contract Sent'),
     ]
-    
+
     opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE, related_name='activities')
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPE_CHOICES)
     subject = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_opportunity_activities'
         verbose_name = 'Opportunity Activity'
@@ -130,12 +130,12 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_products'
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
-    
+
     def __str__(self):
         return self.name
 
@@ -148,13 +148,13 @@ class OpportunityProduct(models.Model):
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
-    
+
     class Meta:
         db_table = 'crm_opportunity_products'
         verbose_name = 'Opportunity Product'
         verbose_name_plural = 'Opportunity Products'
         unique_together = ['opportunity', 'product']
-    
+
     def save(self, *args, **kwargs):
         # Calculate total price
         discount_amount = (self.unit_price * self.discount_percentage) / 100

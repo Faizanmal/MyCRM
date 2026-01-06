@@ -2,14 +2,15 @@
 Document Management Models
 """
 
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.core.validators import FileExtensionValidator
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-import uuid
 import os
+import uuid
+
 import magic
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
+from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -18,15 +19,15 @@ def validate_file_content(file):
     """Validate file content matches its extension using magic numbers"""
     if not file:
         return
-    
+
     # Get file content type using python-magic
     try:
         file_content = file.read()
         file.seek(0)  # Reset file pointer
-        
+
         # Use magic to detect content type
         detected_mime = magic.from_buffer(file_content, mime=True)
-        
+
         # Map of allowed MIME types
         allowed_mimes = {
             'application/pdf': ['pdf'],
@@ -42,18 +43,18 @@ def validate_file_content(file):
             'image/png': ['png'],
             'image/gif': ['gif'],
         }
-        
+
         # Check if detected MIME type is allowed
         if detected_mime not in allowed_mimes:
             raise ValidationError(f'File content type {detected_mime} is not allowed.')
-        
+
         # Check if file extension matches content type
         filename = file.name.lower()
         extension = filename.split('.')[-1] if '.' in filename else ''
-        
+
         if extension not in allowed_mimes.get(detected_mime, []):
             raise ValidationError(f'File extension .{extension} does not match content type {detected_mime}.')
-            
+
     except Exception as e:
         raise ValidationError(f'File validation failed: {str(e)}')
 
@@ -62,7 +63,7 @@ def document_upload_path(instance, filename):
     """Generate upload path for documents"""
     ext = filename.split('.')[-1]
     filename = f"{uuid.uuid4()}.{ext}"
-    
+
     # Organize by entity type
     if instance.lead:
         return f"documents/leads/{instance.lead.id}/{filename}"
@@ -76,7 +77,7 @@ def document_upload_path(instance, filename):
 
 class Document(models.Model):
     """Document storage with versioning"""
-    
+
     CATEGORY_CHOICES = [
         ('contract', 'Contract'),
         ('proposal', 'Proposal'),
@@ -88,27 +89,27 @@ class Document(models.Model):
         ('identification', 'Identification'),
         ('other', 'Other'),
     ]
-    
+
     ACCESS_LEVEL_CHOICES = [
         ('public', 'Public'),
         ('internal', 'Internal'),
         ('confidential', 'Confidential'),
         ('restricted', 'Restricted'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     # Document info
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
-    
+
     # File
     file = models.FileField(
         upload_to=document_upload_path,
         validators=[
             FileExtensionValidator(
-                allowed_extensions=['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 
+                allowed_extensions=['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
                                   'txt', 'csv', 'jpg', 'jpeg', 'png', 'gif']
             ),
             validate_file_content
@@ -116,17 +117,17 @@ class Document(models.Model):
     )
     file_size = models.BigIntegerField(help_text="File size in bytes")
     mime_type = models.CharField(max_length=100)
-    
+
     # Versioning
     version = models.IntegerField(default=1)
     parent_document = models.ForeignKey(
-        'self', 
-        on_delete=models.SET_NULL, 
-        null=True, 
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='versions'
     )
-    
+
     # Entity associations
     lead = models.ForeignKey(
         'lead_management.Lead',
@@ -149,30 +150,30 @@ class Document(models.Model):
         blank=True,
         related_name='documents'
     )
-    
+
     # Security
     access_level = models.CharField(
         max_length=20,
         choices=ACCESS_LEVEL_CHOICES,
         default='internal'
     )
-    
+
     # OCR extracted text
     extracted_text = models.TextField(blank=True, help_text="Text extracted via OCR")
     ocr_processed = models.BooleanField(default=False)
-    
+
     # Tags for searchability
     tags = models.JSONField(default=list, blank=True)
-    
+
     # Metadata
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     # Tracking
     download_count = models.IntegerField(default=0)
     last_accessed = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         db_table = 'crm_documents'
         verbose_name = 'Document'
@@ -185,25 +186,25 @@ class Document(models.Model):
             models.Index(fields=['opportunity']),
             models.Index(fields=['uploaded_by']),
         ]
-    
+
     def __str__(self):
         return f"{self.name} (v{self.version})"
-    
+
     @property
     def file_extension(self):
         """Get file extension"""
         return os.path.splitext(self.file.name)[1].lower()
-    
+
     @property
     def is_image(self):
         """Check if document is an image"""
         return self.file_extension in ['.jpg', '.jpeg', '.png', '.gif']
-    
+
     @property
     def is_pdf(self):
         """Check if document is a PDF"""
         return self.file_extension == '.pdf'
-    
+
     def create_version(self, new_file, updated_by):
         """Create a new version of this document"""
         new_version = Document.objects.create(
@@ -226,7 +227,7 @@ class Document(models.Model):
 
 class DocumentTemplate(models.Model):
     """Reusable document templates for proposals, contracts, etc."""
-    
+
     TEMPLATE_TYPE_CHOICES = [
         ('proposal', 'Proposal'),
         ('contract', 'Contract'),
@@ -236,84 +237,84 @@ class DocumentTemplate(models.Model):
         ('letter', 'Letter'),
         ('custom', 'Custom'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     template_type = models.CharField(max_length=50, choices=TEMPLATE_TYPE_CHOICES)
-    
+
     # Template file
     file = models.FileField(upload_to='document_templates/')
-    
+
     # Template variables for dynamic content
     variables = models.JSONField(
         default=list,
         help_text="List of variables: ['client_name', 'amount', 'date', etc.]"
     )
-    
+
     # Preview
     thumbnail = models.ImageField(upload_to='template_thumbnails/', null=True, blank=True)
-    
+
     is_active = models.BooleanField(default=True)
-    
+
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_document_templates'
         verbose_name = 'Document Template'
         verbose_name_plural = 'Document Templates'
         ordering = ['-created_at']
-    
+
     def __str__(self):
         return f"{self.name} ({self.template_type})"
 
 
 class DocumentShare(models.Model):
     """Document sharing with external parties"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='shares')
-    
+
     # Share details
     shared_with_email = models.EmailField()
     access_token = models.UUIDField(default=uuid.uuid4, unique=True)
-    
+
     # Permissions
     can_download = models.BooleanField(default=True)
     can_view = models.BooleanField(default=True)
-    
+
     # Expiration
     expires_at = models.DateTimeField(null=True, blank=True)
-    
+
     # Tracking
     view_count = models.IntegerField(default=0)
     download_count = models.IntegerField(default=0)
     last_accessed = models.DateTimeField(null=True, blank=True)
-    
+
     # Metadata
     shared_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     shared_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_document_shares'
         verbose_name = 'Document Share'
         verbose_name_plural = 'Document Shares'
         ordering = ['-shared_at']
-    
+
     def __str__(self):
         return f"{self.document.name} shared with {self.shared_with_email}"
-    
+
     @property
     def is_expired(self):
         """Check if share link is expired"""
         if self.expires_at:
             return timezone.now() > self.expires_at
         return False
-    
+
     @property
     def is_active(self):
         """Check if share is active"""
@@ -322,50 +323,50 @@ class DocumentShare(models.Model):
 
 class DocumentComment(models.Model):
     """Comments on documents"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='comments')
-    
+
     comment = models.TextField()
-    
+
     # Optional page reference for PDFs
     page_number = models.IntegerField(null=True, blank=True)
-    
+
     # Metadata
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_document_comments'
         verbose_name = 'Document Comment'
         verbose_name_plural = 'Document Comments'
         ordering = ['created_at']
-    
+
     def __str__(self):
         return f"Comment on {self.document.name} by {self.created_by}"
 
 
 class DocumentApproval(models.Model):
     """Document approval workflow"""
-    
+
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='approvals')
-    
+
     approver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='document_approvals')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    
+
     comments = models.TextField(blank=True)
-    
+
     requested_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -374,13 +375,13 @@ class DocumentApproval(models.Model):
     )
     requested_at = models.DateTimeField(auto_now_add=True)
     responded_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         db_table = 'crm_document_approvals'
         verbose_name = 'Document Approval'
         verbose_name_plural = 'Document Approvals'
         ordering = ['-requested_at']
         unique_together = ['document', 'approver']
-    
+
     def __str__(self):
         return f"{self.document.name} approval by {self.approver} ({self.status})"

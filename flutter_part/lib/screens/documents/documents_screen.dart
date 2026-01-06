@@ -138,8 +138,39 @@ class _DocumentsScreenState extends State<DocumentsScreen> with SingleTickerProv
   }
 
   Widget _buildDocumentList(List<Document> documents) {
-    final filteredDocs = documents.where((d) => 
+    var filteredDocs = documents.where((d) => 
       d.name.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+
+    // Sort documents based on _sortBy
+    filteredDocs.sort((a, b) {
+      switch (_sortBy) {
+        case 'name':
+          return a.name.compareTo(b.name);
+        case 'modified':
+          return b.modifiedAt.compareTo(a.modifiedAt); // Newest first
+        case 'size':
+          // Parse size strings like "2.4 MB" to numbers for comparison
+          double parseSize(String size) {
+            final match = RegExp(r'(\d+(?:\.\d+)?)\s*(KB|MB|GB)?').firstMatch(size);
+            if (match != null) {
+              final value = double.parse(match.group(1)!);
+              final unit = match.group(2);
+              switch (unit) {
+                case 'KB': return value * 1024;
+                case 'MB': return value * 1024 * 1024;
+                case 'GB': return value * 1024 * 1024 * 1024;
+                default: return value;
+              }
+            }
+            return 0;
+          }
+          return parseSize(b.size).compareTo(parseSize(a.size));
+        case 'type':
+          return a.type.compareTo(b.type);
+        default:
+          return 0;
+      }
+    });
 
     if (filteredDocs.isEmpty) {
       return Center(

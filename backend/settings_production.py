@@ -2,9 +2,9 @@
 
 # Add these to your settings.py for better performance
 
-from pathlib import Path
 import os
 import socket
+from pathlib import Path
 
 
 # Helper used in production tuning snippets: attempt to resolve the ENV host and
@@ -22,7 +22,7 @@ def _resolve_env_host(env_name: str, default: str = 'db') -> str:
             import warnings
             warnings.warn(
                 f"Configured production host {host!r} is not resolvable; falling back to {fallback!r}. "
-                "If you expect to use a Docker service name here, be sure to run inside the same Docker network."
+                "If you expect to use a Docker service name here, be sure to run inside the same Docker network.", stacklevel=2
             )
         return fallback
 
@@ -81,12 +81,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'MAX_PAGE_SIZE': 100,
-    
+
     # Enable browsable API caching
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
     ],
-    
+
     # Throttling
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -96,7 +96,7 @@ REST_FRAMEWORK = {
         'anon': '100/hour',
         'user': '1000/hour',
     },
-    
+
     # Parser optimization
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -235,6 +235,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://your-domain.com",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001"
 ]
 CORS_ALLOW_CREDENTIALS = True
 

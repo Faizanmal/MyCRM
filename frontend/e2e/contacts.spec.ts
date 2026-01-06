@@ -80,7 +80,6 @@ test.describe('Contacts Management', () => {
         const exportButton = page.getByRole('button', { name: /export|download/i });
         if (await exportButton.count() > 0) {
             // Click export button
-            const downloadPromise = page.waitForEvent('download');
             await exportButton.click();
             
             // Should trigger a download or show export options

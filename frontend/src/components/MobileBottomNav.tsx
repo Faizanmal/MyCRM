@@ -13,8 +13,6 @@ import {
     Bell,
     Menu,
     Plus,
-    Search,
-    X,
     Settings,
     BarChart3,
     Mail,

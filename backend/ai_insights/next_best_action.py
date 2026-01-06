@@ -1,41 +1,44 @@
 """
 Next Best Action recommendation engine
 """
-from datetime import timedelta
-from django.utils import timezone
-from lead_management.models import Lead
-from contact_management.models import Contact
-from opportunity_management.models import Opportunity
-from .models import NextBestAction
 import logging
+from datetime import timedelta
+
+from django.utils import timezone
+
+from contact_management.models import Contact
+from lead_management.models import Lead
+from opportunity_management.models import Opportunity
+
+from .models import NextBestAction
 
 logger = logging.getLogger(__name__)
 
 
 class NextBestActionEngine:
     """Generate AI-powered next best action recommendations"""
-    
+
     def __init__(self):
         self.model_version = '1.0'
-    
+
     def generate_recommendations(self, user, limit=10):
         """Generate personalized recommendations for a user"""
         recommendations = []
-        
+
         # Get user's entities
         leads = Lead.objects.filter(assigned_to=user)
         contacts = Contact.objects.filter(assigned_to=user)
         opportunities = Opportunity.objects.filter(owner=user)
-        
+
         # Generate recommendations for each entity type
         recommendations.extend(self._recommend_for_leads(user, leads))
         recommendations.extend(self._recommend_for_contacts(user, contacts))
         recommendations.extend(self._recommend_for_opportunities(user, opportunities))
-        
+
         # Sort by priority and take top N
         recommendations.sort(key=lambda x: x['priority_score'], reverse=True)
         recommendations = recommendations[:limit]
-        
+
         # Save to database
         saved_recommendations = []
         for rec in recommendations:
@@ -55,21 +58,21 @@ class NextBestActionEngine:
                 }
             )
             saved_recommendations.append(action)
-        
+
         return saved_recommendations
-    
+
     def _recommend_for_leads(self, user, leads):
         """Generate recommendations for leads"""
         recommendations = []
         now = timezone.now()
-        
+
         for lead in leads[:20]:  # Limit processing
             # Check for stale leads
             if lead.last_contacted_at:
                 days_since_contact = (now - lead.last_contacted_at).days
             else:
                 days_since_contact = (now - lead.created_at).days
-            
+
             # Recommend follow-up for stale leads
             if days_since_contact > 7:
                 priority = min(100, days_since_contact * 5)
@@ -84,7 +87,7 @@ class NextBestActionEngine:
                     'expected_impact': 'high' if days_since_contact > 14 else 'medium',
                     'suggested_timing': now + timedelta(hours=2)
                 })
-            
+
             # Recommend qualification call for new leads
             if lead.status == 'new' and (now - lead.created_at).days < 3:
                 recommendations.append({
@@ -98,7 +101,7 @@ class NextBestActionEngine:
                     'expected_impact': 'high',
                     'suggested_timing': now + timedelta(hours=4)
                 })
-            
+
             # Recommend conversion for qualified leads
             if lead.status == 'qualified' and lead.lead_score > 70:
                 recommendations.append({
@@ -112,20 +115,20 @@ class NextBestActionEngine:
                     'expected_impact': 'high',
                     'suggested_timing': now + timedelta(days=1)
                 })
-        
+
         return recommendations
-    
+
     def _recommend_for_contacts(self, user, contacts):
         """Generate recommendations for contacts"""
         recommendations = []
         now = timezone.now()
-        
+
         for contact in contacts[:20]:
             # Recommend check-in for customers with no recent activity
             days_since_activity = 999
             if contact.last_contacted_at:
                 days_since_activity = (now - contact.last_contacted_at).days
-            
+
             if contact.contact_type == 'customer' and days_since_activity > 30:
                 priority = min(100, days_since_activity * 2)
                 recommendations.append({
@@ -139,13 +142,13 @@ class NextBestActionEngine:
                     'expected_impact': 'high' if days_since_activity > 60 else 'medium',
                     'suggested_timing': now + timedelta(days=1)
                 })
-            
+
             # Recommend upsell for customers with no recent opportunities
             if contact.contact_type == 'customer':
                 recent_opps = contact.opportunities.filter(
                     created_at__gte=now - timedelta(days=90)
                 ).count()
-                
+
                 if recent_opps == 0:
                     recommendations.append({
                         'entity_type': 'contact',
@@ -158,18 +161,18 @@ class NextBestActionEngine:
                         'expected_impact': 'high',
                         'suggested_timing': now + timedelta(days=2)
                     })
-        
+
         return recommendations
-    
+
     def _recommend_for_opportunities(self, user, opportunities):
         """Generate recommendations for opportunities"""
         recommendations = []
         now = timezone.now()
-        
+
         for opp in opportunities.filter(stage__in=['prospecting', 'qualification', 'proposal']):
             # Calculate days in current stage
             days_in_stage = (now - opp.updated_at).days
-            
+
             # Recommend action for stalled opportunities
             if days_in_stage > 14:
                 priority = min(100, 50 + days_in_stage * 3)
@@ -184,7 +187,7 @@ class NextBestActionEngine:
                     'expected_impact': 'high',
                     'suggested_timing': now + timedelta(hours=12)
                 })
-            
+
             # Recommend proposal for qualified opportunities
             if opp.stage == 'qualification' and opp.probability > 50:
                 recommendations.append({
@@ -198,7 +201,7 @@ class NextBestActionEngine:
                     'expected_impact': 'high',
                     'suggested_timing': now + timedelta(days=1)
                 })
-            
+
             # Recommend discount for deals close to closing
             if opp.stage == 'proposal' and opp.close_date:
                 days_to_close = (opp.close_date - now.date()).days
@@ -214,9 +217,9 @@ class NextBestActionEngine:
                         'expected_impact': 'medium',
                         'suggested_timing': now + timedelta(hours=24)
                     })
-        
+
         return recommendations
-    
+
     def accept_recommendation(self, action_id):
         """Mark recommendation as accepted"""
         try:
@@ -226,7 +229,7 @@ class NextBestActionEngine:
             return action
         except NextBestAction.DoesNotExist:
             return None
-    
+
     def complete_recommendation(self, action_id):
         """Mark recommendation as completed"""
         try:
@@ -237,7 +240,7 @@ class NextBestActionEngine:
             return action
         except NextBestAction.DoesNotExist:
             return None
-    
+
     def dismiss_recommendation(self, action_id):
         """Dismiss a recommendation"""
         try:

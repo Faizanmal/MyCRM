@@ -3,16 +3,23 @@ Custom Report Builder Serializers
 """
 
 from rest_framework import serializers
+
 from .report_models import (
-    ReportTemplate, ReportWidget, SavedReport, ScheduledReport,
-    ReportDashboard, DashboardWidget, DataSource, ReportFolder,
-    ReportSubscription
+    DashboardWidget,
+    DataSource,
+    ReportDashboard,
+    ReportFolder,
+    ReportSubscription,
+    ReportTemplate,
+    ReportWidget,
+    SavedReport,
+    ScheduledReport,
 )
 
 
 class ReportWidgetSerializer(serializers.ModelSerializer):
     """Serializer for ReportWidget"""
-    
+
     class Meta:
         model = ReportWidget
         fields = [
@@ -29,10 +36,10 @@ class ReportWidgetSerializer(serializers.ModelSerializer):
 
 class ReportTemplateSerializer(serializers.ModelSerializer):
     """Serializer for ReportTemplate"""
-    
+
     widgets = ReportWidgetSerializer(many=True, read_only=True)
     widget_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ReportTemplate
         fields = [
@@ -48,14 +55,14 @@ class ReportTemplateSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'view_count', 'last_viewed_at', 'created_at', 'updated_at']
-    
+
     def get_widget_count(self, obj):
         return obj.widgets.count()
 
 
 class ReportTemplateListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing reports"""
-    
+
     class Meta:
         model = ReportTemplate
         fields = [
@@ -68,9 +75,9 @@ class ReportTemplateListSerializer(serializers.ModelSerializer):
 
 class SavedReportSerializer(serializers.ModelSerializer):
     """Serializer for SavedReport"""
-    
+
     template_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SavedReport
         fields = [
@@ -82,16 +89,16 @@ class SavedReportSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_template_name(self, obj):
         return obj.template.name if obj.template else None
 
 
 class SavedReportListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing saved reports"""
-    
+
     template_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SavedReport
         fields = [
@@ -100,16 +107,16 @@ class SavedReportListSerializer(serializers.ModelSerializer):
             'export_format', 'file_url',
             'created_at'
         ]
-    
+
     def get_template_name(self, obj):
         return obj.template.name if obj.template else None
 
 
 class ScheduledReportSerializer(serializers.ModelSerializer):
     """Serializer for ScheduledReport"""
-    
+
     template_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ScheduledReport
         fields = [
@@ -126,16 +133,16 @@ class ScheduledReportSerializer(serializers.ModelSerializer):
             'id', 'next_run_at', 'last_run_at', 'last_status',
             'run_count', 'failure_count', 'created_at', 'updated_at'
         ]
-    
+
     def get_template_name(self, obj):
         return obj.template.name if obj.template else None
 
 
 class DashboardWidgetSerializer(serializers.ModelSerializer):
     """Serializer for DashboardWidget"""
-    
+
     widget_details = ReportWidgetSerializer(source='widget', read_only=True)
-    
+
     class Meta:
         model = DashboardWidget
         fields = [
@@ -150,10 +157,10 @@ class DashboardWidgetSerializer(serializers.ModelSerializer):
 
 class ReportDashboardSerializer(serializers.ModelSerializer):
     """Serializer for ReportDashboard"""
-    
+
     dashboard_widgets = DashboardWidgetSerializer(many=True, read_only=True)
     widget_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ReportDashboard
         fields = [
@@ -171,16 +178,16 @@ class ReportDashboardSerializer(serializers.ModelSerializer):
             'id', 'public_token', 'view_count',
             'created_at', 'updated_at'
         ]
-    
+
     def get_widget_count(self, obj):
         return obj.dashboard_widgets.count()
 
 
 class ReportDashboardListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing dashboards"""
-    
+
     widget_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ReportDashboard
         fields = [
@@ -189,14 +196,14 @@ class ReportDashboardListSerializer(serializers.ModelSerializer):
             'view_count', 'widget_count',
             'created_at', 'updated_at'
         ]
-    
+
     def get_widget_count(self, obj):
         return obj.dashboard_widgets.count()
 
 
 class DataSourceSerializer(serializers.ModelSerializer):
     """Serializer for DataSource"""
-    
+
     class Meta:
         model = DataSource
         fields = [
@@ -211,10 +218,10 @@ class DataSourceSerializer(serializers.ModelSerializer):
 
 class ReportFolderSerializer(serializers.ModelSerializer):
     """Serializer for ReportFolder"""
-    
+
     children = serializers.SerializerMethodField()
     report_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ReportFolder
         fields = [
@@ -224,10 +231,10 @@ class ReportFolderSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_children(self, obj):
         return ReportFolderSerializer(obj.children.all(), many=True).data
-    
+
     def get_report_count(self, obj):
         from .report_models import ReportTemplate
         return ReportTemplate.objects.filter(folder=obj.name).count()
@@ -235,9 +242,9 @@ class ReportFolderSerializer(serializers.ModelSerializer):
 
 class ReportSubscriptionSerializer(serializers.ModelSerializer):
     """Serializer for ReportSubscription"""
-    
+
     scheduled_report_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ReportSubscription
         fields = [
@@ -247,7 +254,7 @@ class ReportSubscriptionSerializer(serializers.ModelSerializer):
             'is_active', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_scheduled_report_name(self, obj):
         return obj.scheduled_report.name if obj.scheduled_report else None
 
@@ -255,7 +262,7 @@ class ReportSubscriptionSerializer(serializers.ModelSerializer):
 # Request Serializers
 class CreateReportSerializer(serializers.Serializer):
     """Request serializer for creating a report"""
-    
+
     name = serializers.CharField(max_length=255)
     description = serializers.CharField(required=False, allow_blank=True)
     report_type = serializers.ChoiceField(choices=[
@@ -301,7 +308,7 @@ class CreateReportSerializer(serializers.Serializer):
 
 class ExecuteReportSerializer(serializers.Serializer):
     """Request serializer for executing a report"""
-    
+
     parameters = serializers.DictField(required=False, default=dict)
     limit = serializers.IntegerField(min_value=1, max_value=10000, default=1000)
     offset = serializers.IntegerField(min_value=0, default=0)
@@ -309,7 +316,7 @@ class ExecuteReportSerializer(serializers.Serializer):
 
 class ExportReportSerializer(serializers.Serializer):
     """Request serializer for exporting a report"""
-    
+
     format = serializers.ChoiceField(choices=['csv', 'json', 'excel', 'pdf', 'html'])
     include_headers = serializers.BooleanField(default=True)
     include_summary = serializers.BooleanField(default=True)
@@ -317,7 +324,7 @@ class ExportReportSerializer(serializers.Serializer):
 
 class CreateWidgetSerializer(serializers.Serializer):
     """Request serializer for creating a widget"""
-    
+
     name = serializers.CharField(max_length=255)
     widget_type = serializers.ChoiceField(choices=[
         'metric', 'chart_bar', 'chart_line', 'chart_pie', 'chart_donut',
@@ -336,7 +343,7 @@ class CreateWidgetSerializer(serializers.Serializer):
 
 class CreateDashboardSerializer(serializers.Serializer):
     """Request serializer for creating a dashboard"""
-    
+
     name = serializers.CharField(max_length=255)
     description = serializers.CharField(required=False, allow_blank=True)
     layout_type = serializers.ChoiceField(choices=['grid', 'free'], default='grid')
@@ -348,7 +355,7 @@ class CreateDashboardSerializer(serializers.Serializer):
 
 class AddDashboardWidgetSerializer(serializers.Serializer):
     """Request serializer for adding widget to dashboard"""
-    
+
     widget_id = serializers.UUIDField(required=False)
     widget_type = serializers.CharField(required=False, allow_blank=True)
     config = serializers.DictField(required=False, default=dict)
@@ -361,7 +368,7 @@ class AddDashboardWidgetSerializer(serializers.Serializer):
 
 class UpdateLayoutSerializer(serializers.Serializer):
     """Request serializer for updating dashboard layout"""
-    
+
     widgets = serializers.ListField(
         child=serializers.DictField(),
         min_length=1
@@ -370,7 +377,7 @@ class UpdateLayoutSerializer(serializers.Serializer):
 
 class CreateScheduleSerializer(serializers.Serializer):
     """Request serializer for creating a schedule"""
-    
+
     report_id = serializers.UUIDField()
     name = serializers.CharField(max_length=255)
     frequency = serializers.ChoiceField(choices=[
@@ -399,7 +406,7 @@ class CreateScheduleSerializer(serializers.Serializer):
 
 class ShareDashboardSerializer(serializers.Serializer):
     """Request serializer for sharing a dashboard"""
-    
+
     is_public = serializers.BooleanField(default=False)
     embed_enabled = serializers.BooleanField(default=False)
     users = serializers.ListField(
@@ -411,5 +418,5 @@ class ShareDashboardSerializer(serializers.Serializer):
 
 class CloneReportSerializer(serializers.Serializer):
     """Request serializer for cloning a report"""
-    
+
     new_name = serializers.CharField(max_length=255)

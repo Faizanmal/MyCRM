@@ -3,30 +3,31 @@ Locust Load Testing Configuration for MyCRM
 Run with: locust -f locustfile.py --host=http://localhost:8000
 """
 
-from locust import HttpUser, task, between, TaskSet
-from random import randint, choice
+from random import choice, randint
+
+from locust import HttpUser, TaskSet, between, task
 
 
 class ContactBehavior(TaskSet):
     """User behavior for contact management"""
-    
+
     def on_start(self):
         """Login when starting"""
         # You'll need to implement actual authentication
         # For now, we'll assume the user is authenticated
         pass
-    
+
     @task(3)
     def list_contacts(self):
         """List contacts - most common action"""
         self.client.get("/api/contacts/", name="List Contacts")
-    
+
     @task(2)
     def view_contact(self):
         """View a specific contact"""
         contact_id = randint(1, 100)
         self.client.get(f"/api/contacts/{contact_id}/", name="View Contact")
-    
+
     @task(1)
     def create_contact(self):
         """Create a new contact"""
@@ -43,7 +44,7 @@ class ContactBehavior(TaskSet):
             json=data,
             name="Create Contact"
         )
-    
+
     @task(1)
     def update_contact(self):
         """Update a contact"""
@@ -58,7 +59,7 @@ class ContactBehavior(TaskSet):
             json=data,
             name="Update Contact"
         )
-    
+
     @task(2)
     def search_contacts(self):
         """Search contacts"""
@@ -72,18 +73,18 @@ class ContactBehavior(TaskSet):
 
 class LeadBehavior(TaskSet):
     """User behavior for lead management"""
-    
+
     @task(3)
     def list_leads(self):
         """List leads"""
         self.client.get("/api/leads/", name="List Leads")
-    
+
     @task(2)
     def view_lead(self):
         """View a specific lead"""
         lead_id = randint(1, 100)
         self.client.get(f"/api/leads/{lead_id}/", name="View Lead")
-    
+
     @task(1)
     def create_lead(self):
         """Create a new lead"""
@@ -101,7 +102,7 @@ class LeadBehavior(TaskSet):
             json=data,
             name="Create Lead"
         )
-    
+
     @task(1)
     def filter_leads_by_status(self):
         """Filter leads by status"""
@@ -114,18 +115,18 @@ class LeadBehavior(TaskSet):
 
 class OpportunityBehavior(TaskSet):
     """User behavior for opportunity management"""
-    
+
     @task(3)
     def list_opportunities(self):
         """List opportunities"""
         self.client.get("/api/opportunities/", name="List Opportunities")
-    
+
     @task(2)
     def view_opportunity(self):
         """View a specific opportunity"""
         opp_id = randint(1, 50)
         self.client.get(f"/api/opportunities/{opp_id}/", name="View Opportunity")
-    
+
     @task(1)
     def create_opportunity(self):
         """Create a new opportunity"""
@@ -145,13 +146,13 @@ class OpportunityBehavior(TaskSet):
 class SalesUser(HttpUser):
     """Sales representative user behavior"""
     wait_time = between(1, 3)  # Wait 1-3 seconds between tasks
-    
+
     tasks = {
         ContactBehavior: 3,
         LeadBehavior: 2,
         OpportunityBehavior: 1
     }
-    
+
     def on_start(self):
         """Called when a simulated user starts"""
         # Implement authentication here if needed
@@ -161,19 +162,19 @@ class SalesUser(HttpUser):
 class MarketingUser(HttpUser):
     """Marketing user behavior - mainly views data"""
     wait_time = between(2, 5)
-    
+
     @task(5)
     def view_contacts(self):
         self.client.get("/api/contacts/", name="Marketing: View Contacts")
-    
+
     @task(3)
     def view_leads(self):
         self.client.get("/api/leads/", name="Marketing: View Leads")
-    
+
     @task(2)
     def view_campaigns(self):
         self.client.get("/api/campaigns/", name="Marketing: View Campaigns")
-    
+
     @task(1)
     def view_reports(self):
         self.client.get("/api/reports/", name="Marketing: View Reports")
@@ -182,19 +183,19 @@ class MarketingUser(HttpUser):
 class ManagerUser(HttpUser):
     """Manager user behavior - mainly views reports and dashboards"""
     wait_time = between(3, 7)
-    
+
     @task(3)
     def view_dashboard(self):
         self.client.get("/api/dashboard/", name="Manager: Dashboard")
-    
+
     @task(2)
     def view_reports(self):
         self.client.get("/api/reports/", name="Manager: Reports")
-    
+
     @task(2)
     def view_analytics(self):
         self.client.get("/api/analytics/", name="Manager: Analytics")
-    
+
     @task(1)
     def view_team_performance(self):
         self.client.get("/api/team/performance/", name="Manager: Team Performance")
@@ -203,7 +204,7 @@ class ManagerUser(HttpUser):
 class HeavyUser(HttpUser):
     """Simulates heavy system usage"""
     wait_time = between(0.5, 1.5)
-    
+
     @task
     def stress_test(self):
         """Rapid fire requests"""

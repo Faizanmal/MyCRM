@@ -5,11 +5,19 @@ Django admin configuration for voice intelligence models
 
 from django.contrib import admin
 from django.utils.html import format_html
+
 from .models import (
-    VoiceRecording, Transcription, ConversationSummary,
-    ActionItem, SentimentAnalysis, KeyMoment, CallScore,
-    VoiceNote, ConversationCategory, RecordingCategory,
-    TranscriptionSettings
+    ActionItem,
+    CallScore,
+    ConversationCategory,
+    ConversationSummary,
+    KeyMoment,
+    RecordingCategory,
+    SentimentAnalysis,
+    Transcription,
+    TranscriptionSettings,
+    VoiceNote,
+    VoiceRecording,
 )
 
 
@@ -20,7 +28,7 @@ class TranscriptionInline(admin.StackedInline):
         'provider', 'confidence_score', 'detected_language',
         'processing_time_seconds', 'word_count', 'created_at'
     ]
-    
+
     def word_count(self, obj):
         return obj.word_count
     word_count.short_description = 'Word Count'
@@ -63,7 +71,7 @@ class VoiceRecordingAdmin(admin.ModelAdmin):
         TranscriptionInline, ConversationSummaryInline,
         ActionItemInline, KeyMomentInline
     ]
-    
+
     fieldsets = (
         ('Basic Info', {
             'fields': ('id', 'title', 'owner', 'source_type', 'status')
@@ -95,7 +103,7 @@ class VoiceRecordingAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def status_badge(self, obj):
         colors = {
             'uploading': '#FFA500',
@@ -114,7 +122,7 @@ class VoiceRecordingAdmin(admin.ModelAdmin):
             color, obj.get_status_display()
         )
     status_badge.short_description = 'Status'
-    
+
     def has_transcription(self, obj):
         return hasattr(obj, 'transcription')
     has_transcription.boolean = True
@@ -130,7 +138,7 @@ class TranscriptionAdmin(admin.ModelAdmin):
     list_filter = ['provider', 'detected_language', 'was_edited']
     search_fields = ['recording__title', 'full_text']
     readonly_fields = ['word_count', 'created_at', 'updated_at']
-    
+
     def word_count(self, obj):
         return obj.word_count
     word_count.short_description = 'Words'
@@ -153,7 +161,7 @@ class ActionItemAdmin(admin.ModelAdmin):
     list_filter = ['priority', 'status', 'was_confirmed', 'created_at']
     search_fields = ['title', 'description', 'recording__title']
     readonly_fields = ['created_at', 'updated_at']
-    
+
     def priority_badge(self, obj):
         colors = {
             'low': '#95a5a6',
@@ -167,7 +175,7 @@ class ActionItemAdmin(admin.ModelAdmin):
             color, obj.get_priority_display()
         )
     priority_badge.short_description = 'Priority'
-    
+
     def status_badge(self, obj):
         colors = {
             'pending': '#FFA500',
@@ -192,7 +200,7 @@ class SentimentAnalysisAdmin(admin.ModelAdmin):
     ]
     list_filter = ['overall_sentiment', 'dominant_emotion']
     readonly_fields = ['created_at']
-    
+
     def sentiment_badge(self, obj):
         colors = {
             'very_negative': '#c0392b',
@@ -218,7 +226,7 @@ class KeyMomentAdmin(admin.ModelAdmin):
     list_filter = ['moment_type', 'is_ai_detected', 'created_at']
     search_fields = ['recording__title', 'transcript_excerpt', 'summary']
     readonly_fields = ['created_at']
-    
+
     def timestamp_range(self, obj):
         return f"{obj.start_timestamp}s - {obj.end_timestamp}s"
     timestamp_range.short_description = 'Time Range'
@@ -233,7 +241,7 @@ class CallScoreAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['recording__title']
     readonly_fields = ['created_at']
-    
+
     def score_display(self, obj):
         score = obj.overall_score
         if score >= 80:
@@ -266,7 +274,7 @@ class ConversationCategoryAdmin(admin.ModelAdmin):
     list_filter = ['parent']
     search_fields = ['name', 'description']
     readonly_fields = ['recording_count', 'created_at']
-    
+
     def color_display(self, obj):
         return format_html(
             '<span style="background-color: {}; padding: 2px 10px; '

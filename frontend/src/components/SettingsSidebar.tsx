@@ -171,13 +171,11 @@ function SidebarItem({ item, isActive, collapsed }: { item: NavItem; isActive: b
     );
 }
 
-// Main Sidebar Component
-export default function SettingsSidebar() {
+// Sidebar Content Component
+function SidebarContent({ collapsed, setCollapsed }: { collapsed: boolean; setCollapsed: (c: boolean) => void }) {
     const pathname = usePathname();
-    const [collapsed, setCollapsed] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
 
-    const SidebarContent = () => (
+    return (
         <div className="h-full flex flex-col">
             {/* Header */}
             <div className={cn(
@@ -236,6 +234,13 @@ export default function SettingsSidebar() {
             </div>
         </div>
     );
+}
+
+// Main Sidebar Component
+export default function SettingsSidebar() {
+    // const pathname = usePathname();
+    const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
         <>
@@ -245,7 +250,7 @@ export default function SettingsSidebar() {
                 transition={{ duration: 0.2 }}
                 className="hidden md:block h-screen bg-white dark:bg-gray-900 border-r dark:border-gray-800 sticky top-0"
             >
-                <SidebarContent />
+                <SidebarContent collapsed={collapsed} setCollapsed={setCollapsed} />
             </motion.aside>
 
             {/* Mobile Toggle */}
@@ -290,7 +295,7 @@ export default function SettingsSidebar() {
                                     <X className="w-5 h-5" />
                                 </Button>
                             </div>
-                            <SidebarContent />
+                            <SidebarContent collapsed={false} setCollapsed={setCollapsed} />
                         </motion.aside>
                     </>
                 )}

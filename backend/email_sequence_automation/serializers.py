@@ -1,8 +1,15 @@
 from rest_framework import serializers
+
 from .models import (
-    EmailSequence, SequenceStep, SequenceEmail, SequenceEnrollment,
-    SequenceActivity, ABTest, AutomatedTrigger, EmailPersonalizationToken,
-    SequenceAnalytics
+    ABTest,
+    AutomatedTrigger,
+    EmailPersonalizationToken,
+    EmailSequence,
+    SequenceActivity,
+    SequenceAnalytics,
+    SequenceEmail,
+    SequenceEnrollment,
+    SequenceStep,
 )
 
 
@@ -10,7 +17,7 @@ class SequenceEmailSerializer(serializers.ModelSerializer):
     open_rate = serializers.ReadOnlyField()
     click_rate = serializers.ReadOnlyField()
     reply_rate = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = SequenceEmail
         fields = [
@@ -40,7 +47,7 @@ class SequenceStepSerializer(serializers.ModelSerializer):
     emails = SequenceEmailSerializer(many=True, read_only=True)
     ab_test = ABTestSerializer(read_only=True)
     wait_total_minutes = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = SequenceStep
         fields = [
@@ -68,7 +75,7 @@ class EmailSequenceSerializer(serializers.ModelSerializer):
     steps = SequenceStepSerializer(many=True, read_only=True)
     conversion_rate = serializers.ReadOnlyField()
     owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
-    
+
     class Meta:
         model = EmailSequence
         fields = [
@@ -97,7 +104,7 @@ class EmailSequenceCreateSerializer(serializers.ModelSerializer):
 class SequenceActivitySerializer(serializers.ModelSerializer):
     contact_name = serializers.CharField(source='enrollment.contact.full_name', read_only=True)
     step_name = serializers.CharField(source='step.name', read_only=True)
-    
+
     class Meta:
         model = SequenceActivity
         fields = [
@@ -112,7 +119,7 @@ class SequenceEnrollmentSerializer(serializers.ModelSerializer):
     sequence_name = serializers.CharField(source='sequence.name', read_only=True)
     current_step_name = serializers.CharField(source='current_step.name', read_only=True)
     activities = SequenceActivitySerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = SequenceEnrollment
         fields = [
@@ -136,7 +143,7 @@ class EnrollContactSerializer(serializers.Serializer):
 
 class AutomatedTriggerSerializer(serializers.ModelSerializer):
     sequence_name = serializers.CharField(source='sequence.name', read_only=True)
-    
+
     class Meta:
         model = AutomatedTrigger
         fields = [

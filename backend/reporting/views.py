@@ -1,14 +1,20 @@
-from rest_framework import viewsets, status, permissions, filters
+from datetime import timedelta
+
+from django.contrib.auth import get_user_model
+from django.db.models import Q, Sum
+from django.utils import timezone
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from django.db.models import Sum, Q
-from django.utils import timezone
-from datetime import timedelta
-from .models import Dashboard, Report, ReportSchedule, Analytics, KPIMetric, DataExport
+
+from .models import Analytics, Dashboard, DataExport, KPIMetric, Report, ReportSchedule
 from .serializers import (
-    DashboardSerializer, ReportSerializer, ReportScheduleSerializer,
-    AnalyticsSerializer, KPIMetricSerializer, DataExportSerializer
+    AnalyticsSerializer,
+    DashboardSerializer,
+    DataExportSerializer,
+    KPIMetricSerializer,
+    ReportScheduleSerializer,
+    ReportSerializer,
 )
 
 User = get_user_model()
@@ -19,37 +25,37 @@ class DashboardViewSet(viewsets.ModelViewSet):
     queryset = Dashboard.objects.all()
     serializer_class = DashboardSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         return Dashboard.objects.filter(user=self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-    
+
     @action(detail=False, methods=['get'])
     def default(self, request):
         """Get user's default dashboard"""
         dashboard = self.get_queryset().filter(is_default=True).first()
         if not dashboard:
             dashboard = self.get_queryset().first()
-        
+
         if dashboard:
             return Response(DashboardSerializer(dashboard).data)
         else:
             return Response({'message': 'No dashboard found'}, status=status.HTTP_404_NOT_FOUND)
-    
+
     @action(detail=True, methods=['post'])
-    def set_default(self, request, pk=None):
+    def set_default(self, request, _pk=None):
         """Set dashboard as default"""
         dashboard = self.get_object()
-        
+
         # Remove default flag from other dashboards
         self.get_queryset().update(is_default=False)
-        
+
         # Set this dashboard as default
         dashboard.is_default = True
         dashboard.save()
-        
+
         return Response(DashboardSerializer(dashboard).data)
 
 
@@ -62,46 +68,46 @@ class ReportViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at']
     ordering = ['-created_at']
-    
+
     def get_queryset(self):
         # Users can see their own reports and public reports
         return Report.objects.filter(
             Q(created_by=self.request.user) | Q(is_public=True) | Q(shared_with=self.request.user)
         ).distinct()
-    
+
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
-    
+
     @action(detail=True, methods=['get'])
-    def export(self, request, pk=None):
+    def export(self, request, _pk=None):
         """Export report in specified format"""
         report = self.get_object()
         format_type = request.query_params.get('format', 'pdf')
-        
+
         # Here you would implement the actual export logic
         # For now, we'll just return a success message
-        
+
         return Response({
             'message': f'Report exported as {format_type}',
             'report_id': report.id,
             'format': format_type
         })
-    
+
     @action(detail=True, methods=['post'])
-    def share(self, request, pk=None):
+    def share(self, request, _pk=None):
         """Share report with other users"""
         report = self.get_object()
         user_ids = request.data.get('user_ids', [])
-        
+
         if not user_ids:
             return Response(
                 {'error': 'User IDs are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         users = User.objects.filter(id__in=user_ids)
         report.shared_with.add(*users)
-        
+
         return Response({
             'message': f'Report shared with {users.count()} users',
             'shared_with': [user.get_full_name() for user in users]
@@ -113,7 +119,7 @@ class ReportScheduleViewSet(viewsets.ModelViewSet):
     queryset = ReportSchedule.objects.all()
     serializer_class = ReportScheduleSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         return ReportSchedule.objects.filter(report__created_by=self.request.user)
 
@@ -127,7 +133,7 @@ class AnalyticsViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at', 'value']
     ordering = ['-created_at']
-    
+
     @action(detail=False, methods=['get'])
     def dashboard_metrics(self, request):
         """Get dashboard metrics"""
@@ -136,25 +142,25 @@ class AnalyticsViewSet(viewsets.ModelViewSet):
         from lead_management.models import Lead
         from opportunity_management.models import Opportunity
         from task_management.models import Task
-        
+
         # Contact metrics
         total_contacts = Contact.objects.count()
         new_contacts_this_month = Contact.objects.filter(
             created_at__month=timezone.now().month,
             created_at__year=timezone.now().year
         ).count()
-        
+
         # Lead metrics
         total_leads = Lead.objects.count()
         converted_leads = Lead.objects.filter(status='converted').count()
         conversion_rate = (converted_leads / total_leads * 100) if total_leads > 0 else 0
-        
+
         # Opportunity metrics
         total_opportunities = Opportunity.objects.count()
         total_pipeline_value = Opportunity.objects.aggregate(
             total=Sum('amount')
         )['total'] or 0
-        
+
         # Task metrics
         total_tasks = Task.objects.count()
         completed_tasks = Task.objects.filter(status='completed').count()
@@ -162,7 +168,7 @@ class AnalyticsViewSet(viewsets.ModelViewSet):
             due_date__lt=timezone.now(),
             status__in=['pending', 'in_progress']
         ).count()
-        
+
         return Response({
             'contacts': {
                 'total': total_contacts,
@@ -183,41 +189,41 @@ class AnalyticsViewSet(viewsets.ModelViewSet):
                 'overdue': overdue_tasks
             }
         })
-    
+
     @action(detail=False, methods=['get'])
     def sales_pipeline(self, request):
         """Get sales pipeline data"""
         from opportunity_management.models import Opportunity
-        
+
         pipeline_data = []
         for stage_choice in Opportunity.STAGE_CHOICES:
             stage_name = stage_choice[0]
             stage_display = stage_choice[1]
-            
+
             opportunities = Opportunity.objects.filter(stage=stage_name)
             count = opportunities.count()
             total_value = opportunities.aggregate(total=Sum('amount'))['total'] or 0
-            
+
             pipeline_data.append({
                 'stage': stage_name,
                 'stage_display': stage_display,
                 'count': count,
                 'total_value': total_value
             })
-        
+
         return Response(pipeline_data)
-    
+
     @action(detail=False, methods=['get'])
     def activity_timeline(self, request):
         """Get activity timeline data"""
         from communication_management.models import Communication
-        
+
         # Get communications from last 30 days
         thirty_days_ago = timezone.now() - timedelta(days=30)
         communications = Communication.objects.filter(
             communication_date__gte=thirty_days_ago
         ).order_by('communication_date')
-        
+
         # Group by date
         timeline_data = {}
         for comm in communications:
@@ -230,7 +236,7 @@ class AnalyticsViewSet(viewsets.ModelViewSet):
                     'emails': 0,
                     'meetings': 0
                 }
-            
+
             timeline_data[date_key]['communications'] += 1
             if comm.communication_type == 'call':
                 timeline_data[date_key]['calls'] += 1
@@ -238,7 +244,7 @@ class AnalyticsViewSet(viewsets.ModelViewSet):
                 timeline_data[date_key]['emails'] += 1
             elif comm.communication_type == 'meeting':
                 timeline_data[date_key]['meetings'] += 1
-        
+
         return Response(list(timeline_data.values()))
 
 
@@ -247,10 +253,10 @@ class KPIMetricViewSet(viewsets.ModelViewSet):
     queryset = KPIMetric.objects.all()
     serializer_class = KPIMetricSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         return KPIMetric.objects.filter(created_by=self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
@@ -260,27 +266,27 @@ class DataExportViewSet(viewsets.ModelViewSet):
     queryset = DataExport.objects.all()
     serializer_class = DataExportSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         return DataExport.objects.filter(requested_by=self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(requested_by=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
-    def download(self, request, pk=None):
+    def download(self, request, _pk=None):
         """Download exported data"""
         export = self.get_object()
-        
+
         if export.status != 'completed':
             return Response(
                 {'error': 'Export is not ready for download'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Here you would implement the actual download logic
         # For now, we'll just return the file path
-        
+
         return Response({
             'file_path': export.file_path,
             'file_size': export.file_size,

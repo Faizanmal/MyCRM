@@ -2,9 +2,10 @@
 AI Insights Tests
 """
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import AIInsight, PredictionModel, DataAnalysisJob
+from django.test import TestCase
+
+from .models import AIInsight, DataAnalysisJob, PredictionModel
 
 User = get_user_model()
 
@@ -20,7 +21,7 @@ class AIInsightModelTest(TestCase):
             confidence_score=0.85,
             generated_by=self.user
         )
-    
+
     def test_insight_creation(self):
         self.assertEqual(self.insight.title, 'Lead Conversion Trend')
         self.assertEqual(self.insight.confidence_score, 0.85)
@@ -36,7 +37,7 @@ class PredictionModelTest(TestCase):
             accuracy=0.92,
             status='active'
         )
-    
+
     def test_model_creation(self):
         self.assertEqual(self.model.name, 'Lead Scoring Model')
         self.assertEqual(self.model.accuracy, 0.92)
@@ -52,7 +53,7 @@ class DataAnalysisJobTest(TestCase):
             status='pending',
             created_by=self.user
         )
-    
+
     def test_job_creation(self):
         self.assertEqual(self.job.name, 'Sales Forecast Analysis')
         self.assertEqual(self.job.status, 'pending')

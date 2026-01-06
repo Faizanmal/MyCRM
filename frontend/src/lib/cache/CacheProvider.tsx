@@ -77,7 +77,7 @@ interface SWROptions {
 
 // Constants
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
-const DEFAULT_STALE_TTL = 60 * 1000; // 1 minute
+// const DEFAULT_STALE_TTL = 60 * 1000; // 1 minute
 const MAX_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // Context
@@ -385,7 +385,7 @@ export function CacheProvider({ children, defaultTTL = DEFAULT_TTL }: CacheProvi
     options?: SWROptions
   ): Promise<T> => {
     const ttl = options?.ttl ?? currentTTL;
-    const staleTTL = options?.staleTTL ?? DEFAULT_STALE_TTL;
+    // const staleTTL = options?.staleTTL ?? DEFAULT_STALE_TTL;
     
     const cached = cacheRef.current.getStale(key);
     
@@ -526,7 +526,7 @@ export function useCacheStats() {
 
 // Utility Components
 export function CacheDebugPanel() {
-  const { stats, entries, isOnline } = useCacheStats();
+  const { stats, isOnline } = useCacheStats();
   
   if (process.env.NODE_ENV !== 'development') {
     return null;

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
 // ==================== Types ====================
@@ -221,9 +221,9 @@ export function RBACProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     // Get effective permissions (role + custom)
-    const permissions = user
+    const permissions = useMemo(() => user
         ? [...rolePermissions[user.role], ...(user.permissions || [])]
-        : [];
+        : [], [user]);
 
     // Load user from storage/API on mount
     useEffect(() => {
@@ -397,7 +397,7 @@ export function ProtectedRoute({
         hasRole,
         hasMinimumRole,
         isLoading,
-        user,
+        _user,
     } = useRBAC();
 
     useEffect(() => {
@@ -496,14 +496,14 @@ export function AccessDenied() {
         <div className="flex flex-col items-center justify-center min-h-screen px-4">
             <div className="text-center">
                 <h1 className="text-6xl font-bold text-gray-200">403</h1>
-                <h2 className="text-2xl font-semibold text-gray-700 mt-4">Access Denied</h2>
+                <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300 mt-4">Access Denied</h2>
                 <p className="text-gray-500 mt-2">
-                    You don't have permission to access this page.
+                    You don&apos;t have permission to access this page.
                 </p>
                 <div className="mt-6 space-x-4">
                     <button
                         onClick={() => router.back()}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
                     >
                         Go Back
                     </button>
@@ -541,8 +541,8 @@ export function getRoleColor(role: Role): string {
         admin: 'bg-purple-100 text-purple-700',
         manager: 'bg-blue-100 text-blue-700',
         sales_rep: 'bg-green-100 text-green-700',
-        viewer: 'bg-gray-100 text-gray-700',
+        viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
         guest: 'bg-yellow-100 text-yellow-700',
     };
-    return colors[role] || 'bg-gray-100 text-gray-700';
+    return colors[role] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 }

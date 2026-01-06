@@ -3,20 +3,21 @@ Mobile App Enhancement Serializers
 """
 
 from rest_framework import serializers
+
 from .mobile_models import (
-    OfflineSyncQueue,
-    DeviceRegistration,
     BusinessCardScan,
+    DeviceRegistration,
     LocationCheckIn,
-    NearbyCustomer,
     MobileActivityLog,
-    VoiceNote
+    NearbyCustomer,
+    OfflineSyncQueue,
+    VoiceNote,
 )
 
 
 class OfflineSyncQueueSerializer(serializers.ModelSerializer):
     """Serializer for offline sync queue items"""
-    
+
     class Meta:
         model = OfflineSyncQueue
         fields = [
@@ -36,7 +37,7 @@ class OfflineSyncQueueSerializer(serializers.ModelSerializer):
 
 class DeviceRegistrationSerializer(serializers.ModelSerializer):
     """Serializer for device registration"""
-    
+
     class Meta:
         model = DeviceRegistration
         fields = [
@@ -55,7 +56,7 @@ class DeviceRegistrationSerializer(serializers.ModelSerializer):
 
 class BusinessCardScanSerializer(serializers.ModelSerializer):
     """Serializer for business card scans"""
-    
+
     class Meta:
         model = BusinessCardScan
         fields = [
@@ -77,7 +78,7 @@ class BusinessCardScanSerializer(serializers.ModelSerializer):
 
 class BusinessCardScanListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for scan list"""
-    
+
     class Meta:
         model = BusinessCardScan
         fields = [
@@ -88,7 +89,7 @@ class BusinessCardScanListSerializer(serializers.ModelSerializer):
 
 class LocationCheckInSerializer(serializers.ModelSerializer):
     """Serializer for location check-ins"""
-    
+
     class Meta:
         model = LocationCheckIn
         fields = [
@@ -107,7 +108,7 @@ class LocationCheckInSerializer(serializers.ModelSerializer):
 
 class LocationCheckInListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for check-in list"""
-    
+
     class Meta:
         model = LocationCheckIn
         fields = [
@@ -118,7 +119,7 @@ class LocationCheckInListSerializer(serializers.ModelSerializer):
 
 class NearbyCustomerSerializer(serializers.ModelSerializer):
     """Serializer for nearby customers cache"""
-    
+
     class Meta:
         model = NearbyCustomer
         fields = [
@@ -129,7 +130,7 @@ class NearbyCustomerSerializer(serializers.ModelSerializer):
 
 class MobileActivityLogSerializer(serializers.ModelSerializer):
     """Serializer for mobile activity logs"""
-    
+
     class Meta:
         model = MobileActivityLog
         fields = [
@@ -143,7 +144,7 @@ class MobileActivityLogSerializer(serializers.ModelSerializer):
 
 class VoiceNoteSerializer(serializers.ModelSerializer):
     """Serializer for voice notes"""
-    
+
     class Meta:
         model = VoiceNote
         fields = [
@@ -164,7 +165,7 @@ class VoiceNoteSerializer(serializers.ModelSerializer):
 
 class VoiceNoteListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for voice note list"""
-    
+
     class Meta:
         model = VoiceNote
         fields = [
@@ -177,7 +178,7 @@ class VoiceNoteListSerializer(serializers.ModelSerializer):
 
 class RegisterDeviceSerializer(serializers.Serializer):
     """Serializer for device registration request"""
-    
+
     device_id = serializers.CharField(max_length=200)
     device_name = serializers.CharField(max_length=200)
     platform = serializers.ChoiceField(choices=['ios', 'android', 'web'])
@@ -189,7 +190,7 @@ class RegisterDeviceSerializer(serializers.Serializer):
 
 class GetPendingChangesSerializer(serializers.Serializer):
     """Serializer for getting pending changes"""
-    
+
     device_id = serializers.CharField(max_length=200)
     since_timestamp = serializers.DateTimeField(required=False)
     entity_types = serializers.ListField(
@@ -199,7 +200,7 @@ class GetPendingChangesSerializer(serializers.Serializer):
 
 class QueueSyncOperationSerializer(serializers.Serializer):
     """Serializer for queueing sync operations"""
-    
+
     device_id = serializers.CharField(max_length=200)
     operation = serializers.ChoiceField(choices=['create', 'update', 'delete'])
     entity_type = serializers.CharField(max_length=100)
@@ -210,7 +211,7 @@ class QueueSyncOperationSerializer(serializers.Serializer):
 
 class ResolveConflictSerializer(serializers.Serializer):
     """Serializer for conflict resolution"""
-    
+
     sync_id = serializers.UUIDField()
     resolution = serializers.ChoiceField(
         choices=['client_wins', 'server_wins', 'merged']
@@ -220,7 +221,7 @@ class ResolveConflictSerializer(serializers.Serializer):
 
 class ProcessCardSerializer(serializers.Serializer):
     """Serializer for processing business card"""
-    
+
     image_url = serializers.URLField()
     scan_location = serializers.DictField(required=False)
     event_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
@@ -228,14 +229,14 @@ class ProcessCardSerializer(serializers.Serializer):
 
 class CreateContactFromScanSerializer(serializers.Serializer):
     """Serializer for creating contact from scan"""
-    
+
     scan_id = serializers.UUIDField()
     overrides = serializers.DictField(required=False)
 
 
 class CheckInSerializer(serializers.Serializer):
     """Serializer for location check-in"""
-    
+
     latitude = serializers.DecimalField(max_digits=10, decimal_places=8)
     longitude = serializers.DecimalField(max_digits=11, decimal_places=8)
     check_in_type = serializers.ChoiceField(choices=[
@@ -253,7 +254,7 @@ class CheckInSerializer(serializers.Serializer):
 
 class FindNearbySerializer(serializers.Serializer):
     """Serializer for finding nearby customers"""
-    
+
     latitude = serializers.DecimalField(max_digits=10, decimal_places=8)
     longitude = serializers.DecimalField(max_digits=11, decimal_places=8)
     radius_km = serializers.DecimalField(
@@ -264,7 +265,7 @@ class FindNearbySerializer(serializers.Serializer):
 
 class RouteOptimizationSerializer(serializers.Serializer):
     """Serializer for route optimization"""
-    
+
     locations = serializers.ListField(
         child=serializers.DictField()
     )
@@ -273,7 +274,7 @@ class RouteOptimizationSerializer(serializers.Serializer):
 
 class ProcessVoiceNoteSerializer(serializers.Serializer):
     """Serializer for processing voice note"""
-    
+
     audio_url = serializers.URLField()
     duration_seconds = serializers.IntegerField()
     format = serializers.CharField(max_length=20, default='m4a')

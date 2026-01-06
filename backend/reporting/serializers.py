@@ -1,13 +1,14 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Dashboard, Report, ReportSchedule, Analytics, KPIMetric, DataExport
+from rest_framework import serializers
+
+from .models import Analytics, Dashboard, DataExport, KPIMetric, Report, ReportSchedule
 
 User = get_user_model()
 
 
 class DashboardSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
-    
+
     class Meta:
         model = Dashboard
         fields = [
@@ -19,7 +20,7 @@ class DashboardSerializer(serializers.ModelSerializer):
 
 class ReportSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = Report
         fields = [
@@ -32,7 +33,7 @@ class ReportSerializer(serializers.ModelSerializer):
 
 class ReportScheduleSerializer(serializers.ModelSerializer):
     report_name = serializers.CharField(source='report.name', read_only=True)
-    
+
     class Meta:
         model = ReportSchedule
         fields = [
@@ -57,7 +58,7 @@ class AnalyticsSerializer(serializers.ModelSerializer):
 class KPIMetricSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     achievement_percentage = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = KPIMetric
         fields = [
@@ -71,7 +72,7 @@ class KPIMetricSerializer(serializers.ModelSerializer):
 
 class DataExportSerializer(serializers.ModelSerializer):
     requested_by_name = serializers.CharField(source='requested_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = DataExport
         fields = [

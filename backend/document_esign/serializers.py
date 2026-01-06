@@ -3,15 +3,22 @@ Document E-Signature Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    DocumentTemplate, Document, DocumentRecipient, SignatureField,
-    Signature, DocumentAuditLog, SavedSignature, DocumentAnalytics
+    Document,
+    DocumentAnalytics,
+    DocumentAuditLog,
+    DocumentRecipient,
+    DocumentTemplate,
+    SavedSignature,
+    Signature,
+    SignatureField,
 )
 
 
 class DocumentTemplateSerializer(serializers.ModelSerializer):
     template_type_display = serializers.CharField(source='get_template_type_display', read_only=True)
-    
+
     class Meta:
         model = DocumentTemplate
         fields = '__all__'
@@ -20,7 +27,7 @@ class DocumentTemplateSerializer(serializers.ModelSerializer):
 
 class SignatureFieldSerializer(serializers.ModelSerializer):
     field_type_display = serializers.CharField(source='get_field_type_display', read_only=True)
-    
+
     class Meta:
         model = SignatureField
         fields = '__all__'
@@ -30,12 +37,12 @@ class DocumentRecipientSerializer(serializers.ModelSerializer):
     recipient_type_display = serializers.CharField(source='get_recipient_type_display', read_only=True)
     fields = SignatureFieldSerializer(many=True, read_only=True)
     status = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentRecipient
         fields = '__all__'
         read_only_fields = ['access_token', 'viewed_at', 'signed_at', 'declined_at']
-    
+
     def get_status(self, obj):
         if obj.declined_at:
             return 'declined'
@@ -51,7 +58,7 @@ class DocumentSerializer(serializers.ModelSerializer):
     recipients = DocumentRecipientSerializer(many=True, read_only=True)
     signing_progress = serializers.ReadOnlyField()
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = Document
         fields = '__all__'
@@ -68,19 +75,19 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
-    
+
     class Meta:
         model = Document
         fields = ['name', 'template', 'opportunity', 'contact', 'content_html',
                   'expires_at', 'require_all_signatures', 'signing_order',
                   'send_reminders', 'document_value', 'recipients', 'fields']
-    
+
     def create(self, validated_data):
         recipients_data = validated_data.pop('recipients', [])
         fields_data = validated_data.pop('fields', [])
-        
+
         document = Document.objects.create(**validated_data)
-        
+
         # Create recipients
         recipient_map = {}
         for i, recipient_data in enumerate(recipients_data):
@@ -90,7 +97,7 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
                 **recipient_data
             )
             recipient_map[i] = recipient
-        
+
         # Create fields
         for field_data in fields_data:
             recipient_index = field_data.pop('recipient_index', 0)
@@ -101,7 +108,7 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
                     recipient=recipient,
                     **field_data
                 )
-        
+
         return document
 
 
@@ -114,7 +121,7 @@ class SignatureSerializer(serializers.ModelSerializer):
 
 class DocumentAuditLogSerializer(serializers.ModelSerializer):
     action_display = serializers.CharField(source='get_action_display', read_only=True)
-    
+
     class Meta:
         model = DocumentAuditLog
         fields = '__all__'
@@ -129,11 +136,11 @@ class SavedSignatureSerializer(serializers.ModelSerializer):
 
 class DocumentAnalyticsSerializer(serializers.ModelSerializer):
     completion_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentAnalytics
         fields = '__all__'
-    
+
     def get_completion_rate(self, obj):
         if obj.documents_sent > 0:
             return round((obj.documents_completed / obj.documents_sent) * 100, 1)

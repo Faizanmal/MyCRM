@@ -3,16 +3,22 @@ Voice & Conversation Intelligence - Advanced Serializers
 """
 
 from rest_framework import serializers
+
 from .advanced_models import (
-    RealTimeCoachingSession, RealTimeCoachingSuggestion,
-    SentimentTimeline, SentimentDashboard, MeetingSummary,
-    MeetingActionItem, CallCoachingMetrics, KeyMoment
+    CallCoachingMetrics,
+    KeyMoment,
+    MeetingActionItem,
+    MeetingSummary,
+    RealTimeCoachingSession,
+    RealTimeCoachingSuggestion,
+    SentimentDashboard,
+    SentimentTimeline,
 )
 
 
 class RealTimeCoachingSuggestionSerializer(serializers.ModelSerializer):
     """Serializer for coaching suggestions"""
-    
+
     class Meta:
         model = RealTimeCoachingSuggestion
         fields = [
@@ -25,10 +31,10 @@ class RealTimeCoachingSuggestionSerializer(serializers.ModelSerializer):
 
 class RealTimeCoachingSessionSerializer(serializers.ModelSerializer):
     """Serializer for coaching sessions"""
-    
+
     suggestions = RealTimeCoachingSuggestionSerializer(many=True, read_only=True)
     recording_title = serializers.CharField(source='recording.title', read_only=True)
-    
+
     class Meta:
         model = RealTimeCoachingSession
         fields = [
@@ -43,7 +49,7 @@ class RealTimeCoachingSessionSerializer(serializers.ModelSerializer):
 
 class SentimentTimelineSerializer(serializers.ModelSerializer):
     """Serializer for sentiment timeline"""
-    
+
     class Meta:
         model = SentimentTimeline
         fields = [
@@ -54,7 +60,7 @@ class SentimentTimelineSerializer(serializers.ModelSerializer):
 
 class SentimentDashboardSerializer(serializers.ModelSerializer):
     """Serializer for sentiment dashboard"""
-    
+
     class Meta:
         model = SentimentDashboard
         fields = [
@@ -68,9 +74,9 @@ class SentimentDashboardSerializer(serializers.ModelSerializer):
 
 class MeetingActionItemSerializer(serializers.ModelSerializer):
     """Serializer for meeting action items"""
-    
+
     assigned_to_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = MeetingActionItem
         fields = [
@@ -80,7 +86,7 @@ class MeetingActionItemSerializer(serializers.ModelSerializer):
             'linked_task', 'created_at', 'completed_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_assigned_to_name(self, obj):
         if obj.assigned_to:
             return obj.assigned_to.get_full_name() or obj.assigned_to.email
@@ -89,13 +95,13 @@ class MeetingActionItemSerializer(serializers.ModelSerializer):
 
 class MeetingSummarySerializer(serializers.ModelSerializer):
     """Serializer for meeting summaries"""
-    
+
     recording_title = serializers.CharField(source='recording.title', read_only=True)
     recording_duration = serializers.IntegerField(
         source='recording.duration_seconds', read_only=True
     )
     extracted_action_items = MeetingActionItemSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = MeetingSummary
         fields = [
@@ -112,7 +118,7 @@ class MeetingSummarySerializer(serializers.ModelSerializer):
 
 class CallCoachingMetricsSerializer(serializers.ModelSerializer):
     """Serializer for coaching metrics"""
-    
+
     class Meta:
         model = CallCoachingMetrics
         fields = [
@@ -127,7 +133,7 @@ class CallCoachingMetricsSerializer(serializers.ModelSerializer):
 
 class KeyMomentSerializer(serializers.ModelSerializer):
     """Serializer for key moments"""
-    
+
     class Meta:
         model = KeyMoment
         fields = [
@@ -142,7 +148,7 @@ class KeyMomentSerializer(serializers.ModelSerializer):
 
 class StartCoachingSessionSerializer(serializers.Serializer):
     """Serializer for starting a coaching session"""
-    
+
     recording_id = serializers.IntegerField(required=True)
     coaching_enabled = serializers.BooleanField(default=True)
     suggestions_enabled = serializers.BooleanField(default=True)
@@ -150,14 +156,14 @@ class StartCoachingSessionSerializer(serializers.Serializer):
 
 class ProcessAudioChunkSerializer(serializers.Serializer):
     """Serializer for processing audio chunks"""
-    
+
     audio_data = serializers.CharField(required=True)  # Base64 encoded
     timestamp = serializers.FloatField(required=True)
 
 
 class GenerateSummarySerializer(serializers.Serializer):
     """Serializer for generating meeting summary"""
-    
+
     recording_id = serializers.IntegerField(required=True)
     summary_type = serializers.ChoiceField(
         choices=['full', 'executive', 'action_items', 'key_points'],
@@ -167,7 +173,7 @@ class GenerateSummarySerializer(serializers.Serializer):
 
 class SendSummaryEmailSerializer(serializers.Serializer):
     """Serializer for sending summary email"""
-    
+
     recipients = serializers.ListField(
         child=serializers.EmailField(),
         min_length=1
@@ -176,13 +182,13 @@ class SendSummaryEmailSerializer(serializers.Serializer):
 
 class SentimentAnalysisRequestSerializer(serializers.Serializer):
     """Serializer for sentiment analysis request"""
-    
+
     recording_id = serializers.IntegerField(required=True)
 
 
 class SentimentDashboardRequestSerializer(serializers.Serializer):
     """Serializer for dashboard request"""
-    
+
     period = serializers.ChoiceField(
         choices=['daily', 'weekly', 'monthly'],
         default='weekly'

@@ -1,6 +1,7 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.conf import settings
+
 
 class User(AbstractUser):
     """Extended User model with CRM-specific fields"""
@@ -11,7 +12,7 @@ class User(AbstractUser):
         ('customer_support', 'Customer Support'),
         ('manager', 'Manager'),
     ]
-    
+
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='sales_rep')
     phone = models.CharField(max_length=20, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
@@ -23,7 +24,7 @@ class User(AbstractUser):
     two_factor_secret = models.CharField(max_length=32, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     # Override groups and user_permissions to avoid reverse accessor clashes
     groups = models.ManyToManyField(
         'auth.Group',
@@ -41,7 +42,7 @@ class User(AbstractUser):
         related_name='crm_users',
         related_query_name='crm_user',
     )
-    
+
     class Meta:
         db_table = 'crm_users'
         verbose_name = 'User'
@@ -57,9 +58,12 @@ class UserProfile(models.Model):
     language = models.CharField(max_length=10, default='en')
     notification_preferences = models.JSONField(default=dict)
     dashboard_preferences = models.JSONField(default=dict)
+
+    def __str__(self):
+        return f"Profile for {self.user.username}"
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_user_profiles'
         verbose_name = 'User Profile'
@@ -73,7 +77,10 @@ class Permission(models.Model):
     description = models.TextField(blank=True, null=True)
     module = models.CharField(max_length=50)  # contacts, leads, opportunities, etc.
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
+    def __str__(self):
+        return self.name
+
     class Meta:
         db_table = 'crm_permissions'
         verbose_name = 'Permission'
@@ -85,7 +92,10 @@ class RolePermission(models.Model):
     role = models.CharField(max_length=20, choices=User.ROLE_CHOICES)
     permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
+    def __str__(self):
+        return f"{self.role} - {self.permission.name}"
+
     class Meta:
         db_table = 'crm_role_permissions'
         unique_together = ['role', 'permission']
@@ -103,7 +113,7 @@ class AuditLog(models.Model):
         ('login', 'Login'),
         ('logout', 'Logout'),
     ]
-    
+
     # Use settings.AUTH_USER_MODEL here too
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_audit_logs')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
@@ -113,7 +123,10 @@ class AuditLog(models.Model):
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    
+
+    def __str__(self):
+        return f"{self.user.username if self.user else 'Anonymous'} - {self.action} - {self.model_name}"
+
     class Meta:
         db_table = 'crm_user_audit_logs'
         verbose_name = 'Audit Log'

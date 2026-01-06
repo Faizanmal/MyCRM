@@ -257,7 +257,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
               ),
               const SizedBox(height: AppSizes.paddingSm),
               DropdownButtonFormField<String>(
-                value: _selectedStatus,
+                initialValue: _selectedStatus,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.label),

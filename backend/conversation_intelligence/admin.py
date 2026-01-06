@@ -3,10 +3,18 @@ Conversation Intelligence Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    CallRecording, CallTranscript, TranscriptSegment, CallAnalysis,
-    TopicMention, CallCoaching, CallPlaylist, PlaylistClip,
-    CallTracker, ConversationAnalytics
+    CallAnalysis,
+    CallCoaching,
+    CallPlaylist,
+    CallRecording,
+    CallTracker,
+    CallTranscript,
+    ConversationAnalytics,
+    PlaylistClip,
+    TopicMention,
+    TranscriptSegment,
 )
 
 

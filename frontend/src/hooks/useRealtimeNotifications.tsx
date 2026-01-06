@@ -28,6 +28,49 @@ export function RealtimeNotificationProvider({ children }: { children: ReactNode
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const reconnectAttemptsRef = useRef(0);
     const maxReconnectAttempts = 5;
+    const connectRef = useRef<() => void | null>(null);
+
+    const handleSystemMessage = useCallback((message: RealtimeMessage) => {
+        switch (message.type) {
+            case 'notification':
+                const { title, body } = message.payload as { title?: string; body?: string };
+                if (title) {
+                    toast(title, { description: body });
+                }
+                break;
+
+            case 'achievement':
+                const achievement = message.payload as { name?: string; xp?: number };
+                toast.success(`🏆 Achievement Unlocked: ${achievement.name}`, {
+                    description: `+${achievement.xp || 0} XP`,
+                });
+                break;
+
+            case 'recommendation':
+                // New AI recommendation available
+                toast.info('💡 New AI insight available', {
+                    action: {
+                        label: 'View',
+                        onClick: () => window.location.href = '/dashboard',
+                    },
+                });
+                break;
+
+            case 'deal_update':
+                const deal = message.payload as { name?: string; stage?: string };
+                toast(`Deal Updated: ${deal.name}`, {
+                    description: `Moved to ${deal.stage}`,
+                });
+                break;
+
+            case 'mention':
+                const mention = message.payload as { from?: string; context?: string };
+                toast(`${mention.from} mentioned you`, {
+                    description: mention.context,
+                });
+                break;
+        }
+    }, []);
 
     const connect = useCallback(() => {
         if (wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -77,7 +120,7 @@ export function RealtimeNotificationProvider({ children }: { children: ReactNode
                     const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
                     reconnectTimeoutRef.current = setTimeout(() => {
                         reconnectAttemptsRef.current++;
-                        connect();
+                        connectRef.current?.();
                     }, delay);
                 }
             };
@@ -90,49 +133,11 @@ export function RealtimeNotificationProvider({ children }: { children: ReactNode
         } catch (error) {
             console.error('Failed to create WebSocket:', error);
         }
-    }, []);
+    }, [handleSystemMessage]);
 
-    const handleSystemMessage = (message: RealtimeMessage) => {
-        switch (message.type) {
-            case 'notification':
-                const { title, body, ...rest } = message.payload as { title?: string; body?: string };
-                if (title) {
-                    toast(title, { description: body });
-                }
-                break;
-
-            case 'achievement':
-                const achievement = message.payload as { name?: string; xp?: number };
-                toast.success(`🏆 Achievement Unlocked: ${achievement.name}`, {
-                    description: `+${achievement.xp || 0} XP`,
-                });
-                break;
-
-            case 'recommendation':
-                // New AI recommendation available
-                toast.info('💡 New AI insight available', {
-                    action: {
-                        label: 'View',
-                        onClick: () => window.location.href = '/dashboard',
-                    },
-                });
-                break;
-
-            case 'deal_update':
-                const deal = message.payload as { name?: string; stage?: string };
-                toast(`Deal Updated: ${deal.name}`, {
-                    description: `Moved to ${deal.stage}`,
-                });
-                break;
-
-            case 'mention':
-                const mention = message.payload as { from?: string; context?: string };
-                toast(`${mention.from} mentioned you`, {
-                    description: mention.context,
-                });
-                break;
-        }
-    };
+    useEffect(() => {
+        connectRef.current = connect;
+    }, [connect]);
 
     const disconnect = useCallback(() => {
         if (reconnectTimeoutRef.current) {
@@ -206,8 +211,8 @@ export function useRealtimeSubscription(
     useEffect(() => {
         const unsubscribe = subscribe(channel, callback);
         return unsubscribe;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [channel, subscribe, ...deps]);
+
+    }, [channel, subscribe, callback, ...deps]);
 }
 
 // Hook for real-time notifications

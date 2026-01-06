@@ -3,13 +3,14 @@ Health Check URL Configuration
 """
 
 from django.urls import path
+
 from .health_views import (
+    DetailedHealthCheckView,
     HealthCheckView,
+    LivenessCheckView,
+    MetricsView,
     PingView,
     ReadinessCheckView,
-    LivenessCheckView,
-    DetailedHealthCheckView,
-    MetricsView,
 )
 
 urlpatterns = [

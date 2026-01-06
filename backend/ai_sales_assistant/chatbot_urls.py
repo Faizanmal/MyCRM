@@ -2,12 +2,16 @@
 AI Sales Assistant - Chatbot URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .chatbot_views import (
-    ConversationSessionViewSet, ChatMessageViewSet,
-    QuickActionViewSet, PredictiveDealIntelligenceViewSet,
-    SmartContentViewSet, AIAssistantDashboardView
+    AIAssistantDashboardView,
+    ChatMessageViewSet,
+    ConversationSessionViewSet,
+    PredictiveDealIntelligenceViewSet,
+    QuickActionViewSet,
+    SmartContentViewSet,
 )
 
 router = DefaultRouter()

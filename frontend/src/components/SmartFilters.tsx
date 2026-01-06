@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef, useEffect, ReactNode } from 'react';
-import { useInView } from 'react-intersection-observer';
+import { useState, useCallback, useMemo, ReactNode } from 'react';
+// import { useInView } from 'react-intersection-observer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -64,7 +64,6 @@ export function SmartFilters({
     onFilterChange,
     onClearAll,
     savedViews = [],
-    onSaveView,
     className,
 }: SmartFiltersProps) {
     const [isExpanded, setIsExpanded] = useState(false);

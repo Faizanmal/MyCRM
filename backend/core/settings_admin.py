@@ -7,10 +7,10 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .settings_models import (
-    UserPreference,
+    ExportJob,
     NotificationPreference,
     NotificationTypeSetting,
-    ExportJob,
+    UserPreference,
     UserRole,
     UserRoleAssignment,
 )
@@ -22,7 +22,7 @@ class UserPreferenceAdmin(admin.ModelAdmin):
     list_filter = ['theme', 'default_view', 'compact_mode', 'animations_enabled']
     search_fields = ['user__username', 'user__email']
     readonly_fields = ['created_at', 'updated_at']
-    
+
     fieldsets = (
         ('User', {
             'fields': ('user',)
@@ -48,7 +48,7 @@ class UserPreferenceAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def accent_color_preview(self, obj):
         return format_html(
             '<span style="background-color: {}; padding: 2px 12px; border-radius: 4px;">&nbsp;</span> {}',
@@ -71,7 +71,7 @@ class NotificationPreferenceAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'user__email']
     readonly_fields = ['created_at', 'updated_at']
     inlines = [NotificationTypeSettingInline]
-    
+
     fieldsets = (
         ('User', {
             'fields': ('user',)
@@ -99,7 +99,7 @@ class ExportJobAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'user__email']
     readonly_fields = ['created_at', 'started_at', 'completed_at', 'expires_at', 'progress', 'file_path', 'file_size']
     date_hierarchy = 'created_at'
-    
+
     fieldsets = (
         ('Job Info', {
             'fields': ('user', 'format', 'entities', 'date_range')
@@ -117,11 +117,11 @@ class ExportJobAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'started_at', 'completed_at', 'expires_at')
         }),
     )
-    
+
     def entities_display(self, obj):
         return ', '.join(obj.entities) if obj.entities else '-'
     entities_display.short_description = 'Entities'
-    
+
     def status_badge(self, obj):
         colors = {
             'pending': '#f59e0b',
@@ -135,7 +135,7 @@ class ExportJobAdmin(admin.ModelAdmin):
             obj.status.upper()
         )
     status_badge.short_description = 'Status'
-    
+
     def file_size_display(self, obj):
         if obj.file_size:
             if obj.file_size >= 1024 * 1024:
@@ -146,9 +146,9 @@ class ExportJobAdmin(admin.ModelAdmin):
                 return f"{obj.file_size} B"
         return '-'
     file_size_display.short_description = 'File Size'
-    
+
     actions = ['cancel_jobs', 'retry_failed_jobs']
-    
+
     def cancel_jobs(self, request, queryset):
         count = 0
         for job in queryset.filter(status__in=['pending', 'processing']):
@@ -156,7 +156,7 @@ class ExportJobAdmin(admin.ModelAdmin):
             count += 1
         self.message_user(request, f'{count} jobs cancelled')
     cancel_jobs.short_description = 'Cancel selected jobs'
-    
+
     def retry_failed_jobs(self, request, queryset):
         count = 0
         for job in queryset.filter(status='failed'):
@@ -177,7 +177,7 @@ class UserRoleAdmin(admin.ModelAdmin):
     list_filter = ['is_system_role', 'level']
     search_fields = ['name', 'display_name', 'description']
     readonly_fields = ['created_at', 'updated_at']
-    
+
     fieldsets = (
         ('Role Info', {
             'fields': ('name', 'display_name', 'description')
@@ -190,11 +190,11 @@ class UserRoleAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def permissions_count(self, obj):
         return len(obj.permissions) if obj.permissions else 0
     permissions_count.short_description = 'Permissions'
-    
+
     def color_preview(self, obj):
         return format_html(
             '<span class="{}" style="padding: 2px 8px; border-radius: 4px;">{}</span>',
@@ -202,9 +202,9 @@ class UserRoleAdmin(admin.ModelAdmin):
             obj.display_name
         )
     color_preview.short_description = 'Color Preview'
-    
+
     actions = ['initialize_default_roles']
-    
+
     def initialize_default_roles(self, request, queryset):
         UserRole.create_default_roles()
         self.message_user(request, 'Default roles initialized')
@@ -218,7 +218,7 @@ class UserRoleAssignmentAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'user__email', 'role__name']
     readonly_fields = ['assigned_at']
     autocomplete_fields = ['user', 'role', 'assigned_by']
-    
+
     fieldsets = (
         ('Assignment', {
             'fields': ('user', 'role')

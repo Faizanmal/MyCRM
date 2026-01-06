@@ -19,7 +19,7 @@ def handle_analysis_complete(sender, instance, **kwargs):
     """Handle analysis completion"""
     # Could update opportunity, create tasks for low scores, etc.
     recording = instance.recording
-    
+
     if instance.call_score < 50 and recording.owner:
         # Could create a coaching task
         pass

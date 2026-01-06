@@ -3,10 +3,20 @@ Customer Success Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    CustomerAccount, HealthScore, HealthScoreConfig, CustomerMilestone,
-    SuccessPlaybook, PlaybookStep, PlaybookExecution, CustomerNote,
-    RenewalOpportunity, ExpansionOpportunity, NPSSurvey, CustomerSuccessAnalytics
+    CustomerAccount,
+    CustomerMilestone,
+    CustomerNote,
+    CustomerSuccessAnalytics,
+    ExpansionOpportunity,
+    HealthScore,
+    HealthScoreConfig,
+    NPSSurvey,
+    PlaybookExecution,
+    PlaybookStep,
+    RenewalOpportunity,
+    SuccessPlaybook,
 )
 
 

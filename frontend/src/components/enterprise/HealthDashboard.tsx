@@ -23,7 +23,6 @@ import {
   MemoryStick,
   RefreshCw,
   Server,
-  Wifi,
   XCircle,
 } from 'lucide-react';
 
@@ -116,28 +115,6 @@ export function HealthDashboard() {
         {status}
       </Badge>
     );
-  };
-
-  const getComponentIcon = (name: string) => {
-    if (name.includes('database') || name.includes('postgres')) {
-      return <Database className="h-4 w-4" />;
-    }
-    if (name.includes('redis') || name.includes('cache')) {
-      return <Server className="h-4 w-4" />;
-    }
-    if (name.includes('celery') || name.includes('worker')) {
-      return <Activity className="h-4 w-4" />;
-    }
-    if (name.includes('disk') || name.includes('storage')) {
-      return <HardDrive className="h-4 w-4" />;
-    }
-    if (name.includes('memory') || name.includes('ram')) {
-      return <MemoryStick className="h-4 w-4" />;
-    }
-    if (name.includes('network') || name.includes('api')) {
-      return <Wifi className="h-4 w-4" />;
-    }
-    return <Server className="h-4 w-4" />;
   };
 
   if (error) {

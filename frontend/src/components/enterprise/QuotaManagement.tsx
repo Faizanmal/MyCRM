@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
@@ -28,7 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
+// import { Textarea } from '@/components/ui/textarea';
 import {
   Target,
   TrendingUp,
@@ -170,7 +170,7 @@ const fetchQuotaForecast = async (quotaId: string): Promise<QuotaForecast> => {
   };
 };
 
-const fetchAIRecommendation = async (quotaId: string): Promise<AIRecommendation> => {
+const fetchAIRecommendation = async (_quotaId: string): Promise<AIRecommendation> => {
   return {
     recommended_target: 480000,
     confidence: 0.82,

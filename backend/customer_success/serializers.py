@@ -3,10 +3,20 @@ Customer Success Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    CustomerAccount, HealthScore, HealthScoreConfig, CustomerMilestone,
-    SuccessPlaybook, PlaybookStep, PlaybookExecution, CustomerNote,
-    RenewalOpportunity, ExpansionOpportunity, NPSSurvey, CustomerSuccessAnalytics
+    CustomerAccount,
+    CustomerMilestone,
+    CustomerNote,
+    CustomerSuccessAnalytics,
+    ExpansionOpportunity,
+    HealthScore,
+    HealthScoreConfig,
+    NPSSurvey,
+    PlaybookExecution,
+    PlaybookStep,
+    RenewalOpportunity,
+    SuccessPlaybook,
 )
 
 
@@ -18,7 +28,7 @@ class HealthScoreSerializer(serializers.ModelSerializer):
 
 class CustomerMilestoneSerializer(serializers.ModelSerializer):
     milestone_type_display = serializers.CharField(source='get_milestone_type_display', read_only=True)
-    
+
     class Meta:
         model = CustomerMilestone
         fields = '__all__'
@@ -27,7 +37,7 @@ class CustomerMilestoneSerializer(serializers.ModelSerializer):
 class CustomerNoteSerializer(serializers.ModelSerializer):
     note_type_display = serializers.CharField(source='get_note_type_display', read_only=True)
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = CustomerNote
         fields = '__all__'
@@ -41,7 +51,7 @@ class CustomerAccountListSerializer(serializers.ModelSerializer):
     days_until_renewal = serializers.ReadOnlyField()
     health_status = serializers.SerializerMethodField()
     health_score = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CustomerAccount
         fields = [
@@ -49,11 +59,11 @@ class CustomerAccountListSerializer(serializers.ModelSerializer):
             'customer_success_manager', 'csm_name', 'is_active',
             'contract_end', 'days_until_renewal', 'health_status', 'health_score'
         ]
-    
+
     def get_health_status(self, obj):
         latest = obj.health_scores.first()
         return latest.status if latest else None
-    
+
     def get_health_score(self, obj):
         latest = obj.health_scores.first()
         return latest.score if latest else None
@@ -64,15 +74,15 @@ class CustomerAccountDetailSerializer(serializers.ModelSerializer):
     tier_display = serializers.CharField(source='get_tier_display', read_only=True)
     csm_name = serializers.CharField(source='customer_success_manager.get_full_name', read_only=True)
     days_until_renewal = serializers.ReadOnlyField()
-    
+
     health_scores = HealthScoreSerializer(many=True, read_only=True)
     milestones = CustomerMilestoneSerializer(many=True, read_only=True)
     recent_notes = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CustomerAccount
         fields = '__all__'
-    
+
     def get_recent_notes(self, obj):
         notes = obj.notes.all()[:5]
         return CustomerNoteSerializer(notes, many=True).data
@@ -80,7 +90,7 @@ class CustomerAccountDetailSerializer(serializers.ModelSerializer):
 
 class PlaybookStepSerializer(serializers.ModelSerializer):
     step_type_display = serializers.CharField(source='get_step_type_display', read_only=True)
-    
+
     class Meta:
         model = PlaybookStep
         fields = '__all__'
@@ -89,7 +99,7 @@ class PlaybookStepSerializer(serializers.ModelSerializer):
 class SuccessPlaybookSerializer(serializers.ModelSerializer):
     trigger_type_display = serializers.CharField(source='get_trigger_type_display', read_only=True)
     steps = PlaybookStepSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = SuccessPlaybook
         fields = '__all__'
@@ -99,7 +109,7 @@ class SuccessPlaybookSerializer(serializers.ModelSerializer):
 class PlaybookExecutionSerializer(serializers.ModelSerializer):
     account_name = serializers.CharField(source='account.name', read_only=True)
     playbook_name = serializers.CharField(source='playbook.name', read_only=True)
-    
+
     class Meta:
         model = PlaybookExecution
         fields = '__all__'
@@ -109,7 +119,7 @@ class RenewalOpportunitySerializer(serializers.ModelSerializer):
     account_name = serializers.CharField(source='account.name', read_only=True)
     projected_change = serializers.ReadOnlyField()
     projected_change_percent = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = RenewalOpportunity
         fields = '__all__'
@@ -118,7 +128,7 @@ class RenewalOpportunitySerializer(serializers.ModelSerializer):
 class ExpansionOpportunitySerializer(serializers.ModelSerializer):
     account_name = serializers.CharField(source='account.name', read_only=True)
     expansion_type_display = serializers.CharField(source='get_expansion_type_display', read_only=True)
-    
+
     class Meta:
         model = ExpansionOpportunity
         fields = '__all__'
@@ -126,7 +136,7 @@ class ExpansionOpportunitySerializer(serializers.ModelSerializer):
 
 class NPSSurveySerializer(serializers.ModelSerializer):
     account_name = serializers.CharField(source='account.name', read_only=True)
-    
+
     class Meta:
         model = NPSSurvey
         fields = '__all__'

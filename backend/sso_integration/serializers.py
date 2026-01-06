@@ -1,19 +1,20 @@
-from rest_framework import serializers
-from .models import SSOProvider, SSOSession, SSOLoginAttempt
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from .models import SSOLoginAttempt, SSOProvider, SSOSession
 
 User = get_user_model()
 
 
 class SSOProviderSerializer(serializers.ModelSerializer):
     """Serializer for SSO Provider with sensitive data protection."""
-    
+
     is_oauth2 = serializers.ReadOnlyField()
     is_saml = serializers.ReadOnlyField()
     is_active = serializers.ReadOnlyField()
     redirect_uri = serializers.SerializerMethodField()
     created_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SSOProvider
         fields = [
@@ -25,7 +26,7 @@ class SSOProviderSerializer(serializers.ModelSerializer):
             'created_by', 'created_by_name', 'total_logins', 'last_used_at',
             'is_oauth2', 'is_saml', 'is_active', 'redirect_uri'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by', 
+        read_only_fields = ['id', 'created_at', 'updated_at', 'created_by',
                            'total_logins', 'last_used_at']
         extra_kwargs = {
             'client_secret': {'write_only': True},  # Never expose secret in responses
@@ -65,17 +66,17 @@ class SSOProviderSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """Validate OAuth2 and SAML configuration."""
         provider_type = data.get('provider_type')
-        
+
         if provider_type and provider_type.startswith('oauth2_'):
             # OAuth2 validation
-            required_fields = ['client_id', 'client_secret', 'authorization_url', 
+            required_fields = ['client_id', 'client_secret', 'authorization_url',
                              'token_url', 'user_info_url']
             for field in required_fields:
                 if not data.get(field):
                     raise serializers.ValidationError({
                         field: "This field is required for OAuth2 providers."
                     })
-        
+
         elif provider_type and provider_type.startswith('saml_'):
             # SAML validation
             required_fields = ['entity_id', 'sso_url', 'x509_cert']
@@ -84,16 +85,16 @@ class SSOProviderSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({
                         field: "This field is required for SAML providers."
                     })
-        
+
         return data
 
 
 class SSOProviderListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing providers."""
-    
+
     is_active = serializers.ReadOnlyField()
     created_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SSOProvider
         fields = [
@@ -109,10 +110,10 @@ class SSOProviderListSerializer(serializers.ModelSerializer):
 
 class SSOSessionSerializer(serializers.ModelSerializer):
     """Serializer for SSO sessions."""
-    
+
     provider_name = serializers.CharField(source='provider.provider_name', read_only=True)
     user_email = serializers.EmailField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = SSOSession
         fields = [
@@ -125,10 +126,10 @@ class SSOSessionSerializer(serializers.ModelSerializer):
 
 class SSOLoginAttemptSerializer(serializers.ModelSerializer):
     """Serializer for SSO login attempts."""
-    
+
     provider_name = serializers.CharField(source='provider.provider_name', read_only=True)
     user_email = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SSOLoginAttempt
         fields = [
@@ -144,12 +145,12 @@ class SSOLoginAttemptSerializer(serializers.ModelSerializer):
 
 class SSOProviderTestSerializer(serializers.Serializer):
     """Serializer for testing SSO provider connection."""
-    
+
     test_email = serializers.EmailField(
         required=False,
         help_text="Test email address (for validation only)"
     )
-    
+
     def validate_test_email(self, value):
         """Validate test email against required domains if configured."""
         provider = self.context.get('provider')
@@ -164,7 +165,7 @@ class SSOProviderTestSerializer(serializers.Serializer):
 
 class SSOProviderStatisticsSerializer(serializers.Serializer):
     """Serializer for SSO provider statistics."""
-    
+
     total_logins = serializers.IntegerField()
     successful_logins = serializers.IntegerField()
     failed_logins = serializers.IntegerField()

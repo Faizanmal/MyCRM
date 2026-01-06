@@ -3,9 +3,16 @@ Document E-Signature Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    DocumentTemplate, Document, DocumentRecipient, SignatureField,
-    Signature, DocumentAuditLog, SavedSignature, DocumentAnalytics
+    Document,
+    DocumentAnalytics,
+    DocumentAuditLog,
+    DocumentRecipient,
+    DocumentTemplate,
+    SavedSignature,
+    Signature,
+    SignatureField,
 )
 
 

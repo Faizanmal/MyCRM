@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import SSOProvider, SSOSession, SSOLoginAttempt
+
+from .models import SSOLoginAttempt, SSOProvider, SSOSession
 
 
 @admin.register(SSOProvider)
@@ -11,7 +12,7 @@ class SSOProviderAdmin(admin.ModelAdmin):
     list_filter = ['provider_type', 'status', 'created_at']
     search_fields = ['provider_name', 'organization__name', 'entity_id']
     readonly_fields = ['id', 'created_at', 'updated_at', 'total_logins', 'last_used_at']
-    
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('id', 'organization', 'provider_type', 'provider_name', 'status')
@@ -47,7 +48,7 @@ class SSOSessionAdmin(admin.ModelAdmin):
     list_filter = ['is_active', 'provider', 'created_at']
     search_fields = ['user__email', 'provider__provider_name', 'ip_address']
     readonly_fields = ['id', 'created_at']
-    
+
     fieldsets = (
         ('Session Information', {
             'fields': ('id', 'provider', 'user', 'is_active', 'created_at', 'ended_at')
@@ -70,7 +71,7 @@ class SSOLoginAttemptAdmin(admin.ModelAdmin):
     list_filter = ['status', 'provider', 'created_at']
     search_fields = ['email', 'provider__provider_name', 'ip_address', 'error_message']
     readonly_fields = ['id', 'created_at']
-    
+
     fieldsets = (
         ('Attempt Information', {
             'fields': ('id', 'provider', 'email', 'user', 'status', 'created_at')

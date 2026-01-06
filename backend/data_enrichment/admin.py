@@ -3,11 +3,20 @@ Data Enrichment Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    EnrichmentProvider, EnrichmentProfile, CompanyEnrichment,
-    TechnographicData, IntentSignal, NewsAlert, EmailVerification,
-    EnrichmentJob, EnrichmentRule, SocialProfile, FinancialData,
-    EnrichmentActivity
+    CompanyEnrichment,
+    EmailVerification,
+    EnrichmentActivity,
+    EnrichmentJob,
+    EnrichmentProfile,
+    EnrichmentProvider,
+    EnrichmentRule,
+    FinancialData,
+    IntentSignal,
+    NewsAlert,
+    SocialProfile,
+    TechnographicData,
 )
 
 

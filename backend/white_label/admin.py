@@ -3,9 +3,18 @@ White Label and Billing Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    WhiteLabelPartner, SubscriptionPlan, Organization, OrganizationMember,
-    Invoice, InvoiceLineItem, PaymentMethod, UsageRecord, PartnerPayout, FeatureFlag
+    FeatureFlag,
+    Invoice,
+    InvoiceLineItem,
+    Organization,
+    OrganizationMember,
+    PartnerPayout,
+    PaymentMethod,
+    SubscriptionPlan,
+    UsageRecord,
+    WhiteLabelPartner,
 )
 
 

@@ -487,17 +487,15 @@ class _IntegrationHubScreenState extends State<IntegrationHubScreen>
       '${providerItem.name} Integration',
     );
 
-    if (!context.mounted) return;
+    if (!mounted) return;
     Navigator.pop(context);
 
     if (authUrl != null) {
-      if (!context.mounted) return;
       // Show dialog with auth URL or launch browser
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please complete authentication at: $authUrl')),
       );
     } else {
-      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Integration created successfully!')),
       );

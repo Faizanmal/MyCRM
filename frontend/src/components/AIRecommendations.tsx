@@ -12,7 +12,6 @@ import {
     X,
     Sparkles,
     Phone,
-    Calendar,
     Lightbulb,
     Target,
     RefreshCw,
@@ -135,7 +134,7 @@ export default function AIRecommendations() {
             }
         } catch (error) {
             // Use fallback recommendations if API fails
-            console.log('Using fallback recommendations');
+            console.log('Using fallback recommendations',error);
             setRecommendations(fallbackRecommendations);
         } finally {
             setIsLoading(false);
@@ -157,7 +156,7 @@ export default function AIRecommendations() {
             toast.success('Recommendation dismissed');
         } catch (error) {
             // Silently handle - already removed from UI
-            console.log('Dismiss synced locally');
+            console.log('Dismiss synced locally',error);
         }
     };
 
@@ -165,7 +164,7 @@ export default function AIRecommendations() {
         try {
             // Mark as completed
             await recommendationsAPI.complete(recommendation.id);
-        } catch (error) {
+        } catch (_error) {
             // Continue navigation even if API fails
         }
         router.push(recommendation.action_url);
@@ -178,6 +177,7 @@ export default function AIRecommendations() {
             await fetchRecommendations(true);
             toast.success('Recommendations refreshed');
         } catch (error) {
+            console.log('Failed to refresh recommendations',error);
             toast.error('Failed to refresh recommendations');
             setIsRefreshing(false);
         }

@@ -1,7 +1,11 @@
 from rest_framework import serializers
+
 from .models import (
-    ChurnPrediction, NextBestAction, AIGeneratedContent,
-    SentimentAnalysis, AIModelMetrics
+    AIGeneratedContent,
+    AIModelMetrics,
+    ChurnPrediction,
+    NextBestAction,
+    SentimentAnalysis,
 )
 
 
@@ -9,7 +13,7 @@ class ChurnPredictionSerializer(serializers.ModelSerializer):
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
     contact_email = serializers.EmailField(source='contact.email', read_only=True)
     is_expired = serializers.BooleanField(read_only=True)
-    
+
     class Meta:
         model = ChurnPrediction
         fields = [
@@ -23,7 +27,7 @@ class ChurnPredictionSerializer(serializers.ModelSerializer):
 
 class NextBestActionSerializer(serializers.ModelSerializer):
     entity_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = NextBestAction
         fields = [
@@ -33,7 +37,7 @@ class NextBestActionSerializer(serializers.ModelSerializer):
             'status', 'model_version', 'created_at', 'updated_at', 'completed_at'
         ]
         read_only_fields = ['user', 'created_at', 'updated_at', 'completed_at']
-    
+
     def get_entity_name(self, obj):
         """Get name of the entity"""
         try:

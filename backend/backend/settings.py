@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-from pathlib import Path
-from datetime import timedelta
 import socket
+from datetime import timedelta
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -106,12 +107,16 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'core.middleware.SecurityHeadersMiddleware',  # Security headers
+    'core.middleware.RequestLoggingMiddleware',  # Request logging
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'multi_tenant.middleware.TenantMiddleware',  # Multi-tenant middleware (after auth)
     'core.security.SecurityMiddleware',  # Enterprise security middleware (after auth)
+    'core.middleware.RateLimitMiddleware',  # Global rate limiting
+    'core.middleware.IPWhitelistMiddleware',  # Admin IP whitelist
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -159,7 +164,7 @@ def _resolve_env_host(env_name: str, default: str = 'localhost') -> str:
                 f"Configured host {host!r} could not be resolved (getaddrinfo failed). "
                 f"Falling back to {fallback!r}. If you intended to connect to a Docker "
                 "service, either run the app inside the same compose network or set the "
-                "DATABASE_HOST appropriately."
+                "DATABASE_HOST appropriately.", stacklevel=2
             )
         return fallback
 
@@ -267,6 +272,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'TRAILING_SLASH': False,
 }
 
 # API Documentation with drf-spectacular
@@ -299,12 +305,34 @@ SIMPLE_JWT = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS', 
-    'http://localhost:3000,http://127.0.0.1:3000'
-).split(',')
+# Allow origins from env var or fall back to FRONTEND_URL and common localhost origins
+_cors_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if _cors_env:
+    CORS_ALLOWED_ORIGINS = _cors_env.split(',')
+else:
+    CORS_ALLOWED_ORIGINS = list(filter(None, [
+        os.getenv('FRONTEND_URL', 'http://localhost:3000'),
+        'http://127.0.0.1:3000',
+    ]))
 
 CORS_ALLOW_CREDENTIALS = True
+
+# Ensure common headers and methods are allowed (including Authorization)
+try:
+    from corsheaders.defaults import default_headers, default_methods  # type: ignore
+    CORS_ALLOW_HEADERS = list(default_headers) + ['content-type', 'authorization']
+    CORS_ALLOW_METHODS = list(default_methods)
+except Exception:
+    # Fallback to reasonable defaults if corsheaders package doesn't expose defaults
+    CORS_ALLOW_HEADERS = ['accept', 'accept-encoding', 'authorization', 'content-type',
+                          'dnt', 'origin', 'user-agent', 'x-csrftoken', 'x-requested-with']
+    CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+
+# Allow localhost regex for convenience in development
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https?://localhost(:\d+)?$",
+    r"^https?://127\.0\.0\.1(:\d+)?$",
+]
 
 # Security Settings
 SECURE_BROWSER_XSS_FILTER = True
@@ -331,7 +359,7 @@ if not DEBUG:
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')  # Generate with Fernet.generate_key()
 if not ENCRYPTION_KEY:
     import warnings
-    warnings.warn('ENCRYPTION_KEY not set! Enterprise encryption features will not work.')
+    warnings.warn('ENCRYPTION_KEY not set! Enterprise encryption features will not work.', stacklevel=2)
 
 # Rate Limiting Configuration
 RATE_LIMIT_ENABLED = True
@@ -392,8 +420,175 @@ OAUTH_REDIRECT_URI = os.getenv('OAUTH_REDIRECT_URI', '')
 SENTRY_DSN = os.getenv('SENTRY_DSN', '')
 if SENTRY_DSN and not DEBUG:
     import sentry_sdk
+    from sentry_sdk.integrations.celery import CeleryIntegration
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+
     sentry_sdk.init(
         dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            CeleryIntegration(),
+            RedisIntegration(),
+        ],
         traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
         environment='production' if not DEBUG else 'development',
+        send_default_pii=False,  # Don't send PII data
     )
+
+# =====================
+# SECURITY SETTINGS
+# =====================
+
+# Admin IP Whitelist (empty means no restriction in development)
+ADMIN_IP_WHITELIST = os.getenv('ADMIN_IP_WHITELIST', '').split(',') if os.getenv('ADMIN_IP_WHITELIST') else []
+
+# Security Headers
+if not DEBUG:
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True'
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Password Requirements
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 12,  # Stronger password requirement
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Django Axes - Brute Force Protection
+AXES_ENABLED = not DEBUG
+AXES_FAILURE_LIMIT = 5  # Lock after 5 failed attempts
+AXES_COOLOFF_TIME = timedelta(minutes=30)
+AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
+AXES_RESET_ON_SUCCESS = True
+
+# =====================
+# MONITORING & APM
+# =====================
+
+VERSION = os.getenv('APP_VERSION', '1.0.0')
+
+# Prometheus Metrics
+PROMETHEUS_ENABLED = os.getenv('PROMETHEUS_ENABLED', 'true').lower() == 'true'
+
+# Datadog APM
+DATADOG_ENABLED = os.getenv('DATADOG_ENABLED', 'false').lower() == 'true'
+if DATADOG_ENABLED and not DEBUG:
+    DATADOG_API_KEY = os.getenv('DATADOG_API_KEY', '')
+    DATADOG_APP_KEY = os.getenv('DATADOG_APP_KEY', '')
+    DATADOG_STATSD_HOST = os.getenv('DATADOG_STATSD_HOST', 'localhost')
+    DATADOG_STATSD_PORT = int(os.getenv('DATADOG_STATSD_PORT', '8125'))
+
+# OpenTelemetry
+OTEL_ENABLED = os.getenv('OTEL_ENABLED', 'false').lower() == 'true'
+if OTEL_ENABLED:
+    OTEL_SERVICE_NAME = os.getenv('OTEL_SERVICE_NAME', 'mycrm-backend')
+    OTEL_EXPORTER_OTLP_ENDPOINT = os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://localhost:4317')
+
+# =====================
+# LOGGING CONFIGURATION
+# =====================
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'mycrm.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'security': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'security.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'core.middleware': {
+            'handlers': ['security'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'axes': {
+            'handlers': ['security'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+# Create logs directory if it doesn't exist
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)

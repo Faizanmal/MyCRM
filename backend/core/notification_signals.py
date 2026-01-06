@@ -4,10 +4,11 @@ Automatically trigger notifications on model events
 """
 
 import logging
-from django.db.models.signals import post_save, pre_save, post_delete
-from django.dispatch import receiver
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_delete, post_save, pre_save
+from django.dispatch import receiver
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -19,7 +20,7 @@ User = get_user_model()
 def opportunity_saved(sender, instance, created, **kwargs):
     """Handle opportunity save events"""
     from .notification_service import notification_service
-    
+
     try:
         if created:
             # New deal assigned
@@ -57,7 +58,7 @@ def opportunity_saved(sender, instance, created, **kwargs):
                         }},
                         action_url=f'{settings.FRONTEND_URL}/deals/{instance.id}',
                     )
-            
+
             # Check for deal won
             if hasattr(instance, '_previous_status') and instance._previous_status != 'won' and instance.status == 'won':
                 # Notify team about deal won
@@ -77,7 +78,7 @@ def opportunity_saved(sender, instance, created, **kwargs):
                         action_url=f'{settings.FRONTEND_URL}/deals/{instance.id}',
                         priority='high',
                     )
-            
+
             # Check for deal lost
             if hasattr(instance, '_previous_status') and instance._previous_status != 'lost' and instance.status == 'lost':
                 if instance.owner:
@@ -116,7 +117,7 @@ def opportunity_pre_save(sender, instance, **kwargs):
 def task_saved(sender, instance, created, **kwargs):
     """Handle task save events"""
     from .notification_service import notification_service
-    
+
     try:
         if created:
             # New task assigned
@@ -150,8 +151,7 @@ def contact_saved(sender, instance, created, **kwargs):
     try:
         if created:
             # Log new contact creation for activity feed
-            from .models import Notification
-            
+
             if instance.owner:
                 # Could send team notification for high-value leads
                 pass
@@ -165,13 +165,13 @@ def contact_saved(sender, instance, created, **kwargs):
 def comment_created(sender, instance, created, **kwargs):
     """Handle new comments"""
     from .notification_service import notification_service
-    
+
     try:
         if created:
             # Find users mentioned in the comment
             import re
             mentions = re.findall(r'@(\w+)', instance.content)
-            
+
             for username in mentions:
                 try:
                     mentioned_user = User.objects.get(username=username)
@@ -192,7 +192,7 @@ def comment_created(sender, instance, created, **kwargs):
                         )
                 except User.DoesNotExist:
                     pass
-            
+
             # Notify content owner about the comment
             content_owner = getattr(instance.content_object, 'owner', None)
             if content_owner and content_owner != instance.author:
@@ -217,14 +217,19 @@ def comment_created(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def user_created(sender, instance, created, **kwargs):
     """Handle new user creation"""
-    from .settings_models import UserPreference, NotificationPreference, UserRole, UserRoleAssignment
-    
+    from .settings_models import (
+        NotificationPreference,
+        UserPreference,
+        UserRole,
+        UserRoleAssignment,
+    )
+
     try:
         if created:
             # Create default preferences
             UserPreference.objects.get_or_create(user=instance)
             NotificationPreference.objects.get_or_create(user=instance)
-            
+
             # Assign default role
             try:
                 default_role = UserRole.objects.get(name='sales_rep')
@@ -234,7 +239,7 @@ def user_created(sender, instance, created, **kwargs):
                 )
             except UserRole.DoesNotExist:
                 pass
-            
+
             logger.info(f"Created default preferences for new user: {instance.username}")
     except Exception as e:
         logger.error(f"Error in user_created signal: {e}")
@@ -246,7 +251,7 @@ def user_created(sender, instance, created, **kwargs):
 def export_job_updated(sender, instance, **kwargs):
     """Handle export job updates"""
     from .notification_service import notification_service
-    
+
     try:
         if instance.status == 'completed':
             notification_service.send(
@@ -285,7 +290,7 @@ def export_job_updated(sender, instance, **kwargs):
 def security_event(sender, instance, created, **kwargs):
     """Handle security-related audit events"""
     from .notification_service import notification_service
-    
+
     try:
         if created and instance.risk_level in ['high', 'critical']:
             if instance.user:
@@ -315,11 +320,11 @@ def role_assigned(sender, instance, created, **kwargs):
     """Notify user when role is assigned"""
     from .notification_service import notification_service
     from .rbac_middleware import invalidate_user_permissions
-    
+
     try:
         # Invalidate permission cache
         invalidate_user_permissions(instance.user.id)
-        
+
         if created:
             notification_service.send(
                 user=instance.user,
@@ -336,7 +341,7 @@ def role_assigned(sender, instance, created, **kwargs):
 def role_removed(sender, instance, **kwargs):
     """Handle role removal"""
     from .rbac_middleware import invalidate_user_permissions
-    
+
     try:
         invalidate_user_permissions(instance.user.id)
     except Exception as e:

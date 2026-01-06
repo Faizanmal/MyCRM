@@ -3,24 +3,25 @@ Enterprise Core Models for MyCRM
 Advanced security, audit, and enterprise features
 """
 
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils import timezone
 import uuid
+
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 
 
 class AuditLog(models.Model):
     """Comprehensive audit logging for enterprise compliance"""
-    
+
     RISK_LEVELS = [
         ('low', 'Low'),
         ('medium', 'Medium'),
         ('high', 'High'),
         ('critical', 'Critical'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='core_audit_logs')
     action = models.CharField(max_length=100)
@@ -30,7 +31,7 @@ class AuditLog(models.Model):
     metadata = models.JSONField(default=dict, blank=True)
     risk_level = models.CharField(max_length=20, choices=RISK_LEVELS, default='low')
     timestamp = models.DateTimeField(default=timezone.now)
-    
+
     class Meta:
         db_table = 'crm_core_audit_logs'
         verbose_name = 'Audit Log'
@@ -42,14 +43,14 @@ class AuditLog(models.Model):
             models.Index(fields=['risk_level', 'timestamp']),
             models.Index(fields=['ip_address', 'timestamp']),
         ]
-    
+
     def __str__(self):
         return f"{self.action} by {self.user or 'Anonymous'} at {self.timestamp}"
 
 
 class SystemConfiguration(models.Model):
     """System-wide configuration settings"""
-    
+
     CONFIG_TYPES = [
         ('security', 'Security'),
         ('integration', 'Integration'),
@@ -57,7 +58,7 @@ class SystemConfiguration(models.Model):
         ('ui', 'User Interface'),
         ('notification', 'Notifications'),
     ]
-    
+
     key = models.CharField(max_length=100, unique=True)
     value = models.JSONField()
     config_type = models.CharField(max_length=20, choices=CONFIG_TYPES)
@@ -66,25 +67,25 @@ class SystemConfiguration(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_system_config'
         verbose_name = 'System Configuration'
         verbose_name_plural = 'System Configurations'
-    
+
     def __str__(self):
         return f"{self.key} ({self.config_type})"
 
 
 class APIKey(models.Model):
     """API key management for external integrations"""
-    
+
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('revoked', 'Revoked'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     key_hash = models.CharField(max_length=128, unique=True)  # Hashed API key
@@ -95,31 +96,31 @@ class APIKey(models.Model):
     last_used = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_api_keys'
         verbose_name = 'API Key'
         verbose_name_plural = 'API Keys'
-    
+
     def __str__(self):
         return f"{self.name} - {self.user.username}"
 
 
 class DataBackup(models.Model):
     """Track data backups for disaster recovery"""
-    
+
     BACKUP_TYPES = [
         ('full', 'Full Backup'),
         ('incremental', 'Incremental'),
         ('differential', 'Differential'),
     ]
-    
+
     STATUS_CHOICES = [
         ('running', 'Running'),
         ('completed', 'Completed'),
         ('failed', 'Failed'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     backup_type = models.CharField(max_length=20, choices=BACKUP_TYPES)
     file_path = models.CharField(max_length=500)
@@ -129,20 +130,20 @@ class DataBackup(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         db_table = 'crm_data_backups'
         verbose_name = 'Data Backup'
         verbose_name_plural = 'Data Backups'
         ordering = ['-started_at']
-    
+
     def __str__(self):
         return f"{self.backup_type} backup - {self.started_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class Workflow(models.Model):
     """Automated workflow definitions"""
-    
+
     TRIGGER_TYPES = [
         ('record_created', 'Record Created'),
         ('record_updated', 'Record Updated'),
@@ -150,13 +151,13 @@ class Workflow(models.Model):
         ('time_based', 'Time Based'),
         ('email_received', 'Email Received'),
     ]
-    
+
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('draft', 'Draft'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -167,26 +168,26 @@ class Workflow(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_workflows'
         verbose_name = 'Workflow'
         verbose_name_plural = 'Workflows'
-    
+
     def __str__(self):
         return self.name
 
 
 class WorkflowExecution(models.Model):
     """Track workflow execution history"""
-    
+
     STATUS_CHOICES = [
         ('running', 'Running'),
         ('completed', 'Completed'),
         ('failed', 'Failed'),
         ('cancelled', 'Cancelled'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     workflow = models.ForeignKey(Workflow, on_delete=models.CASCADE, related_name='executions')
     trigger_data = models.JSONField(default=dict)  # Data that triggered the workflow
@@ -197,20 +198,20 @@ class WorkflowExecution(models.Model):
     execution_log = models.JSONField(default=list)  # Detailed execution log
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         db_table = 'crm_workflow_executions'
         verbose_name = 'Workflow Execution'
         verbose_name_plural = 'Workflow Executions'
         ordering = ['-started_at']
-    
+
     def __str__(self):
         return f"{self.workflow.name} - {self.started_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class Integration(models.Model):
     """External system integrations"""
-    
+
     INTEGRATION_TYPES = [
         ('email', 'Email Service'),
         ('calendar', 'Calendar'),
@@ -221,14 +222,14 @@ class Integration(models.Model):
         ('analytics', 'Analytics Platform'),
         ('storage', 'Cloud Storage'),
     ]
-    
+
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('inactive', 'Inactive'),
         ('error', 'Error'),
         ('configuring', 'Configuring'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     integration_type = models.CharField(max_length=30, choices=INTEGRATION_TYPES)
@@ -241,26 +242,26 @@ class Integration(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_integrations'
         verbose_name = 'Integration'
         verbose_name_plural = 'Integrations'
-    
+
     def __str__(self):
         return f"{self.name} ({self.provider})"
 
 
 class NotificationTemplate(models.Model):
     """Templates for automated notifications"""
-    
+
     NOTIFICATION_TYPES = [
         ('email', 'Email'),
         ('sms', 'SMS'),
         ('push', 'Push Notification'),
         ('in_app', 'In-App Notification'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
@@ -271,19 +272,19 @@ class NotificationTemplate(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_notification_templates'
         verbose_name = 'Notification Template'
         verbose_name_plural = 'Notification Templates'
-    
+
     def __str__(self):
         return f"{self.name} ({self.notification_type})"
 
 
 class SystemHealth(models.Model):
     """System health monitoring"""
-    
+
     COMPONENT_TYPES = [
         ('database', 'Database'),
         ('cache', 'Cache'),
@@ -292,21 +293,21 @@ class SystemHealth(models.Model):
         ('api', 'External API'),
         ('queue', 'Task Queue'),
     ]
-    
+
     STATUS_CHOICES = [
         ('healthy', 'Healthy'),
         ('warning', 'Warning'),
         ('critical', 'Critical'),
         ('down', 'Down'),
     ]
-    
+
     component = models.CharField(max_length=50, choices=COMPONENT_TYPES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     response_time = models.FloatField(null=True, blank=True)  # Response time in ms
     error_message = models.TextField(null=True, blank=True)
     metrics = models.JSONField(default=dict)  # Additional metrics
     checked_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_system_health'
         verbose_name = 'System Health Check'
@@ -316,7 +317,7 @@ class SystemHealth(models.Model):
             models.Index(fields=['component', 'checked_at']),
             models.Index(fields=['status', 'checked_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.component} - {self.status} at {self.checked_at}"
 
@@ -331,7 +332,7 @@ class UserPermission(models.Model):
     is_active = models.BooleanField(default=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_user_permissions'
         unique_together = ['user', 'permission']
@@ -340,7 +341,7 @@ class UserPermission(models.Model):
         indexes = [
             models.Index(fields=['user', 'is_active']),
         ]
-    
+
     def __str__(self):
         action = 'Granted' if self.is_granted else 'Revoked'
         return f"{action} {self.permission} for {self.user.username}"
@@ -355,12 +356,12 @@ class PermissionGroup(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_permission_groups'
         verbose_name = 'Permission Group'
         verbose_name_plural = 'Permission Groups'
-    
+
     def __str__(self):
         return self.name
 
@@ -371,13 +372,13 @@ class UserPermissionGroup(models.Model):
     group = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE, related_name='user_assignments')
     assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='group_assignments')
     assigned_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_user_permission_groups'
         unique_together = ['user', 'group']
         verbose_name = 'User Permission Group'
         verbose_name_plural = 'User Permission Groups'
-    
+
     def __str__(self):
         return f"{self.user.username} - {self.group.name}"
 
@@ -390,12 +391,12 @@ class Team(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_teams'
         verbose_name = 'Team'
         verbose_name_plural = 'Teams'
-    
+
     def __str__(self):
         return self.name
 
@@ -407,13 +408,13 @@ class TeamMember(models.Model):
     role = models.CharField(max_length=50, default='member')  # 'manager', 'member', 'viewer'
     is_active = models.BooleanField(default=True)
     joined_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_team_members'
         unique_together = ['team', 'user']
         verbose_name = 'Team Member'
         verbose_name_plural = 'Team Members'
-    
+
     def __str__(self):
         return f"{self.user.username} in {self.team.name}"
 
@@ -427,7 +428,7 @@ class DataImportLog(models.Model):
         ('completed_with_errors', 'Completed with Errors'),
         ('failed', 'Failed'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     model_name = models.CharField(max_length=100)
     file_format = models.CharField(max_length=10)
@@ -441,13 +442,13 @@ class DataImportLog(models.Model):
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         db_table = 'crm_data_import_logs'
         verbose_name = 'Data Import Log'
         verbose_name_plural = 'Data Import Logs'
         ordering = ['-created_at']
-    
+
     def __str__(self):
         return f"Import {self.model_name} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
@@ -463,7 +464,7 @@ class Notification(models.Model):
         ('mention', 'Mention'),
         ('system', 'System'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     title = models.CharField(max_length=200)
@@ -473,7 +474,7 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_notifications'
         verbose_name = 'Notification'
@@ -482,10 +483,10 @@ class Notification(models.Model):
         indexes = [
             models.Index(fields=['user', 'is_read', 'created_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.title} - {self.user.username}"
-    
+
     def mark_as_read(self):
         """Mark notification as read"""
         if not self.is_read:
@@ -505,13 +506,13 @@ class SavedSearch(models.Model):
     is_shared = models.BooleanField(default=False)  # Share with team
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_saved_searches'
         verbose_name = 'Saved Search'
         verbose_name_plural = 'Saved Searches'
         ordering = ['-updated_at']
-    
+
     def __str__(self):
         return f"{self.name} - {self.model_name}"
 
@@ -528,13 +529,13 @@ class Dashboard(models.Model):
     is_shared = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_core_dashboards'
         verbose_name = 'Dashboard'
         verbose_name_plural = 'Dashboards'
         ordering = ['-updated_at']
-    
+
     def __str__(self):
         return f"{self.name} - {self.user.username}"
 
@@ -547,7 +548,7 @@ class Report(models.Model):
         ('pivot', 'Pivot Table'),
         ('custom', 'Custom'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -560,13 +561,13 @@ class Report(models.Model):
     is_shared = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         db_table = 'crm_core_reports'
         verbose_name = 'Report'
         verbose_name_plural = 'Reports'
         ordering = ['-updated_at']
-    
+
     def __str__(self):
         return self.name
 
@@ -579,7 +580,7 @@ class ScheduledReport(models.Model):
         ('monthly', 'Monthly'),
         ('quarterly', 'Quarterly'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='schedules')
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
@@ -590,12 +591,12 @@ class ScheduledReport(models.Model):
     next_run = models.DateTimeField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_scheduled_reports'
         verbose_name = 'Scheduled Report'
         verbose_name_plural = 'Scheduled Reports'
-    
+
     def __str__(self):
         return f"{self.report.name} - {self.frequency}"
 
@@ -609,7 +610,7 @@ class SearchLog(models.Model):
     filters = models.JSONField(default=dict)
     result_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_search_logs'
         verbose_name = 'Search Log'
@@ -619,7 +620,7 @@ class SearchLog(models.Model):
             models.Index(fields=['model_name', 'created_at']),
             models.Index(fields=['user', 'created_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.query} on {self.model_name}"
 
@@ -633,7 +634,7 @@ class EmailLog(models.Model):
         ('failed', 'Failed'),
         ('bounced', 'Bounced'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     to_emails = models.JSONField(default=list)
     cc_emails = models.JSONField(default=list)
@@ -649,7 +650,7 @@ class EmailLog(models.Model):
     click_count = models.IntegerField(default=0)
     sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     sent_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_email_logs'
         verbose_name = 'Email Log'
@@ -659,7 +660,7 @@ class EmailLog(models.Model):
             models.Index(fields=['tracking_id']),
             models.Index(fields=['status', 'sent_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.subject} - {self.sent_at.strftime('%Y-%m-%d %H:%M')}"
 
@@ -670,12 +671,12 @@ class EmailClick(models.Model):
     email_log = models.ForeignKey(EmailLog, on_delete=models.CASCADE, related_name='clicks')
     url = models.URLField()
     clicked_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         db_table = 'crm_email_clicks'
         verbose_name = 'Email Click'
         verbose_name_plural = 'Email Clicks'
-    
+
     def __str__(self):
         return f"{self.url} - {self.clicked_at}"
 
@@ -690,7 +691,7 @@ class EmailCampaign(models.Model):
         ('paused', 'Paused'),
         ('cancelled', 'Cancelled'),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     template = models.ForeignKey(NotificationTemplate, on_delete=models.SET_NULL, null=True)
@@ -705,23 +706,23 @@ class EmailCampaign(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    
+
     class Meta:
         db_table = 'crm_core_email_campaigns'
         verbose_name = 'Email Campaign'
         verbose_name_plural = 'Email Campaigns'
         ordering = ['-created_at']
-    
+
     def __str__(self):
         return self.name
 
 
 # Import settings models to make them available from core.models
 from .settings_models import (  # noqa: E402, F401
-    UserPreference,
+    ExportJob,
     NotificationPreference,
     NotificationTypeSetting,
-    ExportJob,
+    UserPreference,
     UserRole,
     UserRoleAssignment,
 )

@@ -1,8 +1,8 @@
 # MyCRM Backend - Conversation Intelligence Tests
 
+
 import pytest
 from rest_framework import status
-from datetime import datetime
 
 
 @pytest.mark.django_db

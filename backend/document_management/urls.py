@@ -2,11 +2,15 @@
 Document Management URLs
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    DocumentViewSet, DocumentTemplateViewSet, DocumentShareViewSet,
-    DocumentCommentViewSet, DocumentApprovalViewSet
+    DocumentApprovalViewSet,
+    DocumentCommentViewSet,
+    DocumentShareViewSet,
+    DocumentTemplateViewSet,
+    DocumentViewSet,
 )
 
 router = DefaultRouter()

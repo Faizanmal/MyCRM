@@ -3,17 +3,18 @@ Document Management Serializers
 """
 
 from rest_framework import serializers
-from .models import Document, DocumentTemplate, DocumentShare, DocumentComment, DocumentApproval
+
+from .models import Document, DocumentApproval, DocumentComment, DocumentShare, DocumentTemplate
 
 
 class DocumentSerializer(serializers.ModelSerializer):
     """Serializer for Documents"""
-    
+
     file_extension = serializers.CharField(read_only=True)
     is_image = serializers.BooleanField(read_only=True)
     is_pdf = serializers.BooleanField(read_only=True)
     uploaded_by_name = serializers.CharField(source='uploaded_by.username', read_only=True)
-    
+
     class Meta:
         model = Document
         fields = [
@@ -28,20 +29,20 @@ class DocumentSerializer(serializers.ModelSerializer):
             'id', 'version', 'file_size', 'mime_type', 'extracted_text', 'ocr_processed',
             'uploaded_at', 'updated_at', 'download_count', 'last_accessed'
         ]
-    
+
     def create(self, validated_data):
         """Set file metadata on creation"""
         file_obj = validated_data.get('file')
         if file_obj:
             validated_data['file_size'] = file_obj.size
             validated_data['mime_type'] = file_obj.content_type
-        
+
         return super().create(validated_data)
 
 
 class DocumentTemplateSerializer(serializers.ModelSerializer):
     """Serializer for Document Templates"""
-    
+
     class Meta:
         model = DocumentTemplate
         fields = [
@@ -54,11 +55,11 @@ class DocumentTemplateSerializer(serializers.ModelSerializer):
 
 class DocumentShareSerializer(serializers.ModelSerializer):
     """Serializer for Document Shares"""
-    
+
     is_expired = serializers.BooleanField(read_only=True)
     is_active = serializers.BooleanField(read_only=True)
     document_name = serializers.CharField(source='document.name', read_only=True)
-    
+
     class Meta:
         model = DocumentShare
         fields = [
@@ -75,9 +76,9 @@ class DocumentShareSerializer(serializers.ModelSerializer):
 
 class DocumentCommentSerializer(serializers.ModelSerializer):
     """Serializer for Document Comments"""
-    
+
     created_by_name = serializers.CharField(source='created_by.username', read_only=True)
-    
+
     class Meta:
         model = DocumentComment
         fields = [
@@ -89,10 +90,10 @@ class DocumentCommentSerializer(serializers.ModelSerializer):
 
 class DocumentApprovalSerializer(serializers.ModelSerializer):
     """Serializer for Document Approvals"""
-    
+
     approver_name = serializers.CharField(source='approver.username', read_only=True)
     document_name = serializers.CharField(source='document.name', read_only=True)
-    
+
     class Meta:
         model = DocumentApproval
         fields = [

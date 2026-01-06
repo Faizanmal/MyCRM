@@ -1,17 +1,14 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+// import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { Button } from '@/components/ui/button';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-    TrendingUp,
-    TrendingDown,
     BarChart3,
     PieChart,
-    Calendar,
     ArrowUpRight,
     ArrowDownRight,
 } from 'lucide-react';
@@ -150,7 +147,12 @@ export function DonutChart({ data, height = 200 }: ChartProps) {
     const strokeWidth = 30;
     const circumference = 2 * Math.PI * radius;
 
-    let cumulativeOffset = 0;
+    // Calculate cumulative offsets
+    const offsets = data.reduce((acc, item, index) => {
+        const previousOffset = index === 0 ? 0 : acc[index - 1];
+        acc.push(previousOffset + item.value / total);
+        return acc;
+    }, [] as number[]);
 
     return (
         <div className="flex items-center justify-center gap-8" style={{ height }}>
@@ -159,8 +161,7 @@ export function DonutChart({ data, height = 200 }: ChartProps) {
                     {data.map((item, index) => {
                         const percentage = item.value / total;
                         const strokeDasharray = circumference * percentage;
-                        const strokeDashoffset = circumference * cumulativeOffset;
-                        cumulativeOffset += percentage;
+                        const strokeDashoffset = circumference * (index === 0 ? 0 : offsets[index - 1]);
 
                         return (
                             <motion.circle

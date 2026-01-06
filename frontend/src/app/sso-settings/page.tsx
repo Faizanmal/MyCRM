@@ -313,7 +313,7 @@ export default function SSOSettingsPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">SSO Configuration</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">SSO Configuration</h1>
                 <p className="mt-2 text-gray-600">
                   Configure Single Sign-On providers for your organization
                 </p>
@@ -357,7 +357,7 @@ export default function SSOSettingsPage() {
                     flex items-center py-4 px-1 border-b-2 font-medium text-sm
                     ${activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:border-gray-300'}
                   `}
                 >
                   <tab.icon className="h-5 w-5 mr-2" />
@@ -376,7 +376,7 @@ export default function SSOSettingsPage() {
               {providers.length === 0 ? (
                 <div className="col-span-2 text-center py-12 bg-gray-50 rounded-xl">
                   <KeyIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No SSO Providers</h3>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No SSO Providers</h3>
                   <p className="text-gray-600 mb-4">Get started by adding your first SSO provider</p>
                   <button
                     onClick={() => setShowCreateModal(true)}
@@ -425,14 +425,14 @@ export default function SSOSettingsPage() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleTestConnection(provider.id)}
-                        className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
+                        className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm"
                       >
                         <LinkIcon className="h-4 w-4 inline mr-1" />
                         Test
                       </button>
                       <button
                         onClick={() => handleViewStatistics(provider)}
-                        className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
+                        className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm"
                       >
                         <ChartBarIcon className="h-4 w-4 inline mr-1" />
                         Stats
@@ -571,7 +571,7 @@ export default function SSOSettingsPage() {
                 <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                   {/* Provider Type */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Provider Type
                     </label>
                     <select

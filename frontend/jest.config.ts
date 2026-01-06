@@ -1,4 +1,4 @@
-export default {
+const jestConfig = {
     testEnvironment: 'jsdom',
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
     moduleNameMapper: {
@@ -37,3 +37,5 @@ export default {
         '**/*.(test|spec).(ts|tsx)',
     ],
 };
+
+export default jestConfig;

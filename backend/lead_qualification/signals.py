@@ -1,8 +1,11 @@
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-from lead_management.models import Lead
-from .tasks import calculate_lead_score_task
 import logging
+
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
+
+from lead_management.models import Lead
+
+from .tasks import calculate_lead_score_task
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +22,10 @@ def lead_saved(sender, instance, created, **kwargs):
     else:
         # Recalculate score if important fields changed
         significant_fields = [
-            'email', 'phone', 'company', 'status', 'source', 
+            'email', 'phone', 'company', 'status', 'source',
             'industry', 'company_size', 'title'
         ]
-        
+
         # Check if any significant field was updated
         # Note: In production, you'd track field changes more precisely
         if any(hasattr(instance, field) for field in significant_fields):

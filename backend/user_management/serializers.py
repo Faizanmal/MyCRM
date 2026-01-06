@@ -1,7 +1,8 @@
-from rest_framework import serializers
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
-from .models import UserProfile, Permission, RolePermission, AuditLog
+from rest_framework import serializers
+
+from .models import AuditLog, Permission, RolePermission, UserProfile
 
 User = get_user_model()
 
@@ -16,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(read_only=True)
     full_name = serializers.ReadOnlyField(source='get_full_name')
     role = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = [
@@ -36,19 +37,19 @@ class UserSerializer(serializers.ModelSerializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True)
-    
+
     class Meta:
         model = User
         fields = [
             'username', 'email', 'first_name', 'last_name', 'password',
             'password_confirm'
         ]
-    
+
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError("Passwords don't match.")
         return attrs
-    
+
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
@@ -69,11 +70,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-    
+
     def validate(self, attrs):
         username = attrs.get('username')
         password = attrs.get('password')
-        
+
         if username and password:
             user = authenticate(username=username, password=password)
             if not user:
@@ -90,7 +91,7 @@ class PasswordChangeSerializer(serializers.Serializer):
     old_password = serializers.CharField()
     new_password = serializers.CharField(validators=[validate_password])
     new_password_confirm = serializers.CharField()
-    
+
     def validate(self, attrs):
         if attrs['new_password'] != attrs['new_password_confirm']:
             raise serializers.ValidationError("New passwords don't match.")
@@ -104,7 +105,7 @@ class TwoFactorSetupSerializer(serializers.Serializer):
 
 class TwoFactorVerifySerializer(serializers.Serializer):
     token = serializers.CharField(max_length=6)
-    
+
     def validate_token(self, value):
         if not value.isdigit() or len(value) != 6:
             raise serializers.ValidationError('Token must be a 6-digit number.')
@@ -119,7 +120,7 @@ class PermissionSerializer(serializers.ModelSerializer):
 
 class RolePermissionSerializer(serializers.ModelSerializer):
     permission = PermissionSerializer(read_only=True)
-    
+
     class Meta:
         model = RolePermission
         fields = ['role', 'permission']
@@ -127,7 +128,7 @@ class RolePermissionSerializer(serializers.ModelSerializer):
 
 class AuditLogSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
-    
+
     class Meta:
         model = AuditLog
         fields = [

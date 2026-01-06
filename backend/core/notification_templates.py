@@ -3,14 +3,14 @@ Notification Email Templates
 HTML and text email templates for various notification types
 """
 
-from django.template import Template, Context
-from django.utils import timezone
 from django.conf import settings
+from django.template import Context, Template
+from django.utils import timezone
 
 
 class EmailTemplates:
     """Collection of email templates for notifications"""
-    
+
     # Base HTML template
     BASE_HTML = """
 <!DOCTYPE html>
@@ -158,7 +158,7 @@ class EmailTemplates:
 """
 
     # ==================== Deal Notifications ====================
-    
+
     DEAL_WON_HTML = """
 <h2>🎉 Congratulations! Deal Won!</h2>
 <p>Great news! A deal has been closed successfully.</p>
@@ -232,7 +232,7 @@ class EmailTemplates:
 """
 
     # ==================== Task Notifications ====================
-    
+
     TASK_DUE_SOON_HTML = """
 <h2>⏰ Task Due Soon</h2>
 <p>You have a task due {{ task.time_until_due }}.</p>
@@ -240,7 +240,7 @@ class EmailTemplates:
 <div class="card">
     <h3 style="margin-top: 0;">{{ task.title }}</h3>
     <p><strong>Due:</strong> {{ task.due_date|date:"M d, Y" }} at {{ task.due_date|time:"g:i A" }}</p>
-    <p><strong>Priority:</strong> 
+    <p><strong>Priority:</strong>
         <span class="badge {% if task.priority == 'high' %}badge-danger{% elif task.priority == 'medium' %}badge-warning{% else %}badge-info{% endif %}">
             {{ task.priority|upper }}
         </span>
@@ -262,7 +262,7 @@ class EmailTemplates:
 <div class="card" style="border-left-color: #ef4444;">
     <h3 style="margin-top: 0; color: #ef4444;">{{ task.title }}</h3>
     <p><strong>Due:</strong> {{ task.due_date|date:"M d, Y" }} ({{ task.days_overdue }} days ago)</p>
-    <p><strong>Priority:</strong> 
+    <p><strong>Priority:</strong>
         <span class="badge badge-danger">{{ task.priority|upper }}</span>
     </p>
 </div>
@@ -291,7 +291,7 @@ class EmailTemplates:
 """
 
     # ==================== Social Notifications ====================
-    
+
     MENTION_HTML = """
 <h2>@{{ mentioned_by }} mentioned you</h2>
 <p>You were mentioned in a {{ context_type }}.</p>
@@ -325,7 +325,7 @@ class EmailTemplates:
 """
 
     # ==================== System Notifications ====================
-    
+
     SECURITY_ALERT_HTML = """
 <h2>🔐 Security Alert</h2>
 <p>We detected a security-related event on your account.</p>
@@ -366,7 +366,7 @@ class EmailTemplates:
 """
 
     # ==================== AI Notifications ====================
-    
+
     AI_RECOMMENDATION_HTML = """
 <h2>💡 AI Recommendation</h2>
 <p>Our AI has identified an opportunity that might interest you.</p>
@@ -374,7 +374,7 @@ class EmailTemplates:
 <div class="card" style="border-left-color: #8b5cf6;">
     <h3 style="margin-top: 0;">{{ recommendation.title }}</h3>
     <p>{{ recommendation.description }}</p>
-    <p><strong>Priority:</strong> 
+    <p><strong>Priority:</strong>
         <span class="badge {% if recommendation.priority == 'high' %}badge-danger{% else %}badge-info{% endif %}">
             {{ recommendation.priority|upper }}
         </span>
@@ -397,7 +397,7 @@ class EmailTemplates:
 """
 
     # ==================== Digest Templates ====================
-    
+
     DAILY_DIGEST_HTML = """
 <h2>📊 Your Daily Digest</h2>
 <p>Here's your activity summary for {{ date|date:"l, M d, Y" }}.</p>
@@ -572,10 +572,10 @@ class EmailTemplates:
         """Render a notification template with context"""
         if template_name not in cls.TEMPLATES:
             raise ValueError(f"Unknown template: {template_name}")
-        
+
         content_template = Template(cls.TEMPLATES[template_name])
         content_html = content_template.render(Context(context))
-        
+
         base_context = {
             'content': content_html,
             'title': context.get('title', 'MyCRM Notification'),
@@ -584,10 +584,10 @@ class EmailTemplates:
             'unsubscribe_url': context.get('unsubscribe_url', f"{settings.FRONTEND_URL}/unsubscribe"),
             'year': timezone.now().year,
         }
-        
+
         base_template = Template(cls.BASE_HTML)
         return base_template.render(Context(base_context))
-    
+
     @classmethod
     def get_text_version(cls, template_name, context):
         """Get plain text version of a notification"""
@@ -598,4 +598,4 @@ class EmailTemplates:
             'task_overdue': f"OVERDUE: {context.get('task', {}).get('title')}\nWas due: {context.get('task', {}).get('due_date')}",
             'mention': f"@{context.get('mentioned_by')} mentioned you: {context.get('message')}",
         }
-        return texts.get(template_name, f"You have a new notification from MyCRM")
+        return texts.get(template_name, "You have a new notification from MyCRM")

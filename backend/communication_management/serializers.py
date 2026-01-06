@@ -1,13 +1,14 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Communication, EmailTemplate, EmailCampaign, CommunicationRule, CommunicationLog
+from rest_framework import serializers
+
+from .models import Communication, CommunicationLog, CommunicationRule, EmailCampaign, EmailTemplate
 
 User = get_user_model()
 
 
 class EmailTemplateSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = EmailTemplate
         fields = [
@@ -21,7 +22,7 @@ class EmailTemplateSerializer(serializers.ModelSerializer):
 class EmailCampaignSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     template_name = serializers.CharField(source='template.name', read_only=True)
-    
+
     class Meta:
         model = EmailCampaign
         fields = [
@@ -39,7 +40,7 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
 
 class CommunicationRuleSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = CommunicationRule
         fields = [
@@ -52,7 +53,7 @@ class CommunicationRuleSerializer(serializers.ModelSerializer):
 
 class CommunicationLogSerializer(serializers.ModelSerializer):
     rule_name = serializers.CharField(source='rule.name', read_only=True)
-    
+
     class Meta:
         model = CommunicationLog
         fields = [
@@ -69,7 +70,7 @@ class CommunicationSerializer(serializers.ModelSerializer):
     lead_name = serializers.CharField(source='lead.full_name', read_only=True)
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
     task_title = serializers.CharField(source='task.title', read_only=True)
-    
+
     class Meta:
         model = Communication
         fields = [
@@ -93,7 +94,7 @@ class CommunicationCreateSerializer(serializers.ModelSerializer):
             'contact', 'lead', 'opportunity', 'task', 'email_id', 'call_duration',
             'call_recording_url', 'tags', 'attachments', 'custom_fields', 'communication_date'
         ]
-    
+
     def create(self, validated_data):
         # Set from_user if not provided
         if not validated_data.get('from_user'):
@@ -104,7 +105,7 @@ class CommunicationCreateSerializer(serializers.ModelSerializer):
 class CommunicationBulkUpdateSerializer(serializers.Serializer):
     communication_ids = serializers.ListField(child=serializers.IntegerField())
     updates = serializers.DictField()
-    
+
     def validate_communication_ids(self, value):
         if not value:
             raise serializers.ValidationError("At least one communication ID is required.")

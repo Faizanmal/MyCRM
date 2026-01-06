@@ -3,10 +3,18 @@ Conversation Intelligence Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    CallRecording, CallTranscript, TranscriptSegment, CallAnalysis,
-    TopicMention, CallCoaching, CallPlaylist, PlaylistClip,
-    CallTracker, ConversationAnalytics
+    CallAnalysis,
+    CallCoaching,
+    CallPlaylist,
+    CallRecording,
+    CallTracker,
+    CallTranscript,
+    ConversationAnalytics,
+    PlaylistClip,
+    TopicMention,
+    TranscriptSegment,
 )
 
 
@@ -18,7 +26,7 @@ class TranscriptSegmentSerializer(serializers.ModelSerializer):
 
 class CallTranscriptSerializer(serializers.ModelSerializer):
     segments = TranscriptSegmentSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = CallTranscript
         fields = '__all__'
@@ -32,7 +40,7 @@ class CallAnalysisSerializer(serializers.ModelSerializer):
 
 class TopicMentionSerializer(serializers.ModelSerializer):
     topic_type_display = serializers.CharField(source='get_topic_type_display', read_only=True)
-    
+
     class Meta:
         model = TopicMention
         fields = '__all__'
@@ -40,7 +48,7 @@ class TopicMentionSerializer(serializers.ModelSerializer):
 
 class CallCoachingSerializer(serializers.ModelSerializer):
     coach_name = serializers.CharField(source='coach.get_full_name', read_only=True)
-    
+
     class Meta:
         model = CallCoaching
         fields = '__all__'
@@ -55,7 +63,7 @@ class CallRecordingListSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
     has_analysis = serializers.SerializerMethodField()
     call_score = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CallRecording
         fields = [
@@ -63,10 +71,10 @@ class CallRecordingListSerializer(serializers.ModelSerializer):
             'platform', 'platform_display', 'duration_seconds', 'duration_formatted',
             'status', 'recorded_at', 'owner', 'owner_name', 'has_analysis', 'call_score'
         ]
-    
+
     def get_has_analysis(self, obj):
         return hasattr(obj, 'analysis')
-    
+
     def get_call_score(self, obj):
         if hasattr(obj, 'analysis'):
             return obj.analysis.call_score
@@ -79,12 +87,12 @@ class CallRecordingDetailSerializer(serializers.ModelSerializer):
     platform_display = serializers.CharField(source='get_platform_display', read_only=True)
     duration_formatted = serializers.ReadOnlyField()
     owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
-    
+
     transcript = CallTranscriptSerializer(read_only=True)
     analysis = CallAnalysisSerializer(read_only=True)
     topic_mentions = TopicMentionSerializer(many=True, read_only=True)
     coaching_notes = CallCoachingSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = CallRecording
         fields = '__all__'
@@ -102,7 +110,7 @@ class CallRecordingCreateSerializer(serializers.ModelSerializer):
 
 class PlaylistClipSerializer(serializers.ModelSerializer):
     recording_title = serializers.CharField(source='recording.title', read_only=True)
-    
+
     class Meta:
         model = PlaylistClip
         fields = '__all__'
@@ -112,7 +120,7 @@ class CallPlaylistSerializer(serializers.ModelSerializer):
     clips = PlaylistClipSerializer(many=True, read_only=True)
     clip_count = serializers.IntegerField(source='clips.count', read_only=True)
     creator_name = serializers.CharField(source='creator.get_full_name', read_only=True)
-    
+
     class Meta:
         model = CallPlaylist
         fields = '__all__'

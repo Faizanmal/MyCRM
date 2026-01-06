@@ -199,7 +199,7 @@ export default function ActivityFeed({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-sm text-gray-900">
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
                           <span className="font-medium">{activity.user_display_name || 'Someone'}</span>
                           {' '}
                           <span className="text-gray-600">{activity.description}</span>
@@ -280,14 +280,14 @@ export default function ActivityFeed({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {comment.user_display_name || 'Anonymous'}
                         </span>
                         <span className="text-xs text-gray-500">
                           {formatTimeAgo(comment.created_at)}
                         </span>
                       </div>
-                      <div className="mt-1 text-sm text-gray-700">
+                      <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">
                         {parseCommentContent(comment.content)}
                       </div>
                       {(comment.reply_count ?? 0) > 0 && (

@@ -3,14 +3,15 @@ Integration Hub Signals
 Connect to Django signals to trigger webhooks
 """
 
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from lead_management.models import Lead
+
+from campaign_management.models import Campaign
 from contact_management.models import Contact
+from document_management.models import Document
+from lead_management.models import Lead
 from opportunity_management.models import Opportunity
 from task_management.models import Task
-from campaign_management.models import Campaign
-from document_management.models import Document
 
 from .tasks import trigger_webhook
 
@@ -65,7 +66,7 @@ def opportunity_saved(sender, instance, created, **kwargs):
         event = 'opportunity.lost'
     else:
         event = 'opportunity.updated'
-    
+
     payload = {
         'event': event,
         'opportunity_id': str(instance.id),
@@ -85,7 +86,7 @@ def task_saved(sender, instance, created, **kwargs):
         event = 'task.completed'
     else:
         return  # Don't trigger for regular updates
-    
+
     payload = {
         'event': event,
         'task_id': str(instance.id),

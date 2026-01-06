@@ -24,15 +24,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogFooter,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from '@/components/ui/dialog';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -825,7 +825,7 @@ function SeverityBadge({ severity }: { severity: string }) {
   const variants: Record<string, string> = {
     critical: 'bg-red-500 text-white',
     high: 'bg-orange-500 text-white',
-    medium: 'bg-yellow-500 text-black',
+    medium: 'bg-yellow-500 text-black dark:text-white',
     low: 'bg-blue-500 text-white',
   };
 
@@ -888,7 +888,7 @@ function DSRStatusBadge({ status }: { status: string }) {
 function RiskBadge({ level }: { level: string }) {
   const variants: Record<string, string> = {
     high: 'bg-red-500 text-white',
-    medium: 'bg-yellow-500 text-black',
+    medium: 'bg-yellow-500 text-black dark:text-white',
     low: 'bg-green-500 text-white',
   };
 

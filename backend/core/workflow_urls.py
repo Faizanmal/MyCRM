@@ -2,13 +2,16 @@
 Advanced Workflow Engine URLs
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .workflow_views import (
-    WorkflowDefinitionViewSet, WorkflowNodeViewSet,
-    WorkflowInstanceViewSet, WorkflowApprovalViewSet,
-    WorkflowTemplateViewSet, WorkflowTriggerView
+    WorkflowApprovalViewSet,
+    WorkflowDefinitionViewSet,
+    WorkflowInstanceViewSet,
+    WorkflowNodeViewSet,
+    WorkflowTemplateViewSet,
+    WorkflowTriggerView,
 )
 
 router = DefaultRouter()

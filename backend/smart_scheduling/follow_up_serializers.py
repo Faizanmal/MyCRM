@@ -3,22 +3,23 @@ Follow-up and Calendar Sync Serializers
 """
 
 from rest_framework import serializers
+
 from .follow_up_models import (
-    MeetingFollowUp,
+    CalendarEvent,
     FollowUpSequence,
+    MeetingAnalytics,
+    MeetingFollowUp,
     MeetingOutcome,
     RecurringMeetingPattern,
-    MeetingAnalytics,
-    CalendarEvent
 )
 
 
 class MeetingFollowUpSerializer(serializers.ModelSerializer):
     """Serializer for meeting follow-ups"""
-    
+
     meeting_title = serializers.CharField(source='meeting.meeting_type.name', read_only=True)
     guest_name = serializers.CharField(source='meeting.guest_name', read_only=True)
-    
+
     class Meta:
         model = MeetingFollowUp
         fields = [
@@ -35,10 +36,10 @@ class MeetingFollowUpSerializer(serializers.ModelSerializer):
 
 class FollowUpSequenceSerializer(serializers.ModelSerializer):
     """Serializer for follow-up sequences"""
-    
+
     steps_count = serializers.SerializerMethodField()
     meeting_type_names = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = FollowUpSequence
         fields = [
@@ -50,21 +51,21 @@ class FollowUpSequenceSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'times_used', 'avg_reply_rate', 'created_at', 'updated_at']
-    
+
     def get_steps_count(self, obj):
         return len(obj.steps) if obj.steps else 0
-    
+
     def get_meeting_type_names(self, obj):
         return [mt.name for mt in obj.meeting_types.all()]
 
 
 class MeetingOutcomeSerializer(serializers.ModelSerializer):
     """Serializer for meeting outcomes"""
-    
+
     meeting_title = serializers.CharField(source='meeting.meeting_type.name', read_only=True)
     guest_name = serializers.CharField(source='meeting.guest_name', read_only=True)
     recorded_by_name = serializers.CharField(source='recorded_by.username', read_only=True)
-    
+
     class Meta:
         model = MeetingOutcome
         fields = [
@@ -80,10 +81,10 @@ class MeetingOutcomeSerializer(serializers.ModelSerializer):
 
 class RecurringMeetingPatternSerializer(serializers.ModelSerializer):
     """Serializer for recurring meeting patterns"""
-    
+
     meeting_type_name = serializers.CharField(source='meeting_type.name', read_only=True)
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
-    
+
     class Meta:
         model = RecurringMeetingPattern
         fields = [
@@ -100,7 +101,7 @@ class RecurringMeetingPatternSerializer(serializers.ModelSerializer):
 
 class MeetingAnalyticsSerializer(serializers.ModelSerializer):
     """Serializer for meeting analytics"""
-    
+
     class Meta:
         model = MeetingAnalytics
         fields = [
@@ -119,9 +120,9 @@ class MeetingAnalyticsSerializer(serializers.ModelSerializer):
 
 class CalendarEventSerializer(serializers.ModelSerializer):
     """Serializer for synced calendar events"""
-    
+
     provider = serializers.CharField(source='integration.provider', read_only=True)
-    
+
     class Meta:
         model = CalendarEvent
         fields = [

@@ -2,12 +2,16 @@
 Integration Marketplace - URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .marketplace_views import (
-    MarketplaceAppViewSet, AppInstallationViewSet,
-    CustomWebhookViewSet, APIRateLimitViewSet,
-    APIUsageViewSet, IntegrationMarketplaceDashboardView
+    APIRateLimitViewSet,
+    APIUsageViewSet,
+    AppInstallationViewSet,
+    CustomWebhookViewSet,
+    IntegrationMarketplaceDashboardView,
+    MarketplaceAppViewSet,
 )
 
 router = DefaultRouter()

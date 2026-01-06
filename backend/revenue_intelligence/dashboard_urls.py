@@ -2,14 +2,18 @@
 Revenue Intelligence Dashboard URLs
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .dashboard_views import (
-    RevenueForecastViewSet, CohortAnalysisViewSet,
-    RevenueAttributionViewSet, SalesVelocityViewSet,
-    RevenueLeakageViewSet, WinLossAnalysisViewSet,
-    ARRMovementViewSet, RevenueIntelligenceSnapshotViewSet
+    ARRMovementViewSet,
+    CohortAnalysisViewSet,
+    RevenueAttributionViewSet,
+    RevenueForecastViewSet,
+    RevenueIntelligenceSnapshotViewSet,
+    RevenueLeakageViewSet,
+    SalesVelocityViewSet,
+    WinLossAnalysisViewSet,
 )
 
 router = DefaultRouter()

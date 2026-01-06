@@ -1,7 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { ReactNode, createContext, useContext } from 'react';
+import { ReactNode } from 'react';
 
 /**
  * API Client Configuration and Hooks

@@ -1,8 +1,15 @@
 from rest_framework import serializers
+
 from .models import (
-    ConsentType, UserConsent, DataExportRequest, DataDeletionRequest,
-    DataProcessingActivity, DataBreachIncident, DataAccessLog,
-    PrivacyNotice, UserPrivacyPreference
+    ConsentType,
+    DataAccessLog,
+    DataBreachIncident,
+    DataDeletionRequest,
+    DataExportRequest,
+    DataProcessingActivity,
+    PrivacyNotice,
+    UserConsent,
+    UserPrivacyPreference,
 )
 
 
@@ -42,7 +49,7 @@ class UserConsentSerializer(serializers.ModelSerializer):
 
 class UserConsentListSerializer(serializers.ModelSerializer):
     consent_type_name = serializers.CharField(source='consent_type.name', read_only=True)
-    
+
     class Meta:
         model = UserConsent
         fields = ['id', 'consent_type_name', 'is_granted', 'consent_date', 'withdrawn_at']
@@ -51,7 +58,7 @@ class UserConsentListSerializer(serializers.ModelSerializer):
 class DataExportRequestSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    
+
     class Meta:
         model = DataExportRequest
         fields = [

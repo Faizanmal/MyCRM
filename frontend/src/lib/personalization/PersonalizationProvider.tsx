@@ -93,35 +93,35 @@ interface PersonalizationContextType {
     updates: Partial<UserPreferences[K]>
   ) => void;
   resetPreferences: (section?: keyof UserPreferences) => void;
-  
+
   // Quick Actions
   quickActions: QuickAction[];
   executeQuickAction: (actionId: string) => void;
   createQuickAction: (action: Omit<QuickAction, 'id'>) => void;
   deleteQuickAction: (actionId: string) => void;
-  
+
   // Insights
   insights: Insight[];
   dismissInsight: (insightId: string) => void;
   actOnInsight: (insightId: string) => void;
-  
+
   // Onboarding
   tours: OnboardingTour[];
   activeTour: OnboardingTour | null;
   startTour: (tourSlug: string) => void;
   skipTour: (tourSlug: string) => void;
   nextTourStep: () => void;
-  
+
   // Contextual Help
   getHelpForPage: (pagePath: string) => ContextualHelp[];
   dismissHelp: (helpId: string) => void;
-  
+
   // Smart Defaults
   getSmartDefaults: (entityType: string, context?: Record<string, unknown>) => Record<string, unknown>;
-  
+
   // Behavior Tracking
   trackEvent: (eventType: string, eventData: Record<string, unknown>) => void;
-  
+
   // UI Adaptations
   uiAdaptations: {
     dashboardWidgets: string[];
@@ -129,7 +129,7 @@ interface PersonalizationContextType {
     quickActions: QuickAction[];
     featureHighlights: { feature: string; description: string }[];
   } | null;
-  
+
   // State
   isLoading: boolean;
 }
@@ -247,7 +247,7 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
   const queryClient = useQueryClient();
   const [activeTour, setActiveTour] = useState<OnboardingTour | null>(null);
   const [helpDismissed, setHelpDismissed] = useState<Set<string>>(new Set());
-  const [sessionId] = useState(() => `session_${Date.now()}`);
+  // const [sessionId] = useState(() => `session_${Date.now()}`);
 
   // Fetch preferences
   const { data: preferences, isLoading: prefsLoading } = useQuery({
@@ -305,7 +305,7 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
   );
 
   // Reset preferences
-  const resetPreferences = useCallback((section?: keyof UserPreferences) => {
+  const resetPreferences = useCallback(() => {
     // In production, call API to reset
     queryClient.invalidateQueries({ queryKey: ['preferences', userId] });
   }, [queryClient, userId]);
@@ -335,25 +335,25 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
   }, [quickActions]);
 
   // Create quick action
-  const createQuickAction = useCallback((action: Omit<QuickAction, 'id'>) => {
+  const createQuickAction = useCallback(() => {
     // In production, send to API
     queryClient.invalidateQueries({ queryKey: ['quickActions', userId] });
   }, [queryClient, userId]);
 
   // Delete quick action
-  const deleteQuickAction = useCallback((actionId: string) => {
+  const deleteQuickAction = useCallback(() => {
     // In production, send to API
     queryClient.invalidateQueries({ queryKey: ['quickActions', userId] });
   }, [queryClient, userId]);
 
   // Dismiss insight
-  const dismissInsight = useCallback((insightId: string) => {
+  const dismissInsight = useCallback(() => {
     // In production, send to API
     queryClient.invalidateQueries({ queryKey: ['insights', userId] });
   }, [queryClient, userId]);
 
   // Act on insight
-  const actOnInsight = useCallback((insightId: string) => {
+  const actOnInsight = useCallback(() => {
     // In production, send to API and handle action
     queryClient.invalidateQueries({ queryKey: ['insights', userId] });
   }, [queryClient, userId]);
@@ -378,7 +378,7 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
   // Next tour step
   const nextTourStep = useCallback(() => {
     if (!activeTour) return;
-    
+
     if (activeTour.currentStep >= activeTour.totalSteps) {
       setActiveTour(null);
       queryClient.invalidateQueries({ queryKey: ['tours', userId] });
@@ -392,7 +392,7 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
   }, [activeTour, queryClient, userId]);
 
   // Get help for page
-  const getHelpForPage = useCallback((pagePath: string): ContextualHelp[] => {
+  const getHelpForPage = useCallback((): ContextualHelp[] => {
     // In production, fetch from API
     // Filter out dismissed help
     return [];
@@ -402,10 +402,10 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
   const dismissHelp = useCallback((helpId: string) => {
     setHelpDismissed(prev => new Set(prev).add(helpId));
     // In production, send to API
-  }, []);
+  }, [setHelpDismissed]);
 
   // Get smart defaults
-  const getSmartDefaults = useCallback((entityType: string, context?: Record<string, unknown>) => {
+  const getSmartDefaults = useCallback((entityType: string) => {
     // In production, fetch from API with ML predictions
     const defaults: Record<string, Record<string, unknown>> = {
       opportunity: { stage: 'qualification', probability: 20 },
@@ -429,16 +429,16 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
     const handleKeyDown = (e: KeyboardEvent) => {
       for (const action of quickActions) {
         if (!action.keyboardShortcut) continue;
-        
+
         const parts = action.keyboardShortcut.toLowerCase().split('+');
         const key = parts.pop();
         const modifiers = parts;
-        
+
         const matchesKey = e.key.toLowerCase() === key;
         const matchesCtrl = modifiers.includes('ctrl') === e.ctrlKey;
         const matchesShift = modifiers.includes('shift') === e.shiftKey;
         const matchesAlt = modifiers.includes('alt') === e.altKey;
-        
+
         if (matchesKey && matchesCtrl && matchesShift && matchesAlt) {
           e.preventDefault();
           executeQuickAction(action.id);
@@ -539,11 +539,11 @@ export function useTrackEvent() {
 export function InsightBanner() {
   const { insights, dismissInsight, actOnInsight } = useInsights();
   const newInsights = insights.filter(i => i.status === 'new');
-  
+
   if (newInsights.length === 0) return null;
-  
+
   const insight = newInsights[0];
-  
+
   return (
     <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
       <div className="flex items-start">
@@ -575,9 +575,9 @@ export function InsightBanner() {
 
 export function OnboardingOverlay() {
   const { activeTour, nextTourStep, skipTour } = useOnboarding();
-  
+
   if (!activeTour) return null;
-  
+
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
       <div className="absolute inset-0 bg-black/50 pointer-events-auto" />
@@ -616,7 +616,7 @@ export function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const { quickActions, executeQuickAction } = useQuickActions();
-  
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -631,13 +631,13 @@ export function CommandPalette() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
-  
+
   const filteredActions = quickActions.filter(action =>
     action.name.toLowerCase().includes(query.toLowerCase())
   );
-  
+
   if (!isOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-32">
       <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} />

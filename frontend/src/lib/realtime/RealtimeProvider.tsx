@@ -243,10 +243,11 @@ export function RealtimeProvider({
   const [locks, setLocks] = useState<Lock[]>([]);
   
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const eventHandlersRef = useRef<Map<string, Set<(payload: unknown) => void>>>(new Map());
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const connectRef = useRef<(() => void) | null>(null);
   
   // Handle incoming messages
   const handleMessage = useCallback((message: RealtimeMessage) => {
@@ -261,14 +262,14 @@ export function RealtimeProvider({
     switch (type) {
       case 'presence:joined':
       case 'presence:update': {
-        const p = payload as any;
+        const p = payload as unknown;
         setPresence(prev => {
           const next = new Map(prev);
-          next.set(p.user_id, {
-            userId: p.user_id,
-            status: p.status,
-            statusMessage: p.status_message,
-            currentPage: p.current_page,
+          next.set((p as { user_id: string }).user_id, {
+            userId: (p as { user_id: string }).user_id,
+            status: (p as { status: 'online' | 'busy' | 'away' | 'dnd' | 'offline' }).status,
+            statusMessage: (p as { status_message?: string }).status_message,
+            currentPage: (p as { current_page?: string }).current_page,
             lastSeen: new Date(),
           });
           return next;
@@ -277,22 +278,22 @@ export function RealtimeProvider({
       }
       
       case 'presence:left': {
-        const p = payload as any;
+        const p = payload as unknown;
         setPresence(prev => {
           const next = new Map(prev);
-          next.delete(p.user_id);
+          next.delete((p as { user_id: string }).user_id);
           return next;
         });
         break;
       }
       
       case 'presence:typing_start': {
-        const p = payload as any;
+        const p = payload as unknown;
         setTypingUsers(prev => {
           const next = new Map(prev);
-          next.set(p.user_id, {
-            userId: p.user_id,
-            field: p.field,
+          next.set((p as { user_id: string }).user_id, {
+            userId: (p as { user_id: string }).user_id,
+            field: (p as { field: string }).field,
           });
           return next;
         });
@@ -300,25 +301,25 @@ export function RealtimeProvider({
       }
       
       case 'presence:typing_stop': {
-        const p = payload as any;
+        const p = payload as unknown;
         setTypingUsers(prev => {
           const next = new Map(prev);
-          next.delete(p.user_id);
+          next.delete((p as { user_id: string }).user_id);
           return next;
         });
         break;
       }
       
       case 'session:participant_joined': {
-        const p = payload as any;
+        const p = payload as unknown;
         setParticipants(prev => {
-          const exists = prev.some(participant => participant.userId === p.user_id);
+          const exists = prev.some(participant => participant.userId === (p as { user_id: string }).user_id);
           if (exists) return prev;
           
           return [...prev, {
-            userId: p.user_id,
-            user: p.user,
-            role: p.role || 'editor',
+            userId: (p as { user_id: string }).user_id,
+            user: (p as { user: User }).user,
+            role: ((p as { role?: 'owner' | 'editor' | 'commenter' | 'viewer' }).role || 'editor') as 'owner' | 'editor' | 'commenter' | 'viewer',
             status: 'active',
             color: getParticipantColor(prev.length),
             joinedAt: new Date(),
@@ -328,74 +329,74 @@ export function RealtimeProvider({
       }
       
       case 'session:participant_left': {
-        const p = payload as any;
+        const p = payload as unknown;
         setParticipants(prev => 
-          prev.filter(participant => participant.userId !== p.user_id)
+          prev.filter(participant => participant.userId !== (p as { user_id: string }).user_id)
         );
         break;
       }
       
       case 'session:cursor_moved': {
-        const p = payload as any;
+        const p = payload as unknown;
         if (senderId !== userId) {
           setParticipants(prev => prev.map(participant => 
-            participant.userId === p.user_id
-              ? { ...participant, cursor: p.cursor }
+            participant.userId === (p as { user_id: string }).user_id
+              ? { ...participant, cursor: (p as { cursor: any }).cursor as CursorPosition | undefined } // eslint-disable-line @typescript-eslint/no-explicit-any
               : participant
-          ));
+          ) as Participant[]);
         }
         break;
       }
       
       case 'session:selection_changed': {
-        const p = payload as any;
+        const p = payload as unknown;
         if (senderId !== userId) {
           setParticipants(prev => prev.map(participant => 
-            participant.userId === p.user_id
-              ? { ...participant, selection: p.selection }
+            participant.userId === (p as { user_id: string }).user_id
+              ? { ...participant, selection: (p as { selection: any }).selection as Selection | undefined } // eslint-disable-line @typescript-eslint/no-explicit-any
               : participant
-          ));
+          ) as Participant[]);
         }
         break;
       }
       
       case 'change:applied': {
-        const p = payload as any;
-        setVersion(p.version);
+        const p = payload as unknown;
+        setVersion((p as { version: number }).version);
         if (senderId !== userId) {
           setPendingChanges(prev => [...prev, {
-            id: p.change_id,
-            fieldPath: p.field_path,
-            changeType: p.change_type,
-            oldValue: p.old_value,
-            newValue: p.new_value,
-            position: p.position,
-            length: p.length,
-            version: p.version,
-            userId: p.user_id,
+            id: (p as { change_id: string }).change_id,
+            fieldPath: (p as { field_path: string }).field_path,
+            changeType: (p as { change_type: 'delete' | 'replace' | 'format' | 'insert' | 'move' }).change_type,
+            oldValue: (p as { old_value: unknown }).old_value,
+            newValue: (p as { new_value: unknown }).new_value,
+            position: (p as { position?: number }).position,
+            length: (p as { length?: number }).length,
+            version: (p as { version: number }).version,
+            userId: (p as { user_id: string }).user_id,
             timestamp: new Date(message.timestamp),
-          }]);
+          }] as Change[]);
         }
         break;
       }
       
       case 'change:conflict_resolved': {
-        const p = payload as any;
-        if (p.conflict) {
+        const p = payload as unknown;
+        if ((p as { conflict?: unknown }).conflict) {
           setConflicts(prev => [...prev, {
-            id: p.conflict.conflict_id,
-            conflictType: p.conflict.conflict_type,
-            localChange: p.local_change,
-            remoteChange: p.remote_change,
-            resolution: p.conflict.resolution,
-            resolvedValue: p.conflict.resolved_value,
+            id: ((p as { conflict: { conflict_id: string } }).conflict).conflict_id,
+            conflictType: ((p as { conflict: { conflict_type: 'merge' | 'override' | 'discard' } }).conflict).conflict_type,
+            localChange: (p as { local_change: Change }).local_change,
+            remoteChange: (p as { remote_change: Change }).remote_change,
+            resolution: ((p as { conflict: { resolution: 'local' | 'remote' | 'manual' } }).conflict).resolution,
+            resolvedValue: ((p as { conflict: { resolved_value: unknown } }).conflict).resolved_value,
           }]);
         }
         break;
       }
       
       case 'comment:added': {
-        const p = payload as any;
+        const p = payload as { comment_id: string; content: string; field_path: string; author: User; parent_id?: string; thread_root_id?: string; created_at: string };
         setComments(prev => {
           const newComment: Comment = {
             id: p.comment_id,
@@ -423,9 +424,9 @@ export function RealtimeProvider({
       }
       
       case 'comment:resolved': {
-        const p = payload as any;
+        const p = payload as unknown;
         setComments(prev => prev.map(c => 
-          c.id === p.comment_id
+          c.id === (p as { comment_id: string }).comment_id
             ? { ...c, status: 'resolved', resolvedAt: new Date() }
             : c
         ));
@@ -433,22 +434,22 @@ export function RealtimeProvider({
       }
       
       case 'lock:acquired': {
-        const p = payload as any;
+        const p = payload as unknown;
         setLocks(prev => [...prev, {
-          id: p.lock_id,
-          fieldPath: p.field_path,
-          userId: p.user_id,
-          user: p.user,
-          lockType: p.lock_type,
+          id: (p as { lock_id: string }).lock_id,
+          fieldPath: (p as { field_path: string }).field_path,
+          userId: (p as { user_id: string }).user_id,
+          user: (p as { user: User }).user,
+          lockType: (p as { lock_type: 'exclusive' | 'shared' | 'intent' }).lock_type,
           acquiredAt: new Date(),
-          expiresAt: new Date(p.expires_at),
+          expiresAt: new Date((p as { expires_at: string }).expires_at),
         }]);
         break;
       }
       
       case 'lock:released': {
-        const p = payload as any;
-        setLocks(prev => prev.filter(l => l.id !== p.lock_id));
+        const p = payload as unknown;
+        setLocks(prev => prev.filter(l => l.id !== (p as { lock_id: string }).lock_id));
         break;
       }
     }
@@ -498,7 +499,7 @@ export function RealtimeProvider({
       }
       
       // Attempt reconnect
-      reconnectTimeoutRef.current = setTimeout(connect, reconnectInterval);
+      reconnectTimeoutRef.current = setTimeout(() => connectRef.current?.(), reconnectInterval);
     };
     
     ws.onerror = (error) => {
@@ -515,17 +516,18 @@ export function RealtimeProvider({
   
   // Connect on mount
   useEffect(() => {
+    connectRef.current = connect;
     connect();
     
     return () => {
       if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
+        clearTimeout(reconnectTimeoutRef.current as ReturnType<typeof setTimeout>);
       }
       if (heartbeatIntervalRef.current) {
-        clearInterval(heartbeatIntervalRef.current);
+        clearInterval(heartbeatIntervalRef.current as ReturnType<typeof setInterval>);
       }
       if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+        clearTimeout(typingTimeoutRef.current as ReturnType<typeof setTimeout>);
       }
       wsRef.current?.close();
     };
@@ -553,7 +555,7 @@ export function RealtimeProvider({
   
   // Session functions
   const joinSession = useCallback(async (entityType: string, entityId: string): Promise<CollaborationSession> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const channel = `session:${entityType}:${entityId}`;
       
       // Subscribe to session channel
@@ -896,7 +898,7 @@ export function useCollaboration(entityType: string, entityId: string) {
     return () => {
       realtime.leaveSession();
     };
-  }, [entityType, entityId, realtime.joinSession, realtime.leaveSession]);
+  }, [entityType, entityId, realtime.joinSession, realtime.leaveSession,realtime]);
   
   return {
     session: realtime.currentSession,
@@ -947,7 +949,7 @@ export function useComments(entityType: string, entityId: string) {
   };
 }
 
-export function useLocks(entityType: string, entityId: string) {
+export function useLocks(_entityType: string, _entityId: string) {
   const { locks, acquireLock, releaseLock, isFieldLocked, getFieldLockHolder } = useRealtime();
   
   const entityLocks = useMemo(() => {

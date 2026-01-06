@@ -7,7 +7,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from .models import SequenceEnrollment, SequenceActivity
+from .models import SequenceActivity, SequenceEnrollment
 from .services import TriggerEvaluationService
 
 
@@ -16,7 +16,7 @@ def check_lead_score_triggers(sender, instance, created, **kwargs):
     """Check for lead score-based triggers when lead is updated"""
     if created:
         return
-    
+
     service = TriggerEvaluationService()
     service.evaluate_triggers('lead_score', {
         'contact_id': getattr(instance, 'contact_id', None),
@@ -31,14 +31,14 @@ def check_contact_triggers(sender, instance, created, **kwargs):
     """Check for contact-based triggers"""
     if created:
         return
-    
+
     # Check for tag changes
     old_tags = getattr(instance, '_original_tags', [])
     new_tags = instance.tags or []
-    
+
     added_tags = [t for t in new_tags if t not in old_tags]
     removed_tags = [t for t in old_tags if t not in new_tags]
-    
+
     if added_tags or removed_tags:
         service = TriggerEvaluationService()
         service.evaluate_triggers('tag_change', {
@@ -76,7 +76,7 @@ def track_email_open(enrollment_id: str, email_id: str, metadata: dict = None):
         enrollment = SequenceEnrollment.objects.get(id=enrollment_id)
         enrollment.emails_opened += 1
         enrollment.save(update_fields=['emails_opened'])
-        
+
         SequenceActivity.objects.create(
             enrollment=enrollment,
             activity_type='email_opened',
@@ -93,7 +93,7 @@ def track_email_click(enrollment_id: str, email_id: str, url: str, metadata: dic
         enrollment = SequenceEnrollment.objects.get(id=enrollment_id)
         enrollment.emails_clicked += 1
         enrollment.save(update_fields=['emails_clicked'])
-        
+
         SequenceActivity.objects.create(
             enrollment=enrollment,
             activity_type='email_clicked',
@@ -110,24 +110,24 @@ def track_email_reply(enrollment_id: str, email_id: str, metadata: dict = None):
         enrollment = SequenceEnrollment.objects.get(id=enrollment_id)
         enrollment.emails_replied += 1
         enrollment.save(update_fields=['emails_replied'])
-        
+
         SequenceActivity.objects.create(
             enrollment=enrollment,
             activity_type='email_replied',
             description='Email replied',
             metadata=metadata or {}
         )
-        
+
         # Check if sequence should exit on reply
         if enrollment.sequence.exit_conditions.get('on_reply'):
             enrollment.status = 'converted'
             enrollment.exit_reason = 'Replied to email'
             enrollment.exited_at = timezone.now()
             enrollment.save(update_fields=['status', 'exit_reason', 'exited_at'])
-            
+
             # Update sequence stats
             enrollment.sequence.total_converted += 1
             enrollment.sequence.save(update_fields=['total_converted'])
-            
+
     except SequenceEnrollment.DoesNotExist:
         pass

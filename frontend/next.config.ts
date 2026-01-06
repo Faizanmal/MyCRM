@@ -37,6 +37,16 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker production builds
   output: 'standalone',
   
+  // API proxy to backend
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/:path*`,
+      },
+    ];
+  },
+  
   // Security headers
   async headers() {
     return [
@@ -49,8 +59,17 @@ const nextConfig: NextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost'],
     remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000',
+      },
       {
         protocol: 'https',
         hostname: '**',

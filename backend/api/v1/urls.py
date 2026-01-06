@@ -1,20 +1,29 @@
 """
 Unified API V1 URLs
 """
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import LeadViewSet, ContactViewSet, OpportunityViewSet, TaskViewSet
-from .import_export import CSVImportView, CSVExportView
-from .scoring import LeadScoringView
-from .workflows import WorkflowViewSet, NotificationTemplateViewSet
-from .analytics import SalesForecastView, ConversionFunnelView, CohortAnalysisView, CustomMetricsView, DashboardAnalyticsView
-from .email_campaigns import EmailTemplateViewSet, EmailCampaignViewSet
-from .audit_dashboard import (
-    AuditTrailViewSet, FieldHistoryViewSet, 
-    DashboardWidgetViewSet, UserDashboardViewSet
+
+from .analytics import (
+    CohortAnalysisView,
+    ConversionFunnelView,
+    CustomMetricsView,
+    DashboardAnalyticsView,
+    SalesForecastView,
 )
-from .custom_fields import CustomFieldViewSet, CustomFieldValueViewSet
+from .audit_dashboard import (
+    AuditTrailViewSet,
+    DashboardWidgetViewSet,
+    FieldHistoryViewSet,
+    UserDashboardViewSet,
+)
+from .custom_fields import CustomFieldValueViewSet, CustomFieldViewSet
+from .email_campaigns import EmailCampaignViewSet, EmailTemplateViewSet
+from .import_export import CSVExportView, CSVImportView
+from .scoring import LeadScoringView
 from .timeline import ActivityTimelineView, EntityTimelineView, UserActivityView
+from .views import ContactViewSet, LeadViewSet, OpportunityViewSet, TaskViewSet
+from .workflows import NotificationTemplateViewSet, WorkflowViewSet
 
 router = DefaultRouter()
 
@@ -46,27 +55,27 @@ router.register(r'custom-field-values', CustomFieldValueViewSet, basename='custo
 
 urlpatterns = [
     path('', include(router.urls)),
-    
+
     # CSV Import/Export endpoints
     path('import/<str:resource_type>/', CSVImportView.as_view(), name='csv-import'),
     path('export/<str:resource_type>/', CSVExportView.as_view(), name='csv-export'),
-    
+
     # Lead scoring endpoint
     path('scoring/', LeadScoringView.as_view(), name='lead-scoring'),
-    
+
     # Analytics endpoints
     path('analytics/forecast/', SalesForecastView.as_view(), name='analytics-forecast'),
     path('analytics/funnel/', ConversionFunnelView.as_view(), name='analytics-funnel'),
     path('analytics/cohort/', CohortAnalysisView.as_view(), name='analytics-cohort'),
     path('analytics/metrics/', CustomMetricsView.as_view(), name='analytics-metrics'),
     path('analytics/dashboard/', DashboardAnalyticsView.as_view(), name='analytics-dashboard'),
-    
+
     # Activity timeline endpoints
     path('timeline/', ActivityTimelineView.as_view(), name='activity-timeline'),
     path('timeline/<str:entity_type>/<int:entity_id>/', EntityTimelineView.as_view(), name='entity-timeline'),
     path('timeline/user/', UserActivityView.as_view(), name='user-activity'),
     path('timeline/user/<int:user_id>/', UserActivityView.as_view(), name='user-activity-by-id'),
-    
+
     # Interactive features (user preferences, onboarding, AI recommendations, search)
     path('interactive/', include('core.interactive_urls')),
 ]

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import {
     Plus,
     X,
@@ -12,7 +12,6 @@ import {
     Calendar,
     FileText,
     Target,
-    MessageSquare,
     ClipboardList,
     Sparkles,
 } from 'lucide-react';

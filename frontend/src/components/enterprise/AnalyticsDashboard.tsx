@@ -26,17 +26,12 @@ import {
   ArrowRight,
   ArrowUp,
   BarChart3,
-  Calendar,
   DollarSign,
   Download,
-  Filter,
-  Loader2,
-  PieChart,
   RefreshCw,
   Target,
   TrendingDown,
   TrendingUp,
-  Users,
   Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -381,7 +376,7 @@ function OverviewTab({ metrics }: { metrics: SalesMetrics }) {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Activity Summary</CardTitle>
-          <CardDescription>Your team's activities this period</CardDescription>
+          <CardDescription>Your team&apos;s activities this period</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

@@ -1,18 +1,20 @@
-from typing import Dict, Any, List
-from .base import BaseIntegrationClient
-from django.conf import settings
+from typing import Any
+
 import requests
+from django.conf import settings
+
+from .base import BaseIntegrationClient
 
 
 class GoogleWorkspaceClient(BaseIntegrationClient):
     """Google Workspace integration client"""
-    
+
     def __init__(self):
         super().__init__()
         self.base_url = 'https://www.googleapis.com'
         self.client_id = getattr(settings, 'GOOGLE_CLIENT_ID', '')
         self.client_secret = getattr(settings, 'GOOGLE_CLIENT_SECRET', '')
-    
+
     def get_authorization_url(self, redirect_uri: str, state: str = None) -> str:
         """Get Google OAuth URL"""
         scopes = [
@@ -22,7 +24,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
             'https://www.googleapis.com/auth/userinfo.email',
             'https://www.googleapis.com/auth/userinfo.profile',
         ]
-        
+
         params = {
             'client_id': self.client_id,
             'redirect_uri': redirect_uri,
@@ -33,11 +35,11 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
         }
         if state:
             params['state'] = state
-        
+
         query_string = '&'.join([f'{k}={v}' for k, v in params.items()])
         return f'https://accounts.google.com/o/oauth2/v2/auth?{query_string}'
-    
-    def exchange_code(self, code: str, redirect_uri: str) -> Dict[str, Any]:
+
+    def exchange_code(self, code: str, redirect_uri: str) -> dict[str, Any]:
         """Exchange code for tokens"""
         response = requests.post(
             'https://oauth2.googleapis.com/token',
@@ -50,7 +52,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
             }
         )
         data = response.json()
-        
+
         if 'access_token' in data:
             return {
                 'access_token': data['access_token'],
@@ -58,8 +60,8 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                 'expires_in': data.get('expires_in', 3600)
             }
         raise Exception(f"Failed to exchange code: {data.get('error_description')}")
-    
-    def refresh_access_token(self) -> Dict[str, Any]:
+
+    def refresh_access_token(self) -> dict[str, Any]:
         """Refresh Google access token"""
         response = requests.post(
             'https://oauth2.googleapis.com/token',
@@ -71,7 +73,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
             }
         )
         data = response.json()
-        
+
         if 'access_token' in data:
             self.access_token = data['access_token']
             return {
@@ -79,7 +81,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                 'expires_in': data.get('expires_in', 3600)
             }
         raise Exception(f"Failed to refresh token: {data.get('error_description')}")
-    
+
     def test_connection(self) -> bool:
         """Test Google connection"""
         try:
@@ -87,11 +89,11 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
             return 'email' in response
         except Exception:
             return False
-    
-    def sync_contacts(self, crm_contacts: List[Dict]) -> Dict[str, int]:
+
+    def sync_contacts(self, crm_contacts: list[dict]) -> dict[str, int]:
         """Sync contacts to Google Contacts"""
         synced = 0
-        
+
         for contact in crm_contacts:
             try:
                 contact_data = {
@@ -103,20 +105,20 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                         'value': contact.get('email')
                     }]
                 }
-                
+
                 if contact.get('phone'):
                     contact_data['phoneNumbers'] = [{
                         'value': contact['phone']
                     }]
-                
+
                 self.post('people/v1/people:createContact', contact_data)
                 synced += 1
             except Exception:
                 continue
-        
+
         return {'synced': synced}
-    
-    def fetch_contacts(self) -> List[Dict]:
+
+    def fetch_contacts(self) -> list[dict]:
         """Fetch contacts from Google"""
         try:
             response = self.get(
@@ -125,14 +127,14 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                     'personFields': 'names,emailAddresses,phoneNumbers,organizations'
                 }
             )
-            
+
             contacts = []
             for person in response.get('connections', []):
                 names = person.get('names', [{}])[0]
                 emails = person.get('emailAddresses', [{}])[0]
                 phones = person.get('phoneNumbers', [{}])[0]
                 orgs = person.get('organizations', [{}])[0]
-                
+
                 contacts.append({
                     'first_name': names.get('givenName'),
                     'last_name': names.get('familyName'),
@@ -140,12 +142,12 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                     'phone': phones.get('value'),
                     'company_name': orgs.get('name')
                 })
-            
+
             return contacts
         except Exception:
             return []
-    
-    def create_task(self, task_data: Dict) -> Dict:
+
+    def create_task(self, task_data: dict) -> dict:
         """Create calendar event for task"""
         try:
             event = {
@@ -160,12 +162,12 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                     'timeZone': 'UTC'
                 }
             }
-            
+
             response = self.post('calendar/v3/calendars/primary/events', event)
             return {'success': True, 'event_id': response.get('id')}
         except Exception as e:
             return {'success': False, 'error': str(e)}
-    
+
     def send_notification(self, message: str, channel: str = None) -> bool:
         """Send email notification via Gmail"""
         try:
@@ -173,8 +175,8 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
             return True
         except Exception:
             return False
-    
-    def create_calendar_event(self, event_data: Dict) -> Dict:
+
+    def create_calendar_event(self, event_data: dict) -> dict:
         """Create calendar event"""
         try:
             response = self.post('calendar/v3/calendars/primary/events', event_data)

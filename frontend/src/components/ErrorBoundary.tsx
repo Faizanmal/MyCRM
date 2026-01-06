@@ -138,7 +138,7 @@ Time: ${new Date().toISOString()}
                             <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-red-100 flex items-center justify-center">
                                 <AlertTriangle className="h-8 w-8 text-red-600" />
                             </div>
-                            <CardTitle className="text-xl font-semibold text-gray-900">
+                            <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                                 Something went wrong
                             </CardTitle>
                             <CardDescription className="text-gray-600">
@@ -150,13 +150,13 @@ Time: ${new Date().toISOString()}
                             {/* Show error details in development */}
                             {(this.props.showDetails || process.env.NODE_ENV === 'development') && this.state.error && (
                                 <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Error Details</h4>
+                                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Error Details</h4>
                                     <p className="text-sm text-red-600 font-mono break-all">
                                         {this.state.error.message}
                                     </p>
                                     {this.state.error.stack && (
                                         <details className="mt-2">
-                                            <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
+                                            <summary className="text-xs text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300">
                                                 View Stack Trace
                                             </summary>
                                             <pre className="mt-2 text-xs text-gray-600 overflow-auto max-h-40 p-2 bg-gray-100 rounded">

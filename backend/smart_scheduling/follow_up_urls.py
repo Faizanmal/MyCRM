@@ -2,18 +2,18 @@
 Follow-up and Calendar Sync URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .follow_up_views import (
-    MeetingFollowUpViewSet,
-    FollowUpSequenceViewSet,
-    MeetingOutcomeViewSet,
-    RecurringMeetingPatternViewSet,
-    CalendarSyncViewSet,
-    MultiCalendarViewSet,
     CalendarIntelligenceViewSet,
-    MeetingAnalyticsViewSet
+    CalendarSyncViewSet,
+    FollowUpSequenceViewSet,
+    MeetingAnalyticsViewSet,
+    MeetingFollowUpViewSet,
+    MeetingOutcomeViewSet,
+    MultiCalendarViewSet,
+    RecurringMeetingPatternViewSet,
 )
 
 router = DefaultRouter()

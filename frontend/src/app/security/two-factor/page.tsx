@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, Smartphone, AlertCircle, CheckCircle2, Key } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
+import Image from 'next/image';
 
 export default function TwoFactorAuthPage() {
   const { user, refreshUser } = useAuth();
@@ -213,8 +214,7 @@ export default function TwoFactorAuthPage() {
                       Open your authenticator app and scan this QR code
                     </p>
                       <div className="flex justify-center p-4 bg-white border rounded-lg">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={qrCode} alt="2FA QR Code" className="w-64 h-64" />
+                        <Image src={qrCode} alt="2FA QR Code" className="w-64 h-64" />
                       </div>
                   </div>
 

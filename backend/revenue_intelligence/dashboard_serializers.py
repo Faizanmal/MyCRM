@@ -3,19 +3,25 @@ Revenue Intelligence Dashboard Serializers
 """
 
 from rest_framework import serializers
+
 from .dashboard_models import (
-    RevenueForecast, CohortAnalysis, RevenueAttribution,
-    SalesVelocity, RevenueLeakage, WinLossAnalysis,
-    ARRMovement, RevenueIntelligenceSnapshot
+    ARRMovement,
+    CohortAnalysis,
+    RevenueAttribution,
+    RevenueForecast,
+    RevenueIntelligenceSnapshot,
+    RevenueLeakage,
+    SalesVelocity,
+    WinLossAnalysis,
 )
 
 
 class RevenueForecastSerializer(serializers.ModelSerializer):
     """Serializer for RevenueForecast"""
-    
+
     attainment_percentage = serializers.SerializerMethodField()
     gap_to_committed = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = RevenueForecast
         fields = [
@@ -29,12 +35,12 @@ class RevenueForecastSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_attainment_percentage(self, obj):
         if obj.predicted_revenue and obj.committed_revenue:
             return float(obj.committed_revenue / obj.predicted_revenue * 100)
         return 0
-    
+
     def get_gap_to_committed(self, obj):
         if obj.predicted_revenue and obj.committed_revenue:
             return float(obj.predicted_revenue - obj.committed_revenue)
@@ -43,9 +49,9 @@ class RevenueForecastSerializer(serializers.ModelSerializer):
 
 class CohortAnalysisSerializer(serializers.ModelSerializer):
     """Serializer for CohortAnalysis"""
-    
+
     retention_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CohortAnalysis
         fields = [
@@ -56,7 +62,7 @@ class CohortAnalysisSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_retention_rate(self, obj):
         if obj.periodic_values and len(obj.periodic_values) >= 2:
             first = obj.periodic_values[0]
@@ -68,10 +74,10 @@ class CohortAnalysisSerializer(serializers.ModelSerializer):
 
 class RevenueAttributionSerializer(serializers.ModelSerializer):
     """Serializer for RevenueAttribution"""
-    
+
     opportunity_name = serializers.SerializerMethodField()
     top_channels = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = RevenueAttribution
         fields = [
@@ -82,10 +88,10 @@ class RevenueAttributionSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_opportunity_name(self, obj):
         return obj.opportunity.name if obj.opportunity else None
-    
+
     def get_top_channels(self, obj):
         if obj.channel_attribution:
             sorted_channels = sorted(
@@ -99,9 +105,9 @@ class RevenueAttributionSerializer(serializers.ModelSerializer):
 
 class SalesVelocitySerializer(serializers.ModelSerializer):
     """Serializer for SalesVelocity"""
-    
+
     velocity_score = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SalesVelocity
         fields = [
@@ -114,7 +120,7 @@ class SalesVelocitySerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_velocity_score(self, obj):
         """Calculate a normalized velocity score (0-100)"""
         # Simplified scoring
@@ -127,9 +133,9 @@ class SalesVelocitySerializer(serializers.ModelSerializer):
 
 class RevenueLeakageSerializer(serializers.ModelSerializer):
     """Serializer for RevenueLeakage"""
-    
+
     total_leakage = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = RevenueLeakage
         fields = [
@@ -140,7 +146,7 @@ class RevenueLeakageSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_total_leakage(self, obj):
         if obj.identified_amount and obj.recovered_amount:
             return float(obj.identified_amount - obj.recovered_amount)
@@ -149,11 +155,11 @@ class RevenueLeakageSerializer(serializers.ModelSerializer):
 
 class WinLossAnalysisSerializer(serializers.ModelSerializer):
     """Serializer for WinLossAnalysis"""
-    
+
     win_loss_ratio = serializers.SerializerMethodField()
     avg_won_value = serializers.SerializerMethodField()
     avg_lost_value = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WinLossAnalysis
         fields = [
@@ -167,17 +173,17 @@ class WinLossAnalysisSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_win_loss_ratio(self, obj):
         if obj.total_lost and obj.total_lost > 0:
             return round(obj.total_won / obj.total_lost, 2)
         return obj.total_won if obj.total_won else 0
-    
+
     def get_avg_won_value(self, obj):
         if obj.total_won and obj.total_won > 0:
             return float(obj.won_value / obj.total_won)
         return 0
-    
+
     def get_avg_lost_value(self, obj):
         if obj.total_lost and obj.total_lost > 0:
             return float(obj.lost_value / obj.total_lost)
@@ -186,10 +192,10 @@ class WinLossAnalysisSerializer(serializers.ModelSerializer):
 
 class ARRMovementSerializer(serializers.ModelSerializer):
     """Serializer for ARRMovement"""
-    
+
     net_arr_change = serializers.SerializerMethodField()
     growth_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ARRMovement
         fields = [
@@ -204,16 +210,16 @@ class ARRMovementSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_net_arr_change(self, obj):
         return float(
-            (obj.new_arr or 0) + 
-            (obj.expansion_arr or 0) + 
-            (obj.reactivation_arr or 0) - 
-            (obj.contraction_arr or 0) - 
+            (obj.new_arr or 0) +
+            (obj.expansion_arr or 0) +
+            (obj.reactivation_arr or 0) -
+            (obj.contraction_arr or 0) -
             (obj.churn_arr or 0)
         )
-    
+
     def get_growth_rate(self, obj):
         if obj.starting_arr and obj.starting_arr > 0:
             net_change = self.get_net_arr_change(obj)
@@ -223,10 +229,10 @@ class ARRMovementSerializer(serializers.ModelSerializer):
 
 class RevenueIntelligenceSnapshotSerializer(serializers.ModelSerializer):
     """Serializer for RevenueIntelligenceSnapshot"""
-    
+
     quarter_attainment = serializers.SerializerMethodField()
     health_score = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = RevenueIntelligenceSnapshot
         fields = [
@@ -243,7 +249,7 @@ class RevenueIntelligenceSnapshotSerializer(serializers.ModelSerializer):
             'created_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_quarter_attainment(self, obj):
         if obj.current_quarter_target and obj.current_quarter_target > 0:
             return round(
@@ -251,42 +257,42 @@ class RevenueIntelligenceSnapshotSerializer(serializers.ModelSerializer):
                 1
             )
         return 0
-    
+
     def get_health_score(self, obj):
         """Calculate overall pipeline health score"""
         score = 100
-        
+
         # Reduce for at-risk deals
         if obj.at_risk_deals_count and obj.at_risk_deals_count > 5:
             score -= 20
         elif obj.at_risk_deals_count and obj.at_risk_deals_count > 0:
             score -= 10
-        
+
         # Reduce for stalled deals
         if obj.stalled_deals_count and obj.stalled_deals_count > 5:
             score -= 20
         elif obj.stalled_deals_count and obj.stalled_deals_count > 0:
             score -= 10
-        
+
         # Reduce for low coverage
         if obj.pipeline_coverage and obj.pipeline_coverage < 200:
             score -= 15
         elif obj.pipeline_coverage and obj.pipeline_coverage < 300:
             score -= 5
-        
+
         return max(0, score)
 
 
 # Request Serializers
 class GenerateForecastSerializer(serializers.Serializer):
     """Request serializer for generating forecast"""
-    
+
     forecast_type = serializers.ChoiceField(
         choices=['monthly', 'quarterly', 'annual', 'rolling']
     )
     period_start = serializers.DateField()
     period_end = serializers.DateField()
-    
+
     def validate(self, data):
         if data['period_start'] >= data['period_end']:
             raise serializers.ValidationError(
@@ -297,7 +303,7 @@ class GenerateForecastSerializer(serializers.Serializer):
 
 class CohortAnalysisRequestSerializer(serializers.Serializer):
     """Request serializer for cohort analysis"""
-    
+
     cohort_type = serializers.ChoiceField(
         choices=[
             'acquisition_month',
@@ -316,7 +322,7 @@ class CohortAnalysisRequestSerializer(serializers.Serializer):
 
 class AttributionRequestSerializer(serializers.Serializer):
     """Request serializer for attribution calculation"""
-    
+
     opportunity_id = serializers.UUIDField()
     model = serializers.ChoiceField(
         choices=['first_touch', 'last_touch', 'linear', 'time_decay', 'position_based', 'data_driven'],
@@ -326,11 +332,11 @@ class AttributionRequestSerializer(serializers.Serializer):
 
 class VelocityRequestSerializer(serializers.Serializer):
     """Request serializer for velocity calculation"""
-    
+
     period_start = serializers.DateField()
     period_end = serializers.DateField()
     segment = serializers.CharField(required=False, allow_blank=True)
-    
+
     def validate(self, data):
         if data['period_start'] >= data['period_end']:
             raise serializers.ValidationError(
@@ -341,7 +347,7 @@ class VelocityRequestSerializer(serializers.Serializer):
 
 class LeakageAnalysisRequestSerializer(serializers.Serializer):
     """Request serializer for leakage analysis"""
-    
+
     period_start = serializers.DateField()
     period_end = serializers.DateField()
     leakage_types = serializers.ListField(
@@ -359,7 +365,7 @@ class LeakageAnalysisRequestSerializer(serializers.Serializer):
 
 class WinLossRequestSerializer(serializers.Serializer):
     """Request serializer for win/loss analysis"""
-    
+
     period_start = serializers.DateField()
     period_end = serializers.DateField()
     segment = serializers.CharField(required=False, allow_blank=True)
@@ -368,7 +374,7 @@ class WinLossRequestSerializer(serializers.Serializer):
 
 class ARRMovementRequestSerializer(serializers.Serializer):
     """Request serializer for ARR movement analysis"""
-    
+
     period_start = serializers.DateField()
     period_end = serializers.DateField()
     period_type = serializers.ChoiceField(
@@ -383,7 +389,7 @@ class ARRMovementRequestSerializer(serializers.Serializer):
 
 class SnapshotComparisonSerializer(serializers.Serializer):
     """Request serializer for snapshot comparison"""
-    
+
     snapshot_date_1 = serializers.DateField()
     snapshot_date_2 = serializers.DateField()
     metrics = serializers.ListField(

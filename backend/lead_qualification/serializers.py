@@ -1,13 +1,18 @@
 from rest_framework import serializers
+
 from .models import (
-    ScoringRule, QualificationCriteria, LeadScore,
-    QualificationWorkflow, WorkflowExecution, LeadEnrichmentData
+    LeadEnrichmentData,
+    LeadScore,
+    QualificationCriteria,
+    QualificationWorkflow,
+    ScoringRule,
+    WorkflowExecution,
 )
 
 
 class ScoringRuleSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = ScoringRule
         fields = [
@@ -20,7 +25,7 @@ class ScoringRuleSerializer(serializers.ModelSerializer):
 
 class QualificationCriteriaSerializer(serializers.ModelSerializer):
     stage_display = serializers.CharField(source='get_stage_display', read_only=True)
-    
+
     class Meta:
         model = QualificationCriteria
         fields = [
@@ -34,7 +39,7 @@ class QualificationCriteriaSerializer(serializers.ModelSerializer):
 class LeadScoreSerializer(serializers.ModelSerializer):
     lead_name = serializers.CharField(source='lead.name', read_only=True)
     score_change = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = LeadScore
         fields = [
@@ -44,7 +49,7 @@ class LeadScoreSerializer(serializers.ModelSerializer):
             'engagement_score', 'calculated_at'
         ]
         read_only_fields = ['calculated_at']
-    
+
     def get_score_change(self, obj):
         if obj.previous_score is not None:
             return obj.score - obj.previous_score
@@ -55,7 +60,7 @@ class QualificationWorkflowSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     trigger_type_display = serializers.CharField(source='get_trigger_type_display', read_only=True)
     action_type_display = serializers.CharField(source='get_action_type_display', read_only=True)
-    
+
     class Meta:
         model = QualificationWorkflow
         fields = [
@@ -73,7 +78,7 @@ class WorkflowExecutionSerializer(serializers.ModelSerializer):
     lead_name = serializers.CharField(source='lead.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     duration = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = WorkflowExecution
         fields = [
@@ -82,7 +87,7 @@ class WorkflowExecutionSerializer(serializers.ModelSerializer):
             'error_message', 'started_at', 'completed_at', 'duration'
         ]
         read_only_fields = ['started_at', 'completed_at']
-    
+
     def get_duration(self, obj):
         if obj.completed_at:
             delta = obj.completed_at - obj.started_at
@@ -93,7 +98,7 @@ class WorkflowExecutionSerializer(serializers.ModelSerializer):
 class LeadEnrichmentDataSerializer(serializers.ModelSerializer):
     lead_name = serializers.CharField(source='lead.name', read_only=True)
     source_display = serializers.CharField(source='get_source_display', read_only=True)
-    
+
     class Meta:
         model = LeadEnrichmentData
         fields = [
@@ -108,7 +113,7 @@ class LeadEnrichmentDataSerializer(serializers.ModelSerializer):
 class LeadScoreCalculationSerializer(serializers.Serializer):
     """Serializer for triggering score calculation"""
     lead_id = serializers.IntegerField()
-    
+
     def validate_lead_id(self, value):
         from lead_management.models import Lead
         if not Lead.objects.filter(id=value).exists():

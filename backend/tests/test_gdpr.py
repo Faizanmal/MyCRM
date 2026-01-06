@@ -1,8 +1,9 @@
 # MyCRM Backend - GDPR Compliance Tests
 
+from datetime import datetime
+
 import pytest
 from rest_framework import status
-from datetime import datetime
 
 
 @pytest.mark.django_db

@@ -548,7 +548,7 @@ if __name__ == "__main__":
     
     # Get statistics
     stats = get_lead_statistics()
-    print(f"\n✅ Lead Statistics:")
+    print("\n✅ Lead Statistics:")
     print(f"   Total: {stats['total']}")
     print(f"   High Priority: {stats['by_priority']['high']}")
     

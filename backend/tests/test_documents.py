@@ -1,9 +1,9 @@
 # MyCRM Backend - Document Management Tests
 
+
 import pytest
-from rest_framework import status
-from io import BytesIO
 from django.core.files.uploadedfile import SimpleUploadedFile
+from rest_framework import status
 
 
 @pytest.mark.django_db

@@ -2,10 +2,12 @@
 Core URL patterns for enterprise features
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from . import views
+
 from campaign_management.views import CampaignViewSet, EmailTemplateViewSet
+
+from . import views, views_monitoring
 
 router = DefaultRouter()
 router.register(r'audit-logs', views.AuditLogViewSet)
@@ -25,6 +27,15 @@ router.register(r'email-templates', EmailTemplateViewSet, basename='email-templa
 
 urlpatterns = [
     path('', include(router.urls)),
+
+    # Monitoring and Health Check endpoints
+    path('health/', views_monitoring.health_check, name='health-check'),
+    path('health/ready/', views_monitoring.readiness_check, name='readiness-check'),
+    path('health/live/', views_monitoring.liveness_check, name='liveness-check'),
+    path('metrics/', views_monitoring.metrics, name='prometheus-metrics'),
+    path('metrics/system/', views_monitoring.system_metrics, name='system-metrics'),
+    path('status/', views_monitoring.service_status, name='service-status'),
+
     # Authentication APIs
     path('auth/', include('core.auth_urls')),
     # Settings and RBAC APIs

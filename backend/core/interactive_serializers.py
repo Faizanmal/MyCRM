@@ -3,19 +3,20 @@ Interactive Features Serializers
 """
 
 from rest_framework import serializers
+
 from .interactive_models import (
-    UserPreferences,
-    OnboardingProgress,
     AIRecommendation,
+    OnboardingProgress,
+    QuickAction,
     SearchQuery,
     SmartFilter,
-    QuickAction
+    UserPreferences,
 )
 
 
 class UserPreferencesSerializer(serializers.ModelSerializer):
     """Serializer for user preferences"""
-    
+
     class Meta:
         model = UserPreferences
         fields = [
@@ -25,7 +26,7 @@ class UserPreferencesSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
-    
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
@@ -34,7 +35,7 @@ class UserPreferencesSerializer(serializers.ModelSerializer):
 class OnboardingProgressSerializer(serializers.ModelSerializer):
     """Serializer for onboarding progress"""
     completion_percentage = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = OnboardingProgress
         fields = [
@@ -43,7 +44,7 @@ class OnboardingProgressSerializer(serializers.ModelSerializer):
             'completed_at', 'completion_percentage'
         ]
         read_only_fields = ['started_at', 'onboarding_xp']
-    
+
     def get_completion_percentage(self, obj):
         total_steps = 8  # Total onboarding steps
         completed = len(obj.completed_steps) if obj.completed_steps else 0
@@ -59,14 +60,14 @@ class CompleteStepSerializer(serializers.Serializer):
 class AIRecommendationSerializer(serializers.ModelSerializer):
     """Serializer for AI recommendations"""
     recommendation_type_display = serializers.CharField(
-        source='get_recommendation_type_display', 
+        source='get_recommendation_type_display',
         read_only=True
     )
     impact_display = serializers.CharField(
         source='get_impact_display',
         read_only=True
     )
-    
+
     class Meta:
         model = AIRecommendation
         fields = [
@@ -83,7 +84,7 @@ class AIRecommendationSerializer(serializers.ModelSerializer):
 
 class SearchQuerySerializer(serializers.ModelSerializer):
     """Serializer for search queries"""
-    
+
     class Meta:
         model = SearchQuery
         fields = [
@@ -95,7 +96,7 @@ class SearchQuerySerializer(serializers.ModelSerializer):
 
 class SmartFilterSerializer(serializers.ModelSerializer):
     """Serializer for smart filters"""
-    
+
     class Meta:
         model = SmartFilter
         fields = [
@@ -104,7 +105,7 @@ class SmartFilterSerializer(serializers.ModelSerializer):
             'is_default', 'created_at', 'updated_at'
         ]
         read_only_fields = ['use_count', 'last_used_at', 'created_at', 'updated_at']
-    
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
@@ -112,7 +113,7 @@ class SmartFilterSerializer(serializers.ModelSerializer):
 
 class QuickActionSerializer(serializers.ModelSerializer):
     """Serializer for quick actions"""
-    
+
     class Meta:
         model = QuickAction
         fields = [
@@ -121,7 +122,7 @@ class QuickActionSerializer(serializers.ModelSerializer):
             'use_count', 'created_at', 'updated_at'
         ]
         read_only_fields = ['use_count', 'created_at', 'updated_at']
-    
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)

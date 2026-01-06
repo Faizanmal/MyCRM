@@ -28,7 +28,6 @@ class PushNotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      onDidReceiveLocalNotification: _onDidReceiveLocalNotification,
     );
 
     final initSettings = InitializationSettings(
@@ -152,24 +151,6 @@ class PushNotificationService {
     String? channel,
     Map<String, dynamic>? payload,
   }) async {
-    final androidDetails = AndroidNotificationDetails(
-      channel ?? 'tasks',
-      channel ?? 'Task Notifications',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
     // Use zonedSchedule for timezone-aware scheduling
     // For simplicity, using show with a delay here
     final delay = scheduledTime.difference(DateTime.now());
@@ -294,11 +275,6 @@ class PushNotificationService {
         debugPrint('Error parsing notification payload: $e');
       }
     }
-  }
-
-  void _onDidReceiveLocalNotification(int id, String? title, String? body, String? payload) {
-    // Handle iOS foreground notifications (older iOS versions)
-    debugPrint('iOS notification received: $title');
   }
 
   /// Dispose resources

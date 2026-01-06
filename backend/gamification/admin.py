@@ -3,7 +3,16 @@ Gamification Admin
 """
 
 from django.contrib import admin
-from .models import Achievement, UserAchievement, Leaderboard, UserPoints, PointTransaction, Challenge, ChallengeProgress
+
+from .models import (
+    Achievement,
+    Challenge,
+    ChallengeProgress,
+    Leaderboard,
+    PointTransaction,
+    UserAchievement,
+    UserPoints,
+)
 
 
 @admin.register(Achievement)

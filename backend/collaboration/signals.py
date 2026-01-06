@@ -1,9 +1,12 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+
 from .models import (
-    Message, DealRoomParticipant,
-    DocumentComment, CollaborativeDocument,
-    ApprovalInstance
+    ApprovalInstance,
+    CollaborativeDocument,
+    DealRoomParticipant,
+    DocumentComment,
+    Message,
 )
 
 
@@ -17,7 +20,7 @@ def update_message_counts(sender, instance, created, **kwargs):
         elif instance.deal_room:
             instance.deal_room.message_count += 1
             instance.deal_room.save(update_fields=['message_count', 'updated_at'])
-        
+
         # Update thread reply count
         if instance.parent_message:
             instance.parent_message.thread_reply_count += 1

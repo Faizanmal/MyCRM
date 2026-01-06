@@ -3,31 +3,32 @@ AI Summarizer
 AI-powered conversation summarization and analysis
 """
 
+import json
+import logging
+from typing import Any
+
 import openai
 from django.conf import settings
-from typing import Dict, Any, List, Optional
-import logging
-import json
 
 logger = logging.getLogger(__name__)
 
 
 class ConversationSummarizer:
     """AI-powered conversation summarization"""
-    
+
     def __init__(self):
         self.openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-    
+
     def generate_summary(
         self,
         transcript: str,
         summary_type: str = 'executive',
-        context: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        context: dict | None = None
+    ) -> dict[str, Any]:
         """Generate a summary of the conversation"""
         try:
             prompt = self._build_summary_prompt(transcript, summary_type, context)
-            
+
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -41,9 +42,9 @@ Focus on business outcomes, decisions, and next steps."""
                 ],
                 response_format={"type": "json_object"}
             )
-            
+
             result = json.loads(response.choices[0].message.content)
-            
+
             return {
                 'success': True,
                 'summary_text': result.get('summary', ''),
@@ -56,19 +57,19 @@ Focus on business outcomes, decisions, and next steps."""
                 'keywords': result.get('keywords', []),
                 'entities_mentioned': result.get('entities', {})
             }
-            
+
         except Exception as e:
             logger.error(f"Summary generation error: {str(e)}")
             return {'success': False, 'error': str(e)}
-    
+
     def _build_summary_prompt(
         self,
         transcript: str,
         summary_type: str,
-        context: Optional[Dict]
+        context: dict | None
     ) -> str:
         """Build the appropriate prompt based on summary type"""
-        
+
         context_str = ""
         if context:
             if context.get('contact_name'):
@@ -77,7 +78,7 @@ Focus on business outcomes, decisions, and next steps."""
                 context_str += f"\nCompany: {context['company']}"
             if context.get('opportunity'):
                 context_str += f"\nOpportunity: {context['opportunity']}"
-        
+
         if summary_type == 'executive':
             return f"""Create an executive summary of this business conversation.
 {context_str}
@@ -102,7 +103,7 @@ Return JSON with:
         "dates": ["dates/deadlines mentioned"]
     }}
 }}"""
-        
+
         elif summary_type == 'bullet_points':
             return f"""Summarize this conversation as bullet points.
 {context_str}
@@ -122,7 +123,7 @@ Return JSON with:
     "keywords": ["keywords"],
     "entities": {{"people": [], "companies": [], "products": [], "dates": []}}
 }}"""
-        
+
         elif summary_type == 'action_items':
             return f"""Extract all action items from this conversation.
 {context_str}
@@ -142,7 +143,7 @@ Return JSON with:
     "keywords": [],
     "entities": {{"people": ["people assigned tasks"], "companies": [], "products": [], "dates": ["due dates mentioned"]}}
 }}"""
-        
+
         else:  # detailed
             return f"""Create a detailed summary of this conversation.
 {context_str}
@@ -171,15 +172,15 @@ Return JSON with:
 
 class ActionItemExtractor:
     """Extract action items from conversations"""
-    
+
     def __init__(self):
         self.openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-    
+
     def extract_action_items(
         self,
         transcript: str,
-        speaker_labels: Optional[Dict] = None
-    ) -> List[Dict[str, Any]]:
+        speaker_labels: dict | None = None
+    ) -> list[dict[str, Any]]:
         """Extract action items from transcript"""
         try:
             prompt = f"""Analyze this conversation and extract all action items, tasks, and commitments.
@@ -209,7 +210,7 @@ Return JSON:
         }}
     ]
 }}"""
-            
+
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -223,10 +224,10 @@ Distinguish between suggestions and firm commitments."""
                 ],
                 response_format={"type": "json_object"}
             )
-            
+
             result = json.loads(response.choices[0].message.content)
             return result.get('action_items', [])
-            
+
         except Exception as e:
             logger.error(f"Action item extraction error: {str(e)}")
             return []
@@ -234,32 +235,31 @@ Distinguish between suggestions and firm commitments."""
 
 class SentimentAnalyzer:
     """Analyze sentiment and emotions in conversations"""
-    
+
     def __init__(self):
         self.openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-    
+
     def analyze_sentiment(
         self,
         transcript: str,
-        segments: Optional[List[Dict]] = None
-    ) -> Dict[str, Any]:
+        segments: list[dict] | None = None
+    ) -> dict[str, Any]:
         """Analyze overall and segment-level sentiment"""
         try:
             # For segment-level analysis, we'll sample key segments
-            segment_analysis = []
             if segments:
                 # Sample up to 20 segments evenly distributed
                 sample_size = min(20, len(segments))
                 step = max(1, len(segments) // sample_size)
                 sampled = segments[::step][:sample_size]
-                
+
                 segment_texts = "\n".join([
                     f"[{s.get('start', 0):.1f}s] {s.get('text', '')}"
                     for s in sampled
                 ])
             else:
                 segment_texts = transcript[:5000]
-            
+
             prompt = f"""Analyze the sentiment and emotions in this conversation.
 
 Transcript/Segments:
@@ -301,7 +301,7 @@ Return JSON:
         "assertiveness": "moderate"
     }}
 }}"""
-            
+
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -314,9 +314,9 @@ Focus on business-relevant emotional cues and engagement signals."""
                 ],
                 response_format={"type": "json_object"}
             )
-            
+
             return json.loads(response.choices[0].message.content)
-            
+
         except Exception as e:
             logger.error(f"Sentiment analysis error: {str(e)}")
             return {
@@ -328,20 +328,20 @@ Focus on business-relevant emotional cues and engagement signals."""
 
 class KeyMomentDetector:
     """Detect key moments in conversations"""
-    
+
     MOMENT_TYPES = [
         'objection', 'agreement', 'question', 'commitment',
         'concern', 'interest', 'pricing', 'competitor', 'next_step', 'highlight'
     ]
-    
+
     def __init__(self):
         self.openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-    
+
     def detect_key_moments(
         self,
         transcript: str,
-        segments: List[Dict]
-    ) -> List[Dict[str, Any]]:
+        segments: list[dict]
+    ) -> list[dict[str, Any]]:
         """Detect key moments in the conversation"""
         try:
             # Build transcript with timestamps
@@ -349,7 +349,7 @@ class KeyMomentDetector:
                 f"[{s.get('start', 0):.1f}s - {s.get('end', 0):.1f}s] {s.get('speaker', 'Speaker')}: {s.get('text', '')}"
                 for s in segments
             ])
-            
+
             prompt = f"""Identify key moments in this sales/business conversation.
 
 Transcript:
@@ -360,7 +360,7 @@ Key moment types to look for:
 - agreement: Explicit agreement or buy-in
 - question: Important questions asked
 - commitment: Commitment to action or next step
-- concern: Expression of worry or hesitation  
+- concern: Expression of worry or hesitation
 - interest: Strong interest shown
 - pricing: Pricing discussion
 - competitor: Competitor mention
@@ -381,7 +381,7 @@ Return JSON:
         }}
     ]
 }}"""
-            
+
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -394,10 +394,10 @@ Identify moments that are significant for sales outcomes and coaching."""
                 ],
                 response_format={"type": "json_object"}
             )
-            
+
             result = json.loads(response.choices[0].message.content)
             return result.get('key_moments', [])
-            
+
         except Exception as e:
             logger.error(f"Key moment detection error: {str(e)}")
             return []
@@ -405,15 +405,15 @@ Identify moments that are significant for sales outcomes and coaching."""
 
 class CallScorer:
     """Score sales calls based on best practices"""
-    
+
     def __init__(self):
         self.openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-    
+
     def score_call(
         self,
         transcript: str,
         call_type: str = 'sales'
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Score a sales call"""
         try:
             prompt = f"""Score this {call_type} call based on best practices.
@@ -463,7 +463,7 @@ Return JSON:
         "Clear next steps established"
     ]
 }}"""
-            
+
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -476,9 +476,9 @@ Score calls fairly but constructively, providing actionable feedback."""
                 ],
                 response_format={"type": "json_object"}
             )
-            
+
             return json.loads(response.choices[0].message.content)
-            
+
         except Exception as e:
             logger.error(f"Call scoring error: {str(e)}")
             return {
@@ -489,22 +489,22 @@ Score calls fairly but constructively, providing actionable feedback."""
 
 class TopicExtractor:
     """Extract and categorize topics from conversations"""
-    
+
     def __init__(self):
         self.openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-    
+
     def extract_topics(
         self,
         transcript: str,
-        segments: List[Dict]
-    ) -> Dict[str, Any]:
+        segments: list[dict]
+    ) -> dict[str, Any]:
         """Extract topics with time ranges"""
         try:
             timestamped_transcript = "\n".join([
                 f"[{s.get('start', 0):.1f}s] {s.get('text', '')}"
                 for s in segments
             ])
-            
+
             prompt = f"""Identify distinct topics discussed in this conversation with their time ranges.
 
 Transcript:
@@ -525,15 +525,15 @@ Return JSON:
         {{"from": "Introduction", "to": "Product Demo", "timestamp": 60}}
     ]
 }}"""
-            
+
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"}
             )
-            
+
             return json.loads(response.choices[0].message.content)
-            
+
         except Exception as e:
             logger.error(f"Topic extraction error: {str(e)}")
             return {'topics': [], 'error': str(e)}
@@ -541,21 +541,21 @@ Return JSON:
 
 class VoiceNoteProcessor:
     """Process quick voice notes"""
-    
+
     def __init__(self):
         self.openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-    
+
     def process_voice_note(
         self,
         transcript: str,
-        context: Optional[Dict] = None
-    ) -> Dict[str, Any]:
+        context: dict | None = None
+    ) -> dict[str, Any]:
         """Process a voice note and extract key information"""
         try:
             context_str = ""
             if context:
                 context_str = f"\nContext: Related to {context.get('contact_name', 'contact')} at {context.get('company', 'company')}"
-            
+
             prompt = f"""Process this voice note and extract key information.
 {context_str}
 
@@ -574,15 +574,15 @@ Return JSON:
     "follow_up_needed": true/false,
     "follow_up_date_mentioned": "date string or null"
 }}"""
-            
+
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"}
             )
-            
+
             return json.loads(response.choices[0].message.content)
-            
+
         except Exception as e:
             logger.error(f"Voice note processing error: {str(e)}")
             return {

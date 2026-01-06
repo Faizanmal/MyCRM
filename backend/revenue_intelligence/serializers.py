@@ -3,9 +3,16 @@ Revenue Intelligence Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    RevenueTarget, DealScore, DealVelocity, PipelineSnapshot,
-    Competitor, DealCompetitor, RevenueForecast, DealRiskAlert
+    Competitor,
+    DealCompetitor,
+    DealRiskAlert,
+    DealScore,
+    DealVelocity,
+    PipelineSnapshot,
+    RevenueForecast,
+    RevenueTarget,
 )
 
 
@@ -15,7 +22,7 @@ class RevenueTargetSerializer(serializers.ModelSerializer):
     coverage_ratio = serializers.ReadOnlyField()
     forecast_attainment = serializers.ReadOnlyField()
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
-    
+
     class Meta:
         model = RevenueTarget
         fields = '__all__'
@@ -28,7 +35,7 @@ class DealScoreSerializer(serializers.ModelSerializer):
         source='opportunity.amount', max_digits=12, decimal_places=2, read_only=True
     )
     opportunity_stage = serializers.CharField(source='opportunity.stage', read_only=True)
-    
+
     class Meta:
         model = DealScore
         fields = '__all__'
@@ -38,16 +45,16 @@ class DealScoreSerializer(serializers.ModelSerializer):
 class DealScoreSummarySerializer(serializers.ModelSerializer):
     """Lighter serializer for list views"""
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = DealScore
-        fields = ['id', 'opportunity', 'opportunity_name', 'score', 'win_probability', 
+        fields = ['id', 'opportunity', 'opportunity_name', 'score', 'win_probability',
                   'risk_level', 'score_trend', 'calculated_at']
 
 
 class DealVelocitySerializer(serializers.ModelSerializer):
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = DealVelocity
         fields = '__all__'
@@ -56,7 +63,7 @@ class DealVelocitySerializer(serializers.ModelSerializer):
 
 class PipelineSnapshotSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
-    
+
     class Meta:
         model = PipelineSnapshot
         fields = '__all__'
@@ -66,12 +73,12 @@ class PipelineSnapshotSerializer(serializers.ModelSerializer):
 class CompetitorSerializer(serializers.ModelSerializer):
     win_rate_against = serializers.ReadOnlyField()
     deals_total = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Competitor
         fields = '__all__'
         read_only_fields = ['id', 'deals_won_against', 'deals_lost_to', 'created_at', 'updated_at']
-    
+
     def get_deals_total(self, obj):
         return obj.deals_won_against + obj.deals_lost_to
 
@@ -79,7 +86,7 @@ class CompetitorSerializer(serializers.ModelSerializer):
 class DealCompetitorSerializer(serializers.ModelSerializer):
     competitor_name = serializers.CharField(source='competitor.name', read_only=True)
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = DealCompetitor
         fields = '__all__'
@@ -89,7 +96,7 @@ class DealCompetitorSerializer(serializers.ModelSerializer):
 class RevenueForecastSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
     forecast_type_display = serializers.CharField(source='get_forecast_type_display', read_only=True)
-    
+
     class Meta:
         model = RevenueForecast
         fields = '__all__'
@@ -102,7 +109,7 @@ class DealRiskAlertSerializer(serializers.ModelSerializer):
         source='opportunity.amount', max_digits=12, decimal_places=2, read_only=True
     )
     alert_type_display = serializers.CharField(source='get_alert_type_display', read_only=True)
-    
+
     class Meta:
         model = DealRiskAlert
         fields = '__all__'

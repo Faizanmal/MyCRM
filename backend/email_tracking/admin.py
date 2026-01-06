@@ -1,7 +1,13 @@
 from django.contrib import admin
+
 from .models import (
-    TrackedEmail, EmailEvent, EmailTemplate, EmailSequence,
-    SequenceStep, SequenceEnrollment, EmailAnalytics
+    EmailAnalytics,
+    EmailEvent,
+    EmailSequence,
+    EmailTemplate,
+    SequenceEnrollment,
+    SequenceStep,
+    TrackedEmail,
 )
 
 
@@ -10,7 +16,7 @@ class TrackedEmailAdmin(admin.ModelAdmin):
     list_display = ['subject', 'to_email', 'sender', 'status', 'open_count', 'click_count', 'sent_at']
     list_filter = ['status', 'sent_at']
     search_fields = ['subject', 'to_email', 'sender__email']
-    readonly_fields = ['tracking_id', 'sent_at', 'delivered_at', 'first_opened_at', 
+    readonly_fields = ['tracking_id', 'sent_at', 'delivered_at', 'first_opened_at',
                        'last_opened_at', 'first_clicked_at', 'open_count', 'click_count']
 
 

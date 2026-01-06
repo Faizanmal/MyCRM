@@ -1,5 +1,6 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+
 from .models import Contact, ContactGroup
 
 User = get_user_model()
@@ -7,7 +8,7 @@ User = get_user_model()
 
 class ContactModelTest(TestCase):
     """Test cases for Contact model"""
-    
+
     def setUp(self):
         self.user = User.objects.create_user(
             username='testuser',
@@ -25,7 +26,7 @@ class ContactModelTest(TestCase):
             'assigned_to': self.user,
             'created_by': self.user
         }
-    
+
     def test_create_contact(self):
         """Test creating a new contact"""
         contact = Contact.objects.create(**self.contact_data)
@@ -33,18 +34,18 @@ class ContactModelTest(TestCase):
         self.assertEqual(contact.last_name, 'Doe')
         self.assertEqual(contact.email, 'john.doe@example.com')
         self.assertEqual(contact.contact_type, 'customer')
-    
+
     def test_contact_full_name_property(self):
         """Test full_name property"""
         contact = Contact.objects.create(**self.contact_data)
         self.assertEqual(contact.full_name, 'John Doe')
-    
+
     def test_contact_str_method(self):
         """Test contact string representation"""
         contact = Contact.objects.create(**self.contact_data)
         expected = 'John Doe (john.doe@example.com)'
         self.assertEqual(str(contact), expected)
-    
+
     def test_contact_default_values(self):
         """Test default values"""
         contact = Contact.objects.create(
@@ -61,7 +62,7 @@ class ContactModelTest(TestCase):
 
 class ContactGroupTest(TestCase):
     """Test cases for ContactGroup model"""
-    
+
     def setUp(self):
         self.user = User.objects.create_user(
             username='testuser',
@@ -74,7 +75,7 @@ class ContactGroupTest(TestCase):
             email='john@example.com',
             created_by=self.user
         )
-    
+
     def test_create_contact_group(self):
         """Test creating a contact group"""
         group = ContactGroup.objects.create(

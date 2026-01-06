@@ -239,9 +239,9 @@ export default function LeadsPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 75) return 'text-yellow-600';
-    return 'text-gray-600';
+    if (score >= 90) return 'text-green-400';
+    if (score >= 75) return 'text-yellow-400';
+    return 'text-gray-400';
   };
 
   const getScoreBadge = (score: number) => {

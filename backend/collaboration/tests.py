@@ -1,8 +1,7 @@
-from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import (
-    DealRoom, Channel, Message, ApprovalWorkflow
-)
+from django.test import TestCase
+
+from .models import ApprovalWorkflow, Channel, DealRoom, Message
 
 
 class DealRoomModelTest(TestCase):

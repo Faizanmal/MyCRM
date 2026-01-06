@@ -1,4 +1,5 @@
 from rest_framework import permissions
+
 from .models import OrganizationMember
 
 
@@ -9,14 +10,14 @@ class IsOrganizationMember(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        
+
         if request.user.is_superuser:
             return True
-        
+
         organization = getattr(request, 'organization', None)
         if not organization:
             return False
-        
+
         return OrganizationMember.objects.filter(
             organization=organization,
             user=request.user,
@@ -31,14 +32,14 @@ class IsOrganizationAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        
+
         if request.user.is_superuser:
             return True
-        
+
         organization = getattr(request, 'organization', None)
         if not organization:
             return False
-        
+
         return OrganizationMember.objects.filter(
             organization=organization,
             user=request.user,
@@ -49,15 +50,15 @@ class IsOrganizationAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if not request.user.is_authenticated:
             return False
-        
+
         if request.user.is_superuser:
             return True
-        
+
         # Get organization from object
         organization = getattr(obj, 'organization', None)
         if not organization:
             return False
-        
+
         return OrganizationMember.objects.filter(
             organization=organization,
             user=request.user,
@@ -73,14 +74,14 @@ class IsOrganizationOwner(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        
+
         if request.user.is_superuser:
             return True
-        
+
         organization = getattr(request, 'organization', None)
         if not organization:
             return False
-        
+
         return OrganizationMember.objects.filter(
             organization=organization,
             user=request.user,
@@ -91,15 +92,15 @@ class IsOrganizationOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if not request.user.is_authenticated:
             return False
-        
+
         if request.user.is_superuser:
             return True
-        
+
         # Get organization from object
         organization = getattr(obj, 'organization', None)
         if not organization:
             return False
-        
+
         return OrganizationMember.objects.filter(
             organization=organization,
             user=request.user,
@@ -115,14 +116,14 @@ class CanInviteUsers(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        
+
         if request.user.is_superuser:
             return True
-        
+
         organization = getattr(request, 'organization', None)
         if not organization:
             return False
-        
+
         try:
             membership = OrganizationMember.objects.get(
                 organization=organization,

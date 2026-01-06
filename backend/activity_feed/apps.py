@@ -5,6 +5,6 @@ class ActivityFeedConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'activity_feed'
     verbose_name = 'Activity Feed'
-    
+
     def ready(self):
         pass

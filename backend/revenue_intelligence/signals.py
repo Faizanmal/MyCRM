@@ -12,21 +12,21 @@ from django.utils import timezone
 def update_deal_velocity(sender, instance, created, **kwargs):
     """Track stage changes for deal velocity"""
     from .models import DealVelocity
-    
+
     if not created and hasattr(instance, '_previous_stage'):
         if instance._previous_stage != instance.stage:
             # Calculate days in previous stage
             # This is simplified - in production you'd track this more precisely
             days_in_stage = 1  # Default
-            
+
             # Get last velocity record
             last_record = DealVelocity.objects.filter(
                 opportunity=instance
             ).order_by('-transition_date').first()
-            
+
             if last_record:
                 days_in_stage = (timezone.now() - last_record.transition_date).days
-            
+
             DealVelocity.objects.create(
                 opportunity=instance,
                 from_stage=instance._previous_stage,
@@ -53,13 +53,13 @@ def store_previous_stage(sender, instance, **kwargs):
 def update_competitor_stats(sender, instance, **kwargs):
     """Update competitor win/loss stats when deal closes"""
     from .models import DealCompetitor
-    
+
     if instance.stage in ['closed_won', 'closed_lost']:
         deal_competitors = DealCompetitor.objects.filter(
             opportunity=instance,
             status='active'
         )
-        
+
         for dc in deal_competitors:
             if instance.stage == 'closed_won':
                 dc.status = 'won'
@@ -67,6 +67,6 @@ def update_competitor_stats(sender, instance, **kwargs):
             else:
                 dc.status = 'lost'
                 dc.competitor.deals_lost_to += 1
-            
+
             dc.save()
             dc.competitor.save()

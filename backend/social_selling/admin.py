@@ -3,10 +3,17 @@ Social Selling Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    SocialProfile, SocialPost, SocialEngagement, LinkedInIntegration,
-    SocialSellingSequence, SocialSellingStep, ProspectInSequence,
-    SocialInsight, EngagementAnalytics
+    EngagementAnalytics,
+    LinkedInIntegration,
+    ProspectInSequence,
+    SocialEngagement,
+    SocialInsight,
+    SocialPost,
+    SocialProfile,
+    SocialSellingSequence,
+    SocialSellingStep,
 )
 
 
@@ -70,7 +77,7 @@ class SocialInsightAdmin(admin.ModelAdmin):
 
 @admin.register(EngagementAnalytics)
 class EngagementAnalyticsAdmin(admin.ModelAdmin):
-    list_display = ['user', 'date', 'connections_sent', 'connections_accepted', 
+    list_display = ['user', 'date', 'connections_sent', 'connections_accepted',
                     'messages_sent', 'meetings_booked', 'engagement_score']
     list_filter = ['date']
     search_fields = ['user__email']

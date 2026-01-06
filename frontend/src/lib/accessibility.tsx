@@ -62,7 +62,7 @@ export function LiveRegion({
 export function useAnnounce() {
     const [message, setMessage] = useState('');
 
-    const announce = (text: string, politeness: 'polite' | 'assertive' = 'polite') => {
+    const announce = (text: string) => {
         // Clear first to ensure re-announcement
         setMessage('');
         setTimeout(() => setMessage(text), 100);
@@ -368,7 +368,7 @@ export function AccessibleTable({
                             {headers.map((header) => (
                                 <td
                                     key={header.key}
-                                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"
                                 >
                                     {row[header.key]}
                                 </td>

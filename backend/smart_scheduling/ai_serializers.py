@@ -4,21 +4,22 @@ API serializers for AI-enhanced scheduling features
 """
 
 from rest_framework import serializers
+
 from .ai_models import (
     AISchedulingPreference,
     AITimeSuggestion,
-    NoShowPrediction,
+    AttendeeIntelligence,
     MeetingPrepAI,
-    SmartReschedule,
-    SmartReminder,
+    NoShowPrediction,
     ScheduleOptimization,
-    AttendeeIntelligence
+    SmartReminder,
+    SmartReschedule,
 )
 
 
 class AISchedulingPreferenceSerializer(serializers.ModelSerializer):
     """Serializer for AI scheduling preferences"""
-    
+
     class Meta:
         model = AISchedulingPreference
         fields = [
@@ -39,9 +40,9 @@ class AISchedulingPreferenceSerializer(serializers.ModelSerializer):
 
 class AITimeSuggestionSerializer(serializers.ModelSerializer):
     """Serializer for AI time suggestions"""
-    
+
     meeting_type_name = serializers.CharField(source='meeting_type.name', read_only=True)
-    
+
     class Meta:
         model = AITimeSuggestion
         fields = [
@@ -57,10 +58,10 @@ class AITimeSuggestionSerializer(serializers.ModelSerializer):
 
 class NoShowPredictionSerializer(serializers.ModelSerializer):
     """Serializer for no-show predictions"""
-    
+
     meeting_guest = serializers.CharField(source='meeting.guest_name', read_only=True)
     meeting_time = serializers.DateTimeField(source='meeting.start_time', read_only=True)
-    
+
     class Meta:
         model = NoShowPrediction
         fields = [
@@ -78,9 +79,9 @@ class NoShowPredictionSerializer(serializers.ModelSerializer):
 
 class MeetingPrepAISerializer(serializers.ModelSerializer):
     """Serializer for AI meeting prep materials"""
-    
+
     meeting_details = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = MeetingPrepAI
         fields = [
@@ -95,7 +96,7 @@ class MeetingPrepAISerializer(serializers.ModelSerializer):
             'prep_generated_at', 'last_updated_at', 'was_helpful', 'feedback'
         ]
         read_only_fields = ['id', 'prep_generated_at', 'last_updated_at']
-    
+
     def get_meeting_details(self, obj):
         return {
             'id': str(obj.meeting.id),
@@ -108,9 +109,9 @@ class MeetingPrepAISerializer(serializers.ModelSerializer):
 
 class SmartRescheduleSerializer(serializers.ModelSerializer):
     """Serializer for smart reschedule suggestions"""
-    
+
     meeting_info = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SmartReschedule
         fields = [
@@ -122,7 +123,7 @@ class SmartRescheduleSerializer(serializers.ModelSerializer):
             'selected_alternative', 'response_at', 'created_at', 'expires_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_meeting_info(self, obj):
         return {
             'id': str(obj.meeting.id),
@@ -133,9 +134,9 @@ class SmartRescheduleSerializer(serializers.ModelSerializer):
 
 class SmartReminderSerializer(serializers.ModelSerializer):
     """Serializer for smart reminders"""
-    
+
     meeting_info = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SmartReminder
         fields = [
@@ -147,7 +148,7 @@ class SmartReminderSerializer(serializers.ModelSerializer):
             'recipient_type', 'recipient_email', 'created_at'
         ]
         read_only_fields = ['id', 'created_at']
-    
+
     def get_meeting_info(self, obj):
         return {
             'id': str(obj.meeting.id),
@@ -158,7 +159,7 @@ class SmartReminderSerializer(serializers.ModelSerializer):
 
 class ScheduleOptimizationSerializer(serializers.ModelSerializer):
     """Serializer for schedule optimizations"""
-    
+
     class Meta:
         model = ScheduleOptimization
         fields = [
@@ -175,10 +176,10 @@ class ScheduleOptimizationSerializer(serializers.ModelSerializer):
 
 class AttendeeIntelligenceSerializer(serializers.ModelSerializer):
     """Serializer for attendee intelligence"""
-    
+
     attendance_rate = serializers.FloatField(read_only=True)
     no_show_rate = serializers.FloatField(read_only=True)
-    
+
     class Meta:
         model = AttendeeIntelligence
         fields = [
@@ -202,7 +203,7 @@ class AttendeeIntelligenceSerializer(serializers.ModelSerializer):
 
 class FindOptimalTimesRequestSerializer(serializers.Serializer):
     """Request serializer for finding optimal times"""
-    
+
     meeting_type_id = serializers.UUIDField()
     duration_minutes = serializers.IntegerField(min_value=5, max_value=480)
     date_range_days = serializers.IntegerField(min_value=1, max_value=90, default=14)
@@ -212,7 +213,7 @@ class FindOptimalTimesRequestSerializer(serializers.Serializer):
 
 class OptimalTimeResponseSerializer(serializers.Serializer):
     """Response serializer for optimal time suggestions"""
-    
+
     id = serializers.CharField()
     start = serializers.DateTimeField()
     end = serializers.DateTimeField()
@@ -223,13 +224,13 @@ class OptimalTimeResponseSerializer(serializers.Serializer):
 
 class PredictNoShowRequestSerializer(serializers.Serializer):
     """Request serializer for no-show prediction"""
-    
+
     meeting_id = serializers.UUIDField()
 
 
 class NoShowPredictionResponseSerializer(serializers.Serializer):
     """Response serializer for no-show prediction"""
-    
+
     id = serializers.CharField()
     meeting_id = serializers.CharField()
     no_show_probability = serializers.FloatField()
@@ -242,19 +243,19 @@ class NoShowPredictionResponseSerializer(serializers.Serializer):
 
 class GenerateMeetingPrepRequestSerializer(serializers.Serializer):
     """Request serializer for meeting prep generation"""
-    
+
     meeting_id = serializers.UUIDField()
 
 
 class SetupSmartRemindersRequestSerializer(serializers.Serializer):
     """Request serializer for smart reminders setup"""
-    
+
     meeting_id = serializers.UUIDField()
 
 
 class SuggestRescheduleRequestSerializer(serializers.Serializer):
     """Request serializer for reschedule suggestions"""
-    
+
     meeting_id = serializers.UUIDField()
     trigger_type = serializers.ChoiceField(
         choices=['conflict', 'optimization', 'no_show_risk', 'user_request', 'emergency'],
@@ -265,7 +266,7 @@ class SuggestRescheduleRequestSerializer(serializers.Serializer):
 
 class OptimizeScheduleRequestSerializer(serializers.Serializer):
     """Request serializer for schedule optimization"""
-    
+
     start_date = serializers.DateTimeField()
     end_date = serializers.DateTimeField()
     optimization_type = serializers.ChoiceField(
@@ -279,7 +280,7 @@ class OptimizeScheduleRequestSerializer(serializers.Serializer):
 
 class LearnPreferencesResponseSerializer(serializers.Serializer):
     """Response serializer for learn preferences"""
-    
+
     preferences_updated = serializers.BooleanField()
     data_points_analyzed = serializers.IntegerField()
     preferred_times = serializers.DictField()
@@ -290,7 +291,7 @@ class LearnPreferencesResponseSerializer(serializers.Serializer):
 
 class MeetingPrepFeedbackSerializer(serializers.Serializer):
     """Serializer for meeting prep feedback"""
-    
+
     meeting_prep_id = serializers.UUIDField()
     was_helpful = serializers.BooleanField()
     feedback = serializers.CharField(required=False, allow_blank=True)

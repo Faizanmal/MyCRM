@@ -128,7 +128,7 @@ export default function OnboardingPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Sparkles className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Welcome to MyCRM</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome to MyCRM</h1>
           </div>
           <p className="text-gray-600">
             Let&apos;s get your account set up in just a few steps
@@ -138,10 +138,10 @@ export default function OnboardingPage() {
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Step {currentStep} of {totalSteps}
             </span>
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {Math.round(progress)}% Complete
             </span>
           </div>
@@ -460,7 +460,7 @@ export default function OnboardingPage() {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                     You&apos;re All Set!
                   </h2>
                   <p className="text-gray-600">
@@ -542,7 +542,7 @@ export default function OnboardingPage() {
         {currentStep < totalSteps && (
           <div className="text-center mt-4">
             <button
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               onClick={() => router.push('/dashboard')}
             >
               Skip onboarding

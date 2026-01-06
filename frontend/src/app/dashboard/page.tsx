@@ -301,14 +301,14 @@ export default function DashboardPage() {
       <MainLayout>
         <div className="space-y-6">
           {/* Welcome Section */}
-          <div className="relative overflow-hidden modern-card bg-linear-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-blue-700 dark:via-purple-700 dark:to-pink-700 p-8 text-white shadow-2xl">
+          <div className="relative overflow-hidden bg-linear-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-blue-700 dark:via-purple-700 dark:to-pink-700 p-8 text-white shadow-2xl rounded-xl">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 blur-3xl"></div>
             <div className="relative z-10 flex justify-between items-start">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-bold mb-3 flex items-center gap-3">
                   Welcome back, {user?.first_name || user?.username || 'User'}!
-                  <span className="inline-block animate-bounce">👋</span>
+                  <span className="inline-block animate-bounce emoji">👋</span>
                 </h2>
                 <p className="text-blue-50 text-lg">Here&apos;s what&apos;s happening with your CRM today.</p>
               </div>

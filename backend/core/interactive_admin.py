@@ -3,13 +3,14 @@ Interactive Features Admin Configuration
 """
 
 from django.contrib import admin
+
 from .interactive_models import (
-    UserPreferences,
-    OnboardingProgress,
     AIRecommendation,
+    OnboardingProgress,
+    QuickAction,
     SearchQuery,
     SmartFilter,
-    QuickAction,
+    UserPreferences,
 )
 
 

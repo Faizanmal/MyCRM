@@ -138,6 +138,7 @@ export default function OnboardingChecklist() {
             }
         } catch (error) {
             // Fallback to localStorage
+            console.error('Failed to fetch onboarding progress:', error);
             const dismissed = localStorage.getItem(CHECKLIST_DISMISSED_KEY);
             if (dismissed) {
                 setIsDismissed(true);
@@ -165,7 +166,9 @@ export default function OnboardingChecklist() {
     }, []);
 
     useEffect(() => {
-        loadOnboardingProgress();
+        // Defer call to avoid synchronous setState inside effect
+        Promise.resolve().then(() => loadOnboardingProgress());
+
     }, [loadOnboardingProgress]);
 
     const completedCount = items.filter(item => item.completed).length;
@@ -193,6 +196,7 @@ export default function OnboardingChecklist() {
             await onboardingAPI.completeStep(id, item.points);
         } catch (error) {
             // Already saved locally, continue
+            console.error('Failed to sync step completion:', error);
             console.log('Step completion synced locally');
         }
 
@@ -228,6 +232,8 @@ export default function OnboardingChecklist() {
             await onboardingAPI.dismissTour();
         } catch (error) {
             // Already saved locally
+            console.error('Failed to sync checklist dismissal:', error);
+            console.log('Checklist dismissal synced locally');
         }
 
         toast.info('You can find the checklist in Settings anytime');

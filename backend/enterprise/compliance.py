@@ -10,20 +10,17 @@ Provides:
 - Regulatory mapping (SOC 2, ISO 27001, GDPR, HIPAA)
 """
 
-import os
-import json
 import logging
-from typing import Dict, Optional, Any, List, Callable
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from enum import Enum
+import os
 import threading
-from abc import ABC, abstractmethod
+from collections.abc import Callable
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
 
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
-from django.db.models import Count, Q
 
 logger = logging.getLogger(__name__)
 
@@ -72,24 +69,24 @@ class ComplianceControl:
     description: str
     category: str
     requirement: str
-    
+
     # Implementation details
     status: ControlStatus = ControlStatus.NOT_IMPLEMENTED
     implementation_notes: str = ''
-    
+
     # Evidence requirements
-    evidence_types: List[EvidenceType] = field(default_factory=list)
+    evidence_types: list[EvidenceType] = field(default_factory=list)
     evidence_frequency: str = 'quarterly'  # 'daily', 'weekly', 'monthly', 'quarterly', 'annual'
-    
+
     # Automated checking
-    automated_check: Optional[Callable] = None
-    last_checked: Optional[datetime] = None
-    last_check_result: Optional[bool] = None
-    
+    automated_check: Callable | None = None
+    last_checked: datetime | None = None
+    last_check_result: bool | None = None
+
     # Ownership
     owner: str = ''
     reviewer: str = ''
-    
+
     # Risk mapping
     risk_level: str = 'medium'  # 'low', 'medium', 'high', 'critical'
 
@@ -102,20 +99,20 @@ class ComplianceEvidence:
     evidence_type: EvidenceType
     title: str
     description: str
-    
+
     # Evidence data
-    file_path: Optional[str] = None
-    data: Optional[Dict] = None
-    
+    file_path: str | None = None
+    data: dict | None = None
+
     # Metadata
     collected_at: datetime = field(default_factory=timezone.now)
     collected_by: str = ''
-    valid_until: Optional[datetime] = None
-    
+    valid_until: datetime | None = None
+
     # Review
     reviewed: bool = False
-    reviewed_by: Optional[str] = None
-    reviewed_at: Optional[datetime] = None
+    reviewed_by: str | None = None
+    reviewed_at: datetime | None = None
 
 
 # =====================
@@ -124,7 +121,7 @@ class ComplianceEvidence:
 
 class ControlLibrary:
     """Library of compliance controls"""
-    
+
     # SOC 2 Trust Services Criteria
     SOC2_CONTROLS = {
         'CC1.1': ComplianceControl(
@@ -209,7 +206,7 @@ class ControlLibrary:
             risk_level='high'
         ),
     }
-    
+
     # GDPR Articles
     GDPR_CONTROLS = {
         'GDPR-5': ComplianceControl(
@@ -263,7 +260,7 @@ class ControlLibrary:
             risk_level='critical'
         ),
     }
-    
+
     # ISO 27001 Annex A Controls
     ISO27001_CONTROLS = {
         'A.5.1': ComplianceControl(
@@ -307,18 +304,18 @@ class ControlLibrary:
             risk_level='high'
         ),
     }
-    
+
     @classmethod
-    def get_all_controls(cls) -> Dict[str, ComplianceControl]:
+    def get_all_controls(cls) -> dict[str, ComplianceControl]:
         """Get all controls from all frameworks"""
         all_controls = {}
         all_controls.update(cls.SOC2_CONTROLS)
         all_controls.update(cls.GDPR_CONTROLS)
         all_controls.update(cls.ISO27001_CONTROLS)
         return all_controls
-    
+
     @classmethod
-    def get_controls_by_framework(cls, framework: ComplianceFramework) -> Dict[str, ComplianceControl]:
+    def get_controls_by_framework(cls, framework: ComplianceFramework) -> dict[str, ComplianceControl]:
         """Get controls for a specific framework"""
         if framework in [ComplianceFramework.SOC2_TYPE1, ComplianceFramework.SOC2_TYPE2]:
             return cls.SOC2_CONTROLS
@@ -335,9 +332,9 @@ class ControlLibrary:
 
 class AutomatedComplianceChecks:
     """Automated compliance checking functions"""
-    
+
     @staticmethod
-    def check_encryption_at_rest() -> tuple[bool, Dict]:
+    def check_encryption_at_rest() -> tuple[bool, dict]:
         """Check if data at rest is encrypted"""
         results = {
             'database_encrypted': False,
@@ -345,23 +342,23 @@ class AutomatedComplianceChecks:
             'backup_encrypted': False,
             'details': []
         }
-        
+
         # Check database encryption
         db_settings = getattr(settings, 'DATABASES', {}).get('default', {})
         if db_settings.get('OPTIONS', {}).get('sslmode') == 'require':
             results['database_encrypted'] = True
             results['details'].append('Database SSL enabled')
-        
+
         # Check if encryption key is configured
         if getattr(settings, 'ENCRYPTION_KEY', None):
             results['file_storage_encrypted'] = True
             results['details'].append('Field-level encryption configured')
-        
+
         passed = results['database_encrypted'] and results['file_storage_encrypted']
         return passed, results
-    
+
     @staticmethod
-    def check_encryption_in_transit() -> tuple[bool, Dict]:
+    def check_encryption_in_transit() -> tuple[bool, dict]:
         """Check if data in transit is encrypted"""
         results = {
             'ssl_redirect': False,
@@ -369,28 +366,28 @@ class AutomatedComplianceChecks:
             'secure_cookies': False,
             'details': []
         }
-        
+
         # Check SSL redirect
         if getattr(settings, 'SECURE_SSL_REDIRECT', False):
             results['ssl_redirect'] = True
             results['details'].append('SSL redirect enabled')
-        
+
         # Check HSTS
         hsts_seconds = getattr(settings, 'SECURE_HSTS_SECONDS', 0)
         if hsts_seconds > 0:
             results['hsts_enabled'] = True
             results['details'].append(f'HSTS enabled for {hsts_seconds} seconds')
-        
+
         # Check secure cookies
         if getattr(settings, 'SESSION_COOKIE_SECURE', False):
             results['secure_cookies'] = True
             results['details'].append('Secure session cookies enabled')
-        
+
         passed = all([results['ssl_redirect'], results['hsts_enabled'], results['secure_cookies']])
         return passed, results
-    
+
     @staticmethod
-    def check_access_controls() -> tuple[bool, Dict]:
+    def check_access_controls() -> tuple[bool, dict]:
         """Check access control implementation"""
         results = {
             'authentication_required': False,
@@ -399,36 +396,36 @@ class AutomatedComplianceChecks:
             'session_timeout': False,
             'details': []
         }
-        
+
         # Check authentication
         rest_framework = getattr(settings, 'REST_FRAMEWORK', {})
         auth_classes = rest_framework.get('DEFAULT_AUTHENTICATION_CLASSES', [])
         if 'rest_framework_simplejwt.authentication.JWTAuthentication' in auth_classes:
             results['authentication_required'] = True
             results['details'].append('JWT authentication enabled')
-        
+
         # Check for RBAC (check if user_management app is installed)
         installed_apps = getattr(settings, 'INSTALLED_APPS', [])
         if 'user_management' in installed_apps:
             results['rbac_enabled'] = True
             results['details'].append('User management with RBAC installed')
-        
+
         # Check MFA
         # Check if pyotp is in requirements (2FA support)
         results['mfa_available'] = True  # Assuming it's available based on requirements.txt
         results['details'].append('2FA support available')
-        
+
         # Check session timeout
         session_timeout = getattr(settings, 'SESSION_TIMEOUT_MINUTES', 0)
         if session_timeout > 0 and session_timeout <= 120:
             results['session_timeout'] = True
             results['details'].append(f'Session timeout set to {session_timeout} minutes')
-        
+
         passed = all([results['authentication_required'], results['rbac_enabled']])
         return passed, results
-    
+
     @staticmethod
-    def check_audit_logging() -> tuple[bool, Dict]:
+    def check_audit_logging() -> tuple[bool, dict]:
         """Check audit logging implementation"""
         results = {
             'audit_enabled': False,
@@ -436,29 +433,29 @@ class AutomatedComplianceChecks:
             'sensitive_field_masking': False,
             'details': []
         }
-        
+
         # Check audit logging
         if getattr(settings, 'AUDIT_LOG_ENABLED', False):
             results['audit_enabled'] = True
             results['details'].append('Audit logging enabled')
-        
+
         # Check retention
         retention_days = getattr(settings, 'AUDIT_LOG_RETENTION_DAYS', 0)
         if retention_days >= 365:
             results['log_retention'] = True
             results['details'].append(f'Audit logs retained for {retention_days} days')
-        
+
         # Check sensitive field handling
         sensitive_fields = getattr(settings, 'AUDIT_SENSITIVE_FIELDS', [])
         if sensitive_fields:
             results['sensitive_field_masking'] = True
             results['details'].append('Sensitive fields configured for masking')
-        
+
         passed = results['audit_enabled'] and results['log_retention']
         return passed, results
-    
+
     @staticmethod
-    def check_gdpr_data_subject_rights() -> tuple[bool, Dict]:
+    def check_gdpr_data_subject_rights() -> tuple[bool, dict]:
         """Check GDPR data subject rights implementation"""
         results = {
             'consent_management': False,
@@ -466,7 +463,7 @@ class AutomatedComplianceChecks:
             'data_deletion': False,
             'details': []
         }
-        
+
         # Check if gdpr_compliance app is installed
         installed_apps = getattr(settings, 'INSTALLED_APPS', [])
         if 'gdpr_compliance' in installed_apps:
@@ -474,7 +471,7 @@ class AutomatedComplianceChecks:
             results['data_export'] = True
             results['data_deletion'] = True
             results['details'].append('GDPR compliance module installed')
-        
+
         passed = all([results['consent_management'], results['data_export'], results['data_deletion']])
         return passed, results
 
@@ -487,10 +484,10 @@ class ComplianceEngine:
     """
     Main compliance automation engine
     """
-    
+
     _instance = None
     _lock = threading.Lock()
-    
+
     def __new__(cls):
         if cls._instance is None:
             with cls._lock:
@@ -498,17 +495,17 @@ class ComplianceEngine:
                     cls._instance = super().__new__(cls)
                     cls._instance._initialized = False
         return cls._instance
-    
+
     def __init__(self):
         if self._initialized:
             return
-        
+
         self._controls = ControlLibrary.get_all_controls()
-        self._evidence: Dict[str, List[ComplianceEvidence]] = {}
+        self._evidence: dict[str, list[ComplianceEvidence]] = {}
         self._automated_checks = self._setup_automated_checks()
         self._initialized = True
-    
-    def _setup_automated_checks(self) -> Dict[str, Callable]:
+
+    def _setup_automated_checks(self) -> dict[str, Callable]:
         """Map controls to automated check functions"""
         return {
             'CC6.1': AutomatedComplianceChecks.check_encryption_at_rest,
@@ -520,14 +517,14 @@ class ComplianceEngine:
             'GDPR-15': AutomatedComplianceChecks.check_gdpr_data_subject_rights,
             'GDPR-17': AutomatedComplianceChecks.check_gdpr_data_subject_rights,
         }
-    
-    def run_automated_checks(self, framework: Optional[ComplianceFramework] = None) -> Dict:
+
+    def run_automated_checks(self, framework: ComplianceFramework | None = None) -> dict:
         """
         Run automated compliance checks
-        
+
         Args:
             framework: Specific framework to check (or all if None)
-        
+
         Returns:
             Dict of check results
         """
@@ -542,31 +539,31 @@ class ComplianceEngine:
                 'not_applicable': 0
             }
         }
-        
+
         controls_to_check = (
-            ControlLibrary.get_controls_by_framework(framework) 
-            if framework 
+            ControlLibrary.get_controls_by_framework(framework)
+            if framework
             else self._controls
         )
-        
+
         for control_id, control in controls_to_check.items():
             results['summary']['total'] += 1
-            
+
             if control_id in self._automated_checks:
                 check_func = self._automated_checks[control_id]
                 try:
                     passed, details = check_func()
-                    
+
                     control.last_checked = timezone.now()
                     control.last_check_result = passed
-                    
+
                     if passed:
                         control.status = ControlStatus.IMPLEMENTED
                         results['summary']['passed'] += 1
                     else:
                         control.status = ControlStatus.PARTIALLY_IMPLEMENTED
                         results['summary']['failed'] += 1
-                    
+
                     results['controls'][control_id] = {
                         'name': control.name,
                         'status': control.status.value,
@@ -588,22 +585,22 @@ class ComplianceEngine:
                     'status': control.status.value,
                     'automated_check': False
                 }
-        
+
         # Calculate compliance percentage
         if results['summary']['total'] > 0:
             results['summary']['compliance_percentage'] = round(
                 (results['summary']['passed'] / results['summary']['total']) * 100, 1
             )
-        
+
         # Cache results
         cache.set('compliance_check_results', results, 86400)
-        
+
         return results
-    
-    def get_compliance_status(self, framework: ComplianceFramework) -> Dict:
+
+    def get_compliance_status(self, framework: ComplianceFramework) -> dict:
         """Get current compliance status for a framework"""
         controls = ControlLibrary.get_controls_by_framework(framework)
-        
+
         status = {
             'framework': framework.value,
             'total_controls': len(controls),
@@ -619,8 +616,8 @@ class ComplianceEngine:
                 'low': {'total': 0, 'implemented': 0}
             }
         }
-        
-        for control_id, control in controls.items():
+
+        for _control_id, control in controls.items():
             # Status counts
             if control.status == ControlStatus.IMPLEMENTED:
                 status['implemented'] += 1
@@ -630,7 +627,7 @@ class ComplianceEngine:
                 status['not_applicable'] += 1
             else:
                 status['not_implemented'] += 1
-            
+
             # Category breakdown
             if control.category not in status['by_category']:
                 status['by_category'][control.category] = {
@@ -639,38 +636,38 @@ class ComplianceEngine:
             status['by_category'][control.category]['total'] += 1
             if control.status == ControlStatus.IMPLEMENTED:
                 status['by_category'][control.category]['implemented'] += 1
-            
+
             # Risk level breakdown
             status['by_risk_level'][control.risk_level]['total'] += 1
             if control.status == ControlStatus.IMPLEMENTED:
                 status['by_risk_level'][control.risk_level]['implemented'] += 1
-        
+
         # Calculate percentages
         if status['total_controls'] > 0:
             status['compliance_percentage'] = round(
                 (status['implemented'] / status['total_controls']) * 100, 1
             )
-        
+
         return status
-    
+
     def add_evidence(self, control_id: str, evidence: ComplianceEvidence):
         """Add evidence for a control"""
         if control_id not in self._evidence:
             self._evidence[control_id] = []
         self._evidence[control_id].append(evidence)
-        
+
         # Persist to cache
         cache.set(f'compliance_evidence:{control_id}', self._evidence[control_id], 86400 * 365)
-    
-    def get_evidence(self, control_id: str) -> List[ComplianceEvidence]:
+
+    def get_evidence(self, control_id: str) -> list[ComplianceEvidence]:
         """Get all evidence for a control"""
         return self._evidence.get(control_id, [])
-    
-    def generate_audit_report(self, framework: ComplianceFramework) -> Dict:
+
+    def generate_audit_report(self, framework: ComplianceFramework) -> dict:
         """Generate a compliance audit report"""
         status = self.get_compliance_status(framework)
         controls = ControlLibrary.get_controls_by_framework(framework)
-        
+
         report = {
             'title': f'{framework.value.upper()} Compliance Audit Report',
             'generated_at': timezone.now().isoformat(),
@@ -689,11 +686,11 @@ class ComplianceEngine:
             'evidence_summary': [],
             'recommendations': []
         }
-        
+
         # Add control details
         for control_id, control in controls.items():
             evidence = self.get_evidence(control_id)
-            
+
             control_detail = {
                 'control_id': control_id,
                 'name': control.name,
@@ -707,7 +704,7 @@ class ComplianceEngine:
                 'last_checked': control.last_checked.isoformat() if control.last_checked else None
             }
             report['control_details'].append(control_detail)
-            
+
             # Add recommendations for gaps
             if control.status != ControlStatus.IMPLEMENTED:
                 report['recommendations'].append({
@@ -715,7 +712,7 @@ class ComplianceEngine:
                     'priority': control.risk_level,
                     'recommendation': f"Implement {control.name}: {control.requirement}"
                 })
-        
+
         return report
 
 
@@ -725,19 +722,19 @@ class ComplianceEngine:
 
 class AuditAutomation:
     """Automated audit trail and evidence collection"""
-    
+
     def __init__(self):
         self.compliance_engine = ComplianceEngine()
-    
+
     def collect_access_review_evidence(self) -> ComplianceEvidence:
         """Automatically collect access review evidence"""
         from django.contrib.auth import get_user_model
         User = get_user_model()
-        
+
         # Get user access data
-        users = User.objects.all().values('id', 'username', 'email', 'is_active', 
+        users = User.objects.all().values('id', 'username', 'email', 'is_active',
                                           'is_staff', 'is_superuser', 'last_login')
-        
+
         access_data = {
             'collection_date': timezone.now().isoformat(),
             'total_users': len(users),
@@ -746,7 +743,7 @@ class AuditAutomation:
             'staff_users': sum(1 for u in users if u['is_staff']),
             'users': list(users)
         }
-        
+
         evidence = ComplianceEvidence(
             evidence_id=f"access_review_{timezone.now().strftime('%Y%m%d')}",
             control_id='CC5.1',
@@ -756,10 +753,10 @@ class AuditAutomation:
             data=access_data,
             collected_by='system'
         )
-        
+
         self.compliance_engine.add_evidence('CC5.1', evidence)
         return evidence
-    
+
     def collect_configuration_evidence(self) -> ComplianceEvidence:
         """Collect security configuration evidence"""
         config_data = {
@@ -782,20 +779,20 @@ class AuditAutomation:
                 'audit_logging_enabled': getattr(settings, 'AUDIT_LOG_ENABLED', False)
             }
         }
-        
+
         evidence = ComplianceEvidence(
             evidence_id=f"config_snapshot_{timezone.now().strftime('%Y%m%d_%H%M%S')}",
             control_id='CC6.1',
             evidence_type=EvidenceType.CONFIGURATION,
-            title=f"Security Configuration Snapshot",
+            title="Security Configuration Snapshot",
             description="Automated security configuration capture",
             data=config_data,
             collected_by='system'
         )
-        
+
         self.compliance_engine.add_evidence('CC6.1', evidence)
         return evidence
-    
+
     def collect_audit_log_evidence(self, days: int = 30) -> ComplianceEvidence:
         """Collect audit log evidence"""
         # Get audit log summary from cache
@@ -806,7 +803,7 @@ class AuditAutomation:
             'events_by_type': cache.get('audit_events_by_type', {}),
             'high_risk_events': cache.get('audit_high_risk_count', 0)
         }
-        
+
         evidence = ComplianceEvidence(
             evidence_id=f"audit_log_{timezone.now().strftime('%Y%m%d')}",
             control_id='CC7.1',
@@ -816,10 +813,10 @@ class AuditAutomation:
             data=audit_summary,
             collected_by='system'
         )
-        
+
         self.compliance_engine.add_evidence('CC7.1', evidence)
         return evidence
-    
+
     def schedule_evidence_collection(self):
         """Schedule automated evidence collection tasks"""
         # This would typically integrate with Celery Beat
@@ -837,5 +834,5 @@ class AuditAutomation:
                 'frequency': 'monthly'
             }
         }
-        
+
         return collection_tasks

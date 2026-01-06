@@ -15,7 +15,6 @@ import {
     Download,
     FileSpreadsheet,
     FileJson,
-    FileText,
     Users,
     Building2,
     Target,
@@ -83,16 +82,18 @@ export default function DataExportPage() {
 
     const [isExporting, setIsExporting] = useState(false);
     const [exportProgress, setExportProgress] = useState(0);
-    const [exportJobs, setExportJobs] = useState<ExportJob[]>([
-        // Mock previous exports
-        {
-            id: '1',
-            status: 'completed',
-            progress: 100,
-            format: 'csv',
-            entities: ['contacts', 'companies'],
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 45000),
+    const [exportJobs, setExportJobs] = useState<ExportJob[]>(() => {
+        const now = Date.now();
+        return [
+            // Mock previous exports
+            {
+                id: '1',
+                status: 'completed',
+                progress: 100,
+                format: 'csv',
+                entities: ['contacts', 'companies'],
+                createdAt: new Date(now - 2 * 24 * 60 * 60 * 1000),
+            completedAt: new Date(now - 2 * 24 * 60 * 60 * 1000 + 45000),
             downloadUrl: '#',
             fileSize: '2.4 MB',
         },
@@ -102,12 +103,13 @@ export default function DataExportPage() {
             progress: 100,
             format: 'json',
             entities: ['deals', 'activities'],
-            createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            completedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000 + 120000),
+            createdAt: new Date(now - 7 * 24 * 60 * 60 * 1000),
+            completedAt: new Date(now - 7 * 24 * 60 * 60 * 1000 + 120000),
             downloadUrl: '#',
             fileSize: '5.1 MB',
         },
-    ]);
+        ];
+    });
 
     // Toggle entity selection
     const toggleEntity = (entityId: ExportEntity) => {
@@ -196,10 +198,10 @@ export default function DataExportPage() {
     };
 
     // Delete export
-    const deleteExport = (jobId: string) => {
-        setExportJobs(prev => prev.filter(job => job.id !== jobId));
-        toast.success('Export deleted');
-    };
+    // const deleteExport = (jobId: string) => {
+    //     setExportJobs(prev => prev.filter(job => job.id !== jobId));
+    //     toast.success('Export deleted');
+    // };
 
     // Format date
     const formatDate = (date: Date): string => {

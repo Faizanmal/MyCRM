@@ -1,8 +1,16 @@
 from rest_framework import serializers
+
 from .models import (
-    SalesRepProfile, RoutingRule, LeadAssignment, EscalationRule,
-    RebalancingEvent, RoutingAnalytics, SkillCertification,
-    RepSkillAssignment, TerritoryDefinition, LeadQualityScore
+    EscalationRule,
+    LeadAssignment,
+    LeadQualityScore,
+    RebalancingEvent,
+    RepSkillAssignment,
+    RoutingAnalytics,
+    RoutingRule,
+    SalesRepProfile,
+    SkillCertification,
+    TerritoryDefinition,
 )
 
 
@@ -12,7 +20,7 @@ class SalesRepProfileSerializer(serializers.ModelSerializer):
     conversion_rate = serializers.ReadOnlyField()
     capacity_utilization = serializers.ReadOnlyField()
     is_at_capacity = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = SalesRepProfile
         fields = [
@@ -52,7 +60,7 @@ class SalesRepProfileCreateSerializer(serializers.ModelSerializer):
 class RoutingRuleSerializer(serializers.ModelSerializer):
     target_rep_names = serializers.SerializerMethodField()
     fallback_rep_name = serializers.CharField(source='fallback_rep.get_full_name', read_only=True)
-    
+
     class Meta:
         model = RoutingRule
         fields = [
@@ -64,7 +72,7 @@ class RoutingRuleSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'total_matches', 'total_assignments']
-    
+
     def get_target_rep_names(self, obj):
         return [rep.get_full_name() for rep in obj.target_reps.all()]
 
@@ -75,7 +83,7 @@ class LeadAssignmentSerializer(serializers.ModelSerializer):
     assigned_by_name = serializers.CharField(source='assigned_by.get_full_name', read_only=True)
     previous_assignee_name = serializers.CharField(source='previous_assignee.get_full_name', read_only=True)
     response_time_minutes = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = LeadAssignment
         fields = [
@@ -91,14 +99,14 @@ class LeadAssignmentSerializer(serializers.ModelSerializer):
             'outcome', 'outcome_at'
         ]
         read_only_fields = ['id', 'assigned_at']
-    
+
     def get_lead_name(self, obj):
         return f"{obj.lead.first_name} {obj.lead.last_name}"
 
 
 class EscalationRuleSerializer(serializers.ModelSerializer):
     escalate_to_name = serializers.CharField(source='escalate_to.get_full_name', read_only=True)
-    
+
     class Meta:
         model = EscalationRule
         fields = [
@@ -115,7 +123,7 @@ class EscalationRuleSerializer(serializers.ModelSerializer):
 
 class RebalancingEventSerializer(serializers.ModelSerializer):
     triggered_by_name = serializers.CharField(source='triggered_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = RebalancingEvent
         fields = [
@@ -152,7 +160,7 @@ class RepSkillAssignmentSerializer(serializers.ModelSerializer):
     skill_name = serializers.CharField(source='skill.name', read_only=True)
     rep_name = serializers.CharField(source='rep.user.get_full_name', read_only=True)
     is_expired = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = RepSkillAssignment
         fields = [
@@ -164,7 +172,7 @@ class RepSkillAssignmentSerializer(serializers.ModelSerializer):
 
 class TerritoryDefinitionSerializer(serializers.ModelSerializer):
     primary_rep_name = serializers.CharField(source='primary_rep.get_full_name', read_only=True)
-    
+
     class Meta:
         model = TerritoryDefinition
         fields = [
@@ -177,7 +185,7 @@ class TerritoryDefinitionSerializer(serializers.ModelSerializer):
 
 class LeadQualityScoreSerializer(serializers.ModelSerializer):
     lead_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = LeadQualityScore
         fields = [
@@ -188,7 +196,7 @@ class LeadQualityScoreSerializer(serializers.ModelSerializer):
             'recommended_rep_ids', 'recommended_rule_id', 'priority_tier',
             'model_version', 'scored_at'
         ]
-    
+
     def get_lead_name(self, obj):
         return f"{obj.lead.first_name} {obj.lead.last_name}"
 

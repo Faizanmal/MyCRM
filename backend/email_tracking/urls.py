@@ -2,12 +2,17 @@
 Email Tracking URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    TrackedEmailViewSet, EmailTemplateViewSet, EmailSequenceViewSet,
-    SequenceStepViewSet, TrackingPixelView, TrackingLinkView,
-    EmailAnalyticsDashboardView
+    EmailAnalyticsDashboardView,
+    EmailSequenceViewSet,
+    EmailTemplateViewSet,
+    SequenceStepViewSet,
+    TrackedEmailViewSet,
+    TrackingLinkView,
+    TrackingPixelView,
 )
 
 router = DefaultRouter()

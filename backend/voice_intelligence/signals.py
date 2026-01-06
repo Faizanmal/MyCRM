@@ -3,14 +3,17 @@ Voice Intelligence Signals
 Django signals for voice intelligence events
 """
 
-from django.db.models.signals import post_save, pre_delete
-from django.dispatch import receiver
-from django.utils import timezone
 import logging
 
+from django.db.models.signals import post_save, pre_delete
+from django.dispatch import receiver
+
 from .models import (
-    VoiceRecording, Transcription, ActionItem,
-    ConversationCategory, RecordingCategory
+    ActionItem,
+    ConversationCategory,
+    RecordingCategory,
+    Transcription,
+    VoiceRecording,
 )
 
 logger = logging.getLogger(__name__)
@@ -21,12 +24,12 @@ def on_recording_created(sender, instance, created, **kwargs):
     """Handle new recording creation"""
     if created:
         logger.info(f"New voice recording created: {instance.id}")
-        
+
         # Auto-start processing if uploaded
         if instance.status == 'uploaded':
             # Import here to avoid circular imports
             from .tasks import process_recording_task
-            
+
             # Queue processing with slight delay
             process_recording_task.apply_async(
                 args=[str(instance.id)],
@@ -37,32 +40,30 @@ def on_recording_created(sender, instance, created, **kwargs):
 @receiver(post_save, sender=VoiceRecording)
 def on_recording_status_change(sender, instance, created, **kwargs):
     """Handle recording status changes"""
-    if not created:
-        # Check if status changed to completed
-        if instance.status == 'completed':
-            logger.info(f"Recording processing completed: {instance.id}")
-            
-            # Send notification if enabled
-            try:
-                from .models import TranscriptionSettings
-                settings = TranscriptionSettings.objects.filter(
-                    user=instance.owner
-                ).first()
-                
-                if settings and settings.notify_on_completion:
-                    # Send notification email
-                    try:
-                        from core.email_notifications import EmailNotificationService
-                        EmailNotificationService.send_call_analysis_complete(
-                            user=instance.owner,
-                            call_recording=instance
-                        )
-                        logger.info(f"Sent completion notification for recording {instance.id}")
-                    except Exception as email_err:
-                        logger.warning(f"Failed to send completion email: {email_err}")
-                    
-            except Exception as e:
-                logger.error(f"Error sending completion notification: {str(e)}")
+    if not created and instance.status == 'completed':
+        logger.info(f"Recording processing completed: {instance.id}")
+
+        # Send notification if enabled
+        try:
+            from .models import TranscriptionSettings
+            settings = TranscriptionSettings.objects.filter(
+                user=instance.owner
+            ).first()
+
+            if settings and settings.notify_on_completion:
+                # Send notification email
+                try:
+                    from core.email_notifications import EmailNotificationService
+                    EmailNotificationService.send_call_analysis_complete(
+                        user=instance.owner,
+                        call_recording=instance
+                    )
+                    logger.info(f"Sent completion notification for recording {instance.id}")
+                except Exception as email_err:
+                    logger.warning(f"Failed to send completion email: {email_err}")
+
+        except Exception as e:
+            logger.error(f"Error sending completion notification: {str(e)}")
 
 
 @receiver(post_save, sender=Transcription)
@@ -70,7 +71,7 @@ def on_transcription_created(sender, instance, created, **kwargs):
     """Handle new transcription"""
     if created:
         logger.info(f"Transcription created for recording: {instance.recording_id}")
-        
+
         # Update recording status
         recording = instance.recording
         if recording.status == 'transcribing':
@@ -83,7 +84,7 @@ def on_action_item_created(sender, instance, created, **kwargs):
     """Handle new action item"""
     if created:
         logger.info(f"Action item created: {instance.title}")
-        
+
         # Check for high priority notification
         if instance.priority in ['high', 'critical']:
             try:
@@ -91,7 +92,7 @@ def on_action_item_created(sender, instance, created, **kwargs):
                 settings = TranscriptionSettings.objects.filter(
                     user=instance.recording.owner
                 ).first()
-                
+
                 if settings and settings.notify_on_high_priority_action:
                     # Create in-app notification for high priority action items
                     try:
@@ -110,7 +111,7 @@ def on_action_item_created(sender, instance, created, **kwargs):
                         logger.info(f"Created notification for high priority action item {instance.id}")
                     except Exception as notif_err:
                         logger.warning(f"Failed to create action item notification: {notif_err}")
-                    
+
             except Exception as e:
                 logger.error(f"Error sending action item notification: {str(e)}")
 
@@ -147,7 +148,7 @@ def on_category_removed(sender, instance, **kwargs):
 def on_recording_deleted(sender, instance, **kwargs):
     """Handle recording deletion"""
     logger.info(f"Voice recording deleted: {instance.id}")
-    
+
     # TODO: Delete associated files from storage
     # if instance.file_path:
     #     delete_file_from_storage(instance.file_path)
@@ -165,7 +166,7 @@ def create_activity_for_recording(recording, action):
     """Create activity feed entry for recording events"""
     try:
         from activity_feed.models import Activity
-        
+
         Activity.objects.create(
             user=recording.owner,
             action=action,

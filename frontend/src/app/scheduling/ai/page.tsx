@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,25 +10,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+// import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { 
-  CalendarDays, 
-  Clock, 
-  Brain, 
-  Target, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Plus, 
+import {
+  CalendarDays,
+  Clock,
+  Brain,
+  Target,
+  AlertTriangle,
+  CheckCircle2,
   Sparkles,
-  TrendingUp,
   Calendar,
   Bell,
   FileText,
   User,
-  MapPin,
   Video,
   Phone,
   RefreshCw,
@@ -50,7 +47,7 @@ interface AIPreference {
   avoid_back_to_back: boolean;
   timezone: string;
   working_days: number[];
-  meeting_type_preferences: Record<string, any>;
+  meeting_type_preferences: Record<string, unknown>;
 }
 
 interface NoShowPrediction {
@@ -64,14 +61,26 @@ interface NoShowPrediction {
   attendee_name?: string;
 }
 
+interface RecentInteraction {
+  type: string;
+  date: string;
+  summary: string;
+}
+
+interface OpenOpportunity {
+  name: string;
+  value: number;
+  stage: string;
+}
+
 interface MeetingPrep {
   id: number;
   meeting_title: string;
   meeting_time: string;
   contact_summary: string;
   talking_points: string[];
-  recent_interactions: any[];
-  open_opportunities: any[];
+  recent_interactions: RecentInteraction[];
+  open_opportunities: OpenOpportunity[];
   suggested_agenda: string[];
   risk_alerts: string[];
   prepared_at: string;
@@ -101,39 +110,11 @@ export default function SmartSchedulingAIPage() {
   const [meetingPreps, setMeetingPreps] = useState<MeetingPrep[]>([]);
   const [reminders, setReminders] = useState<SmartReminder[]>([]);
   const [optimalSlots, setOptimalSlots] = useState<OptimalSlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [isPreferencesDialogOpen, setIsPreferencesDialogOpen] = useState(false);
   const [isFindingSlotsDialogOpen, setIsFindingSlotsDialogOpen] = useState(false);
   const [slotDuration, setSlotDuration] = useState(30);
   const [slotDate, setSlotDate] = useState(new Date().toISOString().split('T')[0]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [prefResponse, predictionsResponse, remindersResponse] = await Promise.all([
-        smartSchedulingAIAPI.getAIPreferences().catch(() => ({ data: null })),
-        smartSchedulingAIAPI.getNoShowPredictions().catch(() => ({ data: { results: [] } })),
-        smartSchedulingAIAPI.getSmartReminders().catch(() => ({ data: { results: [] } }))
-      ]);
-      
-      setPreferences(prefResponse.data);
-      setNoShowPredictions(predictionsResponse.data.results || []);
-      setReminders(remindersResponse.data.results || []);
-      
-      // Load demo data if API returns empty
-      if (!prefResponse.data && predictionsResponse.data.results?.length === 0) {
-        loadDemoData();
-      }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-      loadDemoData();
-    }
-    setLoading(false);
-  };
 
   const loadDemoData = () => {
     setPreferences({
@@ -251,26 +232,47 @@ export default function SmartSchedulingAIPage() {
     ]);
   };
 
+  const fetchData = useCallback(async () => {
+    // Defer setting loading to avoid synchronous setState inside useEffect
+    Promise.resolve().then(() => setLoading(true));
+    try {
+      const [prefResponse, predictionsResponse, remindersResponse] = await Promise.all([
+        smartSchedulingAIAPI.getAIPreferences().catch(() => ({ data: null })),
+        smartSchedulingAIAPI.getNoShowPredictions().catch(() => ({ data: { results: [] } })),
+        smartSchedulingAIAPI.getSmartReminders().catch(() => ({ data: { results: [] } }))
+      ]);
+
+      setPreferences(prefResponse.data);
+      setNoShowPredictions(predictionsResponse.data.results || []);
+      setReminders(remindersResponse.data.results || []);
+
+      // Load demo data if API returns empty
+      if (!prefResponse.data && predictionsResponse.data.results?.length === 0) {
+        loadDemoData();
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+      loadDemoData();
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // Defer fetchData to avoid synchronous setState inside effect
+    Promise.resolve().then(() => fetchData());
+  }, [fetchData]);
+
   const findOptimalSlots = async () => {
     try {
       const response = await smartSchedulingAIAPI.findOptimalSlots(slotDuration, slotDate);
       setOptimalSlots(response.data.slots || []);
       toast.success('Found optimal meeting slots');
     } catch (error) {
+      console.error('Failed to find optimal slots:', error);
       toast.info('Using AI-generated optimal slots');
       // Keep demo data
     }
     setIsFindingSlotsDialogOpen(false);
-  };
-
-  const generateMeetingPrep = async (meetingId: number) => {
-    try {
-      const response = await smartSchedulingAIAPI.generateMeetingPrep(meetingId);
-      toast.success('Meeting prep generated');
-      fetchData();
-    } catch (error) {
-      toast.info('Meeting prep ready (demo)');
-    }
   };
 
   const getRiskColor = (probability: number) => {
@@ -525,7 +527,7 @@ export default function SmartSchedulingAIPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CalendarDays className="h-5 w-5" />
-                      Today's AI Insights
+                      Today&apos;s AI Insights
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -823,7 +825,7 @@ export default function SmartSchedulingAIPage() {
                               <span className="text-sm text-gray-500">score</span>
                             </div>
                             <div className="w-24 h-2 bg-gray-200 rounded-full mt-1">
-                              <div 
+                              <div
                                 className="h-full bg-indigo-600 rounded-full"
                                 style={{ width: `${slot.score * 100}%` }}
                               />
@@ -872,14 +874,12 @@ export default function SmartSchedulingAIPage() {
                       <div key={reminder.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-lg ${
-                              reminder.reminder_type === 'preparation' ? 'bg-indigo-100' :
-                              reminder.reminder_type === 'follow_up' ? 'bg-green-100' : 'bg-gray-100'
-                            }`}>
+                            <div className={`p-2 rounded-lg ${reminder.reminder_type === 'preparation' ? 'bg-indigo-100' :
+                                reminder.reminder_type === 'follow_up' ? 'bg-green-100' : 'bg-gray-100'
+                              }`}>
                               {reminder.reminder_type === 'preparation' ? (
-                                <FileText className={`h-5 w-5 ${
-                                  reminder.reminder_type === 'preparation' ? 'text-indigo-600' : 'text-gray-600'
-                                }`} />
+                                <FileText className={`h-5 w-5 ${reminder.reminder_type === 'preparation' ? 'text-indigo-600' : 'text-gray-600'
+                                  }`} />
                               ) : (
                                 <Bell className="h-5 w-5 text-green-600" />
                               )}
@@ -1005,7 +1005,7 @@ export default function SmartSchedulingAIPage() {
                   <Label>Preferred Meeting Lengths</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {[15, 30, 45, 60, 90].map(duration => (
-                      <Badge 
+                      <Badge
                         key={duration}
                         variant={preferences?.preferred_meeting_lengths?.includes(duration) ? 'default' : 'outline'}
                         className="cursor-pointer"

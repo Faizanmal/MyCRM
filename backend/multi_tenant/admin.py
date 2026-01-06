@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Organization, OrganizationMember, OrganizationInvitation
+
+from .models import Organization, OrganizationInvitation, OrganizationMember
 
 
 @admin.register(Organization)
@@ -16,7 +17,7 @@ class OrganizationAdmin(admin.ModelAdmin):
             'fields': ('email', 'phone', 'address')
         }),
         ('Subscription', {
-            'fields': ('status', 'plan', 'max_users', 'max_contacts', 'max_storage_mb', 
+            'fields': ('status', 'plan', 'max_users', 'max_contacts', 'max_storage_mb',
                       'subscription_start', 'subscription_end', 'trial_ends_at')
         }),
         ('Billing', {

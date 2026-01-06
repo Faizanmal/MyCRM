@@ -103,7 +103,7 @@ export default function InstallPrompt() {
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Install MyCRM</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Install MyCRM</h3>
               <p className="text-sm text-gray-600">Access faster & work offline</p>
             </div>
           </div>

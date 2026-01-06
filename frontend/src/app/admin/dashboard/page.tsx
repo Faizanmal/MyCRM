@@ -1,20 +1,17 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     BarChart,
     DonutChart,
-    LineChart,
     HorizontalBarChart,
-    ProgressRing,
-    StatCardWithSparkline,
     FunnelChart,
     HeatMap,
 } from '@/components/charts/DashboardCharts';
@@ -25,14 +22,12 @@ import {
     DollarSign,
     Target,
     Activity,
-    Calendar,
     BarChart3,
     PieChart,
     ArrowUpRight,
     ArrowDownRight,
     Download,
     RefreshCw,
-    Filter,
     Clock,
     Star,
     Trophy,
@@ -361,9 +356,9 @@ export default function AdminDashboard() {
                                     >
                                         <td className="py-4 px-4">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${index === 0 ? 'bg-amber-500' :
-                                                    index === 1 ? 'bg-gray-400' :
-                                                        index === 2 ? 'bg-orange-400' :
-                                                            'bg-gray-300'
+                                                index === 1 ? 'bg-gray-400' :
+                                                    index === 2 ? 'bg-orange-400' :
+                                                        'bg-gray-300'
                                                 }`}>
                                                 {index + 1}
                                             </div>
@@ -377,8 +372,8 @@ export default function AdminDashboard() {
                                         <td className="py-4 px-4 text-right">{member.conversionRate}%</td>
                                         <td className="py-4 px-4 text-right">
                                             <Badge className={`gap-1 ${member.trend >= 0
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-red-100 text-red-700'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-red-100 text-red-700'
                                                 }`}>
                                                 {member.trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                                                 {Math.abs(member.trend)}%

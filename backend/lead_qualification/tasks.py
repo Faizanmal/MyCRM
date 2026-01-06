@@ -1,6 +1,7 @@
+import logging
+
 from celery import shared_task
 from django.utils import timezone
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -10,12 +11,13 @@ def calculate_lead_score_task(lead_id):
     """Background task to calculate lead score"""
     try:
         from lead_management.models import Lead
+
         from .scoring_engine import LeadScoringEngine
-        
+
         lead = Lead.objects.get(id=lead_id)
         engine = LeadScoringEngine(lead)
         lead_score = engine.calculate_score()
-        
+
         logger.info(f"Calculated score for lead {lead.name}: {lead_score.score}")
         return {
             'success': True,
@@ -52,10 +54,11 @@ def enrich_lead_data_task(lead_id, source='api'):
     """Background task to enrich lead data from external sources"""
     try:
         from lead_management.models import Lead
+
         from .models import LeadEnrichmentData
-        
+
         lead = Lead.objects.get(id=lead_id)
-        
+
         # Mock enrichment - integrate with real services like Clearbit, Hunter.io
         enrichment_data = {
             'company_size': 'Unknown',
@@ -63,7 +66,7 @@ def enrich_lead_data_task(lead_id, source='api'):
             'company_industry': 'Unknown',
             'enrichment_note': 'Mock enrichment - integrate real API'
         }
-        
+
         enrichment = LeadEnrichmentData.objects.create(
             lead=lead,
             source=source,
@@ -73,7 +76,7 @@ def enrich_lead_data_task(lead_id, source='api'):
             is_verified=False,
             confidence_score=0.5
         )
-        
+
         logger.info(f"Enriched lead {lead.name} from {source}")
         return {
             'success': True,
@@ -93,32 +96,33 @@ def enrich_lead_data_task(lead_id, source='api'):
 def check_qualification_workflows():
     """Periodic task to check and execute qualification workflows"""
     try:
-        from .models import QualificationWorkflow
         from lead_management.models import Lead
+
+        from .models import QualificationWorkflow
         from .scoring_engine import LeadScoringEngine
-        
+
         workflows = QualificationWorkflow.objects.filter(
             is_active=True,
             trigger_type='time_based'
         )
-        
+
         executed_count = 0
         for workflow in workflows:
             # Get leads that match time-based criteria
             trigger_config = workflow.trigger_config
             check_interval_days = trigger_config.get('check_interval_days', 1)
-            
+
             # Find leads that need checking
             last_check = timezone.now() - timezone.timedelta(days=check_interval_days)
             leads = Lead.objects.filter(
                 updated_at__gte=last_check
             )
-            
+
             for lead in leads:
                 engine = LeadScoringEngine(lead)
                 engine._check_workflows(lead.score, None)
                 executed_count += 1
-        
+
         logger.info(f"Checked {executed_count} leads for qualification workflows")
         return {
             'success': True,
@@ -137,20 +141,21 @@ def daily_score_recalculation():
     """Daily task to recalculate scores for active leads"""
     try:
         from lead_management.models import Lead
+
         from .scoring_engine import LeadScoringEngine
-        
+
         # Only recalculate for leads that have been active in the last 30 days
         active_leads = Lead.objects.filter(
             status__in=['new', 'contacted', 'qualified'],
             updated_at__gte=timezone.now() - timezone.timedelta(days=30)
         )
-        
+
         results = {
             'total': 0,
             'success': 0,
             'failed': 0
         }
-        
+
         for lead in active_leads:
             results['total'] += 1
             try:
@@ -160,7 +165,7 @@ def daily_score_recalculation():
             except Exception as e:
                 results['failed'] += 1
                 logger.error(f"Failed to calculate score for lead {lead.id}: {str(e)}")
-        
+
         logger.info(f"Daily score recalculation completed: {results}")
         return results
     except Exception as e:

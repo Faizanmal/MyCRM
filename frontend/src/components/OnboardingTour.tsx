@@ -6,7 +6,7 @@ import { X, ChevronLeft, ChevronRight, Check, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
+// import { cn } from '@/lib/utils';
 
 interface TourStep {
     id: string;
@@ -68,7 +68,8 @@ export function OnboardingTourProvider({
     }, [isActive, currentStep, steps]);
 
     useEffect(() => {
-        updateTargetRect();
+        // Defer initial update to avoid synchronous setState inside effect
+        Promise.resolve().then(() => updateTargetRect());
         window.addEventListener('resize', updateTargetRect);
         window.addEventListener('scroll', updateTargetRect);
 

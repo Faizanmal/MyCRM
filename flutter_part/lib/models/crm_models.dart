@@ -83,6 +83,9 @@ class Lead {
   final String? status;
   final int? score;
   final String? notes;
+  final String? title;
+  final String? description;
+  final double? estimatedValue;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   
@@ -97,6 +100,9 @@ class Lead {
     this.status,
     this.score,
     this.notes,
+    this.title,
+    this.description,
+    this.estimatedValue,
     this.createdAt,
     this.updatedAt,
   });
@@ -117,6 +123,11 @@ class Lead {
       status: json['status'],
       score: json['score'],
       notes: json['notes'],
+      title: json['title'],
+      description: json['description'],
+      estimatedValue: json['estimated_value'] != null 
+          ? double.tryParse(json['estimated_value'].toString()) 
+          : null,
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at']) 
           : null,
@@ -138,6 +149,9 @@ class Lead {
       'status': status,
       'score': score,
       'notes': notes,
+      'title': title,
+      'description': description,
+      'estimated_value': estimatedValue,
     };
   }
 }

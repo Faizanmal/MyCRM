@@ -4,19 +4,28 @@ API serializers for data enrichment
 """
 
 from rest_framework import serializers
+
 from .models import (
-    EnrichmentProvider, EnrichmentProfile, CompanyEnrichment,
-    TechnographicData, IntentSignal, NewsAlert, EmailVerification,
-    EnrichmentJob, EnrichmentRule, SocialProfile, FinancialData,
-    EnrichmentActivity
+    CompanyEnrichment,
+    EmailVerification,
+    EnrichmentActivity,
+    EnrichmentJob,
+    EnrichmentProfile,
+    EnrichmentProvider,
+    EnrichmentRule,
+    FinancialData,
+    IntentSignal,
+    NewsAlert,
+    SocialProfile,
+    TechnographicData,
 )
 
 
 class EnrichmentProviderSerializer(serializers.ModelSerializer):
     """Serializer for enrichment providers"""
-    
+
     success_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = EnrichmentProvider
         fields = [
@@ -31,7 +40,7 @@ class EnrichmentProviderSerializer(serializers.ModelSerializer):
             'id', 'total_requests', 'successful_requests', 'daily_requests_used',
             'average_response_time', 'created_at', 'updated_at'
         ]
-    
+
     def get_success_rate(self, obj):
         if obj.total_requests == 0:
             return 0
@@ -40,7 +49,7 @@ class EnrichmentProviderSerializer(serializers.ModelSerializer):
 
 class SocialProfileSerializer(serializers.ModelSerializer):
     """Serializer for social profiles"""
-    
+
     class Meta:
         model = SocialProfile
         fields = [
@@ -53,9 +62,9 @@ class SocialProfileSerializer(serializers.ModelSerializer):
 
 class EnrichmentProfileSerializer(serializers.ModelSerializer):
     """Serializer for enrichment profiles"""
-    
+
     social_profiles = SocialProfileSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = EnrichmentProfile
         fields = [
@@ -76,7 +85,7 @@ class EnrichmentProfileSerializer(serializers.ModelSerializer):
 
 class TechnographicDataSerializer(serializers.ModelSerializer):
     """Serializer for technographic data"""
-    
+
     class Meta:
         model = TechnographicData
         fields = [
@@ -88,7 +97,7 @@ class TechnographicDataSerializer(serializers.ModelSerializer):
 
 class FinancialDataSerializer(serializers.ModelSerializer):
     """Serializer for financial data"""
-    
+
     class Meta:
         model = FinancialData
         fields = [
@@ -103,10 +112,10 @@ class FinancialDataSerializer(serializers.ModelSerializer):
 
 class CompanyEnrichmentSerializer(serializers.ModelSerializer):
     """Serializer for company enrichments"""
-    
+
     technographics = TechnographicDataSerializer(many=True, read_only=True)
     financial_data = FinancialDataSerializer(read_only=True)
-    
+
     class Meta:
         model = CompanyEnrichment
         fields = [
@@ -131,9 +140,9 @@ class CompanyEnrichmentSerializer(serializers.ModelSerializer):
 
 class IntentSignalSerializer(serializers.ModelSerializer):
     """Serializer for intent signals"""
-    
+
     company_name = serializers.CharField(source='company.name', read_only=True)
-    
+
     class Meta:
         model = IntentSignal
         fields = [
@@ -147,9 +156,9 @@ class IntentSignalSerializer(serializers.ModelSerializer):
 
 class NewsAlertSerializer(serializers.ModelSerializer):
     """Serializer for news alerts"""
-    
+
     company_name = serializers.CharField(source='company.name', read_only=True)
-    
+
     class Meta:
         model = NewsAlert
         fields = [
@@ -164,7 +173,7 @@ class NewsAlertSerializer(serializers.ModelSerializer):
 
 class EmailVerificationSerializer(serializers.ModelSerializer):
     """Serializer for email verifications"""
-    
+
     class Meta:
         model = EmailVerification
         fields = [
@@ -177,10 +186,10 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
 
 class EnrichmentJobSerializer(serializers.ModelSerializer):
     """Serializer for enrichment jobs"""
-    
+
     initiated_by_name = serializers.CharField(source='initiated_by.get_full_name', read_only=True)
     progress_percentage = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = EnrichmentJob
         fields = [
@@ -195,7 +204,7 @@ class EnrichmentJobSerializer(serializers.ModelSerializer):
             'failed_records', 'started_at', 'completed_at', 'results_summary',
             'error_log', 'created_at'
         ]
-    
+
     def get_progress_percentage(self, obj):
         if obj.total_records == 0:
             return 0
@@ -204,7 +213,7 @@ class EnrichmentJobSerializer(serializers.ModelSerializer):
 
 class EnrichmentRuleSerializer(serializers.ModelSerializer):
     """Serializer for enrichment rules"""
-    
+
     class Meta:
         model = EnrichmentRule
         fields = [
@@ -221,10 +230,10 @@ class EnrichmentRuleSerializer(serializers.ModelSerializer):
 
 class EnrichmentActivitySerializer(serializers.ModelSerializer):
     """Serializer for enrichment activities"""
-    
+
     profile_email = serializers.CharField(source='enrichment_profile.email', read_only=True)
     company_name = serializers.CharField(source='company.name', read_only=True)
-    
+
     class Meta:
         model = EnrichmentActivity
         fields = [
@@ -239,7 +248,7 @@ class EnrichmentActivitySerializer(serializers.ModelSerializer):
 
 class EnrichContactRequestSerializer(serializers.Serializer):
     """Request serializer for enriching a contact"""
-    
+
     email = serializers.EmailField()
     contact_id = serializers.UUIDField(required=False)
     lead_id = serializers.UUIDField(required=False)
@@ -250,7 +259,7 @@ class EnrichContactRequestSerializer(serializers.Serializer):
 
 class EnrichCompanyRequestSerializer(serializers.Serializer):
     """Request serializer for enriching a company"""
-    
+
     domain = serializers.CharField(max_length=255)
     get_technographics = serializers.BooleanField(default=True)
     get_financials = serializers.BooleanField(default=False)
@@ -259,7 +268,7 @@ class EnrichCompanyRequestSerializer(serializers.Serializer):
 
 class BulkEnrichRequestSerializer(serializers.Serializer):
     """Request serializer for bulk enrichment"""
-    
+
     emails = serializers.ListField(
         child=serializers.EmailField(),
         max_length=1000
@@ -274,20 +283,20 @@ class BulkEnrichRequestSerializer(serializers.Serializer):
 
 class VerifyEmailRequestSerializer(serializers.Serializer):
     """Request serializer for email verification"""
-    
+
     email = serializers.EmailField()
 
 
 class FetchNewsRequestSerializer(serializers.Serializer):
     """Request serializer for fetching company news"""
-    
+
     domain = serializers.CharField(max_length=255)
     days_back = serializers.IntegerField(default=30, min_value=1, max_value=365)
 
 
 class GetIntentSignalsRequestSerializer(serializers.Serializer):
     """Request serializer for getting intent signals"""
-    
+
     domain = serializers.CharField(max_length=255)
     topics = serializers.ListField(
         child=serializers.CharField(max_length=200),
@@ -297,7 +306,7 @@ class GetIntentSignalsRequestSerializer(serializers.Serializer):
 
 class EnrichmentStatsResponseSerializer(serializers.Serializer):
     """Response serializer for enrichment stats"""
-    
+
     total_profiles = serializers.IntegerField()
     enriched_profiles = serializers.IntegerField()
     enrichment_rate = serializers.FloatField()
@@ -309,7 +318,7 @@ class EnrichmentStatsResponseSerializer(serializers.Serializer):
 
 class ProviderStatsSerializer(serializers.Serializer):
     """Response serializer for provider stats"""
-    
+
     provider = serializers.CharField()
     provider_type = serializers.CharField()
     total_requests = serializers.IntegerField()

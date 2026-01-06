@@ -12,7 +12,6 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedPeriod = 'This Month';
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -338,7 +337,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: deals.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final deal = deals[index];
           return ListTile(
@@ -481,7 +480,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: forecasts.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final forecast = forecasts[index];
           return ListTile(
@@ -514,7 +513,7 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: team.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final member = team[index];
           Color rankColor;

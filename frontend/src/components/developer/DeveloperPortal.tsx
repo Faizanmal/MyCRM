@@ -1,18 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
+// import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import {
   Code,
@@ -27,16 +26,13 @@ import {
   Plus,
   Trash2,
   RefreshCw,
-  Clock,
   CheckCircle,
   XCircle,
-  AlertTriangle,
   ExternalLink,
   Terminal,
   Zap,
   GitBranch,
   Package,
-  Play,
   Send,
   Settings,
 } from 'lucide-react';
@@ -160,28 +156,28 @@ const mockAnalytics: APIAnalytics = {
   requestsOverTime: [],
 };
 
-const availableScopes = [
-  { scope: 'contacts:read', description: 'Read contacts' },
-  { scope: 'contacts:write', description: 'Create/update contacts' },
-  { scope: 'deals:read', description: 'Read deals' },
-  { scope: 'deals:write', description: 'Create/update deals' },
-  { scope: 'activities:read', description: 'Read activities' },
-  { scope: 'activities:write', description: 'Create activities' },
-  { scope: 'reports:read', description: 'Access reports' },
-  { scope: 'webhooks:manage', description: 'Manage webhooks' },
-];
+// const availableScopes = [
+//   { scope: 'contacts:read', description: 'Read contacts' },
+//   { scope: 'contacts:write', description: 'Create/update contacts' },
+//   { scope: 'deals:read', description: 'Read deals' },
+//   { scope: 'deals:write', description: 'Create/update deals' },
+//   { scope: 'activities:read', description: 'Read activities' },
+//   { scope: 'activities:write', description: 'Create activities' },
+//   { scope: 'reports:read', description: 'Access reports' },
+//   { scope: 'webhooks:manage', description: 'Manage webhooks' },
+// ];
 
-const availableEvents = [
-  'contact.created', 'contact.updated', 'contact.deleted',
-  'deal.created', 'deal.updated', 'deal.won', 'deal.lost',
-  'task.created', 'task.completed',
-  'activity.created',
-];
+// const availableEvents = [
+//   'contact.created', 'contact.updated', 'contact.deleted',
+//   'deal.created', 'deal.updated', 'deal.won', 'deal.lost',
+//   'task.created', 'task.completed',
+//   'activity.created',
+// ];
 
 // Tab Components
 const APIKeysTab: React.FC = () => {
   const [showKey, setShowKey] = useState<string | null>(null);
-  const [newKeyName, setNewKeyName] = useState('');
+  const [] = useState('');
 
   return (
     <div className="space-y-6">
@@ -280,14 +276,14 @@ const APIKeysTab: React.FC = () => {
             <div className="mt-1">
               <span className="text-purple-400">import</span> {'{'} MyCRM {'}'}{' '}
               <span className="text-purple-400">from</span>{' '}
-              <span className="text-yellow-300">'@mycrm/sdk'</span>;
+              <span className="text-yellow-300">&apos;@mycrm/sdk&apos;</span>;
             </div>
             <div className="mt-2">
               <span className="text-purple-400">const</span> client ={' '}
               <span className="text-purple-400">new</span> MyCRM({'{'}
             </div>
             <div className="pl-4">
-              apiKey: <span className="text-yellow-300">'sk_live_...'</span>
+              apiKey: <span className="text-yellow-300">&apos;sk_live_...&apos;</span>
             </div>
             <div>{'}'});</div>
             <div className="mt-4 text-green-400"># Make your first request</div>

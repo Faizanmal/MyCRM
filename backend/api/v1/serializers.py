@@ -2,10 +2,11 @@
 Unified API V1 Serializers
 Comprehensive serializers for all CRM resources
 """
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from lead_management.models import Lead
+from rest_framework import serializers
+
 from contact_management.models import Contact
+from lead_management.models import Lead
 from opportunity_management.models import Opportunity
 from task_management.models import Task
 
@@ -15,12 +16,12 @@ User = get_user_model()
 class UserBriefSerializer(serializers.ModelSerializer):
     """Brief user info for nested representations"""
     full_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'full_name']
         read_only_fields = fields
-    
+
     def get_full_name(self, obj):
         return obj.get_full_name() if hasattr(obj, 'get_full_name') else f"{obj.first_name} {obj.last_name}"
 
@@ -29,7 +30,7 @@ class LeadListSerializer(serializers.ModelSerializer):
     """Optimized serializer for lead lists"""
     assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
     owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
-    
+
     class Meta:
         model = Lead
         fields = [
@@ -45,7 +46,7 @@ class LeadDetailSerializer(serializers.ModelSerializer):
     assigned_to_detail = UserBriefSerializer(source='assigned_to', read_only=True)
     owner_detail = UserBriefSerializer(source='owner', read_only=True)
     full_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Lead
         fields = [
@@ -57,10 +58,10 @@ class LeadDetailSerializer(serializers.ModelSerializer):
             'custom_fields', 'created_at', 'updated_at', 'converted_at'
         ]
         read_only_fields = ['id', 'owner', 'created_at', 'updated_at', 'converted_at']
-    
+
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
-    
+
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)
@@ -70,7 +71,7 @@ class ContactListSerializer(serializers.ModelSerializer):
     """Optimized serializer for contact lists"""
     assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
     full_name = serializers.CharField(read_only=True)
-    
+
     class Meta:
         model = Contact
         fields = [
@@ -87,7 +88,7 @@ class ContactDetailSerializer(serializers.ModelSerializer):
     assigned_to_detail = UserBriefSerializer(source='assigned_to', read_only=True)
     created_by_detail = UserBriefSerializer(source='created_by', read_only=True)
     full_name = serializers.CharField(read_only=True)
-    
+
     class Meta:
         model = Contact
         fields = [
@@ -99,7 +100,7 @@ class ContactDetailSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at', 'created_by', 'created_by_detail'
         ]
         read_only_fields = ['id', 'full_name', 'created_at', 'updated_at', 'created_by']
-    
+
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
@@ -111,7 +112,7 @@ class OpportunityListSerializer(serializers.ModelSerializer):
     owner_name = serializers.CharField(source='owner.get_full_name', read_only=True)
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
     weighted_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
-    
+
     class Meta:
         model = Opportunity
         fields = [
@@ -129,7 +130,7 @@ class OpportunityDetailSerializer(serializers.ModelSerializer):
     owner_detail = UserBriefSerializer(source='owner', read_only=True)
     contact_detail = ContactListSerializer(source='contact', read_only=True)
     weighted_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
-    
+
     class Meta:
         model = Opportunity
         fields = [
@@ -140,7 +141,7 @@ class OpportunityDetailSerializer(serializers.ModelSerializer):
             'notes', 'tags', 'custom_fields', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'owner', 'weighted_amount', 'created_at', 'updated_at']
-    
+
     def create(self, validated_data):
         validated_data['owner'] = self.context['request'].user
         return super().create(validated_data)
@@ -150,7 +151,7 @@ class TaskListSerializer(serializers.ModelSerializer):
     """Optimized serializer for task lists"""
     assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = Task
         fields = [
@@ -165,7 +166,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     """Detailed task serializer with all fields"""
     assigned_to_detail = UserBriefSerializer(source='assigned_to', read_only=True)
     created_by_detail = UserBriefSerializer(source='created_by', read_only=True)
-    
+
     class Meta:
         model = Task
         fields = [
@@ -174,7 +175,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
             'due_date', 'completed_at', 'reminder_date', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
-    
+
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)

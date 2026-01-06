@@ -1,10 +1,19 @@
 from rest_framework import serializers
-from .models import Dashboard, DashboardWidget, Report, ReportSchedule, ReportExecution, KPI, KPIValue
+
+from .models import (
+    KPI,
+    Dashboard,
+    DashboardWidget,
+    KPIValue,
+    Report,
+    ReportExecution,
+    ReportSchedule,
+)
 
 
 class DashboardWidgetSerializer(serializers.ModelSerializer):
     """Serializer for dashboard widgets"""
-    
+
     class Meta:
         model = DashboardWidget
         fields = [
@@ -19,7 +28,7 @@ class DashboardSerializer(serializers.ModelSerializer):
     """Serializer for dashboards with nested widgets"""
     widgets = DashboardWidgetSerializer(many=True, read_only=True)
     shared_with_details = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Dashboard
         fields = [
@@ -28,7 +37,7 @@ class DashboardSerializer(serializers.ModelSerializer):
             'widgets', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_shared_with_details(self, obj):
         """Get details of users dashboard is shared with"""
         return [
@@ -39,7 +48,7 @@ class DashboardSerializer(serializers.ModelSerializer):
 
 class ReportExecutionSerializer(serializers.ModelSerializer):
     """Serializer for report execution history"""
-    
+
     class Meta:
         model = ReportExecution
         fields = [
@@ -51,7 +60,7 @@ class ReportExecutionSerializer(serializers.ModelSerializer):
 
 class ReportScheduleSerializer(serializers.ModelSerializer):
     """Serializer for report schedules"""
-    
+
     class Meta:
         model = ReportSchedule
         fields = [
@@ -67,7 +76,7 @@ class ReportSerializer(serializers.ModelSerializer):
     schedules = ReportScheduleSerializer(many=True, read_only=True)
     recent_executions = serializers.SerializerMethodField()
     shared_with_details = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Report
         fields = [
@@ -77,12 +86,12 @@ class ReportSerializer(serializers.ModelSerializer):
             'schedules', 'recent_executions', 'last_generated_at', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'last_generated_at']
-    
+
     def get_recent_executions(self, obj):
         """Get 5 most recent executions"""
         executions = obj.executions.order_by('-started_at')[:5]
         return ReportExecutionSerializer(executions, many=True).data
-    
+
     def get_shared_with_details(self, obj):
         """Get details of users report is shared with"""
         return [
@@ -93,7 +102,7 @@ class ReportSerializer(serializers.ModelSerializer):
 
 class KPIValueSerializer(serializers.ModelSerializer):
     """Serializer for KPI values (time series data)"""
-    
+
     class Meta:
         model = KPIValue
         fields = ['id', 'kpi', 'value', 'period_start', 'period_end', 'previous_value', 'change_percentage', 'metadata', 'calculated_at']
@@ -105,7 +114,7 @@ class KPISerializer(serializers.ModelSerializer):
     recent_values = serializers.SerializerMethodField()
     current_value = serializers.SerializerMethodField()
     trend = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = KPI
         fields = [
@@ -115,28 +124,28 @@ class KPISerializer(serializers.ModelSerializer):
             'current_value', 'trend', 'recent_values', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_recent_values(self, obj):
         """Get recent KPI values for charting"""
         values = obj.values.order_by('-period_end')[:30]
         return KPIValueSerializer(values, many=True).data
-    
+
     def get_current_value(self, obj):
         """Get most recent KPI value"""
         latest = obj.values.order_by('-period_end').first()
         return float(latest.value) if latest else None
-    
+
     def get_trend(self, obj):
         """Calculate trend (up/down/stable)"""
         values = list(obj.values.order_by('-period_end')[:7].values_list('value', flat=True))
         if len(values) < 2:
             return 'stable'
-        
+
         # Simple trend: compare average of first half vs second half
         mid = len(values) // 2
         recent_avg = sum(values[:mid]) / mid if mid > 0 else 0
         older_avg = sum(values[mid:]) / (len(values) - mid) if len(values) > mid else 0
-        
+
         if recent_avg > older_avg * 1.05:
             return 'up'
         elif recent_avg < older_avg * 0.95:

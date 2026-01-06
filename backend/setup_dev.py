@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import os
+
 import django
-from user_management.models import User
+
 from multi_tenant.models import Organization, OrganizationMember
+from user_management.models import User
 
 # Setup Django
 os.chdir('e:/SaaS_Tools/MyCRM/backend')

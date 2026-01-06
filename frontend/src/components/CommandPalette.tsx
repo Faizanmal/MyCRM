@@ -44,14 +44,9 @@ import {
     Database,
     CalendarClock,
     Search,
-    Plus,
-    MessageSquare,
-    Bell,
-    HelpCircle,
     Keyboard,
     Moon,
     Sun,
-    LogOut,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Badge } from '@/components/ui/badge';

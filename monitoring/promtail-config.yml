@@ -1,0 +1,40 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Application logs
+  - job_name: mycrm-backend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: mycrm-backend
+          __path__: /app/logs/*.log
+    pipeline_stages:
+      - match:
+          selector: '{job="mycrm-backend"}'
+          stages:
+            - regex:
+                expression: '^(?P<level>\w+) (?P<timestamp>[\d\-\:\.\s]+) (?P<module>\w+) (?P<process>\d+) (?P<thread>\d+) (?P<message>.*)$'
+            - labels:
+                level:
+                module:
+            - timestamp:
+                source: timestamp
+                format: '2006-01-02 15:04:05,000'
+
+  # System logs
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          __path__: /var/log/*.log

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Users,
   MessageSquare,
@@ -12,16 +12,13 @@ import {
   Send,
   Reply,
   MoreHorizontal,
-  Circle,
   Wifi,
   WifiOff,
   Eye,
   Edit3,
   UserPlus,
-  Clock,
   ChevronDown,
   ChevronUp,
-  AtSign,
   Quote,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,7 +48,6 @@ import {
   useLocks,
   type Participant,
   type Comment,
-  type Lock as LockType,
   type Conflict,
 } from '@/lib/realtime/RealtimeProvider';
 
@@ -306,7 +302,7 @@ interface CursorsOverlayProps {
   containerRef: React.RefObject<HTMLElement>;
 }
 
-function CursorsOverlay({ participants, containerRef }: CursorsOverlayProps) {
+function CursorsOverlay({ participants }: CursorsOverlayProps) {
   // Filter participants with cursor positions
   const withCursors = participants.filter(p => p.cursor);
   
@@ -349,7 +345,7 @@ function CursorsOverlay({ participants, containerRef }: CursorsOverlayProps) {
 
 interface ConflictResolutionProps {
   conflict: Conflict;
-  onResolve: (value: any) => void;
+  onResolve: (value: unknown) => void;
   onDismiss: () => void;
 }
 
@@ -362,7 +358,7 @@ function ConflictResolution({ conflict, onResolve, onDismiss }: ConflictResoluti
           <CardTitle className="text-base">Conflict Detected</CardTitle>
         </div>
         <CardDescription>
-          Changes conflict with another user's edits. Choose how to resolve.
+          Changes conflict with another user&apos;s edits. Choose how to resolve.
         </CardDescription>
       </CardHeader>
       
@@ -704,7 +700,7 @@ interface CollaborationPanelProps {
 }
 
 function CollaborationPanel({ entityType, entityId }: CollaborationPanelProps) {
-  const { session, participants, version } = useCollaboration(entityType, entityId);
+  const { participants, version } = useCollaboration(entityType, entityId);
   const { conflicts, resolveConflict } = useRealtime();
   const [activeTab, setActiveTab] = useState('participants');
   
@@ -788,7 +784,7 @@ function CollaborativeField({
   children 
 }: CollaborativeFieldProps) {
   const { participants } = useCollaboration(entityType, entityId);
-  const { onTyping, onBlur, typingUsers } = useTypingIndicator(fieldPath);
+  const { onTyping, onBlur } = useTypingIndicator(fieldPath);
   
   // Find participants editing this field
   const editingParticipants = participants.filter(

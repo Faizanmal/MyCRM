@@ -169,7 +169,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedStatus,
+                      initialValue: _selectedStatus,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         border: OutlineInputBorder(),
@@ -183,7 +183,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                   const SizedBox(width: AppSizes.paddingSm),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedSource,
+                      initialValue: _selectedSource,
                       decoration: const InputDecoration(
                         labelText: 'Source',
                         border: OutlineInputBorder(),

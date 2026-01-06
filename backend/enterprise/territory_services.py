@@ -4,17 +4,21 @@ AI-powered territory balancing and quota planning
 """
 
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
 from decimal import Decimal
-from django.utils import timezone
-from django.db import transaction
-from django.db.models import Sum, Avg, Count, Q
+
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.db.models import Sum
+from django.utils import timezone
 
 from .territory_models import (
-    Territory, TerritoryAssignmentRule, TerritoryRebalanceRequest,
-    QuotaPeriod, Quota, QuotaAdjustment, TerritoryPerformance
+    Quota,
+    QuotaAdjustment,
+    QuotaPeriod,
+    Territory,
+    TerritoryAssignmentRule,
+    TerritoryPerformance,
+    TerritoryRebalanceRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,16 +27,16 @@ User = get_user_model()
 
 class TerritoryService:
     """Service for territory management"""
-    
-    def get_territory_hierarchy(self) -> List[Dict]:
+
+    def get_territory_hierarchy(self) -> list[dict]:
         """Get complete territory hierarchy"""
-        
-        def build_tree(parent_id=None) -> List[Dict]:
+
+        def build_tree(parent_id=None) -> list[dict]:
             territories = Territory.objects.filter(
                 parent_id=parent_id,
                 is_active=True
             ).select_related('owner')
-            
+
             return [
                 {
                     'id': str(t.id),
@@ -48,28 +52,28 @@ class TerritoryService:
                 }
                 for t in territories
             ]
-        
+
         return build_tree()
-    
+
     @transaction.atomic
     def assign_account_to_territory(
         self,
-        account_data: Dict,
-        force_territory_id: Optional[str] = None
-    ) -> Dict:
+        account_data: dict,
+        force_territory_id: str | None = None
+    ) -> dict:
         """Assign an account to a territory based on rules"""
-        
+
         if force_territory_id:
             territory = Territory.objects.get(id=force_territory_id)
         else:
             territory = self._match_territory(account_data)
-        
+
         if not territory:
             return {
                 'assigned': False,
                 'reason': 'No matching territory found'
             }
-        
+
         # Check capacity
         if territory.max_accounts and territory.current_accounts >= territory.max_accounts:
             return {
@@ -77,47 +81,47 @@ class TerritoryService:
                 'reason': 'Territory at capacity',
                 'territory_id': str(territory.id)
             }
-        
+
         # Update territory counts
         territory.current_accounts += 1
         territory.save(update_fields=['current_accounts'])
-        
+
         return {
             'assigned': True,
             'territory_id': str(territory.id),
             'territory_name': territory.name,
             'owner': territory.owner.username if territory.owner else None
         }
-    
-    def _match_territory(self, account_data: Dict) -> Optional[Territory]:
+
+    def _match_territory(self, account_data: dict) -> Territory | None:
         """Match account to territory using rules"""
-        
+
         rules = TerritoryAssignmentRule.objects.filter(
             is_active=True
         ).select_related('territory').order_by('-priority')
-        
+
         for rule in rules:
             if self._evaluate_rule(rule, account_data):
                 rule.matches_count += 1
                 rule.last_matched_at = timezone.now()
                 rule.save(update_fields=['matches_count', 'last_matched_at'])
                 return rule.territory
-        
+
         return None
-    
-    def _evaluate_rule(self, rule: TerritoryAssignmentRule, data: Dict) -> bool:
+
+    def _evaluate_rule(self, rule: TerritoryAssignmentRule, data: dict) -> bool:
         """Evaluate assignment rule conditions"""
-        
+
         conditions = rule.conditions
         results = []
-        
+
         for condition in conditions:
             field = condition.get('field')
             operator = condition.get('operator')
             value = condition.get('value')
-            
+
             account_value = data.get(field)
-            
+
             if operator == 'equals':
                 results.append(account_value == value)
             elif operator == 'in':
@@ -132,38 +136,38 @@ class TerritoryService:
                 results.append(account_value < value)
             elif operator == 'between':
                 results.append(value[0] <= account_value <= value[1])
-        
+
         if rule.match_type == 'all':
             return all(results)
         else:  # any
             return any(results)
-    
-    def analyze_territory_balance(self, territory_ids: List[str] = None) -> Dict:
+
+    def analyze_territory_balance(self, territory_ids: list[str] = None) -> dict:
         """Analyze territory workload balance"""
-        
+
         queryset = Territory.objects.filter(is_active=True)
         if territory_ids:
             queryset = queryset.filter(id__in=territory_ids)
-        
+
         territories = list(queryset)
-        
+
         if not territories:
             return {'territories': [], 'analysis': {}}
-        
+
         # Calculate metrics
         metrics = []
         total_accounts = sum(t.current_accounts for t in territories)
         total_pipeline = sum(float(t.total_pipeline) for t in territories)
         avg_accounts = total_accounts / len(territories) if territories else 0
         avg_pipeline = total_pipeline / len(territories) if territories else 0
-        
+
         for territory in territories:
             accounts_variance = (territory.current_accounts - avg_accounts) / avg_accounts * 100 if avg_accounts else 0
             pipeline_variance = (float(territory.total_pipeline) - avg_pipeline) / avg_pipeline * 100 if avg_pipeline else 0
-            
+
             # Calculate capacity utilization
             capacity_util = territory.current_accounts / territory.max_accounts * 100 if territory.max_accounts else 0
-            
+
             metrics.append({
                 'territory_id': str(territory.id),
                 'territory_name': territory.name,
@@ -175,11 +179,11 @@ class TerritoryService:
                 'is_overloaded': capacity_util > 90,
                 'is_underutilized': capacity_util < 50
             })
-        
+
         # Overall analysis
         overloaded = [m for m in metrics if m['is_overloaded']]
         underutilized = [m for m in metrics if m['is_underutilized']]
-        
+
         return {
             'territories': metrics,
             'analysis': {
@@ -192,35 +196,35 @@ class TerritoryService:
                 'balance_score': self._calculate_balance_score(metrics)
             }
         }
-    
-    def _calculate_balance_score(self, metrics: List[Dict]) -> int:
+
+    def _calculate_balance_score(self, metrics: list[dict]) -> int:
         """Calculate overall balance score (0-100)"""
-        
+
         if not metrics:
             return 100
-        
+
         variances = [abs(m['accounts_variance']) for m in metrics]
         avg_variance = sum(variances) / len(variances)
-        
+
         # Score decreases as variance increases
         score = max(0, 100 - avg_variance)
         return round(score)
-    
+
     @transaction.atomic
     def request_rebalance(
         self,
         user,
-        territory_ids: List[str],
+        territory_ids: list[str],
         reason: str,
-        optimization_goals: List[str]
-    ) -> Dict:
+        optimization_goals: list[str]
+    ) -> dict:
         """Request territory rebalancing"""
-        
+
         territories = Territory.objects.filter(id__in=territory_ids)
-        
+
         # Get current state
         current_state = self.analyze_territory_balance(territory_ids)
-        
+
         # Create request
         request = TerritoryRebalanceRequest.objects.create(
             requested_by=user,
@@ -230,37 +234,37 @@ class TerritoryService:
             status='analyzing'
         )
         request.territories.set(territories)
-        
+
         # Generate proposed changes (AI-powered in production)
         proposed_changes = self._generate_rebalance_proposal(territories, optimization_goals)
-        
+
         request.proposed_changes = proposed_changes
         request.status = 'ready'
         request.save()
-        
+
         return {
             'request_id': str(request.id),
             'status': request.status,
             'current_state': current_state,
             'proposed_changes': proposed_changes
         }
-    
+
     def _generate_rebalance_proposal(
         self,
         territories,
-        goals: List[str]
-    ) -> List[Dict]:
+        goals: list[str]
+    ) -> list[dict]:
         """Generate rebalancing proposal"""
-        
+
         proposals = []
         territories_list = list(territories)
-        
+
         # Simple algorithm - in production use ML/optimization
         avg_accounts = sum(t.current_accounts for t in territories_list) / len(territories_list)
-        
+
         overloaded = [t for t in territories_list if t.current_accounts > avg_accounts * 1.2]
         underloaded = [t for t in territories_list if t.current_accounts < avg_accounts * 0.8]
-        
+
         for over in overloaded:
             excess = int(over.current_accounts - avg_accounts)
             if underloaded and excess > 0:
@@ -274,36 +278,36 @@ class TerritoryService:
                     'accounts_to_move': min(excess, int(avg_accounts - target.current_accounts)),
                     'reason': 'Balance workload'
                 })
-        
+
         return proposals
 
 
 class QuotaService:
     """Service for quota management"""
-    
+
     def __init__(self, user=None):
         self.user = user
-    
-    def get_quota_summary(self, period_id: str = None) -> Dict:
+
+    def get_quota_summary(self, period_id: str = None) -> dict:
         """Get quota summary for current period"""
-        
+
         if period_id:
             period = QuotaPeriod.objects.get(id=period_id)
         else:
             period = QuotaPeriod.objects.filter(is_active=True).first()
-        
+
         if not period:
             return {'error': 'No active quota period'}
-        
+
         quotas = Quota.objects.filter(period=period)
-        
+
         total_target = quotas.aggregate(Sum('target'))['target__sum'] or 0
         total_achieved = quotas.aggregate(Sum('achieved'))['achieved__sum'] or 0
         total_forecast = quotas.aggregate(Sum('forecast'))['forecast__sum'] or 0
-        
+
         attainment = (total_achieved / total_target * 100) if total_target else 0
         forecast_attainment = (total_forecast / total_target * 100) if total_target else 0
-        
+
         # By user
         user_quotas = quotas.filter(user__isnull=False).select_related('user')
         by_user = [
@@ -317,7 +321,7 @@ class QuotaService:
             }
             for q in user_quotas
         ]
-        
+
         # By territory
         territory_quotas = quotas.filter(territory__isnull=False).select_related('territory')
         by_territory = [
@@ -331,7 +335,7 @@ class QuotaService:
             }
             for q in territory_quotas
         ]
-        
+
         return {
             'period': {
                 'id': str(period.id),
@@ -350,31 +354,31 @@ class QuotaService:
             'by_user': sorted(by_user, key=lambda x: x['attainment'], reverse=True),
             'by_territory': sorted(by_territory, key=lambda x: x['attainment'], reverse=True)
         }
-    
+
     @transaction.atomic
     def set_quota(
         self,
         period_id: str,
-        user_id: Optional[str] = None,
-        territory_id: Optional[str] = None,
+        user_id: str | None = None,
+        territory_id: str | None = None,
         quota_type: str = 'revenue',
         target: Decimal = 0,
-        stretch_target: Optional[Decimal] = None
-    ) -> Dict:
+        stretch_target: Decimal | None = None
+    ) -> dict:
         """Set or update a quota"""
-        
+
         period = QuotaPeriod.objects.get(id=period_id)
-        
+
         if period.is_locked:
             raise ValueError("Quota period is locked")
-        
+
         lookup = {'period': period, 'quota_type': quota_type}
-        
+
         if user_id:
             lookup['user_id'] = user_id
         if territory_id:
             lookup['territory_id'] = territory_id
-        
+
         quota, created = Quota.objects.update_or_create(
             **lookup,
             defaults={
@@ -382,14 +386,14 @@ class QuotaService:
                 'stretch_target': stretch_target
             }
         )
-        
+
         # Get AI recommendation
         ai_recommendation = self._get_ai_quota_recommendation(quota)
         quota.ai_recommended_target = ai_recommendation.get('recommended_target')
         quota.ai_confidence = ai_recommendation.get('confidence')
         quota.ai_factors = ai_recommendation.get('factors', [])
         quota.save()
-        
+
         return {
             'quota_id': str(quota.id),
             'target': float(quota.target),
@@ -397,29 +401,29 @@ class QuotaService:
             'ai_recommendation': ai_recommendation,
             'created': created
         }
-    
-    def _get_ai_quota_recommendation(self, quota: Quota) -> Dict:
+
+    def _get_ai_quota_recommendation(self, quota: Quota) -> dict:
         """Get AI-powered quota recommendation"""
-        
+
         # In production, use ML model based on:
         # - Historical performance
         # - Market conditions
         # - Pipeline data
         # - Seasonal patterns
-        
+
         # Simple heuristic for demo
         historical_achievement = self._get_historical_performance(quota)
-        
+
         if historical_achievement:
             # Suggest 10-20% growth
             recommended = historical_achievement * Decimal('1.15')
-            
+
             factors = [
                 {'factor': 'Historical Performance', 'weight': 0.4},
                 {'factor': 'Market Growth', 'weight': 0.3},
                 {'factor': 'Pipeline Quality', 'weight': 0.3}
             ]
-            
+
             return {
                 'recommended_target': float(recommended),
                 'confidence': 0.75,
@@ -429,17 +433,17 @@ class QuotaService:
                     'percentage': float((quota.target / recommended - 1) * 100) if recommended else 0
                 }
             }
-        
+
         return {
             'recommended_target': None,
             'confidence': 0,
             'factors': [],
             'message': 'Insufficient historical data'
         }
-    
-    def _get_historical_performance(self, quota: Quota) -> Optional[Decimal]:
+
+    def _get_historical_performance(self, quota: Quota) -> Decimal | None:
         """Get historical performance for quota entity"""
-        
+
         # Get previous period quota
         previous = Quota.objects.filter(
             user=quota.user,
@@ -448,9 +452,9 @@ class QuotaService:
         ).exclude(
             period=quota.period
         ).order_by('-period__end_date').first()
-        
+
         return previous.achieved if previous else None
-    
+
     @transaction.atomic
     def request_adjustment(
         self,
@@ -458,11 +462,11 @@ class QuotaService:
         new_target: Decimal,
         reason: str,
         requester
-    ) -> Dict:
+    ) -> dict:
         """Request quota adjustment"""
-        
+
         quota = Quota.objects.get(id=quota_id)
-        
+
         adjustment = QuotaAdjustment.objects.create(
             quota=quota,
             adjustment_type='increase' if new_target > quota.target else 'decrease',
@@ -472,7 +476,7 @@ class QuotaService:
             reason=reason,
             requested_by=requester
         )
-        
+
         return {
             'adjustment_id': str(adjustment.id),
             'old_target': float(adjustment.old_target),
@@ -480,7 +484,7 @@ class QuotaService:
             'difference': float(adjustment.difference),
             'status': 'pending_approval'
         }
-    
+
     @transaction.atomic
     def approve_adjustment(
         self,
@@ -488,40 +492,40 @@ class QuotaService:
         approver,
         approved: bool,
         notes: str = ''
-    ) -> Dict:
+    ) -> dict:
         """Approve or reject quota adjustment"""
-        
+
         adjustment = QuotaAdjustment.objects.get(id=adjustment_id)
-        
+
         adjustment.approved_by = approver
         adjustment.approved_at = timezone.now()
         adjustment.is_approved = approved
-        
+
         if approved:
             # Apply the adjustment
             quota = adjustment.quota
             quota.target = adjustment.new_target
             quota.save(update_fields=['target'])
-        
+
         adjustment.save()
-        
+
         return {
             'adjustment_id': str(adjustment.id),
             'approved': approved,
             'new_target': float(adjustment.new_target) if approved else float(adjustment.old_target)
         }
-    
-    def get_quota_forecast(self, quota_id: str) -> Dict:
+
+    def get_quota_forecast(self, quota_id: str) -> dict:
         """Get quota forecast with AI insights"""
-        
+
         quota = Quota.objects.get(id=quota_id)
-        
+
         # Calculate days remaining
         today = timezone.now().date()
         days_remaining = (quota.period.end_date - today).days
         total_days = (quota.period.end_date - quota.period.start_date).days
         days_elapsed = total_days - days_remaining
-        
+
         # Current run rate
         if days_elapsed > 0:
             daily_rate = float(quota.achieved) / days_elapsed
@@ -529,11 +533,11 @@ class QuotaService:
         else:
             daily_rate = 0
             projected = 0
-        
+
         # Gap analysis
         remaining_target = float(quota.target) - float(quota.achieved)
         required_daily = remaining_target / days_remaining if days_remaining > 0 else 0
-        
+
         return {
             'quota_id': str(quota.id),
             'target': float(quota.target),
@@ -556,13 +560,13 @@ class QuotaService:
 
 class TerritoryPerformanceService:
     """Service for territory performance analytics"""
-    
-    def capture_performance_snapshot(self, territory_id: str, period_id: str) -> Dict:
+
+    def capture_performance_snapshot(self, territory_id: str, period_id: str) -> dict:
         """Capture territory performance snapshot"""
-        
+
         territory = Territory.objects.get(id=territory_id)
         period = QuotaPeriod.objects.get(id=period_id)
-        
+
         # Calculate metrics (in production, aggregate from opportunities)
         performance, created = TerritoryPerformance.objects.update_or_create(
             territory=territory,
@@ -576,19 +580,19 @@ class TerritoryPerformanceService:
                 'health_score': self._calculate_health_score(territory)
             }
         )
-        
+
         return {
             'snapshot_id': str(performance.id),
             'territory': territory.name,
             'health_score': performance.health_score,
             'created': created
         }
-    
+
     def _calculate_health_score(self, territory: Territory) -> int:
         """Calculate territory health score"""
-        
+
         score = 50  # Base score
-        
+
         # Pipeline coverage
         if territory.total_pipeline > 0 and territory.total_revenue > 0:
             coverage = float(territory.total_pipeline) / float(territory.total_revenue)
@@ -598,7 +602,7 @@ class TerritoryPerformanceService:
                 score += 10
             elif coverage < 1:
                 score -= 20
-        
+
         # Win rate
         if territory.win_rate >= 0.3:
             score += 15
@@ -606,7 +610,7 @@ class TerritoryPerformanceService:
             score += 5
         elif territory.win_rate < 0.1:
             score -= 15
-        
+
         # Capacity utilization
         if territory.max_accounts:
             util = territory.current_accounts / territory.max_accounts
@@ -616,29 +620,29 @@ class TerritoryPerformanceService:
                 score -= 10  # Overloaded
             elif util < 0.3:
                 score -= 10  # Underutilized
-        
+
         return max(0, min(100, score))
-    
+
     def get_performance_trends(
         self,
         territory_id: str,
         periods: int = 4
-    ) -> Dict:
+    ) -> dict:
         """Get territory performance trends"""
-        
+
         territory = Territory.objects.get(id=territory_id)
-        
+
         snapshots = TerritoryPerformance.objects.filter(
             territory=territory
         ).order_by('-snapshot_date')[:periods * 10]  # Get enough for grouping
-        
+
         # Group by period
         by_period = {}
         for snap in snapshots:
             period_name = snap.period.name
             if period_name not in by_period:
                 by_period[period_name] = snap
-        
+
         trends = [
             {
                 'period': snap.period.name,
@@ -650,20 +654,20 @@ class TerritoryPerformanceService:
             }
             for snap in by_period.values()
         ]
-        
+
         return {
             'territory_id': str(territory.id),
             'territory_name': territory.name,
             'trends': sorted(trends, key=lambda x: x['period'])
         }
-    
-    def get_optimization_recommendations(self, territory_id: str) -> List[Dict]:
+
+    def get_optimization_recommendations(self, territory_id: str) -> list[dict]:
         """Get AI-powered optimization recommendations"""
-        
+
         territory = Territory.objects.get(id=territory_id)
-        
+
         recommendations = []
-        
+
         # Check capacity
         if territory.max_accounts:
             util = territory.current_accounts / territory.max_accounts
@@ -683,7 +687,7 @@ class TerritoryPerformanceService:
                     'description': f'Territory is at only {util*100:.0f}% capacity. Consider merging or adding accounts.',
                     'impact': 'Improves rep productivity'
                 })
-        
+
         # Check win rate
         if territory.win_rate < 0.15:
             recommendations.append({
@@ -693,7 +697,7 @@ class TerritoryPerformanceService:
                 'description': f'Win rate of {territory.win_rate*100:.1f}% is below target. Review deal qualification.',
                 'impact': 'Improve close rates and revenue'
             })
-        
+
         # Check pipeline coverage
         if float(territory.total_revenue) > 0:
             coverage = float(territory.total_pipeline) / float(territory.total_revenue)
@@ -705,5 +709,5 @@ class TerritoryPerformanceService:
                     'description': f'Pipeline coverage of {coverage:.1f}x is below the 3x target.',
                     'impact': 'Risk of missing quota'
                 })
-        
+
         return recommendations

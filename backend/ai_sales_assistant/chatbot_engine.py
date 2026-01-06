@@ -3,20 +3,19 @@ AI Sales Assistant - Conversational Chatbot Engine
 Handles natural language queries, CRM data analysis, and intelligent responses
 """
 
-import os
 import json
+import os
 import re
-from datetime import datetime, timedelta
-from decimal import Decimal
-from typing import Dict, List, Any, Optional, Tuple
+from datetime import timedelta
+from typing import Any
 
-from django.db.models import Sum, Avg, Count, Q, F
+from django.db.models import Avg, Count, Q, Sum
 from django.utils import timezone
 
 
 class ChatbotEngine:
     """Core chatbot engine for CRM assistant"""
-    
+
     def __init__(self):
         self.openai_available = bool(os.environ.get('OPENAI_API_KEY'))
         self.intent_handlers = {
@@ -31,30 +30,30 @@ class ChatbotEngine:
             'insight_request': self._handle_insight_request,
             'action_suggestion': self._handle_action_suggestion,
         }
-    
-    def process_message(self, session, message: str, user) -> Dict[str, Any]:
+
+    def process_message(self, session, message: str, user) -> dict[str, Any]:
         """Process a user message and generate a response"""
-        
+
         # Detect intent
         intent, entities = self._detect_intent(message)
-        
+
         # Get CRM context
         crm_context = self._build_crm_context(user, entities)
-        
+
         # Handle based on intent
         if intent in self.intent_handlers:
             response = self.intent_handlers[intent](message, entities, crm_context, user)
         else:
             response = self._handle_general_query(message, crm_context, user)
-        
+
         return response
-    
-    def _detect_intent(self, message: str) -> Tuple[str, Dict]:
+
+    def _detect_intent(self, message: str) -> tuple[str, dict]:
         """Detect user intent from message"""
-        
+
         message_lower = message.lower()
         entities = {}
-        
+
         # Pipeline queries
         pipeline_patterns = [
             r'pipeline|deals|opportunities',
@@ -65,7 +64,7 @@ class ChatbotEngine:
         for pattern in pipeline_patterns:
             if re.search(pattern, message_lower):
                 return 'pipeline_query', entities
-        
+
         # Deal status
         deal_patterns = [
             r'deal\s+status|deal\s+update',
@@ -75,7 +74,7 @@ class ChatbotEngine:
         for pattern in deal_patterns:
             if re.search(pattern, message_lower):
                 return 'deal_status', entities
-        
+
         # Activity summary
         activity_patterns = [
             r'activities?|what.+(done|completed)',
@@ -85,7 +84,7 @@ class ChatbotEngine:
         for pattern in activity_patterns:
             if re.search(pattern, message_lower):
                 return 'activity_summary', entities
-        
+
         # Forecast
         forecast_patterns = [
             r'forecast|prediction|quota',
@@ -95,7 +94,7 @@ class ChatbotEngine:
         for pattern in forecast_patterns:
             if re.search(pattern, message_lower):
                 return 'forecast_query', entities
-        
+
         # Contact lookup
         contact_patterns = [
             r'contact|person|who\s+is',
@@ -104,7 +103,7 @@ class ChatbotEngine:
         for pattern in contact_patterns:
             if re.search(pattern, message_lower):
                 return 'contact_lookup', entities
-        
+
         # Task queries
         task_patterns = [
             r'tasks?|to.?do|pending',
@@ -113,7 +112,7 @@ class ChatbotEngine:
         for pattern in task_patterns:
             if re.search(pattern, message_lower):
                 return 'task_query', entities
-        
+
         # Content generation
         content_patterns = [
             r'write|draft|compose|generate',
@@ -123,7 +122,7 @@ class ChatbotEngine:
         for pattern in content_patterns:
             if re.search(pattern, message_lower):
                 return 'generate_content', entities
-        
+
         # Coaching
         coaching_patterns = [
             r'advice|suggest|recommend|help',
@@ -133,7 +132,7 @@ class ChatbotEngine:
         for pattern in coaching_patterns:
             if re.search(pattern, message_lower):
                 return 'coaching_request', entities
-        
+
         # Insights
         insight_patterns = [
             r'insight|analysis|analyze|trend',
@@ -143,7 +142,7 @@ class ChatbotEngine:
         for pattern in insight_patterns:
             if re.search(pattern, message_lower):
                 return 'insight_request', entities
-        
+
         # Actions
         action_patterns = [
             r'what.+next|next.+action|should\s+i\s+do',
@@ -152,21 +151,20 @@ class ChatbotEngine:
         for pattern in action_patterns:
             if re.search(pattern, message_lower):
                 return 'action_suggestion', entities
-        
+
         return 'general', entities
-    
-    def _build_crm_context(self, user, entities: Dict) -> Dict[str, Any]:
+
+    def _build_crm_context(self, user, entities: dict) -> dict[str, Any]:
         """Build CRM context for the response"""
-        
-        from opportunity_management.models import Opportunity
-        from contact_management.models import Contact
-        from task_management.models import Task
+
         from activity_feed.models import Activity
-        
+        from opportunity_management.models import Opportunity
+        from task_management.models import Task
+
         today = timezone.now().date()
         week_ago = today - timedelta(days=7)
-        month_ago = today - timedelta(days=30)
-        
+        today - timedelta(days=30)
+
         context = {
             'user': {
                 'name': user.get_full_name() or user.email,
@@ -176,7 +174,7 @@ class ChatbotEngine:
             'activities': {},
             'tasks': {},
         }
-        
+
         # Pipeline summary
         opportunities = Opportunity.objects.filter(owner=user, is_closed=False)
         context['pipeline'] = {
@@ -191,7 +189,7 @@ class ChatbotEngine:
                 expected_close_date__year=today.year
             ).count(),
         }
-        
+
         # Recent activities
         try:
             recent_activities = Activity.objects.filter(
@@ -203,7 +201,7 @@ class ChatbotEngine:
             }
         except Exception:
             context['activities'] = {'this_week': 0}
-        
+
         # Tasks
         try:
             tasks = Task.objects.filter(assigned_to=user)
@@ -217,15 +215,15 @@ class ChatbotEngine:
             }
         except Exception:
             context['tasks'] = {'pending': 0, 'overdue': 0, 'due_today': 0}
-        
+
         return context
-    
-    def _handle_pipeline_query(self, message: str, entities: Dict, 
-                                context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_pipeline_query(self, message: str, entities: dict,
+                                context: dict, user) -> dict[str, Any]:
         """Handle pipeline-related queries"""
-        
+
         pipeline = context['pipeline']
-        
+
         response_text = f"""📊 **Your Pipeline Overview**
 
 **Total Active Deals:** {pipeline['total_deals']}
@@ -233,11 +231,11 @@ class ChatbotEngine:
 **Deals Closing This Month:** {pipeline['closing_this_month']}
 
 **By Stage:**"""
-        
+
         for stage in pipeline['by_stage']:
             stage_name = stage['stage'].replace('_', ' ').title()
             response_text += f"\n• {stage_name}: {stage['count']} deals (${float(stage['value'] or 0):,.0f})"
-        
+
         # Generate insights
         insights = []
         if pipeline['closing_this_month'] > 0:
@@ -245,7 +243,7 @@ class ChatbotEngine:
                 'type': 'info',
                 'text': f"You have {pipeline['closing_this_month']} deals expected to close this month."
             })
-        
+
         return {
             'message_type': 'insight',
             'content': response_text,
@@ -256,28 +254,28 @@ class ChatbotEngine:
             },
             'attachments': [],
         }
-    
-    def _handle_deal_status(self, message: str, entities: Dict,
-                            context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_deal_status(self, message: str, entities: dict,
+                            context: dict, user) -> dict[str, Any]:
         """Handle deal status queries"""
-        
+
         from opportunity_management.models import Opportunity
-        
+
         # Get at-risk deals
         at_risk_deals = Opportunity.objects.filter(
             owner=user,
             is_closed=False,
         ).order_by('-amount')[:5]
-        
+
         response_text = "🎯 **Deal Status Summary**\n\n"
-        
+
         if at_risk_deals.exists():
             response_text += "**Top Active Deals:**\n"
             for deal in at_risk_deals:
                 response_text += f"• **{deal.name}**: ${float(deal.amount):,.0f} - {deal.stage}\n"
         else:
             response_text += "No active deals found."
-        
+
         # Generate actions
         actions = []
         for deal in at_risk_deals[:3]:
@@ -287,7 +285,7 @@ class ChatbotEngine:
                 'entity_type': 'opportunity',
                 'entity_id': str(deal.id),
             })
-        
+
         return {
             'message_type': 'insight',
             'content': response_text,
@@ -299,14 +297,14 @@ class ChatbotEngine:
                 for d in at_risk_deals
             ],
         }
-    
-    def _handle_activity_summary(self, message: str, entities: Dict,
-                                  context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_activity_summary(self, message: str, entities: dict,
+                                  context: dict, user) -> dict[str, Any]:
         """Handle activity summary queries"""
-        
+
         activities = context['activities']
         tasks = context['tasks']
-        
+
         response_text = f"""📅 **Your Activity Summary**
 
 **This Week:**
@@ -317,10 +315,10 @@ class ChatbotEngine:
 • Due Today: {tasks['due_today']}
 • Overdue: {tasks['overdue']}
 """
-        
+
         if tasks['overdue'] > 0:
             response_text += f"\n⚠️ You have {tasks['overdue']} overdue tasks that need attention."
-        
+
         return {
             'message_type': 'insight',
             'content': response_text,
@@ -330,16 +328,15 @@ class ChatbotEngine:
             },
             'attachments': [],
         }
-    
-    def _handle_forecast_query(self, message: str, entities: Dict,
-                               context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_forecast_query(self, message: str, entities: dict,
+                               context: dict, user) -> dict[str, Any]:
         """Handle forecast and quota queries"""
-        
+
         from revenue_intelligence.models import RevenueTarget
-        from opportunity_management.models import Opportunity
-        
+
         today = timezone.now().date()
-        
+
         # Get current quota
         try:
             target = RevenueTarget.objects.filter(
@@ -348,7 +345,7 @@ class ChatbotEngine:
                 start_date__lte=today,
                 end_date__gte=today
             ).first()
-            
+
             if target:
                 progress = (float(target.achieved_amount) / float(target.target_amount)) * 100
                 response_text = f"""📈 **Forecast & Quota Status**
@@ -371,7 +368,7 @@ class ChatbotEngine:
 """
         except Exception:
             response_text = "Unable to load forecast data. Please check your revenue targets."
-        
+
         return {
             'message_type': 'insight',
             'content': response_text,
@@ -380,18 +377,18 @@ class ChatbotEngine:
             },
             'attachments': [],
         }
-    
-    def _handle_contact_lookup(self, message: str, entities: Dict,
-                               context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_contact_lookup(self, message: str, entities: dict,
+                               context: dict, user) -> dict[str, Any]:
         """Handle contact search and lookup"""
-        
+
         from contact_management.models import Contact
-        
+
         # Extract potential name from message
         # Simple extraction - in production would use NER
         words = message.lower().replace('find', '').replace('search', '').replace('contact', '').strip().split()
         search_term = ' '.join(words) if words else ''
-        
+
         if search_term:
             contacts = Contact.objects.filter(
                 Q(first_name__icontains=search_term) |
@@ -399,7 +396,7 @@ class ChatbotEngine:
                 Q(company__icontains=search_term) |
                 Q(email__icontains=search_term)
             )[:5]
-            
+
             if contacts.exists():
                 response_text = f"🔍 **Found {contacts.count()} contacts:**\n\n"
                 for contact in contacts:
@@ -411,34 +408,34 @@ class ChatbotEngine:
                 response_text = f"No contacts found matching '{search_term}'."
         else:
             response_text = "Please specify a name, company, or email to search for."
-        
+
         return {
             'message_type': 'text',
             'content': response_text,
             'metadata': {},
             'attachments': [],
         }
-    
-    def _handle_task_query(self, message: str, entities: Dict,
-                           context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_task_query(self, message: str, entities: dict,
+                           context: dict, user) -> dict[str, Any]:
         """Handle task-related queries"""
-        
+
         from task_management.models import Task
-        
+
         today = timezone.now().date()
-        
+
         # Get upcoming tasks
         tasks = Task.objects.filter(
             assigned_to=user,
             status__in=['pending', 'in_progress']
         ).order_by('due_date')[:10]
-        
+
         response_text = "✅ **Your Tasks**\n\n"
-        
+
         overdue = []
         due_today = []
         upcoming = []
-        
+
         for task in tasks:
             if task.due_date:
                 if task.due_date < today:
@@ -449,28 +446,28 @@ class ChatbotEngine:
                     upcoming.append(task)
             else:
                 upcoming.append(task)
-        
+
         if overdue:
             response_text += "**⚠️ Overdue:**\n"
             for task in overdue:
                 response_text += f"• {task.title} (Due: {task.due_date})\n"
             response_text += "\n"
-        
+
         if due_today:
             response_text += "**📅 Due Today:**\n"
             for task in due_today:
                 response_text += f"• {task.title}\n"
             response_text += "\n"
-        
+
         if upcoming:
             response_text += "**🔜 Upcoming:**\n"
             for task in upcoming[:5]:
                 due = f" (Due: {task.due_date})" if task.due_date else ""
                 response_text += f"• {task.title}{due}\n"
-        
+
         if not tasks:
             response_text += "🎉 No pending tasks!"
-        
+
         return {
             'message_type': 'insight',
             'content': response_text,
@@ -480,11 +477,11 @@ class ChatbotEngine:
             },
             'attachments': [],
         }
-    
-    def _handle_content_generation(self, message: str, entities: Dict,
-                                   context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_content_generation(self, message: str, entities: dict,
+                                   context: dict, user) -> dict[str, Any]:
         """Handle content generation requests"""
-        
+
         response_text = """✍️ **Content Generation**
 
 I can help you create:
@@ -497,7 +494,7 @@ Please specify what you'd like to create and for which contact/deal.
 
 _Example: "Write a follow-up email for the Acme Corp deal"_
 """
-        
+
         return {
             'message_type': 'suggestion',
             'content': response_text,
@@ -510,62 +507,62 @@ _Example: "Write a follow-up email for the Acme Corp deal"_
             },
             'attachments': [],
         }
-    
-    def _handle_coaching_request(self, message: str, entities: Dict,
-                                  context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_coaching_request(self, message: str, entities: dict,
+                                  context: dict, user) -> dict[str, Any]:
         """Handle sales coaching requests"""
-        
+
         # In production, this would use GPT-4 for personalized advice
         coaching_tips = [
             "**Discovery Call Tips:**\n• Ask open-ended questions\n• Listen more than you talk\n• Identify pain points early",
             "**Closing Techniques:**\n• Create urgency with value, not pressure\n• Address objections proactively\n• Always confirm next steps",
             "**Objection Handling:**\n• Acknowledge the concern\n• Ask clarifying questions\n• Reframe around value",
         ]
-        
+
         import random
         tip = random.choice(coaching_tips)
-        
+
         response_text = f"""🎯 **Sales Coaching**
 
 {tip}
 
 💡 _For personalized coaching, tell me about a specific deal or situation you're facing._
 """
-        
+
         return {
             'message_type': 'insight',
             'content': response_text,
             'metadata': {},
             'attachments': [],
         }
-    
-    def _handle_insight_request(self, message: str, entities: Dict,
-                                 context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_insight_request(self, message: str, entities: dict,
+                                 context: dict, user) -> dict[str, Any]:
         """Handle insight and analysis requests"""
-        
+
         pipeline = context['pipeline']
         tasks = context['tasks']
-        
+
         insights = []
-        
+
         # Generate insights based on data
         if pipeline['total_deals'] > 0:
             avg_deal = pipeline['total_value'] / pipeline['total_deals']
             insights.append(f"Your average deal size is ${avg_deal:,.0f}")
-        
+
         if tasks['overdue'] > 0:
             insights.append(f"⚠️ You have {tasks['overdue']} overdue tasks that may be impacting deals")
-        
+
         if pipeline['closing_this_month'] > 0:
             insights.append(f"Focus on {pipeline['closing_this_month']} deals closing this month")
-        
+
         response_text = "💡 **Key Insights**\n\n"
         for insight in insights:
             response_text += f"• {insight}\n"
-        
+
         if not insights:
             response_text += "No significant insights at this time. Keep up the good work!"
-        
+
         return {
             'message_type': 'insight',
             'content': response_text,
@@ -574,18 +571,17 @@ _Example: "Write a follow-up email for the Acme Corp deal"_
             },
             'attachments': [],
         }
-    
-    def _handle_action_suggestion(self, message: str, entities: Dict,
-                                   context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_action_suggestion(self, message: str, entities: dict,
+                                   context: dict, user) -> dict[str, Any]:
         """Handle next action suggestions"""
-        
+
         from opportunity_management.models import Opportunity
-        from task_management.models import Task
-        
-        today = timezone.now().date()
-        
+
+        timezone.now().date()
+
         actions = []
-        
+
         # Check for overdue tasks
         if context['tasks']['overdue'] > 0:
             actions.append({
@@ -593,21 +589,21 @@ _Example: "Write a follow-up email for the Acme Corp deal"_
                 'action': f"Complete {context['tasks']['overdue']} overdue tasks",
                 'reason': "Overdue tasks can impact deal momentum",
             })
-        
+
         # Check for stale deals
         stale_deals = Opportunity.objects.filter(
             owner=user,
             is_closed=False,
             updated_at__lt=timezone.now() - timedelta(days=7)
         ).count()
-        
+
         if stale_deals > 0:
             actions.append({
                 'priority': 'medium',
                 'action': f"Update {stale_deals} deals with no recent activity",
                 'reason': "Regular updates keep deals on track",
             })
-        
+
         # Check for deals closing soon
         if context['pipeline']['closing_this_month'] > 0:
             actions.append({
@@ -615,16 +611,16 @@ _Example: "Write a follow-up email for the Acme Corp deal"_
                 'action': f"Review {context['pipeline']['closing_this_month']} deals closing this month",
                 'reason': "Ensure close dates are accurate",
             })
-        
+
         response_text = "🎯 **Recommended Actions**\n\n"
-        
+
         for i, action in enumerate(actions, 1):
             priority_emoji = '🔴' if action['priority'] == 'high' else '🟡'
             response_text += f"{i}. {priority_emoji} **{action['action']}**\n   _{action['reason']}_\n\n"
-        
+
         if not actions:
             response_text += "✅ You're all caught up! No urgent actions needed."
-        
+
         return {
             'message_type': 'action',
             'content': response_text,
@@ -633,10 +629,10 @@ _Example: "Write a follow-up email for the Acme Corp deal"_
             },
             'attachments': [],
         }
-    
-    def _handle_general_query(self, message: str, context: Dict, user) -> Dict[str, Any]:
+
+    def _handle_general_query(self, message: str, context: dict, user) -> dict[str, Any]:
         """Handle general queries using AI or fallback"""
-        
+
         if self.openai_available:
             return self._generate_ai_response(message, context, user)
         else:
@@ -655,13 +651,13 @@ What would you like to know?""",
                 'metadata': {},
                 'attachments': [],
             }
-    
-    def _generate_ai_response(self, message: str, context: Dict, user) -> Dict[str, Any]:
+
+    def _generate_ai_response(self, message: str, context: dict, user) -> dict[str, Any]:
         """Generate response using OpenAI"""
-        
+
         try:
             import openai
-            
+
             system_prompt = f"""You are a helpful AI sales assistant for a CRM system.
 You help sales professionals with their pipeline, deals, tasks, and provide coaching.
 
@@ -671,7 +667,7 @@ User context:
 - Tasks: {context['tasks']['pending']} pending, {context['tasks']['overdue']} overdue
 
 Be concise, helpful, and actionable. Use emojis sparingly for emphasis."""
-            
+
             client = openai.OpenAI()
             response = client.chat.completions.create(
                 model="gpt-4",
@@ -682,32 +678,32 @@ Be concise, helpful, and actionable. Use emojis sparingly for emphasis."""
                 max_tokens=500,
                 temperature=0.7,
             )
-            
+
             return {
                 'message_type': 'text',
                 'content': response.choices[0].message.content,
                 'metadata': {},
                 'attachments': [],
             }
-        except Exception as e:
+        except Exception:
             return self._handle_general_query(message, context, user)
 
 
 class PredictiveDealEngine:
     """ML engine for deal predictions and risk assessment"""
-    
+
     def __init__(self):
         self.model_version = "1.0.0"
-    
-    def analyze_deal(self, opportunity) -> Dict[str, Any]:
+
+    def analyze_deal(self, opportunity) -> dict[str, Any]:
         """Analyze a deal and generate predictions"""
-        
-        from opportunity_management.models import Opportunity
+
         from activity_feed.models import Activity
-        
+        from opportunity_management.models import Opportunity
+
         # Calculate win probability based on multiple factors
         factors = {}
-        
+
         # Stage-based probability
         stage_probabilities = {
             'prospecting': 10,
@@ -720,7 +716,7 @@ class PredictiveDealEngine:
         }
         stage_prob = stage_probabilities.get(opportunity.stage, 30)
         factors['stage'] = stage_prob
-        
+
         # Days in stage (negative if too long)
         days_in_stage = (timezone.now().date() - opportunity.updated_at.date()).days
         if days_in_stage > 30:
@@ -729,19 +725,19 @@ class PredictiveDealEngine:
             factors['velocity'] = -5
         else:
             factors['velocity'] = 5
-        
+
         # Deal size factor (larger deals need more attention)
         avg_deal_size = Opportunity.objects.filter(
             owner=opportunity.owner,
             is_closed=True,
             stage='closed_won'
         ).aggregate(avg=Avg('amount'))['avg'] or opportunity.amount
-        
+
         if opportunity.amount > float(avg_deal_size) * 2:
             factors['deal_size'] = -5
         else:
             factors['deal_size'] = 5
-        
+
         # Activity level
         try:
             recent_activities = Activity.objects.filter(
@@ -756,12 +752,12 @@ class PredictiveDealEngine:
                 factors['engagement'] = -10
         except Exception:
             factors['engagement'] = 0
-        
+
         # Calculate final probability
         base_prob = factors['stage']
         adjustments = sum(v for k, v in factors.items() if k != 'stage')
         win_probability = max(5, min(95, base_prob + adjustments))
-        
+
         # Determine risk level
         if win_probability >= 70:
             risk_level = 'low'
@@ -771,7 +767,7 @@ class PredictiveDealEngine:
             risk_level = 'high'
         else:
             risk_level = 'critical'
-        
+
         # Generate risk factors
         risk_factors = []
         if factors['velocity'] < 0:
@@ -780,14 +776,14 @@ class PredictiveDealEngine:
                 'description': f'Deal has been in {opportunity.stage} for {days_in_stage} days',
                 'impact': 'medium',
             })
-        
+
         if factors.get('engagement', 0) < 0:
             risk_factors.append({
                 'factor': 'Low Engagement',
                 'description': 'No recent activities logged',
                 'impact': 'high',
             })
-        
+
         # Generate recommended actions
         recommended_actions = []
         if factors['velocity'] < 0:
@@ -796,14 +792,14 @@ class PredictiveDealEngine:
                 'priority': 'high',
                 'reason': 'Re-engage the prospect and move the deal forward',
             })
-        
+
         if factors.get('engagement', 0) < 0:
             recommended_actions.append({
                 'action': 'Send a value-add email',
                 'priority': 'medium',
                 'reason': 'Maintain visibility and demonstrate ongoing value',
             })
-        
+
         return {
             'win_probability': win_probability,
             'probability_factors': factors,
@@ -816,22 +812,22 @@ class PredictiveDealEngine:
             'model_version': self.model_version,
             'confidence_score': 0.75,
         }
-    
-    def batch_analyze(self, opportunities) -> List[Dict[str, Any]]:
+
+    def batch_analyze(self, opportunities) -> list[dict[str, Any]]:
         """Analyze multiple deals"""
         return [self.analyze_deal(opp) for opp in opportunities]
 
 
 class SmartContentGenerator:
     """AI-powered content generation for sales"""
-    
+
     def __init__(self):
         self.openai_available = bool(os.environ.get('OPENAI_API_KEY'))
-    
-    def generate_content(self, content_type: str, context: Dict,
-                        tone: str = 'professional') -> Dict[str, Any]:
+
+    def generate_content(self, content_type: str, context: dict,
+                        tone: str = 'professional') -> dict[str, Any]:
         """Generate personalized content"""
-        
+
         generators = {
             'email': self._generate_email,
             'call_script': self._generate_call_script,
@@ -840,21 +836,21 @@ class SmartContentGenerator:
             'linkedin_message': self._generate_linkedin_message,
             'sms': self._generate_sms,
         }
-        
+
         generator = generators.get(content_type, self._generate_generic)
         return generator(context, tone)
-    
-    def _generate_email(self, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _generate_email(self, context: dict, tone: str) -> dict[str, Any]:
         """Generate email content"""
-        
+
         contact_name = context.get('contact_name', 'there')
         company = context.get('company', 'your company')
-        
+
         if self.openai_available:
             return self._ai_generate('email', context, tone)
-        
+
         # Template fallback
-        subject = f"Following up on our conversation"
+        subject = "Following up on our conversation"
         body = f"""Hi {contact_name},
 
 I hope this email finds you well. I wanted to follow up on our recent conversation about {company}.
@@ -864,7 +860,7 @@ I hope this email finds you well. I wanted to follow up on our recent conversati
 Would you be available for a quick call this week to discuss next steps?
 
 Best regards"""
-        
+
         return {
             'title': subject,
             'content': body,
@@ -872,13 +868,13 @@ Best regards"""
             'personalization_score': 0.3,
             'personalization_elements': ['contact_name', 'company'],
         }
-    
-    def _generate_call_script(self, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _generate_call_script(self, context: dict, tone: str) -> dict[str, Any]:
         """Generate call script"""
-        
+
         contact_name = context.get('contact_name', 'the prospect')
-        
-        script = f"""**Opening:**
+
+        script = """**Opening:**
 "Hi, this is [Your Name] from [Company]. How are you today?"
 
 **Purpose:**
@@ -899,7 +895,7 @@ Best regards"""
 **Close:**
 "Based on our conversation, I think it would be valuable to [next step]. Does [date/time] work for you?"
 """
-        
+
         return {
             'title': f'Call Script for {contact_name}',
             'content': script,
@@ -907,12 +903,12 @@ Best regards"""
             'personalization_score': 0.5,
             'personalization_elements': ['contact_name'],
         }
-    
-    def _generate_objection_response(self, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _generate_objection_response(self, context: dict, tone: str) -> dict[str, Any]:
         """Generate objection handling response"""
-        
+
         objection = context.get('objection', 'price concern')
-        
+
         responses = {
             'price': """**When they say "It's too expensive":**
 
@@ -935,14 +931,14 @@ Best regards"""
 4. **Stay connected:** "What if we schedule a check-in for [future date]?"
 """,
         }
-        
+
         # Find matching response
         content = responses.get('price', responses['price'])
         for key, response in responses.items():
             if key in objection.lower():
                 content = response
                 break
-        
+
         return {
             'title': f'Response to: {objection}',
             'content': content,
@@ -950,12 +946,12 @@ Best regards"""
             'personalization_score': 0.4,
             'personalization_elements': ['objection'],
         }
-    
-    def _generate_social_post(self, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _generate_social_post(self, context: dict, tone: str) -> dict[str, Any]:
         """Generate social media post"""
-        
+
         topic = context.get('topic', 'sales tips')
-        
+
         post = f"""🚀 {topic.title()}
 
 [Your insight or tip here]
@@ -966,7 +962,7 @@ What's your experience with this? Drop a comment below! 👇
 
 #Sales #SalesTips #B2B #GrowthMindset
 """
-        
+
         return {
             'title': f'Social Post: {topic}',
             'content': post,
@@ -974,12 +970,12 @@ What's your experience with this? Drop a comment below! 👇
             'personalization_score': 0.2,
             'personalization_elements': ['topic'],
         }
-    
-    def _generate_linkedin_message(self, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _generate_linkedin_message(self, context: dict, tone: str) -> dict[str, Any]:
         """Generate LinkedIn message"""
-        
+
         contact_name = context.get('contact_name', 'there')
-        
+
         message = f"""Hi {contact_name},
 
 I came across your profile and was impressed by [specific observation].
@@ -990,7 +986,7 @@ Would you be open to a brief conversation about [topic]?
 
 Looking forward to connecting!
 """
-        
+
         return {
             'title': f'LinkedIn Message to {contact_name}',
             'content': message,
@@ -998,14 +994,14 @@ Looking forward to connecting!
             'personalization_score': 0.4,
             'personalization_elements': ['contact_name'],
         }
-    
-    def _generate_sms(self, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _generate_sms(self, context: dict, tone: str) -> dict[str, Any]:
         """Generate SMS message"""
-        
+
         contact_name = context.get('contact_name', 'Hi')
-        
+
         message = f"""Hi {contact_name}, this is [Your Name] from [Company]. Following up on [topic]. Do you have 5 min to chat today? Reply YES and I'll call you."""
-        
+
         return {
             'title': f'SMS to {contact_name}',
             'content': message,
@@ -1013,10 +1009,10 @@ Looking forward to connecting!
             'personalization_score': 0.3,
             'personalization_elements': ['contact_name'],
         }
-    
-    def _generate_generic(self, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _generate_generic(self, context: dict, tone: str) -> dict[str, Any]:
         """Generate generic content"""
-        
+
         return {
             'title': 'Generated Content',
             'content': 'Please specify the content type you need.',
@@ -1024,13 +1020,13 @@ Looking forward to connecting!
             'personalization_score': 0,
             'personalization_elements': [],
         }
-    
-    def _ai_generate(self, content_type: str, context: Dict, tone: str) -> Dict[str, Any]:
+
+    def _ai_generate(self, content_type: str, context: dict, tone: str) -> dict[str, Any]:
         """Generate content using AI"""
-        
+
         try:
             import openai
-            
+
             prompt = f"""Generate a {tone} {content_type} for a sales professional.
 
 Context:
@@ -1041,7 +1037,7 @@ Requirements:
 - Include personalization where possible
 - Focus on value and next steps
 """
-            
+
             client = openai.OpenAI()
             response = client.chat.completions.create(
                 model="gpt-4",
@@ -1052,9 +1048,9 @@ Requirements:
                 max_tokens=500,
                 temperature=0.7,
             )
-            
+
             content = response.choices[0].message.content
-            
+
             return {
                 'title': f'{content_type.replace("_", " ").title()}',
                 'content': content,
@@ -1062,6 +1058,6 @@ Requirements:
                 'personalization_score': 0.8,
                 'personalization_elements': list(context.keys()),
             }
-        except Exception as e:
+        except Exception:
             # Fallback to template
             return self._generate_generic(context, tone)

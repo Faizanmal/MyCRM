@@ -1,6 +1,9 @@
+import contextlib
 from threading import local
-from django.utils.deprecation import MiddlewareMixin
+
 from django.shortcuts import redirect
+from django.utils.deprecation import MiddlewareMixin
+
 from .models import Organization, OrganizationMember
 
 _thread_locals = local()
@@ -38,28 +41,24 @@ class TenantMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         organization = None
-        
+
         # Skip for admin, auth, and static URLs
         if request.path.startswith(('/admin/', '/api/auth/', '/static/', '/media/')):
             return None
-        
+
         try:
             # Method 1: Check for organization in header (API requests)
             org_slug = request.headers.get('X-Organization-Slug')
             if org_slug:
-                try:
+                with contextlib.suppress(Organization.DoesNotExist):
                     organization = Organization.objects.get(slug=org_slug, status='active')
-                except Organization.DoesNotExist:
-                    pass
-            
+
             # Method 2: Check for custom domain
             if not organization:
                 host = request.get_host().split(':')[0]  # Remove port
-                try:
+                with contextlib.suppress(Organization.DoesNotExist):
                     organization = Organization.objects.get(domain=host, status='active')
-                except Organization.DoesNotExist:
-                    pass
-            
+
             # Method 3: Check for subdomain
             if not organization:
                 host = request.get_host().split(':')[0]
@@ -67,20 +66,16 @@ class TenantMiddleware(MiddlewareMixin):
                 if len(parts) > 2:  # Has subdomain
                     subdomain = parts[0]
                     if subdomain not in ['www', 'api', 'admin']:
-                        try:
+                        with contextlib.suppress(Organization.DoesNotExist):
                             organization = Organization.objects.get(slug=subdomain, status='active')
-                        except Organization.DoesNotExist:
-                            pass
-            
+
             # Method 4: Check session (fallback for web interface)
             if not organization and request.user.is_authenticated:
                 org_id = request.session.get('organization_id')
                 if org_id:
-                    try:
+                    with contextlib.suppress(Organization.DoesNotExist):
                         organization = Organization.objects.get(id=org_id, status='active')
-                    except Organization.DoesNotExist:
-                        pass
-            
+
             # Method 5: Create default organization for development
             if not organization:
                 try:
@@ -99,12 +94,12 @@ class TenantMiddleware(MiddlewareMixin):
         except Exception:
             # If database tables don't exist yet (during initial setup), skip tenant logic
             pass
-        
+
         # Set organization in thread-local storage
         if organization:
             set_current_organization(organization)
             request.organization = organization
-            
+
             # Verify user has access to this organization
             if request.user.is_authenticated and not request.user.is_superuser:
                 try:
@@ -117,11 +112,11 @@ class TenantMiddleware(MiddlewareMixin):
                 except OrganizationMember.DoesNotExist:
                     # User doesn't have access to this organization
                     return redirect('unauthorized')
-        
+
         # Set user in thread-local storage
         if request.user.is_authenticated:
             set_current_user(request.user)
-        
+
         return None
 
     def process_response(self, request, response):

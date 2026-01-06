@@ -18,7 +18,6 @@ import {
     Users,
     Calendar,
     BarChart3,
-    Zap,
     RefreshCw,
     Copy,
     ThumbsUp,
@@ -64,7 +63,6 @@ export default function FloatingAIAssistant() {
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [showPulse, setShowPulse] = useState(true);
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -81,13 +79,6 @@ export default function FloatingAIAssistant() {
             setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [isOpen, isMinimized]);
-
-    // Hide pulse after first open
-    useEffect(() => {
-        if (isOpen) {
-            setShowPulse(false);
-        }
-    }, [isOpen]);
 
     const generateResponse = useCallback((userMessage: string): string => {
         const lowerMessage = userMessage.toLowerCase();
@@ -187,7 +178,7 @@ export default function FloatingAIAssistant() {
                             )}
                         >
                             <Bot className="h-6 w-6 text-white" />
-                            {showPulse && (
+                            {!isOpen && (
                                 <span className="absolute -top-1 -right-1 h-4 w-4">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-4 w-4 bg-purple-500 border-2 border-white"></span>

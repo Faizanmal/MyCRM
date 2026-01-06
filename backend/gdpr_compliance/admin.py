@@ -1,8 +1,15 @@
 from django.contrib import admin
+
 from .models import (
-    ConsentType, UserConsent, DataExportRequest, DataDeletionRequest,
-    DataProcessingActivity, DataBreachIncident, DataAccessLog,
-    PrivacyNotice, UserPrivacyPreference
+    ConsentType,
+    DataAccessLog,
+    DataBreachIncident,
+    DataDeletionRequest,
+    DataExportRequest,
+    DataProcessingActivity,
+    PrivacyNotice,
+    UserConsent,
+    UserPrivacyPreference,
 )
 
 

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Document, DocumentTemplate, DocumentShare, DocumentComment, DocumentApproval
+
+from .models import Document, DocumentApproval, DocumentComment, DocumentShare, DocumentTemplate
 
 
 @admin.register(Document)

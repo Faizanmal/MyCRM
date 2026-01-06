@@ -3,27 +3,27 @@ AI Meeting Prep Generator
 Generates intelligent meeting preparation materials
 """
 
+import contextlib
 import logging
-from typing import Dict, List, Optional
-from django.utils import timezone
 from datetime import timedelta
-import json
+
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
 
 class MeetingPrepGenerator:
     """Generates AI-powered meeting preparation materials"""
-    
+
     def __init__(self, meeting):
         self.meeting = meeting
         self.host = meeting.host
         self.contact = meeting.contact
         self.opportunity = meeting.opportunity
-    
-    def generate_prep_materials(self) -> Dict:
+
+    def generate_prep_materials(self) -> dict:
         """Generate comprehensive meeting prep materials"""
-        
+
         prep_data = {
             'participant_summary': self._generate_participant_summary(),
             'company_info': self._gather_company_info(),
@@ -38,34 +38,34 @@ class MeetingPrepGenerator:
             'deal_context': self._gather_deal_context(),
             'recommended_next_steps': self._suggest_next_steps()
         }
-        
+
         return prep_data
-    
+
     def _generate_participant_summary(self) -> str:
         """Generate a summary of the participant"""
-        
+
         summary_parts = []
-        
+
         if self.contact:
             summary_parts.append(f"**{self.contact.first_name} {self.contact.last_name}**")
-            
+
             if hasattr(self.contact, 'title') and self.contact.title:
                 summary_parts.append(f"Title: {self.contact.title}")
-            
+
             if hasattr(self.contact, 'company') and self.contact.company:
                 summary_parts.append(f"Company: {self.contact.company}")
-            
+
             if hasattr(self.contact, 'email') and self.contact.email:
                 summary_parts.append(f"Email: {self.contact.email}")
         else:
             summary_parts.append(f"**{self.meeting.guest_name}**")
             summary_parts.append(f"Email: {self.meeting.guest_email}")
-        
+
         return "\n".join(summary_parts)
-    
-    def _gather_company_info(self) -> Dict:
+
+    def _gather_company_info(self) -> dict:
         """Gather information about the participant's company"""
-        
+
         company_info = {
             'name': '',
             'industry': '',
@@ -74,18 +74,18 @@ class MeetingPrepGenerator:
             'description': '',
             'recent_news': []
         }
-        
+
         if self.contact and hasattr(self.contact, 'company_name'):
             company_info['name'] = self.contact.company_name or ''
-        
+
         # In production, this would integrate with data enrichment services
         # For now, return basic structure
-        
+
         return company_info
-    
-    def _gather_crm_context(self) -> Dict:
+
+    def _gather_crm_context(self) -> dict:
         """Gather relevant CRM context"""
-        
+
         context = {
             'contact_summary': '',
             'previous_interactions': [],
@@ -94,7 +94,7 @@ class MeetingPrepGenerator:
             'tags': [],
             'notes': []
         }
-        
+
         if self.contact:
             # Get interaction history
             if hasattr(self.contact, 'interactions'):
@@ -107,7 +107,7 @@ class MeetingPrepGenerator:
                     }
                     for i in interactions
                 ]
-            
+
             # Get opportunities
             if hasattr(self.contact, 'opportunities'):
                 opportunities = self.contact.opportunities.filter(
@@ -122,7 +122,7 @@ class MeetingPrepGenerator:
                     }
                     for o in opportunities
                 ]
-            
+
             # Get pending tasks
             if hasattr(self.contact, 'tasks'):
                 tasks = self.contact.tasks.filter(status='pending')
@@ -134,17 +134,17 @@ class MeetingPrepGenerator:
                     }
                     for t in tasks
                 ]
-            
+
             # Get tags
             if hasattr(self.contact, 'tags'):
                 context['tags'] = list(self.contact.tags.values_list('name', flat=True))
-        
+
         return context
-    
-    def _gather_meeting_history(self) -> Dict:
+
+    def _gather_meeting_history(self) -> dict:
         """Gather history of meetings with this participant"""
         from .models import Meeting
-        
+
         history = {
             'total_meetings': 0,
             'last_meeting': None,
@@ -152,7 +152,7 @@ class MeetingPrepGenerator:
             'common_topics': [],
             'outcomes': []
         }
-        
+
         # Find previous meetings with same guest
         previous_meetings = Meeting.objects.filter(
             host=self.host,
@@ -160,9 +160,9 @@ class MeetingPrepGenerator:
             status='completed',
             end_time__lt=timezone.now()
         ).order_by('-start_time')[:10]
-        
+
         history['total_meetings'] = previous_meetings.count()
-        
+
         if previous_meetings.exists():
             last = previous_meetings.first()
             history['last_meeting'] = {
@@ -170,7 +170,7 @@ class MeetingPrepGenerator:
                 'type': last.meeting_type.name if last.meeting_type else '',
                 'notes': last.notes[:500] if last.notes else ''
             }
-            
+
             history['meetings_list'] = [
                 {
                     'date': m.start_time.isoformat(),
@@ -180,22 +180,22 @@ class MeetingPrepGenerator:
                 }
                 for m in previous_meetings[:5]
             ]
-        
+
         return history
-    
-    def _generate_agenda(self) -> List[Dict]:
+
+    def _generate_agenda(self) -> list[dict]:
         """Generate a suggested meeting agenda"""
-        
+
         agenda = []
         meeting_duration = self.meeting.duration_minutes
-        
+
         # Opening (5 min)
         agenda.append({
             'item': 'Welcome & Introduction',
             'duration': 5,
             'notes': 'Brief introductions and rapport building'
         })
-        
+
         # Main content depends on meeting type and context
         if self.opportunity:
             # Sales-focused agenda
@@ -236,18 +236,18 @@ class MeetingPrepGenerator:
                     'notes': 'Recap key points and next steps'
                 }
             ])
-        
+
         return agenda
-    
-    def _generate_talking_points(self) -> List[Dict]:
+
+    def _generate_talking_points(self) -> list[dict]:
         """Generate key talking points"""
-        
+
         talking_points = []
-        
+
         # Based on opportunity stage
         if self.opportunity:
             stage = getattr(self.opportunity, 'stage', '')
-            
+
             if stage in ['discovery', 'qualification']:
                 talking_points.extend([
                     {
@@ -284,14 +284,14 @@ class MeetingPrepGenerator:
                 'point': 'Meeting Objective',
                 'details': 'Clarify the purpose and desired outcomes of the meeting'
             })
-        
+
         return talking_points
-    
-    def _generate_questions(self) -> List[Dict]:
+
+    def _generate_questions(self) -> list[dict]:
         """Generate questions to ask during the meeting"""
-        
+
         questions = []
-        
+
         # Discovery questions
         questions.extend([
             {
@@ -310,7 +310,7 @@ class MeetingPrepGenerator:
                 'category': 'qualification'
             }
         ])
-        
+
         # Follow-up questions if we have history
         if self.contact:
             questions.append({
@@ -318,7 +318,7 @@ class MeetingPrepGenerator:
                 'purpose': 'Build on previous conversations',
                 'category': 'follow-up'
             })
-        
+
         # Closing questions
         questions.extend([
             {
@@ -332,14 +332,14 @@ class MeetingPrepGenerator:
                 'category': 'expansion'
             }
         ])
-        
+
         return questions
-    
-    def _identify_objections(self) -> List[Dict]:
+
+    def _identify_objections(self) -> list[dict]:
         """Identify potential objections and prepare responses"""
-        
+
         objections = []
-        
+
         # Common objections
         objections.extend([
             {
@@ -363,22 +363,22 @@ class MeetingPrepGenerator:
                 'category': 'competition'
             }
         ])
-        
+
         return objections
-    
-    def _generate_personalization_tips(self) -> List[Dict]:
+
+    def _generate_personalization_tips(self) -> list[dict]:
         """Generate personalization tips for the meeting"""
-        
+
         tips = []
-        
+
         if self.contact:
             # Use contact info for personalization
             if hasattr(self.contact, 'notes') and self.contact.notes:
                 tips.append({
                     'tip': 'Reference previous notes',
-                    'detail': f'Review contact notes for context'
+                    'detail': 'Review contact notes for context'
                 })
-        
+
         # Time-based tips
         meeting_hour = self.meeting.start_time.hour
         if meeting_hour < 10:
@@ -391,7 +391,7 @@ class MeetingPrepGenerator:
                 'tip': 'Late day meeting',
                 'detail': 'Be mindful of time, they may be wrapping up their day'
             })
-        
+
         # Day-based tips
         day = self.meeting.start_time.weekday()
         if day == 0:
@@ -404,27 +404,27 @@ class MeetingPrepGenerator:
                 'tip': 'Friday meeting',
                 'detail': 'Keep it focused and action-oriented for weekend follow-up'
             })
-        
+
         return tips
-    
-    def _generate_ice_breakers(self) -> List[str]:
+
+    def _generate_ice_breakers(self) -> list[str]:
         """Generate ice breaker suggestions"""
-        
+
         ice_breakers = [
             "How's your week going so far?",
             "Have you had a chance to [reference recent shared event/news]?",
             "I noticed you're based in [location] - how's the weather there?"
         ]
-        
+
         # Add contextual ice breakers
         if self.contact and hasattr(self.contact, 'linkedin_url') and self.contact.linkedin_url:
             ice_breakers.append("I saw on LinkedIn that you [recent activity] - that's impressive!")
-        
+
         return ice_breakers
-    
-    def _gather_deal_context(self) -> Dict:
+
+    def _gather_deal_context(self) -> dict:
         """Gather context about the related deal/opportunity"""
-        
+
         deal_context = {
             'stage': '',
             'value': 0,
@@ -434,27 +434,27 @@ class MeetingPrepGenerator:
             'key_stakeholders': [],
             'decision_criteria': []
         }
-        
+
         if self.opportunity:
             deal_context['stage'] = getattr(self.opportunity, 'stage', '')
             deal_context['value'] = float(getattr(self.opportunity, 'value', 0) or 0)
             deal_context['probability'] = getattr(self.opportunity, 'probability', 0)
-            
+
             # Calculate days in stage
             if hasattr(self.opportunity, 'stage_changed_at') and self.opportunity.stage_changed_at:
                 days = (timezone.now() - self.opportunity.stage_changed_at).days
                 deal_context['days_in_stage'] = days
-        
+
         return deal_context
-    
-    def _suggest_next_steps(self) -> List[Dict]:
+
+    def _suggest_next_steps(self) -> list[dict]:
         """Suggest next steps based on context"""
-        
+
         next_steps = []
-        
+
         if self.opportunity:
             stage = getattr(self.opportunity, 'stage', '')
-            
+
             if stage in ['discovery', 'qualification']:
                 next_steps.extend([
                     {
@@ -500,29 +500,27 @@ class MeetingPrepGenerator:
                 'priority': 'high',
                 'timing': 'Same day'
             })
-        
+
         return next_steps
 
 
 class SmartReminderOptimizer:
     """Optimizes reminder timing and channel based on attendee behavior"""
-    
+
     def __init__(self, meeting):
         self.meeting = meeting
-    
-    def get_optimal_reminders(self) -> List[Dict]:
+
+    def get_optimal_reminders(self) -> list[dict]:
         """Generate optimal reminder schedule"""
         from .ai_models import AttendeeIntelligence, NoShowPrediction
-        
+
         reminders = []
-        
+
         # Try to get attendee intelligence
         attendee_intel = None
-        try:
+        with contextlib.suppress(AttendeeIntelligence.DoesNotExist):
             attendee_intel = AttendeeIntelligence.objects.get(email=self.meeting.guest_email)
-        except AttendeeIntelligence.DoesNotExist:
-            pass
-        
+
         # Get no-show prediction if available
         no_show_risk = 0
         try:
@@ -530,23 +528,23 @@ class SmartReminderOptimizer:
             no_show_risk = prediction.risk_score
         except NoShowPrediction.DoesNotExist:
             pass
-        
+
         # Determine best channel
         best_channel = self._determine_best_channel(attendee_intel)
-        
+
         # Standard reminders
         reminder_times = [1440, 60]  # 24 hours and 1 hour before
-        
+
         # Add extra reminder for high-risk meetings
         if no_show_risk > 50:
             reminder_times.insert(1, 180)  # 3 hours before
-        
+
         if no_show_risk > 70:
             reminder_times.insert(0, 2880)  # 48 hours before
-        
+
         for minutes_before in reminder_times:
             reminder_time = self.meeting.start_time - timedelta(minutes=minutes_before)
-            
+
             if reminder_time > timezone.now():
                 reminders.append({
                     'scheduled_at': reminder_time.isoformat(),
@@ -558,18 +556,18 @@ class SmartReminderOptimizer:
                         minutes_before, no_show_risk, attendee_intel
                     )
                 })
-        
+
         return reminders
-    
+
     def _determine_best_channel(self, attendee_intel) -> str:
         """Determine the best communication channel"""
-        
+
         if attendee_intel and attendee_intel.best_communication_channel:
             return attendee_intel.best_communication_channel
-        
+
         # Default to email
         return 'email'
-    
+
     def _get_optimization_reason(
         self,
         minutes_before: int,
@@ -577,19 +575,19 @@ class SmartReminderOptimizer:
         attendee_intel
     ) -> str:
         """Generate explanation for reminder timing"""
-        
+
         reasons = []
-        
+
         if minutes_before == 2880 and no_show_risk > 70:
             reasons.append("48h reminder added due to high no-show risk")
         elif minutes_before == 180 and no_show_risk > 50:
             reasons.append("3h reminder added due to elevated no-show risk")
-        
+
         if attendee_intel:
             if attendee_intel.best_reminder_timing:
                 reasons.append(f"Channel optimized based on {attendee_intel.email}'s engagement history")
-        
+
         if not reasons:
             reasons.append("Standard reminder timing")
-        
+
         return "; ".join(reasons)

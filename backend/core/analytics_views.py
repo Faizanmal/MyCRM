@@ -11,14 +11,11 @@ Provides analytics endpoints for:
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from decimal import Decimal
 
-from django.db.models import Count, Sum, Avg, F, Q
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
-from django.utils import timezone
 from django.contrib.auth import get_user_model
-
+from django.db.models import Avg, Count, F, Q, Sum
+from django.db.models.functions import TruncDay, TruncMonth, TruncWeek
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -31,7 +28,7 @@ User = get_user_model()
 def get_date_range(period: str = 'month') -> tuple[datetime, datetime]:
     """Get start and end dates for a period."""
     now = timezone.now()
-    
+
     if period == 'today':
         start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         end = now
@@ -53,7 +50,7 @@ def get_date_range(period: str = 'month') -> tuple[datetime, datetime]:
         # Default to last 30 days
         start = now - timedelta(days=30)
         end = now
-    
+
     return start, end
 
 
@@ -65,7 +62,7 @@ def get_comparison_period(start: datetime, end: datetime) -> tuple[datetime, dat
     return prev_start, prev_end
 
 
-def calculate_change_percent(current: float, previous: float) -> Optional[float]:
+def calculate_change_percent(current: float, previous: float) -> float | None:
     """Calculate percentage change between two values."""
     if previous == 0:
         return 100.0 if current > 0 else 0.0
@@ -79,52 +76,52 @@ def dashboard_metrics(request):
     period = request.query_params.get('period', 'month')
     start, end = get_date_range(period)
     prev_start, prev_end = get_comparison_period(start, end)
-    
+
     try:
-        from lead_management.models import Lead
         from contact_management.models import Contact
+        from lead_management.models import Lead
         from opportunity_management.models import Opportunity
         from task_management.models import Task
-        
+
         # Current period metrics
         leads_count = Lead.objects.filter(
             created_at__gte=start,
             created_at__lte=end
         ).count()
-        
+
         contacts_count = Contact.objects.filter(
             created_at__gte=start,
             created_at__lte=end
         ).count()
-        
+
         opportunities = Opportunity.objects.filter(
             created_at__gte=start,
             created_at__lte=end
         )
-        
+
         active_deals = opportunities.exclude(stage__in=['closed_won', 'closed_lost']).count()
-        
+
         won_deals = opportunities.filter(stage='closed_won')
         revenue = won_deals.aggregate(total=Sum('value'))['total'] or 0
-        
+
         tasks_completed = Task.objects.filter(
             status='completed',
             updated_at__gte=start,
             updated_at__lte=end
         ).count()
-        
+
         # Previous period for comparison
         prev_leads = Lead.objects.filter(
             created_at__gte=prev_start,
             created_at__lt=prev_end
         ).count()
-        
+
         prev_revenue = Opportunity.objects.filter(
             stage='closed_won',
             created_at__gte=prev_start,
             created_at__lt=prev_end
         ).aggregate(total=Sum('value'))['total'] or 0
-        
+
         return Response({
             'success': True,
             'data': {
@@ -168,10 +165,10 @@ def revenue_analytics(request):
     """Get revenue analytics with trends."""
     period = request.query_params.get('period', 'month')
     group_by = request.query_params.get('group_by', 'day')
-    
+
     try:
         from opportunity_management.models import Opportunity
-        
+
         # Determine date range
         if period == 'year':
             start = timezone.now() - timedelta(days=365)
@@ -182,7 +179,7 @@ def revenue_analytics(request):
         else:
             start = timezone.now() - timedelta(days=30)
             trunc_func = TruncDay if group_by == 'day' else TruncWeek
-        
+
         # Get revenue by period
         revenue_data = Opportunity.objects.filter(
             stage='closed_won',
@@ -193,7 +190,7 @@ def revenue_analytics(request):
             revenue=Sum('value'),
             count=Count('id')
         ).order_by('period')
-        
+
         # Get pipeline value
         pipeline_data = Opportunity.objects.exclude(
             stage__in=['closed_won', 'closed_lost']
@@ -201,7 +198,7 @@ def revenue_analytics(request):
             total_value=Sum('value'),
             weighted_value=Sum(F('value') * F('probability') / 100)
         )
-        
+
         return Response({
             'success': True,
             'data': {
@@ -233,7 +230,7 @@ def pipeline_analytics(request):
     """Get pipeline analytics by stage."""
     try:
         from opportunity_management.models import Opportunity
-        
+
         # Pipeline by stage
         pipeline_stages = Opportunity.objects.exclude(
             stage__in=['closed_won', 'closed_lost']
@@ -242,19 +239,19 @@ def pipeline_analytics(request):
             value=Sum('value'),
             avg_value=Avg('value')
         ).order_by('stage')
-        
+
         # Conversion rates
         total_opportunities = Opportunity.objects.count()
         won_opportunities = Opportunity.objects.filter(stage='closed_won').count()
         lost_opportunities = Opportunity.objects.filter(stage='closed_lost').count()
-        
+
         conversion_rate = (won_opportunities / total_opportunities * 100) if total_opportunities > 0 else 0
-        
+
         # Average deal size
         avg_deal_size = Opportunity.objects.filter(
             stage='closed_won'
         ).aggregate(avg=Avg('value'))['avg'] or 0
-        
+
         # Average sales cycle
         won_deals = Opportunity.objects.filter(stage='closed_won')
         if won_deals.exists():
@@ -264,7 +261,7 @@ def pipeline_analytics(request):
             avg_cycle = avg_cycle_days.days if avg_cycle_days else 0
         else:
             avg_cycle = 0
-        
+
         return Response({
             'success': True,
             'data': {
@@ -301,24 +298,24 @@ def activity_analytics(request):
     """Get activity analytics."""
     period = request.query_params.get('period', 'week')
     start, end = get_date_range(period)
-    
+
     try:
         from task_management.models import Task
-        
+
         # Tasks by status
         tasks_by_status = Task.objects.filter(
             created_at__gte=start
         ).values('status').annotate(
             count=Count('id')
         )
-        
+
         # Tasks by priority
         tasks_by_priority = Task.objects.filter(
             created_at__gte=start
         ).values('priority').annotate(
             count=Count('id')
         )
-        
+
         # Daily activity
         daily_activity = Task.objects.filter(
             created_at__gte=start
@@ -328,13 +325,13 @@ def activity_analytics(request):
             created=Count('id'),
             completed=Count('id', filter=Q(status='completed'))
         ).order_by('day')
-        
+
         # Overdue tasks
         overdue_count = Task.objects.filter(
             status__in=['pending', 'in_progress'],
             due_date__lt=timezone.now()
         ).count()
-        
+
         return Response({
             'success': True,
             'data': {
@@ -365,41 +362,41 @@ def team_performance(request):
     """Get team performance analytics."""
     period = request.query_params.get('period', 'month')
     start, end = get_date_range(period)
-    
+
     try:
         from lead_management.models import Lead
         from opportunity_management.models import Opportunity
         from task_management.models import Task
-        
+
         # Get team members (users with activity)
         team_stats = []
-        
+
         users_with_activity = User.objects.filter(
             Q(lead_assigns__created_at__gte=start) |
             Q(opportunity_set__created_at__gte=start) |
             Q(task_assignments__created_at__gte=start)
         ).distinct()
-        
+
         for user in users_with_activity:
             leads_handled = Lead.objects.filter(
                 assigned_to=user,
                 created_at__gte=start
             ).count()
-            
+
             deals_won = Opportunity.objects.filter(
                 owner=user,
                 stage='closed_won',
                 updated_at__gte=start
             )
-            
+
             revenue = deals_won.aggregate(total=Sum('value'))['total'] or 0
-            
+
             tasks_completed = Task.objects.filter(
                 assigned_to=user,
                 status='completed',
                 updated_at__gte=start
             ).count()
-            
+
             team_stats.append({
                 'id': user.id,
                 'name': user.get_full_name() or user.username,
@@ -408,10 +405,10 @@ def team_performance(request):
                 'revenue': float(revenue),
                 'tasksCompleted': tasks_completed,
             })
-        
+
         # Sort by revenue
         team_stats.sort(key=lambda x: x['revenue'], reverse=True)
-        
+
         return Response({
             'success': True,
             'data': {
@@ -433,10 +430,10 @@ def lead_source_analytics(request):
     """Get lead source analytics."""
     period = request.query_params.get('period', 'month')
     start, end = get_date_range(period)
-    
+
     try:
         from lead_management.models import Lead
-        
+
         # Leads by source
         source_stats = Lead.objects.filter(
             created_at__gte=start
@@ -444,7 +441,7 @@ def lead_source_analytics(request):
             count=Count('id'),
             converted=Count('id', filter=Q(status='won'))
         ).order_by('-count')
-        
+
         # Calculate conversion rates
         result = []
         for item in source_stats:
@@ -455,7 +452,7 @@ def lead_source_analytics(request):
                 'converted': item['converted'],
                 'conversionRate': round(conversion, 1)
             })
-        
+
         return Response({
             'success': True,
             'data': result

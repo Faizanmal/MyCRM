@@ -3,15 +3,16 @@ Authentication URL Configuration
 """
 
 from django.urls import path
+
 from .auth_views import (
-    RegisterView,
+    ChangePasswordView,
     LoginView,
     LogoutView,
-    UserProfileView,
-    ChangePasswordView,
-    PasswordResetRequestView,
     PasswordResetConfirmView,
+    PasswordResetRequestView,
     RefreshTokenView,
+    RegisterView,
+    UserProfileView,
 )
 
 urlpatterns = [

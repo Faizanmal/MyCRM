@@ -3,10 +3,8 @@ Personalization Services - Adaptive UI, smart defaults, and user experience mana
 """
 
 import uuid
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from collections import Counter
-from django.db.models import Count, Avg, F
+from typing import Any
+
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -16,7 +14,7 @@ User = get_user_model()
 class PreferenceService:
     """Service for managing user preferences."""
 
-    def get_user_preferences(self, user_id: str) -> Dict[str, Any]:
+    def get_user_preferences(self, user_id: str) -> dict[str, Any]:
         """Get all preferences for a user."""
         # In production, query UserPreferenceProfile
         return {
@@ -53,12 +51,12 @@ class PreferenceService:
             },
         }
 
-    def update_preferences(self, user_id: str, section: str, updates: Dict) -> Dict:
+    def update_preferences(self, user_id: str, section: str, updates: dict) -> dict:
         """Update a section of user preferences."""
         # In production, update UserPreferenceProfile
         return {'success': True, 'section': section, 'updates': updates}
 
-    def reset_preferences(self, user_id: str, section: Optional[str] = None) -> Dict:
+    def reset_preferences(self, user_id: str, section: str | None = None) -> dict:
         """Reset preferences to defaults."""
         return {'success': True, 'reset_section': section or 'all'}
 
@@ -72,12 +70,12 @@ class BehaviorTrackingService:
         event_type: str,
         event_category: str,
         event_target: str,
-        event_data: Dict = None,
+        event_data: dict = None,
         page_path: str = '',
         session_id: str = '',
         device_type: str = 'desktop',
         duration_ms: int = None,
-    ) -> Dict:
+    ) -> dict:
         """Track a user behavior event."""
         event = {
             'id': str(uuid.uuid4()),
@@ -92,11 +90,11 @@ class BehaviorTrackingService:
             'duration_ms': duration_ms,
             'timestamp': timezone.now().isoformat(),
         }
-        
+
         # In production, save to UserBehaviorEvent
         return event
 
-    def get_behavior_summary(self, user_id: str, days: int = 30) -> Dict:
+    def get_behavior_summary(self, user_id: str, days: int = 30) -> dict:
         """Get summary of user behavior."""
         # In production, aggregate from UserBehaviorEvent
         return {
@@ -116,7 +114,7 @@ class BehaviorTrackingService:
             'device_breakdown': {'desktop': 85, 'mobile': 12, 'tablet': 3},
         }
 
-    def get_page_analytics(self, user_id: str, page_path: str) -> Dict:
+    def get_page_analytics(self, user_id: str, page_path: str) -> dict:
         """Get analytics for a specific page."""
         return {
             'page_path': page_path,
@@ -134,12 +132,12 @@ class SmartDefaultsService:
         self,
         user_id: str,
         entity_type: str,
-        context: Dict = None,
-    ) -> Dict[str, Any]:
+        context: dict = None,
+    ) -> dict[str, Any]:
         """Get smart defaults for a form/entity."""
         # In production, query SmartDefault and apply ML model
         defaults = {}
-        
+
         if entity_type == 'opportunity':
             defaults = {
                 'stage': 'qualification',
@@ -158,11 +156,11 @@ class SmartDefaultsService:
                 'status': 'active',
                 'source': 'direct',
             }
-        
+
         return {
             'entity_type': entity_type,
             'defaults': defaults,
-            'confidence_scores': {k: 0.85 for k in defaults.keys()},
+            'confidence_scores': dict.fromkeys(defaults.keys(), 0.85),
         }
 
     def learn_from_input(
@@ -171,7 +169,7 @@ class SmartDefaultsService:
         entity_type: str,
         field_name: str,
         value: Any,
-        context: Dict = None,
+        context: dict = None,
         was_default_used: bool = False,
     ) -> None:
         """Learn from user input to improve defaults."""
@@ -186,7 +184,7 @@ class SmartDefaultsService:
         field_name: str,
         partial_value: str = '',
         limit: int = 5,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Get smart suggestions for a field."""
         # In production, use ML to generate suggestions
         return [
@@ -203,7 +201,7 @@ class ContextualHelpService:
         user_id: str,
         page_path: str,
         user_segment: str = 'all',
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Get relevant help content for a page."""
         # In production, query ContextualHelp and filter by user progress
         return [
@@ -237,7 +235,7 @@ class ContextualHelpService:
 class OnboardingService:
     """Service for managing onboarding tours."""
 
-    def get_user_tours(self, user_id: str) -> List[Dict]:
+    def get_user_tours(self, user_id: str) -> list[dict]:
         """Get all tours relevant to a user."""
         # In production, query OnboardingTour and UserTourProgress
         return [
@@ -263,7 +261,7 @@ class OnboardingService:
             },
         ]
 
-    def get_tour_steps(self, tour_slug: str) -> List[Dict]:
+    def get_tour_steps(self, tour_slug: str) -> list[dict]:
         """Get all steps for a tour."""
         # In production, query OnboardingStep
         return [
@@ -285,7 +283,7 @@ class OnboardingService:
             },
         ]
 
-    def start_tour(self, user_id: str, tour_slug: str) -> Dict:
+    def start_tour(self, user_id: str, tour_slug: str) -> dict:
         """Start a tour for a user."""
         return {
             'tour_slug': tour_slug,
@@ -294,7 +292,7 @@ class OnboardingService:
             'started_at': timezone.now().isoformat(),
         }
 
-    def complete_step(self, user_id: str, tour_slug: str, step: int) -> Dict:
+    def complete_step(self, user_id: str, tour_slug: str, step: int) -> dict:
         """Complete a tour step."""
         return {
             'tour_slug': tour_slug,
@@ -302,7 +300,7 @@ class OnboardingService:
             'next_step': step + 1,
         }
 
-    def skip_tour(self, user_id: str, tour_slug: str) -> Dict:
+    def skip_tour(self, user_id: str, tour_slug: str) -> dict:
         """Skip a tour."""
         return {
             'tour_slug': tour_slug,
@@ -314,25 +312,25 @@ class OnboardingService:
 class AdaptiveUIService:
     """Service for adaptive UI based on user behavior."""
 
-    def get_ui_adaptations(self, user_id: str) -> Dict[str, Any]:
+    def get_ui_adaptations(self, user_id: str) -> dict[str, Any]:
         """Get UI adaptations for a user based on behavior."""
         behavior = self._analyze_behavior(user_id)
-        
+
         adaptations = {
             'dashboard_widgets': self._get_recommended_widgets(behavior),
             'sidebar_order': self._get_recommended_sidebar_order(behavior),
             'quick_actions': self._get_recommended_quick_actions(behavior),
             'feature_highlights': self._get_unused_features(behavior),
         }
-        
+
         return adaptations
 
-    def apply_rule(self, user_id: str, rule_id: str) -> Dict:
+    def apply_rule(self, user_id: str, rule_id: str) -> dict:
         """Apply a specific adaptive UI rule."""
         # In production, get rule from AdaptiveUIRule and apply actions
         return {'applied': True, 'rule_id': rule_id}
 
-    def _analyze_behavior(self, user_id: str) -> Dict:
+    def _analyze_behavior(self, user_id: str) -> dict:
         """Analyze user behavior patterns."""
         return {
             'primary_focus': 'sales',  # sales, support, marketing
@@ -349,30 +347,30 @@ class AdaptiveUIService:
             },
         }
 
-    def _get_recommended_widgets(self, behavior: Dict) -> List[str]:
+    def _get_recommended_widgets(self, behavior: dict) -> list[str]:
         """Get recommended dashboard widgets."""
         focus = behavior.get('primary_focus', 'sales')
-        
+
         widget_map = {
             'sales': ['pipeline', 'revenue_chart', 'deals_by_stage', 'top_deals'],
             'support': ['tickets', 'response_time', 'satisfaction', 'queue'],
             'marketing': ['campaigns', 'leads_chart', 'conversion_funnel', 'sources'],
         }
-        
+
         return widget_map.get(focus, ['overview', 'tasks', 'activities'])
 
-    def _get_recommended_sidebar_order(self, behavior: Dict) -> List[str]:
+    def _get_recommended_sidebar_order(self, behavior: dict) -> list[str]:
         """Get recommended sidebar order."""
         usage = behavior.get('feature_usage', {})
-        
+
         # Sort by usage frequency
         sorted_items = sorted(usage.items(), key=lambda x: x[1], reverse=True)
         return [item[0] for item in sorted_items]
 
-    def _get_recommended_quick_actions(self, behavior: Dict) -> List[Dict]:
+    def _get_recommended_quick_actions(self, behavior: dict) -> list[dict]:
         """Get recommended quick actions."""
         focus = behavior.get('primary_focus', 'sales')
-        
+
         actions = {
             'sales': [
                 {'action': 'create_deal', 'label': 'New Deal', 'icon': 'plus'},
@@ -383,16 +381,16 @@ class AdaptiveUIService:
                 {'action': 'view_queue', 'label': 'View Queue', 'icon': 'list'},
             ],
         }
-        
+
         return actions.get(focus, [])
 
-    def _get_unused_features(self, behavior: Dict) -> List[Dict]:
+    def _get_unused_features(self, behavior: dict) -> list[dict]:
         """Get features user hasn't discovered yet."""
         usage = behavior.get('feature_usage', {})
-        
+
         # Features with low or no usage
         unused = [k for k, v in usage.items() if v < 0.2]
-        
+
         return [
             {'feature': f, 'description': f'Discover {f} to boost productivity'}
             for f in unused
@@ -402,7 +400,7 @@ class AdaptiveUIService:
 class InsightService:
     """Service for generating personalized insights."""
 
-    def get_user_insights(self, user_id: str, limit: int = 5) -> List[Dict]:
+    def get_user_insights(self, user_id: str, limit: int = 5) -> list[dict]:
         """Get AI-generated insights for a user."""
         # In production, query UserInsight and generate new ones
         return [
@@ -426,17 +424,17 @@ class InsightService:
             },
         ]
 
-    def generate_insights(self, user_id: str) -> List[Dict]:
+    def generate_insights(self, user_id: str) -> list[dict]:
         """Generate new insights based on recent behavior."""
-        behavior = BehaviorTrackingService().get_behavior_summary(user_id)
+        BehaviorTrackingService().get_behavior_summary(user_id)
         insights = []
-        
+
         # Analyze patterns and generate insights
         # In production, use ML models for this
-        
+
         return insights
 
-    def act_on_insight(self, user_id: str, insight_id: str, action: str) -> Dict:
+    def act_on_insight(self, user_id: str, insight_id: str, action: str) -> dict:
         """Record user action on an insight."""
         return {
             'insight_id': insight_id,
@@ -448,7 +446,7 @@ class InsightService:
 class QuickActionService:
     """Service for managing user quick actions."""
 
-    def get_user_quick_actions(self, user_id: str) -> List[Dict]:
+    def get_user_quick_actions(self, user_id: str) -> list[dict]:
         """Get user's configured quick actions."""
         # In production, query QuickAction
         return [
@@ -472,7 +470,7 @@ class QuickActionService:
             },
         ]
 
-    def create_quick_action(self, user_id: str, action_data: Dict) -> Dict:
+    def create_quick_action(self, user_id: str, action_data: dict) -> dict:
         """Create a new quick action."""
         return {
             'id': str(uuid.uuid4()),
@@ -480,7 +478,7 @@ class QuickActionService:
             'created_at': timezone.now().isoformat(),
         }
 
-    def update_quick_action(self, user_id: str, action_id: str, updates: Dict) -> Dict:
+    def update_quick_action(self, user_id: str, action_id: str, updates: dict) -> dict:
         """Update a quick action."""
         return {'id': action_id, **updates}
 
@@ -488,7 +486,7 @@ class QuickActionService:
         """Delete a quick action."""
         return True
 
-    def reorder_quick_actions(self, user_id: str, action_ids: List[str]) -> List[Dict]:
+    def reorder_quick_actions(self, user_id: str, action_ids: list[str]) -> list[dict]:
         """Reorder quick actions."""
         return [{'id': aid, 'order': i} for i, aid in enumerate(action_ids)]
 
@@ -505,7 +503,7 @@ class PersonalizationEngine:
         self.adaptive_service = AdaptiveUIService()
         self.insight_service = InsightService()
 
-    def get_personalized_experience(self, user_id: str, page_path: str) -> Dict[str, Any]:
+    def get_personalized_experience(self, user_id: str, page_path: str) -> dict[str, Any]:
         """Get complete personalized experience for current context."""
         return {
             'preferences': self.preference_service.get_user_preferences(user_id),
@@ -522,7 +520,7 @@ class PersonalizationEngine:
         self,
         user_id: str,
         event_type: str,
-        event_data: Dict,
+        event_data: dict,
         page_path: str,
         session_id: str,
     ) -> None:
@@ -537,7 +535,7 @@ class PersonalizationEngine:
             page_path=page_path,
             session_id=session_id,
         )
-        
+
         # Trigger learning for smart defaults
         if event_type == 'form_submit':
             for field, value in event_data.get('fields', {}).items():

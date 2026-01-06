@@ -2,19 +2,18 @@
 Progressive Web App (PWA) URL Configuration
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .pwa_views import (
-    PushSubscriptionViewSet,
-    PushNotificationViewSet,
     BackgroundSyncViewSet,
-    OfflineActionViewSet,
-    PWAAnalyticsViewSet,
     CacheManifestViewSet,
-    ServiceWorkerConfigView
+    OfflineActionViewSet,
+    PushNotificationViewSet,
+    PushSubscriptionViewSet,
+    PWAAnalyticsViewSet,
+    ServiceWorkerConfigView,
 )
-
 
 router = DefaultRouter()
 router.register(r'push/subscriptions', PushSubscriptionViewSet, basename='push-subscriptions')

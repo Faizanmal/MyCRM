@@ -1,7 +1,11 @@
 from django.contrib import admin
+
 from .models import (
-    ChurnPrediction, NextBestAction, AIGeneratedContent,
-    SentimentAnalysis, AIModelMetrics
+    AIGeneratedContent,
+    AIModelMetrics,
+    ChurnPrediction,
+    NextBestAction,
+    SentimentAnalysis,
 )
 
 

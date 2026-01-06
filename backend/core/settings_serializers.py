@@ -4,11 +4,12 @@ Serializers for user preferences, notification settings, export jobs, and RBAC
 """
 
 from rest_framework import serializers
+
 from .settings_models import (
-    UserPreference,
+    ExportJob,
     NotificationPreference,
     NotificationTypeSetting,
-    ExportJob,
+    UserPreference,
     UserRole,
     UserRoleAssignment,
 )
@@ -16,7 +17,7 @@ from .settings_models import (
 
 class UserPreferenceSerializer(serializers.ModelSerializer):
     """Serializer for user preferences"""
-    
+
     class Meta:
         model = UserPreference
         fields = [
@@ -54,7 +55,7 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 
 class NotificationTypeSettingSerializer(serializers.ModelSerializer):
     """Serializer for notification type settings"""
-    
+
     class Meta:
         model = NotificationTypeSetting
         fields = [
@@ -73,7 +74,7 @@ class NotificationTypeSettingSerializer(serializers.ModelSerializer):
 class NotificationPreferenceSerializer(serializers.ModelSerializer):
     """Serializer for notification preferences"""
     type_settings = NotificationTypeSettingSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = NotificationPreference
         fields = [
@@ -106,7 +107,7 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
 class NotificationPreferenceUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating notification preferences with type settings"""
     type_settings = NotificationTypeSettingSerializer(many=True, required=False)
-    
+
     class Meta:
         model = NotificationPreference
         fields = [
@@ -125,15 +126,15 @@ class NotificationPreferenceUpdateSerializer(serializers.ModelSerializer):
             'digest_include_metrics',
             'type_settings',
         ]
-    
+
     def update(self, instance, validated_data):
         type_settings_data = validated_data.pop('type_settings', None)
-        
+
         # Update main preferences
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        
+
         # Update type settings if provided
         if type_settings_data:
             for setting_data in type_settings_data:
@@ -143,7 +144,7 @@ class NotificationPreferenceUpdateSerializer(serializers.ModelSerializer):
                     notification_type=notification_type,
                     defaults=setting_data
                 )
-        
+
         return instance
 
 
@@ -151,7 +152,7 @@ class ExportJobSerializer(serializers.ModelSerializer):
     """Serializer for export jobs"""
     download_url = serializers.SerializerMethodField()
     file_size_formatted = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ExportJob
         fields = [
@@ -177,14 +178,14 @@ class ExportJobSerializer(serializers.ModelSerializer):
             'id', 'status', 'progress', 'file_path', 'file_size',
             'error_message', 'created_at', 'started_at', 'completed_at', 'expires_at',
         ]
-    
+
     def get_download_url(self, obj):
         if obj.status == 'completed' and obj.file_path:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(f'/api/v1/export/{obj.id}/download/')
         return None
-    
+
     def get_file_size_formatted(self, obj):
         if obj.file_size:
             if obj.file_size >= 1024 * 1024:
@@ -198,7 +199,7 @@ class ExportJobSerializer(serializers.ModelSerializer):
 
 class ExportJobCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating export jobs"""
-    
+
     class Meta:
         model = ExportJob
         fields = [
@@ -208,7 +209,7 @@ class ExportJobCreateSerializer(serializers.ModelSerializer):
             'include_archived',
             'include_deleted',
         ]
-    
+
     def validate_entities(self, value):
         valid_entities = ['contacts', 'companies', 'deals', 'tasks', 'activities', 'emails', 'calendar']
         for entity in value:
@@ -222,7 +223,7 @@ class ExportJobCreateSerializer(serializers.ModelSerializer):
 class UserRoleSerializer(serializers.ModelSerializer):
     """Serializer for user roles"""
     permissions_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = UserRole
         fields = [
@@ -239,7 +240,7 @@ class UserRoleSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_permissions_count(self, obj):
         return len(obj.permissions) if obj.permissions else 0
 
@@ -255,7 +256,7 @@ class UserRoleAssignmentSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_name = serializers.SerializerMethodField()
     assigned_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = UserRoleAssignment
         fields = [
@@ -272,10 +273,10 @@ class UserRoleAssignmentSerializer(serializers.ModelSerializer):
             'assigned_at',
         ]
         read_only_fields = ['id', 'assigned_by', 'assigned_at']
-    
+
     def get_user_name(self, obj):
         return obj.user.get_full_name() or obj.user.username
-    
+
     def get_assigned_by_name(self, obj):
         if obj.assigned_by:
             return obj.assigned_by.get_full_name() or obj.assigned_by.username

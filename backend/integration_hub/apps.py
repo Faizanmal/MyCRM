@@ -5,6 +5,6 @@ class IntegrationHubConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'integration_hub'
     verbose_name = 'Integration Hub'
-    
+
     def ready(self):
         import integration_hub.signals  # noqa: F401

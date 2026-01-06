@@ -1,12 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// import { motion, AnimatePresence } from 'framer-motion';
 import { Command } from 'cmdk';
 import {
     Search, Home, Users, Target, CheckSquare,
-    Calendar, Settings, HelpCircle, LogOut, Plus,
-    FileText, Mail, Phone, ArrowRight,
+    Calendar, Settings, Plus,
+    FileText, Mail, ArrowRight,
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -266,17 +266,17 @@ export function ShortcutProvider({ children }: ShortcutProviderProps) {
  * Command Palette Component
  */
 function CommandPalette() {
-    const { isCommandPaletteOpen, closeCommandPalette, shortcuts } = useShortcuts();
+    const { isCommandPaletteOpen, closeCommandPalette } = useShortcuts();
     const router = useRouter();
     const [search, setSearch] = useState('');
 
     // Group shortcuts by category
-    const categories = shortcuts.reduce((acc, shortcut) => {
-        const category = shortcut.category || 'Other';
-        if (!acc[category]) acc[category] = [];
-        acc[category].push(shortcut);
-        return acc;
-    }, {} as Record<string, Shortcut[]>);
+    // const categories = shortcuts.reduce((acc, shortcut) => {
+    //     const category = shortcut.category || 'Other';
+    //     if (!acc[category]) acc[category] = [];
+    //     acc[category].push(shortcut);
+    //     return acc;
+    // }, {} as Record<string, Shortcut[]>);
 
     const navigationItems = [
         { icon: Home, label: 'Dashboard', path: '/dashboard' },

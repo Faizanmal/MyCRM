@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
@@ -27,11 +27,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Map,
-  Users,
   Building2,
   TrendingUp,
   AlertTriangle,
@@ -226,7 +224,7 @@ const fetchBalanceAnalysis = async (): Promise<BalanceAnalysis> => {
   };
 };
 
-const fetchRecommendations = async (territoryId: string): Promise<Recommendation[]> => {
+const fetchRecommendations = async (_type: string): Promise<Recommendation[]> => {
   return [
     {
       type: 'capacity',

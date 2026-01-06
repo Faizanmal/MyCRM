@@ -1,7 +1,14 @@
 from django.contrib import admin
+
 from .models import (
-    SchedulingPage, MeetingType, Availability, BlockedTime,
-    Meeting, MeetingReminder, CalendarIntegration, SchedulingAnalytics
+    Availability,
+    BlockedTime,
+    CalendarIntegration,
+    Meeting,
+    MeetingReminder,
+    MeetingType,
+    SchedulingAnalytics,
+    SchedulingPage,
 )
 
 

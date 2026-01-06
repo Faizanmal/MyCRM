@@ -3,19 +3,20 @@ Progressive Web App (PWA) Serializers
 """
 
 from rest_framework import serializers
+
 from .pwa_models import (
-    PushSubscription,
-    PushNotification,
     BackgroundSyncJob,
     CacheManifest,
+    InstallationAnalytics,
     OfflineAction,
-    InstallationAnalytics
+    PushNotification,
+    PushSubscription,
 )
 
 
 class PushSubscriptionSerializer(serializers.ModelSerializer):
     """Serializer for push subscriptions"""
-    
+
     class Meta:
         model = PushSubscription
         fields = [
@@ -32,7 +33,7 @@ class PushSubscriptionSerializer(serializers.ModelSerializer):
 
 class PushNotificationSerializer(serializers.ModelSerializer):
     """Serializer for push notifications"""
-    
+
     class Meta:
         model = PushNotification
         fields = [
@@ -51,7 +52,7 @@ class PushNotificationSerializer(serializers.ModelSerializer):
 
 class PushNotificationListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for notification list"""
-    
+
     class Meta:
         model = PushNotification
         fields = [
@@ -62,7 +63,7 @@ class PushNotificationListSerializer(serializers.ModelSerializer):
 
 class BackgroundSyncJobSerializer(serializers.ModelSerializer):
     """Serializer for background sync jobs"""
-    
+
     class Meta:
         model = BackgroundSyncJob
         fields = [
@@ -80,7 +81,7 @@ class BackgroundSyncJobSerializer(serializers.ModelSerializer):
 
 class CacheManifestSerializer(serializers.ModelSerializer):
     """Serializer for cache manifests"""
-    
+
     class Meta:
         model = CacheManifest
         fields = [
@@ -93,7 +94,7 @@ class CacheManifestSerializer(serializers.ModelSerializer):
 
 class OfflineActionSerializer(serializers.ModelSerializer):
     """Serializer for offline actions"""
-    
+
     class Meta:
         model = OfflineAction
         fields = [
@@ -112,7 +113,7 @@ class OfflineActionSerializer(serializers.ModelSerializer):
 
 class InstallationAnalyticsSerializer(serializers.ModelSerializer):
     """Serializer for installation analytics"""
-    
+
     class Meta:
         model = InstallationAnalytics
         fields = [
@@ -133,7 +134,7 @@ class InstallationAnalyticsSerializer(serializers.ModelSerializer):
 
 class SubscribePushSerializer(serializers.Serializer):
     """Serializer for push subscription request"""
-    
+
     endpoint = serializers.CharField()
     auth_key = serializers.CharField()
     p256dh_key = serializers.CharField()
@@ -144,7 +145,7 @@ class SubscribePushSerializer(serializers.Serializer):
 
 class UpdatePreferencesSerializer(serializers.Serializer):
     """Serializer for updating notification preferences"""
-    
+
     notifications_enabled = serializers.BooleanField(required=False)
     notify_new_leads = serializers.BooleanField(required=False)
     notify_task_reminders = serializers.BooleanField(required=False)
@@ -157,7 +158,7 @@ class UpdatePreferencesSerializer(serializers.Serializer):
 
 class SendNotificationSerializer(serializers.Serializer):
     """Serializer for sending push notification"""
-    
+
     notification_type = serializers.ChoiceField(choices=[
         'new_lead', 'task_reminder', 'task_assigned',
         'deal_update', 'deal_won', 'deal_lost',
@@ -176,7 +177,7 @@ class SendNotificationSerializer(serializers.Serializer):
 
 class RequestSyncSerializer(serializers.Serializer):
     """Serializer for requesting background sync"""
-    
+
     sync_type = serializers.ChoiceField(choices=[
         'contacts', 'leads', 'opportunities',
         'tasks', 'activities', 'messages', 'full'
@@ -187,7 +188,7 @@ class RequestSyncSerializer(serializers.Serializer):
 
 class QueueOfflineActionSerializer(serializers.Serializer):
     """Serializer for queueing offline action"""
-    
+
     action_type = serializers.ChoiceField(choices=[
         'create', 'update', 'delete', 'api_call'
     ])
@@ -202,7 +203,7 @@ class QueueOfflineActionSerializer(serializers.Serializer):
 
 class TrackInstallationSerializer(serializers.Serializer):
     """Serializer for tracking PWA installation"""
-    
+
     platform = serializers.CharField(max_length=50)
     browser = serializers.CharField(max_length=100)
     install_source = serializers.ChoiceField(

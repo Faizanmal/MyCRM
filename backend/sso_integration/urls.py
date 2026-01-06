@@ -1,11 +1,7 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import (
-    SSOProviderViewSet,
-    SSOSessionViewSet,
-    SSOLoginAttemptViewSet,
-    SSOCallbackView
-)
+
+from .views import SSOCallbackView, SSOLoginAttemptViewSet, SSOProviderViewSet, SSOSessionViewSet
 
 router = DefaultRouter()
 router.register(r'providers', SSOProviderViewSet, basename='sso-provider')

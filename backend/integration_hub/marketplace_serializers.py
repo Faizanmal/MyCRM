@@ -3,16 +3,23 @@ Integration Marketplace - Serializers
 """
 
 from rest_framework import serializers
+
 from .marketplace_models import (
-    MarketplaceApp, AppInstallation, AppReview,
-    CustomWebhook, WebhookEvent, WebhookDeliveryLog,
-    APIRateLimit, APIUsageLog, APIUsageMetrics
+    APIRateLimit,
+    APIUsageLog,
+    APIUsageMetrics,
+    AppInstallation,
+    AppReview,
+    CustomWebhook,
+    MarketplaceApp,
+    WebhookDeliveryLog,
+    WebhookEvent,
 )
 
 
 class MarketplaceAppListSerializer(serializers.ModelSerializer):
     """List serializer for marketplace apps"""
-    
+
     class Meta:
         model = MarketplaceApp
         fields = [
@@ -24,9 +31,9 @@ class MarketplaceAppListSerializer(serializers.ModelSerializer):
 
 class MarketplaceAppDetailSerializer(serializers.ModelSerializer):
     """Detail serializer for marketplace apps"""
-    
+
     is_installed = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = MarketplaceApp
         fields = [
@@ -38,7 +45,7 @@ class MarketplaceAppDetailSerializer(serializers.ModelSerializer):
             'install_count', 'rating_avg', 'rating_count',
             'is_installed', 'published_at', 'created_at', 'updated_at'
         ]
-    
+
     def get_is_installed(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
@@ -50,7 +57,7 @@ class MarketplaceAppDetailSerializer(serializers.ModelSerializer):
 
 class MarketplaceAppCreateSerializer(serializers.ModelSerializer):
     """Create serializer for marketplace apps"""
-    
+
     class Meta:
         model = MarketplaceApp
         fields = [
@@ -66,10 +73,10 @@ class MarketplaceAppCreateSerializer(serializers.ModelSerializer):
 
 class AppInstallationSerializer(serializers.ModelSerializer):
     """Serializer for app installations"""
-    
+
     app_name = serializers.CharField(source='app.name', read_only=True)
     app_icon = serializers.ImageField(source='app.icon', read_only=True)
-    
+
     class Meta:
         model = AppInstallation
         fields = [
@@ -82,9 +89,9 @@ class AppInstallationSerializer(serializers.ModelSerializer):
 
 class AppReviewSerializer(serializers.ModelSerializer):
     """Serializer for app reviews"""
-    
+
     user_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = AppReview
         fields = [
@@ -93,14 +100,14 @@ class AppReviewSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
-    
+
     def get_user_name(self, obj):
         return obj.user.get_full_name() or obj.user.email.split('@')[0]
 
 
 class CreateReviewSerializer(serializers.Serializer):
     """Serializer for creating reviews"""
-    
+
     rating = serializers.IntegerField(min_value=1, max_value=5)
     title = serializers.CharField(max_length=200)
     review = serializers.CharField()
@@ -108,9 +115,9 @@ class CreateReviewSerializer(serializers.Serializer):
 
 class CustomWebhookSerializer(serializers.ModelSerializer):
     """Serializer for custom webhooks"""
-    
+
     success_rate = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CustomWebhook
         fields = [
@@ -128,7 +135,7 @@ class CustomWebhookSerializer(serializers.ModelSerializer):
             'failed_deliveries', 'last_triggered', 'last_success',
             'last_failure', 'created_at', 'updated_at'
         ]
-    
+
     def get_success_rate(self, obj):
         if obj.total_triggers == 0:
             return 100.0
@@ -137,7 +144,7 @@ class CustomWebhookSerializer(serializers.ModelSerializer):
 
 class CreateWebhookSerializer(serializers.Serializer):
     """Serializer for creating webhooks"""
-    
+
     name = serializers.CharField(max_length=200)
     description = serializers.CharField(required=False, default='')
     url = serializers.URLField()
@@ -166,7 +173,7 @@ class CreateWebhookSerializer(serializers.Serializer):
 
 class WebhookEventSerializer(serializers.ModelSerializer):
     """Serializer for webhook events"""
-    
+
     class Meta:
         model = WebhookEvent
         fields = [
@@ -177,9 +184,9 @@ class WebhookEventSerializer(serializers.ModelSerializer):
 
 class WebhookDeliveryLogSerializer(serializers.ModelSerializer):
     """Serializer for webhook delivery logs"""
-    
+
     webhook_name = serializers.CharField(source='webhook.name', read_only=True)
-    
+
     class Meta:
         model = WebhookDeliveryLog
         fields = [
@@ -193,9 +200,9 @@ class WebhookDeliveryLogSerializer(serializers.ModelSerializer):
 
 class APIRateLimitSerializer(serializers.ModelSerializer):
     """Serializer for API rate limits"""
-    
+
     usage_percentage = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = APIRateLimit
         fields = [
@@ -204,7 +211,7 @@ class APIRateLimitSerializer(serializers.ModelSerializer):
             'is_exceeded', 'usage_percentage', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'current_count', 'period_start', 'is_exceeded', 'created_at', 'updated_at']
-    
+
     def get_usage_percentage(self, obj):
         if obj.requests_limit == 0:
             return 0
@@ -213,7 +220,7 @@ class APIRateLimitSerializer(serializers.ModelSerializer):
 
 class CreateRateLimitSerializer(serializers.Serializer):
     """Serializer for creating rate limits"""
-    
+
     user_id = serializers.IntegerField(required=False)
     api_key = serializers.CharField(required=False)
     endpoint_pattern = serializers.CharField(default='*')
@@ -227,7 +234,7 @@ class CreateRateLimitSerializer(serializers.Serializer):
 
 class APIUsageLogSerializer(serializers.ModelSerializer):
     """Serializer for API usage logs"""
-    
+
     class Meta:
         model = APIUsageLog
         fields = [
@@ -239,7 +246,7 @@ class APIUsageLogSerializer(serializers.ModelSerializer):
 
 class APIUsageMetricsSerializer(serializers.ModelSerializer):
     """Serializer for API usage metrics"""
-    
+
     class Meta:
         model = APIUsageMetrics
         fields = [

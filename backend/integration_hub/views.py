@@ -2,19 +2,22 @@
 Integration Hub Views
 """
 
-from rest_framework import viewsets, status, filters
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from .models import Webhook, WebhookDelivery, ThirdPartyIntegration, IntegrationLog, APIEndpoint
+from .models import APIEndpoint, IntegrationLog, ThirdPartyIntegration, Webhook, WebhookDelivery
 from .serializers import (
-    WebhookSerializer, WebhookDeliverySerializer, ThirdPartyIntegrationSerializer,
-    IntegrationLogSerializer, APIEndpointSerializer
+    APIEndpointSerializer,
+    IntegrationLogSerializer,
+    ThirdPartyIntegrationSerializer,
+    WebhookDeliverySerializer,
+    WebhookSerializer,
 )
-from .tasks import trigger_webhook, sync_third_party_integration
+from .tasks import sync_third_party_integration, trigger_webhook
 
 
 class WebhookViewSet(viewsets.ModelViewSet):
@@ -27,16 +30,16 @@ class WebhookViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['status', 'is_active']
     search_fields = ['name', 'url']
-    
+
     def perform_create(self, serializer):
         """Set the creator"""
         serializer.save(created_by=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
-    def test(self, request, pk=None):
+    def test(self, request, _pk=None):
         """Test a webhook with sample payload"""
         webhook = self.get_object()
-        
+
         test_payload = {
             'event': 'test.webhook',
             'test': True,
@@ -44,42 +47,42 @@ class WebhookViewSet(viewsets.ModelViewSet):
             'webhook_id': webhook.id,
             'webhook_name': webhook.name,
         }
-        
+
         # Trigger test delivery
         trigger_webhook.delay('test.webhook', test_payload)
-        
+
         return Response({
             'message': 'Test webhook queued',
             'payload': test_payload
         }, status=status.HTTP_200_OK)
-    
+
     @action(detail=True, methods=['get'])
-    def deliveries(self, request, pk=None):
+    def deliveries(self, request, _pk=None):
         """Get delivery history for a webhook"""
         webhook = self.get_object()
         deliveries = webhook.deliveries.all()[:50]  # Last 50 deliveries
-        
+
         serializer = WebhookDeliverySerializer(deliveries, many=True)
         return Response(serializer.data)
-    
+
     @action(detail=True, methods=['post'])
-    def activate(self, request, pk=None):
+    def activate(self, request, _pk=None):
         """Activate a webhook"""
         webhook = self.get_object()
         webhook.is_active = True
         webhook.status = 'active'
         webhook.save()
-        
+
         return Response({'message': 'Webhook activated'})
-    
+
     @action(detail=True, methods=['post'])
-    def deactivate(self, request, pk=None):
+    def deactivate(self, request, _pk=None):
         """Deactivate a webhook"""
         webhook = self.get_object()
         webhook.is_active = False
         webhook.status = 'inactive'
         webhook.save()
-        
+
         return Response({'message': 'Webhook deactivated'})
 
 
@@ -106,29 +109,29 @@ class ThirdPartyIntegrationViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['provider', 'status', 'is_active']
     search_fields = ['name']
-    
+
     def perform_create(self, serializer):
         """Set the creator"""
         serializer.save(created_by=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
-    def sync(self, request, pk=None):
+    def sync(self, request, _pk=None):
         """Trigger sync with third-party service"""
         integration = self.get_object()
-        
+
         # Queue sync task
         sync_third_party_integration.delay(str(integration.id))
-        
+
         return Response({
             'message': 'Sync queued',
             'integration': integration.name
         }, status=status.HTTP_202_ACCEPTED)
-    
+
     @action(detail=True, methods=['post'])
-    def test(self, request, pk=None):
+    def test(self, request, _pk=None):
         """Test integration connection"""
         integration = self.get_object()
-        
+
         # Test based on provider
         try:
             if integration.provider == 'slack':
@@ -141,23 +144,23 @@ class ThirdPartyIntegrationViewSet(viewsets.ModelViewSet):
                 return Response({
                     'error': f'Test not implemented for {integration.provider}'
                 }, status=status.HTTP_501_NOT_IMPLEMENTED)
-            
+
             return Response({
                 'message': 'Connection test successful',
                 'result': result
             })
-        
+
         except Exception as e:
             return Response({
                 'error': f'Connection test failed: {str(e)}'
             }, status=status.HTTP_400_BAD_REQUEST)
-    
+
     @action(detail=True, methods=['get'])
-    def logs(self, request, pk=None):
+    def logs(self, request, _pk=None):
         """Get integration activity logs"""
         integration = self.get_object()
         logs = integration.logs.all()[:50]
-        
+
         serializer = IntegrationLogSerializer(logs, many=True)
         return Response(serializer.data)
 
@@ -184,16 +187,16 @@ class APIEndpointViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'path']
-    
+
     def perform_create(self, serializer):
         """Set the creator"""
         serializer.save(created_by=self.request.user)
-    
+
     @action(detail=True, methods=['post'])
-    def test(self, request, pk=None):
+    def test(self, request, _pk=None):
         """Test custom endpoint"""
         endpoint = self.get_object()
-        
+
         # Execute endpoint handler
         try:
             if endpoint.handler_type == 'webhook':
@@ -208,13 +211,13 @@ class APIEndpointViewSet(viewsets.ModelViewSet):
                     'status_code': response.status_code,
                     'response': response.text[:500]
                 })
-            
+
             elif endpoint.handler_type == 'function':
                 # Execute Python code (DANGEROUS - need sandboxing in production)
                 return Response({
                     'error': 'Function execution not yet implemented'
                 }, status=status.HTTP_501_NOT_IMPLEMENTED)
-        
+
         except Exception as e:
             return Response({
                 'error': str(e)

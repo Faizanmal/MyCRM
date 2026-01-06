@@ -1,5 +1,6 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
 from .models import Contact, ContactGroup, ContactImport
 
 User = get_user_model()
@@ -9,7 +10,7 @@ class ContactSerializer(serializers.ModelSerializer):
     assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     full_name = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = Contact
         fields = [
@@ -32,7 +33,7 @@ class ContactCreateSerializer(serializers.ModelSerializer):
             'assigned_to', 'status', 'website', 'linkedin', 'twitter',
             'notes', 'tags', 'custom_fields'
         ]
-    
+
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
@@ -41,7 +42,7 @@ class ContactCreateSerializer(serializers.ModelSerializer):
 class ContactGroupSerializer(serializers.ModelSerializer):
     contact_count = serializers.SerializerMethodField()
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = ContactGroup
         fields = [
@@ -49,14 +50,14 @@ class ContactGroupSerializer(serializers.ModelSerializer):
             'created_by', 'created_by_name', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
-    
+
     def get_contact_count(self, obj):
         return obj.contacts.count()
 
 
 class ContactImportSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = ContactImport
         fields = [
@@ -70,7 +71,7 @@ class ContactImportSerializer(serializers.ModelSerializer):
 class ContactBulkUpdateSerializer(serializers.Serializer):
     contact_ids = serializers.ListField(child=serializers.IntegerField())
     updates = serializers.DictField()
-    
+
     def validate_contact_ids(self, value):
         if not value:
             raise serializers.ValidationError("At least one contact ID is required.")

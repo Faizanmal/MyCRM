@@ -3,16 +3,25 @@ White Label and Billing Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    WhiteLabelPartner, SubscriptionPlan, Organization, OrganizationMember,
-    Invoice, InvoiceLineItem, PaymentMethod, UsageRecord, PartnerPayout, FeatureFlag
+    FeatureFlag,
+    Invoice,
+    InvoiceLineItem,
+    Organization,
+    OrganizationMember,
+    PartnerPayout,
+    PaymentMethod,
+    SubscriptionPlan,
+    UsageRecord,
+    WhiteLabelPartner,
 )
 
 
 class WhiteLabelPartnerSerializer(serializers.ModelSerializer):
     partner_type_display = serializers.CharField(source='get_partner_type_display', read_only=True)
     organizations_count = serializers.IntegerField(source='organizations.count', read_only=True)
-    
+
     class Meta:
         model = WhiteLabelPartner
         fields = '__all__'
@@ -31,7 +40,7 @@ class WhiteLabelBrandingSerializer(serializers.ModelSerializer):
 
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     billing_period_display = serializers.CharField(source='get_billing_period_display', read_only=True)
-    
+
     class Meta:
         model = SubscriptionPlan
         fields = '__all__'
@@ -53,7 +62,7 @@ class OrganizationMemberSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
     role_display = serializers.CharField(source='get_role_display', read_only=True)
-    
+
     class Meta:
         model = OrganizationMember
         fields = '__all__'
@@ -66,7 +75,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
     is_on_trial = serializers.ReadOnlyField()
     days_remaining_trial = serializers.ReadOnlyField()
     members = OrganizationMemberSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = Organization
         fields = '__all__'
@@ -93,7 +102,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     line_items = InvoiceLineItemSerializer(many=True, read_only=True)
     organization_name = serializers.CharField(source='organization.name', read_only=True)
-    
+
     class Meta:
         model = Invoice
         fields = '__all__'
@@ -101,21 +110,21 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
     display_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = PaymentMethod
         fields = [
             'id', 'card_brand', 'card_last4', 'card_exp_month',
             'card_exp_year', 'is_default', 'display_name', 'created_at'
         ]
-    
+
     def get_display_name(self, obj):
         return f"{obj.card_brand.title()} ****{obj.card_last4}"
 
 
 class UsageRecordSerializer(serializers.ModelSerializer):
     usage_type_display = serializers.CharField(source='get_usage_type_display', read_only=True)
-    
+
     class Meta:
         model = UsageRecord
         fields = '__all__'
@@ -124,7 +133,7 @@ class UsageRecordSerializer(serializers.ModelSerializer):
 class PartnerPayoutSerializer(serializers.ModelSerializer):
     partner_name = serializers.CharField(source='partner.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    
+
     class Meta:
         model = PartnerPayout
         fields = '__all__'

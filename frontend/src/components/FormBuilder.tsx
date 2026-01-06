@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { useForm, FieldValues, UseFormReturn, Path, FieldError, DefaultValues, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -408,7 +408,7 @@ export function Form<T extends FieldValues>({
     resetOnSuccess = false,
 }: FormProps<T>) {
     const form = useForm<T>({
-        resolver: zodResolver(schema as any),
+        resolver: zodResolver(schema as any), // eslint-disable-line @typescript-eslint/no-explicit-any
         defaultValues,
     });
 
@@ -424,8 +424,8 @@ export function Form<T extends FieldValues>({
     };
 
     return (
-        <form onSubmit={form.handleSubmit(handleSubmit as any)} className={className}>
-            {children(form as any)}
+        <form onSubmit={form.handleSubmit(handleSubmit as unknown as SubmitHandler<FieldValues>)} className={className}>
+            {children(form as UseFormReturn<T>)}
         </form>
     );
 }
@@ -498,7 +498,7 @@ export const contactFormSchema = z.object({
 
 export type ContactFormData = z.infer<typeof contactFormSchema>;
 
-export default {
+const formBuilderComponents = {
     Form,
     FormField,
     TextInput,
@@ -510,3 +510,5 @@ export default {
     SubmitButton,
     schemas,
 };
+
+export default formBuilderComponents;

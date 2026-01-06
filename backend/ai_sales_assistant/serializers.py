@@ -3,16 +3,23 @@ AI Sales Assistant Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    AIEmailDraft, SalesCoachAdvice, ObjectionResponse,
-    CallScript, DealInsight, WinLossAnalysis, PersonaProfile, ContactPersonaMatch
+    AIEmailDraft,
+    CallScript,
+    ContactPersonaMatch,
+    DealInsight,
+    ObjectionResponse,
+    PersonaProfile,
+    SalesCoachAdvice,
+    WinLossAnalysis,
 )
 
 
 class AIEmailDraftSerializer(serializers.ModelSerializer):
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = AIEmailDraft
         fields = '__all__'
@@ -36,7 +43,7 @@ class GenerateEmailSerializer(serializers.Serializer):
 class SalesCoachAdviceSerializer(serializers.ModelSerializer):
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
-    
+
     class Meta:
         model = SalesCoachAdvice
         fields = '__all__'
@@ -45,7 +52,7 @@ class SalesCoachAdviceSerializer(serializers.ModelSerializer):
 
 class ObjectionResponseSerializer(serializers.ModelSerializer):
     category_display = serializers.CharField(source='get_category_display', read_only=True)
-    
+
     class Meta:
         model = ObjectionResponse
         fields = '__all__'
@@ -63,13 +70,13 @@ class CallScriptSerializer(serializers.ModelSerializer):
     class Meta:
         model = CallScript
         fields = '__all__'
-        read_only_fields = ['id', 'user', 'times_used', 'avg_call_duration', 
+        read_only_fields = ['id', 'user', 'times_used', 'avg_call_duration',
                            'success_rate', 'created_at', 'updated_at']
 
 
 class DealInsightSerializer(serializers.ModelSerializer):
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = DealInsight
         fields = '__all__'
@@ -78,7 +85,7 @@ class DealInsightSerializer(serializers.ModelSerializer):
 
 class WinLossAnalysisSerializer(serializers.ModelSerializer):
     opportunity_name = serializers.CharField(source='opportunity.name', read_only=True)
-    
+
     class Meta:
         model = WinLossAnalysis
         fields = '__all__'
@@ -87,18 +94,18 @@ class WinLossAnalysisSerializer(serializers.ModelSerializer):
 
 class PersonaProfileSerializer(serializers.ModelSerializer):
     win_rate = serializers.ReadOnlyField()
-    
+
     class Meta:
         model = PersonaProfile
         fields = '__all__'
-        read_only_fields = ['id', 'contacts_matched', 'deals_won', 'deals_lost', 
+        read_only_fields = ['id', 'contacts_matched', 'deals_won', 'deals_lost',
                            'avg_deal_size', 'created_at', 'updated_at']
 
 
 class ContactPersonaMatchSerializer(serializers.ModelSerializer):
     contact_name = serializers.CharField(source='contact.full_name', read_only=True)
     persona_name = serializers.CharField(source='persona.name', read_only=True)
-    
+
     class Meta:
         model = ContactPersonaMatch
         fields = '__all__'

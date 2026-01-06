@@ -2,12 +2,14 @@
 Django management command to create database backup
 """
 
+import os
+import subprocess
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.conf import settings
+
 from core.models import DataBackup
-import subprocess
-import os
 
 
 class Command(BaseCommand):
@@ -64,11 +66,11 @@ class Command(BaseCommand):
             # Update backup record
             backup.status = 'completed'
             backup.completed_at = timezone.now()
-            
+
             # Get file size
             if os.path.exists(backup.file_path):
                 backup.file_size = os.path.getsize(backup.file_path)
-            
+
             backup.save()
 
             self.stdout.write(
@@ -82,7 +84,7 @@ class Command(BaseCommand):
             backup.error_message = str(e)
             backup.completed_at = timezone.now()
             backup.save()
-            
+
             self.stdout.write(
                 self.style.ERROR(f'Backup failed: {str(e)}')
             )
@@ -92,14 +94,14 @@ class Command(BaseCommand):
         """Generate backup filename"""
         timestamp = timezone.now().strftime('%Y%m%d_%H%M%S')
         extension = '.sql.gz' if compress else '.sql'
-        
+
         filename = f"crm_backup_{backup_type}_{timestamp}{extension}"
         return os.path.join(output_dir, filename)
 
     def create_full_backup(self, backup, compress):
         """Create full database backup"""
         db_config = settings.DATABASES['default']
-        
+
         # Build pg_dump command
         cmd = [
             'pg_dump',
@@ -112,14 +114,14 @@ class Command(BaseCommand):
             '--no-owner',
             '--no-privileges'
         ]
-        
+
         if compress:
             cmd.extend(['--compress', '9'])
-        
+
         # Set environment variable for password
         env = os.environ.copy()
         env['PGPASSWORD'] = db_config['PASSWORD']
-        
+
         # Run pg_dump
         with open(backup.file_path, 'wb') as output_file:
             result = subprocess.run(
@@ -132,7 +134,7 @@ class Command(BaseCommand):
             # Log backup process completion
             if result.returncode == 0:
                 self.stdout.write('Backup process completed successfully')
-        
+
         self.stdout.write(f'Full backup created: {backup.file_path}')
 
     def create_incremental_backup(self, backup, compress):

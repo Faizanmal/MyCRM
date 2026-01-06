@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -180,6 +180,7 @@ export default function UserPreferencesPage() {
             setHasChanges(false);
             toast.success('Settings saved successfully');
         } catch (error) {
+            console.log("Failed to save settings",error);
             toast.error('Failed to save settings');
         } finally {
             setIsSaving(false);

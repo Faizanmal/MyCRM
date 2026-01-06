@@ -1,26 +1,25 @@
-// @ts-nocheck
 /**
  * Dashboard Charts Unit Tests
  * Tests for all chart components
- * 
+ *
  * To run: npm install -D vitest @testing-library/react jsdom
  * Then: npx vitest run
  */
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
     motion: {
-        div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-        circle: (props: any) => <circle {...props} />,
-        path: (props: any) => <path {...props} />,
-        span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-        tr: ({ children, ...props }: any) => <tr {...props}>{children}</tr>,
+        div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <div {...props}>{children}</div>,
+        circle: (props: Record<string, unknown>) => <circle {...props} />,
+        path: (props: Record<string, unknown>) => <path {...props} />,
+        span: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <span {...props}>{children}</span>,
+        tr: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <tr {...props}>{children}</tr>,
     },
-    AnimatePresence: ({ children }: any) => children,
+    AnimatePresence: ({ children }: React.PropsWithChildren<Record<string, unknown>>) => children,
 }));
 
 import {

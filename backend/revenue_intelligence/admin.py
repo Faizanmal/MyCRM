@@ -1,7 +1,14 @@
 from django.contrib import admin
+
 from .models import (
-    RevenueTarget, DealScore, DealVelocity, PipelineSnapshot,
-    Competitor, DealCompetitor, RevenueForecast, DealRiskAlert
+    Competitor,
+    DealCompetitor,
+    DealRiskAlert,
+    DealScore,
+    DealVelocity,
+    PipelineSnapshot,
+    RevenueForecast,
+    RevenueTarget,
 )
 
 
@@ -18,7 +25,7 @@ class DealScoreAdmin(admin.ModelAdmin):
     list_display = ['opportunity', 'score', 'win_probability', 'risk_level', 'score_trend', 'calculated_at']
     list_filter = ['risk_level', 'score_trend']
     search_fields = ['opportunity__name']
-    readonly_fields = ['score', 'win_probability', 'risk_level', 'engagement_score', 'timing_score', 
+    readonly_fields = ['score', 'win_probability', 'risk_level', 'engagement_score', 'timing_score',
                        'stakeholder_score', 'activity_score', 'competitive_score', 'calculated_at']
 
 
