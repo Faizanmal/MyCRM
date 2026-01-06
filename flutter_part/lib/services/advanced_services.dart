@@ -735,3 +735,117 @@ class NotificationService {
     }
   }
 }
+
+/// Service for AI Sales Assistant
+class AISalesAssistantService {
+  final ApiClient _apiClient;
+
+  AISalesAssistantService(this._apiClient);
+
+  // ==================== Email Drafts ====================
+  Future<List<AIEmailDraft>> getEmailDrafts() async {
+    final response = await _apiClient.get(ApiConstants.emailDrafts);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data is List ? response.data : response.data['results'] ?? [];
+      return data.map((json) => AIEmailDraft.fromJson(json)).toList();
+    }
+    throw Exception('Failed to load email drafts');
+  }
+
+  Future<AIEmailDraft> generateEmailAction({
+    required String emailType,
+    required String contactId,
+    String? opportunityId,
+    String? context,
+    String? tone,
+    List<String>? keyPoints,
+  }) async {
+    final response = await _apiClient.post('${ApiConstants.emailDrafts}generate/', data: {
+      'email_type': emailType,
+      'contact_id': contactId,
+      if (opportunityId != null) 'opportunity_id': opportunityId,
+      if (context != null) 'context': context,
+      if (tone != null) 'tone': tone,
+      if (keyPoints != null) 'key_points': keyPoints,
+    });
+
+    if (response.statusCode == 201) {
+      return AIEmailDraft.fromJson(response.data);
+    }
+    throw Exception('Failed to generate email');
+  }
+
+  // ==================== Sales Coaching ====================
+  Future<List<SalesCoachAdvice>> getCoachingAdvice() async {
+    final response = await _apiClient.get(ApiConstants.coaching);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data is List ? response.data : response.data['results'] ?? [];
+      return data.map((json) => SalesCoachAdvice.fromJson(json)).toList();
+    }
+    throw Exception('Failed to load coaching advice');
+  }
+
+  Future<List<SalesCoachAdvice>> analyzeDeal(String opportunityId) async {
+    final response = await _apiClient.post('${ApiConstants.coaching}analyze_deal/', data: {
+      'opportunity_id': opportunityId,
+    });
+    if (response.statusCode == 200) {
+       final List<dynamic> data = response.data['advice'] ?? [];
+       return data.map((json) => SalesCoachAdvice.fromJson(json)).toList();
+    }
+    throw Exception('Failed to analyze deal');
+  }
+
+  Future<void> dismissAdvice(String id) async {
+    final response = await _apiClient.post('${ApiConstants.coaching}$id/dismiss/');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to dismiss advice');
+    }
+  }
+
+  Future<void> completeAdvice(String id) async {
+    final response = await _apiClient.post('${ApiConstants.coaching}$id/complete/');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to complete advice');
+    }
+  }
+
+  Future<void> rateAdvice(String id, bool wasHelpful) async {
+    final response = await _apiClient.post('${ApiConstants.coaching}$id/feedback/', data: {
+      'was_helpful': wasHelpful,
+    });
+    if (response.statusCode != 200) {
+      throw Exception('Failed to rate advice');
+    }
+  }
+
+  // ==================== Objection Handling ====================
+  Future<List<ObjectionResponse>> getObjectionResponses() async {
+    final response = await _apiClient.get(ApiConstants.objections);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data is List ? response.data : response.data['results'] ?? [];
+      return data.map((json) => ObjectionResponse.fromJson(json)).toList();
+    }
+    throw Exception('Failed to load objection responses');
+  }
+
+  Future<ObjectionResponse> handleObjection(String objection) async {
+    final response = await _apiClient.post('${ApiConstants.objections}handle/', data: {
+      'objection': objection,
+    });
+    if (response.statusCode == 200) {
+      return ObjectionResponse.fromJson(response.data);
+    }
+    throw Exception('Failed to handle objection');
+  }
+
+  // ==================== Call Scripts ====================
+  Future<List<CallScript>> getCallScripts() async {
+    final response = await _apiClient.get(ApiConstants.callScripts);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = response.data is List ? response.data : response.data['results'] ?? [];
+      return data.map((json) => CallScript.fromJson(json)).toList();
+    }
+    throw Exception('Failed to load call scripts');
+  }
+}

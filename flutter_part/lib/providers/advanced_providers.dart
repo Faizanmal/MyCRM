@@ -128,6 +128,9 @@ class AIInsightsProvider extends ChangeNotifier {
 
   void _setLoading(bool value) {
     _isLoading = value;
+    if (value) {
+      _error = null;
+    }
     notifyListeners();
   }
 
@@ -677,6 +680,180 @@ class NotificationProvider extends ChangeNotifier {
 
   void _setLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+}
+
+/// Provider for AI Sales Assistant
+class AISalesAssistantProvider extends ChangeNotifier {
+  final AISalesAssistantService _service;
+
+  List<AIEmailDraft> _emailDrafts = [];
+  List<SalesCoachAdvice> _coachingAdvice = [];
+  List<ObjectionResponse> _objectionResponses = [];
+  List<CallScript> _callScripts = [];
+
+  bool _isLoading = false;
+  String? _error;
+
+  AISalesAssistantProvider(ApiClient apiClient) : _service = AISalesAssistantService(apiClient);
+
+  List<AIEmailDraft> get emailDrafts => _emailDrafts;
+  List<SalesCoachAdvice> get coachingAdvice => _coachingAdvice;
+  List<ObjectionResponse> get objectionResponses => _objectionResponses;
+  List<CallScript> get callScripts => _callScripts;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  Future<void> loadAll() async {
+    _setLoading(true);
+    try {
+      await Future.wait([
+        loadEmailDrafts(),
+        loadCoachingAdvice(),
+        loadObjectionResponses(),
+        loadCallScripts(),
+      ]);
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> loadEmailDrafts() async {
+    try {
+      _emailDrafts = await _service.getEmailDrafts();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> generateEmail({
+    required String emailType,
+    required String contactId,
+    String? opportunityId,
+    String? context,
+    String? tone,
+    List<String>? keyPoints,
+  }) async {
+    _setLoading(true);
+    try {
+      final draft = await _service.generateEmailAction(
+        emailType: emailType,
+        contactId: contactId,
+        opportunityId: opportunityId,
+        context: context,
+        tone: tone,
+        keyPoints: keyPoints,
+      );
+      _emailDrafts.insert(0, draft);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> loadCoachingAdvice() async {
+    try {
+      _coachingAdvice = await _service.getCoachingAdvice();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> analyzeDeal(String opportunityId) async {
+    _setLoading(true);
+    try {
+      final newAdvice = await _service.analyzeDeal(opportunityId);
+      _coachingAdvice.addAll(newAdvice);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> loadObjectionResponses() async {
+    try {
+      _objectionResponses = await _service.getObjectionResponses();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> handleObjection(String objection) async {
+    _setLoading(true);
+    try {
+      final response = await _service.handleObjection(objection);
+      // Add the response to the list so the user can see it immediately
+      _objectionResponses.insert(0, response);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> dismissAdvice(String id) async {
+    try {
+      await _service.dismissAdvice(id);
+      _coachingAdvice.removeWhere((a) => a.id == id);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> completeAdvice(String id) async {
+    try {
+      await _service.completeAdvice(id);
+      _coachingAdvice.removeWhere((a) => a.id == id);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> rateAdvice(String id, bool wasHelpful) async {
+    try {
+      await _service.rateAdvice(id, wasHelpful);
+      // Optional: update UI to reflect rated status
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadCallScripts() async {
+    try {
+      _callScripts = await _service.getCallScripts();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    if (value) {
+      _error = null;
+    }
     notifyListeners();
   }
 }

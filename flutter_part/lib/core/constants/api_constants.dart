@@ -185,6 +185,7 @@ class ApiConstants {
   static const String schedulingAnalytics = '$v1/scheduling/analytics/';
 
   // ==================== AI Sales Assistant (v1) Endpoints ====================
+  // AI-powered email generation, coaching, objection handling, and call scripts
   static const String emailDrafts = '$v1/ai-assistant/email-drafts/';
   static String regenerateDraft(String id) => '$v1/ai-assistant/email-drafts/$id/regenerate/';
   static const String coaching = '$v1/ai-assistant/coaching/';
