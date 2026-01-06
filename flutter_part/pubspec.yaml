@@ -90,6 +90,10 @@ dependencies:
   
   # Biometric Auth
   local_auth: ^2.3.0
+  record: ^5.1.0
+  permission_handler: ^11.3.0
+  firebase_messaging: ^14.7.15
+  firebase_core: ^3.1.0
 
 dev_dependencies:
   flutter_test:

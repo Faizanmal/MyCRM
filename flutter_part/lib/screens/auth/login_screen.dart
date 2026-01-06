@@ -26,6 +26,28 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
   
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBiometric();
+    });
+  }
+
+  Future<void> _checkBiometric() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final bioService = authProvider.biometricService;
+
+    if (bioService != null && bioService.isBiometricEnabled) {
+      final success = await bioService.authenticate();
+      if (success && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    }
+  }
+
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -36,9 +58,15 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       
       if (success && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        // Enable biometric if available and not set
+        final bioService = authProvider.biometricService;
+        if (bioService != null && await bioService.isAvailable && !bioService.isBiometricEnabled) {
+          _showBiometricSetupDialog(bioService);
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        }
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -48,6 +76,39 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
+  }
+
+  void _showBiometricSetupDialog(dynamic bioService) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Enable Biometric Login?'),
+        content: const Text('Use FaceID or Fingerprint for faster login next time.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+              );
+            },
+            child: const Text('No thanks'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await bioService.setBiometricEnabled(true);
+              if (!context.mounted) return;
+              Navigator.pop(context);
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+              );
+            },
+            child: const Text('Enable'),
+          ),
+        ],
+      ),
+    );
   }
   
   @override
@@ -182,27 +243,46 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Login Button
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, _) {
-                            return ElevatedButton(
-                              onPressed: authProvider.isLoading ? null : _handleLogin,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: AppSizes.paddingMd),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: authProvider.isLoading ? null : _handleLogin,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: AppSizes.paddingMd),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                                    ),
+                                  ),
+                                  child: authProvider.isLoading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : const Text(
+                                          'Login',
+                                          style: TextStyle(
+                                            fontSize: AppSizes.fontLg,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                 ),
-                              ),
-                              child: authProvider.isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    )
-                                  : const Text(
-                                      'Sign In',
-                                      style: TextStyle(
-                                        fontSize: AppSizes.fontLg,
-                                        fontWeight: FontWeight.bold,
+                                if (authProvider.biometricService?.isBiometricEnabled ?? false) ...[
+                                  const SizedBox(height: 16),
+                                  OutlinedButton.icon(
+                                    onPressed: () => _checkBiometric(),
+                                    icon: const Icon(Icons.fingerprint),
+                                    label: const Text('Login with Biometrics'),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: AppSizes.paddingMd),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                                       ),
                                     ),
+                                  ),
+                                ],
+                              ],
                             );
                           },
                         ),

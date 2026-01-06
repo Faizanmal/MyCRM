@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../services/auth/biometric_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  BiometricService? _biometricService;
   
   User? _user;
   bool _isLoading = false;
@@ -18,11 +21,23 @@ class AuthProvider with ChangeNotifier {
   AuthProvider() {
     _checkAuth();
   }
+
+  BiometricService? get biometricService => _biometricService;
+
+  Future<void> _initBiometric() async {
+    final prefs = await SharedPreferences.getInstance();
+    _biometricService = BiometricService(prefs);
+    notifyListeners();
+  }
   
   Future<void> _checkAuth() async {
     _isLoading = true;
     notifyListeners();
     
+    // Initialize biometric service
+    await _initBiometric();
+    notifyListeners();
+
     try {
       final isAuth = await _authService.isAuthenticated();
       _isAuthenticated = isAuth;

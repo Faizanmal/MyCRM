@@ -206,6 +206,9 @@ class ApiConstants {
   static const String linkedInConnect = '$v1/social-selling/linkedin/connect/';
   static const String linkedInStatus = '$v1/social-selling/linkedin/status/';
 
+  // ==================== Voice Intelligence (v1) Endpoints ====================
+  static const String callRecordings = '$v1/conversation-intelligence/recordings/';
+
   // ==================== Document E-Sign (v1) Endpoints ====================
   static const String esignTemplates = '$v1/documents/templates/';
   static const String esignDocuments = '$v1/documents/documents/';

@@ -14,6 +14,8 @@ class OfflineSyncService {
   late Box<Map> _syncQueueBox;
   late Box<Map> _cacheBox;
   late Box<String> _metadataBox;
+  late Box<Map> _socialCacheBox;
+  late Box<Map> _voiceCacheBox;
   
   bool _isInitialized = false;
   bool _isSyncing = false;
@@ -34,6 +36,8 @@ class OfflineSyncService {
     _syncQueueBox = await Hive.openBox<Map>('sync_queue');
     _cacheBox = await Hive.openBox<Map>('offline_cache');
     _metadataBox = await Hive.openBox<String>('sync_metadata');
+    _socialCacheBox = await Hive.openBox<Map>('social_cache');
+    _voiceCacheBox = await Hive.openBox<Map>('voice_cache');
     
     // Listen to connectivity changes
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
@@ -276,6 +280,15 @@ class OfflineSyncService {
   void dispose() {
     _connectivitySubscription?.cancel();
     _syncController.close();
+  }
+  Future<void> cacheSocialData(String key, Map<String, dynamic> data) async {
+    await _socialCacheBox.put(key, data);
+  }
+
+  /// Get cached social data
+  Map<String, dynamic>? getSocialData(String key) {
+    final data = _socialCacheBox.get(key);
+    return data != null ? Map<String, dynamic>.from(data) : null;
   }
 }
 

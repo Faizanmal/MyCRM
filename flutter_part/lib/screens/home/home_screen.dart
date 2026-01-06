@@ -14,6 +14,7 @@ import '../gamification/gamification_screen.dart';
 import '../campaigns/campaigns_screen.dart';
 import '../revenue/revenue_intelligence_screen.dart';
 import '../ai_assistant/ai_assistant_screen.dart';
+import '../social_selling/social_selling_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +25,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize notifications when home screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService().init();
+    });
+  }
   
   final List<Widget> _screens = [
     const DashboardScreen(),
@@ -200,6 +210,11 @@ class _HomeScreenState extends State<HomeScreen> {
             Icons.auto_awesome,
             'AI Sales Assistant',
             () => _navigateTo(const AISalesAssistantScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.share,
+            'Social Selling',
+            () => _navigateTo(const SocialSellingScreen()),
           ),
           
           const Divider(),
