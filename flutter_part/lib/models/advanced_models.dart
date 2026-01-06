@@ -1022,3 +1022,185 @@ class AppNotification {
     );
   }
 }
+
+// ==================== AI Sales Assistant Models ====================
+
+class AIEmailDraft {
+  final String id;
+  final String emailType;
+  final String subject;
+  final String body;
+  final String tone;
+  final String context;
+  final List<String> keyPoints;
+  final List<String> variations;
+  final bool wasUsed;
+  final int? userRating;
+  final DateTime createdAt;
+
+  AIEmailDraft({
+    required this.id,
+    required this.emailType,
+    required this.subject,
+    required this.body,
+    required this.tone,
+    required this.context,
+    required this.keyPoints,
+    required this.variations,
+    required this.wasUsed,
+    this.userRating,
+    required this.createdAt,
+  });
+
+  factory AIEmailDraft.fromJson(Map<String, dynamic> json) {
+    return AIEmailDraft(
+      id: json['id']?.toString() ?? '',
+      emailType: json['email_type'] ?? 'cold_outreach',
+      subject: json['subject'] ?? '',
+      body: json['body'] ?? '',
+      tone: json['tone'] ?? 'professional',
+      context: json['context'] ?? '',
+      keyPoints: List<String>.from(json['key_points'] ?? []),
+      variations: List<String>.from(json['variations'] ?? []),
+      wasUsed: json['was_used'] ?? false,
+      userRating: json['user_rating'],
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+}
+
+class SalesCoachAdvice {
+  final String id;
+  final String adviceType;
+  final String title;
+  final String advice;
+  final String reasoning;
+  final List<String> actionItems;
+  final String priority;
+  final bool? wasHelpful;
+  final bool isDismissed;
+  final bool isCompleted;
+  final DateTime createdAt;
+
+  SalesCoachAdvice({
+    required this.id,
+    required this.adviceType,
+    required this.title,
+    required this.advice,
+    required this.reasoning,
+    required this.actionItems,
+    required this.priority,
+    this.wasHelpful,
+    required this.isDismissed,
+    required this.isCompleted,
+    required this.createdAt,
+  });
+
+  factory SalesCoachAdvice.fromJson(Map<String, dynamic> json) {
+    return SalesCoachAdvice(
+      id: json['id']?.toString() ?? '',
+      adviceType: json['advice_type'] ?? 'general',
+      title: json['title'] ?? '',
+      advice: json['advice'] ?? '',
+      reasoning: json['reasoning'] ?? '',
+      actionItems: List<String>.from(json['action_items'] ?? []),
+      priority: json['priority'] ?? 'medium',
+      wasHelpful: json['was_helpful'],
+      isDismissed: json['is_dismissed'] ?? false,
+      isCompleted: json['is_completed'] ?? false,
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+
+  String get priorityColor {
+    switch (priority) {
+      case 'critical':
+        return 'red';
+      case 'high':
+        return 'orange';
+      case 'medium':
+        return 'yellow';
+      default:
+        return 'blue';
+    }
+  }
+}
+
+class ObjectionResponse {
+  final String id;
+  final String category;
+  final String objection;
+  final List<String> keywords;
+  final List<String> responses;
+  final String bestResponse;
+  final List<String> followUpQuestions;
+  final int timesUsed;
+
+  ObjectionResponse({
+    required this.id,
+    required this.category,
+    required this.objection,
+    required this.keywords,
+    required this.responses,
+    required this.bestResponse,
+    required this.followUpQuestions,
+    required this.timesUsed,
+  });
+
+  factory ObjectionResponse.fromJson(Map<String, dynamic> json) {
+    return ObjectionResponse(
+      id: json['id']?.toString() ?? '',
+      category: json['category'] ?? 'general',
+      objection: json['objection'] ?? '',
+      keywords: List<String>.from(json['keywords'] ?? []),
+      responses: List<String>.from(json['responses'] ?? []),
+      bestResponse: json['best_response'] ?? '',
+      followUpQuestions: List<String>.from(json['follow_up_questions'] ?? []),
+      timesUsed: json['times_used'] ?? 0,
+    );
+  }
+}
+
+class CallScript {
+  final String id;
+  final String name;
+  final String scriptType;
+  final String description;
+  final String opening;
+  final List<String> discoveryQuestions;
+  final List<String> valuePropositions;
+  final Map<String, dynamic> objectionHandlers;
+  final List<String> closingTechniques;
+  final String nextSteps;
+  final bool isTemplate;
+
+  CallScript({
+    required this.id,
+    required this.name,
+    required this.scriptType,
+    required this.description,
+    required this.opening,
+    required this.discoveryQuestions,
+    required this.valuePropositions,
+    required this.objectionHandlers,
+    required this.closingTechniques,
+    required this.nextSteps,
+    required this.isTemplate,
+  });
+
+  factory CallScript.fromJson(Map<String, dynamic> json) {
+    return CallScript(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      scriptType: json['script_type'] ?? 'discovery',
+      description: json['description'] ?? '',
+      opening: json['opening'] ?? '',
+      discoveryQuestions: List<String>.from(json['discovery_questions'] ?? []),
+      valuePropositions: List<String>.from(json['value_propositions'] ?? []),
+      objectionHandlers: Map<String, dynamic>.from(json['objection_handlers'] ?? {}),
+      closingTechniques: List<String>.from(json['closing_techniques'] ?? []),
+      nextSteps: json['next_steps'] ?? '',
+      isTemplate: json['is_template'] ?? false,
+    );
+  }
+}

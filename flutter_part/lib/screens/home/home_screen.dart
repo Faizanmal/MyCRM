@@ -13,6 +13,7 @@ import '../ai_insights/ai_insights_screen.dart';
 import '../gamification/gamification_screen.dart';
 import '../campaigns/campaigns_screen.dart';
 import '../revenue/revenue_intelligence_screen.dart';
+import '../ai_assistant/ai_assistant_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -194,6 +195,11 @@ class _HomeScreenState extends State<HomeScreen> {
             Icons.calendar_today,
             'Scheduling',
             () => _showComingSoon('Smart Scheduling'),
+          ),
+          _buildNavigationItem(
+            Icons.auto_awesome,
+            'AI Sales Assistant',
+            () => _navigateTo(const AISalesAssistantScreen()),
           ),
           
           const Divider(),
