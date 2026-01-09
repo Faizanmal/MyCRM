@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/crm_models.dart';
+import '../../providers/contacts_provider.dart';
 import 'contact_detail_screen.dart';
 import 'add_contact_screen.dart';
 
@@ -12,101 +14,116 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-  List<Contact> _contacts = [];
-  bool _isLoading = true;
+  final ScrollController _scrollController = ScrollController();
   
   @override
   void initState() {
     super.initState();
-    _loadContacts();
+    // Fetch contacts when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ContactsProvider>().fetchContacts(refresh: true);
+    });
+
+    // Add scroll listener for pagination
+    _scrollController.addListener(_onScroll);
   }
   
-  Future<void> _loadContacts() async {
-    setState(() => _isLoading = true);
-    
-    // Simulate API call with mock data
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    setState(() {
-      _contacts = [
-        Contact(
-          id: 1,
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john.doe@example.com',
-          phone: '+1234567890',
-          company: 'Acme Corp',
-          position: 'CEO',
-          status: 'Active',
-        ),
-        Contact(
-          id: 2,
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane.smith@example.com',
-          phone: '+1234567891',
-          company: 'Tech Solutions',
-          position: 'CTO',
-          status: 'Active',
-        ),
-        Contact(
-          id: 3,
-          firstName: 'Bob',
-          lastName: 'Johnson',
-          email: 'bob.j@example.com',
-          phone: '+1234567892',
-          company: 'Marketing Inc',
-          position: 'Manager',
-          status: 'Prospect',
-        ),
-      ];
-      _isLoading = false;
-    });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final provider = context.read<ContactsProvider>();
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (provider.hasMore && !provider.isLoading) {
+        provider.fetchContacts();
+      }
+    }
+  }
+
+  Future<void> _refreshContacts() async {
+    await context.read<ContactsProvider>().fetchContacts(refresh: true);
   }
   
   void _navigateToAddContact() async {
-    final result = await Navigator.push<bool>(
+    await Navigator.push<bool>(
       context,
       MaterialPageRoute(builder: (context) => const AddContactScreen()),
     );
-    
-    if (result == true) {
-      _loadContacts();
-    }
   }
   
   void _navigateToContactDetail(Contact contact) async {
-    final result = await Navigator.push<bool>(
+    await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => ContactDetailScreen(contact: contact),
       ),
     );
-    
-    if (result == true) {
-      _loadContacts();
-    }
+  }
+
+  void _navigateToEditContact(Contact contact) async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddContactScreen(contact: contact),
+      ),
+    );
   }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadContacts,
-              child: _contacts.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(AppSizes.paddingMd),
-                      itemCount: _contacts.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: AppSizes.paddingSm),
-                      itemBuilder: (context, index) {
-                        final contact = _contacts[index];
-                        return _buildContactCard(contact);
-                      },
-                    ),
-            ),
+      body: Consumer<ContactsProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading && provider.contacts.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.error != null && provider.contacts.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                  const SizedBox(height: AppSizes.paddingMd),
+                  Text('Error: ${provider.error}'),
+                  TextButton(
+                    onPressed: _refreshContacts,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: _refreshContacts,
+            child: provider.contacts.isEmpty
+                ? _buildEmptyState()
+                : ListView.separated(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(AppSizes.paddingMd),
+                    itemCount: provider.contacts.length + (provider.hasMore ? 1 : 0),
+                    separatorBuilder: (context, index) => const SizedBox(height: AppSizes.paddingSm),
+                    itemBuilder: (context, index) {
+                      if (index == provider.contacts.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      final contact = provider.contacts[index];
+                      return _buildContactCard(contact);
+                    },
+                  ),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddContact,
         child: const Icon(Icons.add),
@@ -148,27 +165,40 @@ class _ContactsScreenState extends State<ContactsScreen> {
               ),
           ],
         ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSizes.paddingSm,
-            vertical: 4,
-          ),
-          decoration: BoxDecoration(
-            color: contact.status == 'Active' 
-                ? AppColors.success.withValues(alpha: 0.1)
-                : AppColors.warning.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-          ),
-          child: Text(
-            contact.status ?? 'Unknown',
-            style: TextStyle(
-              fontSize: AppSizes.fontXs,
-              fontWeight: FontWeight.w600,
-              color: contact.status == 'Active' 
-                  ? AppColors.success
-                  : AppColors.warning,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.paddingSm,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: contact.status == 'Active'
+                    ? AppColors.success.withValues(alpha: 0.1)
+                    : AppColors.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+              ),
+              child: Text(
+                contact.status ?? 'Unknown',
+                style: TextStyle(
+                  fontSize: AppSizes.fontXs,
+                  fontWeight: FontWeight.w600,
+                  color: contact.status == 'Active'
+                      ? AppColors.success
+                      : AppColors.warning,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.edit, size: 20),
+              color: AppColors.grey500,
+              onPressed: () => _navigateToEditContact(contact),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
         ),
         isThreeLine: true,
         onTap: () => _navigateToContactDetail(contact),

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../models/crm_models.dart';
+import '../../providers/leads_provider.dart';
 
 class AddLeadScreen extends StatefulWidget {
-  const AddLeadScreen({super.key});
+  final Lead? lead;
+
+  const AddLeadScreen({
+    super.key,
+    this.lead,
+  });
   
   @override
   State<AddLeadScreen> createState() => _AddLeadScreenState();
@@ -12,27 +20,63 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   
-  final _titleController = TextEditingController();
-  final _companyController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _estimatedValueController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  late TextEditingController _titleController;
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _companyController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+  late TextEditingController _estimatedValueController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _notesController;
   
   String _selectedStatus = 'New';
   String _selectedSource = 'Website';
+  int _score = 0;
   
   final List<String> _statusOptions = ['New', 'Contacted', 'Qualified', 'Unqualified'];
   final List<String> _sourceOptions = ['Website', 'Referral', 'LinkedIn', 'Cold Call', 'Trade Show', 'Other'];
   
   @override
+  void initState() {
+    super.initState();
+    _initControllers();
+  }
+
+  void _initControllers() {
+    final lead = widget.lead;
+    _titleController = TextEditingController(text: lead?.title ?? '');
+    _firstNameController = TextEditingController(text: lead?.firstName ?? '');
+    _lastNameController = TextEditingController(text: lead?.lastName ?? '');
+    _companyController = TextEditingController(text: lead?.company ?? '');
+    _emailController = TextEditingController(text: lead?.email ?? '');
+    _phoneController = TextEditingController(text: lead?.phone ?? '');
+    _estimatedValueController = TextEditingController(text: lead?.estimatedValue?.toString() ?? '');
+    _descriptionController = TextEditingController(text: lead?.description ?? '');
+    _notesController = TextEditingController(text: lead?.notes ?? '');
+
+    if (lead?.status != null && _statusOptions.contains(lead!.status)) {
+      _selectedStatus = lead.status!;
+    }
+
+    if (lead?.source != null && _sourceOptions.contains(lead!.source)) {
+      _selectedSource = lead.source!;
+    }
+
+    _score = lead?.score ?? 0;
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _companyController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _estimatedValueController.dispose();
     _descriptionController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
   
@@ -41,27 +85,76 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
     
     setState(() => _isLoading = true);
     
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (mounted) {
-      setState(() => _isLoading = false);
+    try {
+      final leadProvider = context.read<LeadsProvider>();
+      bool success;
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lead created successfully'),
-          backgroundColor: AppColors.success,
-        ),
+      final leadData = Lead(
+        id: widget.lead?.id,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
+        email: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        company: _companyController.text.trim().isEmpty ? null : _companyController.text.trim(),
+        status: _selectedStatus,
+        source: _selectedSource,
+        estimatedValue: double.tryParse(_estimatedValueController.text.trim()),
+        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        score: _score,
+        createdAt: widget.lead?.createdAt,
+        updatedAt: DateTime.now(),
       );
       
-      Navigator.pop(context, true);
+      if (widget.lead != null) {
+        success = await leadProvider.updateLead(widget.lead!.id!, leadData);
+      } else {
+        success = await leadProvider.createLead(leadData);
+      }
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.lead != null
+                ? 'Lead updated successfully'
+                : 'Lead created successfully'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          Navigator.pop(context, true);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(leadProvider.error ?? 'An error occurred'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
   
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.lead != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Lead'),
+        title: Text(isEditing ? 'Edit Lead' : 'Add Lead'),
         actions: [
           if (_isLoading)
             const Center(
@@ -103,17 +196,48 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Lead Title *',
+                  labelText: 'Lead Title',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.title),
                   hintText: 'e.g., New Enterprise Deal',
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Title is required';
-                  }
-                  return null;
-                },
+              ),
+              const SizedBox(height: AppSizes.paddingSm),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _firstNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'First Name *',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSizes.paddingSm),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _lastNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Last Name *',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Required';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppSizes.paddingSm),
               TextFormField(
@@ -143,6 +267,14 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                   prefixIcon: Icon(Icons.email),
                 ),
                 keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      return 'Enter a valid email';
+                    }
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: AppSizes.paddingSm),
               TextFormField(
@@ -169,7 +301,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      initialValue: _selectedStatus,
+                      value: _selectedStatus,
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         border: OutlineInputBorder(),
@@ -183,7 +315,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                   const SizedBox(width: AppSizes.paddingSm),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      initialValue: _selectedSource,
+                      value: _selectedSource,
                       decoration: const InputDecoration(
                         labelText: 'Source',
                         border: OutlineInputBorder(),
@@ -221,7 +353,7 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
               
               // Description
               const Text(
-                'Description',
+                'Details',
                 style: TextStyle(
                   fontSize: AppSizes.fontMd,
                   fontWeight: FontWeight.bold,
@@ -235,7 +367,18 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                   border: OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
-                maxLines: 4,
+                maxLines: 3,
+              ),
+              const SizedBox(height: AppSizes.paddingSm),
+              TextFormField(
+                controller: _notesController,
+                decoration: const InputDecoration(
+                  labelText: 'Notes',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.note),
+                  alignLabelWithHint: true,
+                ),
+                maxLines: 3,
               ),
               const SizedBox(height: AppSizes.paddingXl),
               
@@ -261,9 +404,9 @@ class _AddLeadScreenState extends State<AddLeadScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Create Lead',
-                          style: TextStyle(
+                      : Text(
+                          isEditing ? 'Update Lead' : 'Create Lead',
+                          style: const TextStyle(
                             fontSize: AppSizes.fontMd,
                             fontWeight: FontWeight.bold,
                           ),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/crm_models.dart';
+import '../../providers/contacts_provider.dart';
+import 'add_contact_screen.dart';
 
 class ContactDetailScreen extends StatefulWidget {
   final Contact contact;
@@ -14,56 +17,29 @@ class ContactDetailScreen extends StatefulWidget {
 
 class _ContactDetailScreenState extends State<ContactDetailScreen> {
   late Contact _contact;
-  bool _isEditing = false;
-  
-  // Form controllers
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  late TextEditingController _companyController;
-  late TextEditingController _positionController;
-  late TextEditingController _notesController;
   
   @override
   void initState() {
     super.initState();
     _contact = widget.contact;
-    _initControllers();
   }
   
-  void _initControllers() {
-    _firstNameController = TextEditingController(text: _contact.firstName);
-    _lastNameController = TextEditingController(text: _contact.lastName);
-    _emailController = TextEditingController(text: _contact.email ?? '');
-    _phoneController = TextEditingController(text: _contact.phone ?? '');
-    _companyController = TextEditingController(text: _contact.company ?? '');
-    _positionController = TextEditingController(text: _contact.position ?? '');
-    _notesController = TextEditingController(text: _contact.notes ?? '');
-  }
-  
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _companyController.dispose();
-    _positionController.dispose();
-    _notesController.dispose();
-    super.dispose();
-  }
-  
-  Future<void> _saveChanges() async {
-    // Simulate API call
-    setState(() => _isEditing = false);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Contact updated successfully'),
-        backgroundColor: AppColors.success,
+  void _editContact() async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddContactScreen(contact: _contact),
       ),
     );
+
+    // Refresh local contact data from provider after return
+    if (mounted) {
+      final updatedContact = context.read<ContactsProvider>()
+          .contacts.firstWhere((c) => c.id == _contact.id, orElse: () => _contact);
+      setState(() {
+        _contact = updatedContact;
+      });
+    }
   }
   
   Future<void> _callContact() async {
@@ -105,13 +81,26 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
     );
     
     if (confirmed == true && mounted) {
-      Navigator.pop(context, true); // Return true to indicate deletion
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Contact deleted'),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      final success = await context.read<ContactsProvider>().deleteContact(_contact.id!);
+
+      if (mounted) {
+        if (success) {
+          Navigator.pop(context, true); // Return true to indicate deletion
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Contact deleted'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to delete contact'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
     }
   }
   
@@ -119,21 +108,12 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Contact' : 'Contact Details'),
+        title: const Text('Contact Details'),
         actions: [
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () {
-                setState(() => _isEditing = false);
-                _initControllers();
-              },
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => setState(() => _isEditing = true),
-            ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: _editContact,
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'delete') {
@@ -164,18 +144,11 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
             const SizedBox(height: AppSizes.paddingLg),
             
             // Quick actions
-            if (!_isEditing) ...[
-              _buildQuickActions(),
-              const SizedBox(height: AppSizes.paddingLg),
-            ],
+            _buildQuickActions(),
+            const SizedBox(height: AppSizes.paddingLg),
             
             // Contact Info
             _buildInfoSection(),
-            
-            if (_isEditing) ...[
-              const SizedBox(height: AppSizes.paddingLg),
-              _buildSaveButton(),
-            ],
           ],
         ),
       ),
@@ -198,39 +171,14 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
           ),
         ),
         const SizedBox(height: AppSizes.paddingMd),
-        if (!_isEditing)
-          Text(
-            _contact.fullName,
-            style: const TextStyle(
-              fontSize: AppSizes.fontXl,
-              fontWeight: FontWeight.bold,
-            ),
-          )
-        else
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _firstNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'First Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSizes.paddingSm),
-              Expanded(
-                child: TextField(
-                  controller: _lastNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Last Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
+        Text(
+          _contact.fullName,
+          style: const TextStyle(
+            fontSize: AppSizes.fontXl,
+            fontWeight: FontWeight.bold,
           ),
-        if (_contact.company != null && !_isEditing) ...[
+        ),
+        if (_contact.company != null) ...[
           const SizedBox(height: AppSizes.paddingSm),
           Text(
             '${_contact.company}${_contact.position != null ? ' • ${_contact.position}' : ''}',
@@ -326,63 +274,13 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
             ),
             const SizedBox(height: AppSizes.paddingMd),
             
-            if (_isEditing) ...[
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: AppSizes.paddingSm),
-              TextField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone',
-                  prefixIcon: Icon(Icons.phone),
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: AppSizes.paddingSm),
-              TextField(
-                controller: _companyController,
-                decoration: const InputDecoration(
-                  labelText: 'Company',
-                  prefixIcon: Icon(Icons.business),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: AppSizes.paddingSm),
-              TextField(
-                controller: _positionController,
-                decoration: const InputDecoration(
-                  labelText: 'Position',
-                  prefixIcon: Icon(Icons.work),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: AppSizes.paddingSm),
-              TextField(
-                controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Notes',
-                  prefixIcon: Icon(Icons.note),
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-            ] else ...[
-              _buildInfoRow(Icons.email, 'Email', _contact.email ?? 'Not set'),
-              _buildInfoRow(Icons.phone, 'Phone', _contact.phone ?? 'Not set'),
-              _buildInfoRow(Icons.business, 'Company', _contact.company ?? 'Not set'),
-              _buildInfoRow(Icons.work, 'Position', _contact.position ?? 'Not set'),
-              _buildInfoRow(Icons.label, 'Status', _contact.status ?? 'Unknown'),
-              if (_contact.notes != null)
-                _buildInfoRow(Icons.note, 'Notes', _contact.notes!),
-            ],
+            _buildInfoRow(Icons.email, 'Email', _contact.email ?? 'Not set'),
+            _buildInfoRow(Icons.phone, 'Phone', _contact.phone ?? 'Not set'),
+            _buildInfoRow(Icons.business, 'Company', _contact.company ?? 'Not set'),
+            _buildInfoRow(Icons.work, 'Position', _contact.position ?? 'Not set'),
+            _buildInfoRow(Icons.label, 'Status', _contact.status ?? 'Unknown'),
+            if (_contact.notes != null)
+              _buildInfoRow(Icons.note, 'Notes', _contact.notes!),
           ],
         ),
       ),
@@ -415,30 +313,6 @@ class _ContactDetailScreenState extends State<ContactDetailScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-  
-  Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _saveChanges,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: AppSizes.paddingMd),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          ),
-        ),
-        child: const Text(
-          'Save Changes',
-          style: TextStyle(
-            fontSize: AppSizes.fontMd,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/crm_models.dart';
+import '../../providers/leads_provider.dart';
 import 'lead_detail_screen.dart';
 import 'add_lead_screen.dart';
 
@@ -12,103 +14,114 @@ class LeadsScreen extends StatefulWidget {
 }
 
 class _LeadsScreenState extends State<LeadsScreen> {
-  List<Lead> _leads = [];
-  bool _isLoading = true;
+  final ScrollController _scrollController = ScrollController();
   
   @override
   void initState() {
     super.initState();
-    _loadLeads();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LeadsProvider>().fetchLeads(refresh: true);
+    });
+
+    _scrollController.addListener(_onScroll);
   }
   
-  Future<void> _loadLeads() async {
-    setState(() => _isLoading = true);
-    
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    setState(() {
-      _leads = [
-        Lead(
-          id: 1,
-          firstName: 'Alice',
-          lastName: 'Williams',
-          email: 'alice.w@example.com',
-          phone: '+1234567893',
-          company: 'StartupXYZ',
-          source: 'Website',
-          status: 'New',
-          score: 85,
-        ),
-        Lead(
-          id: 2,
-          firstName: 'Charlie',
-          lastName: 'Brown',
-          email: 'charlie.b@example.com',
-          phone: '+1234567894',
-          company: 'Enterprise Co',
-          source: 'Referral',
-          status: 'Contacted',
-          score: 72,
-        ),
-        Lead(
-          id: 3,
-          firstName: 'Diana',
-          lastName: 'Prince',
-          email: 'diana.p@example.com',
-          phone: '+1234567895',
-          company: 'Innovation Labs',
-          source: 'Social Media',
-          status: 'Qualified',
-          score: 95,
-        ),
-      ];
-      _isLoading = false;
-    });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final provider = context.read<LeadsProvider>();
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (provider.hasMore && !provider.isLoading) {
+        provider.fetchLeads();
+      }
+    }
+  }
+
+  Future<void> _refreshLeads() async {
+    await context.read<LeadsProvider>().fetchLeads(refresh: true);
   }
   
   void _navigateToAddLead() async {
-    final result = await Navigator.push<bool>(
+    await Navigator.push<bool>(
       context,
       MaterialPageRoute(builder: (context) => const AddLeadScreen()),
     );
-    
-    if (result == true) {
-      _loadLeads();
-    }
   }
   
   void _navigateToLeadDetail(Lead lead) async {
-    final result = await Navigator.push<bool>(
+    await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => LeadDetailScreen(lead: lead),
       ),
     );
-    
-    if (result == true) {
-      _loadLeads();
-    }
+  }
+
+  void _navigateToEditLead(Lead lead) async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddLeadScreen(lead: lead),
+      ),
+    );
   }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadLeads,
-              child: _leads.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(AppSizes.paddingMd),
-                      itemCount: _leads.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: AppSizes.paddingSm),
-                      itemBuilder: (context, index) {
-                        final lead = _leads[index];
-                        return _buildLeadCard(lead);
-                      },
-                    ),
-            ),
+      body: Consumer<LeadsProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading && provider.leads.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.error != null && provider.leads.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                  const SizedBox(height: AppSizes.paddingMd),
+                  Text('Error: ${provider.error}'),
+                  TextButton(
+                    onPressed: _refreshLeads,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: _refreshLeads,
+            child: provider.leads.isEmpty
+                ? _buildEmptyState()
+                : ListView.separated(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(AppSizes.paddingMd),
+                    itemCount: provider.leads.length + (provider.hasMore ? 1 : 0),
+                    separatorBuilder: (context, index) => const SizedBox(height: AppSizes.paddingSm),
+                    itemBuilder: (context, index) {
+                      if (index == provider.leads.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      final lead = provider.leads[index];
+                      return _buildLeadCard(lead);
+                    },
+                  ),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddLead,
         child: const Icon(Icons.add),
@@ -220,6 +233,13 @@ class _LeadsScreenState extends State<LeadsScreen> {
               ],
             ),
           ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.edit, size: 20),
+          color: AppColors.grey500,
+          onPressed: () => _navigateToEditLead(lead),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
         ),
         isThreeLine: true,
         onTap: () => _navigateToLeadDetail(lead),
