@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
+import '../../models/crm_models.dart';
+import '../../providers/contacts_provider.dart';
 
 class AddContactScreen extends StatefulWidget {
-  const AddContactScreen({super.key});
+  final Contact? contact;
+
+  const AddContactScreen({
+    super.key,
+    this.contact,
+  });
   
   @override
   State<AddContactScreen> createState() => _AddContactScreenState();
@@ -13,13 +21,15 @@ class _AddContactScreenState extends State<AddContactScreen> {
   bool _isLoading = false;
   
   // Form controllers
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _companyController = TextEditingController();
-  final _positionController = TextEditingController();
-  final _notesController = TextEditingController();
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+  late TextEditingController _companyController;
+  late TextEditingController _positionController;
+  late TextEditingController _addressController;
+  late TextEditingController _websiteController;
+  late TextEditingController _notesController;
   
   String _selectedStatus = 'Active';
   
@@ -32,6 +42,29 @@ class _AddContactScreenState extends State<AddContactScreen> {
   ];
   
   @override
+  void initState() {
+    super.initState();
+    _initControllers();
+  }
+
+  void _initControllers() {
+    final contact = widget.contact;
+    _firstNameController = TextEditingController(text: contact?.firstName ?? '');
+    _lastNameController = TextEditingController(text: contact?.lastName ?? '');
+    _emailController = TextEditingController(text: contact?.email ?? '');
+    _phoneController = TextEditingController(text: contact?.phone ?? '');
+    _companyController = TextEditingController(text: contact?.company ?? '');
+    _positionController = TextEditingController(text: contact?.position ?? '');
+    _addressController = TextEditingController(text: contact?.address ?? '');
+    _websiteController = TextEditingController(text: contact?.website ?? '');
+    _notesController = TextEditingController(text: contact?.notes ?? '');
+
+    if (contact?.status != null && _statusOptions.contains(contact!.status)) {
+      _selectedStatus = contact.status!;
+    }
+  }
+
+  @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
@@ -39,6 +72,8 @@ class _AddContactScreenState extends State<AddContactScreen> {
     _phoneController.dispose();
     _companyController.dispose();
     _positionController.dispose();
+    _addressController.dispose();
+    _websiteController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -48,28 +83,74 @@ class _AddContactScreenState extends State<AddContactScreen> {
     
     setState(() => _isLoading = true);
     
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (mounted) {
-      setState(() => _isLoading = false);
+    try {
+      final contactProvider = context.read<ContactsProvider>();
+      bool success;
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Contact created successfully'),
-          backgroundColor: AppColors.success,
-        ),
+      final contactData = Contact(
+        id: widget.contact?.id,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        email: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        company: _companyController.text.trim().isEmpty ? null : _companyController.text.trim(),
+        position: _positionController.text.trim().isEmpty ? null : _positionController.text.trim(),
+        status: _selectedStatus,
+        address: _addressController.text.trim().isEmpty ? null : _addressController.text.trim(),
+        website: _websiteController.text.trim().isEmpty ? null : _websiteController.text.trim(),
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        createdAt: widget.contact?.createdAt,
+        updatedAt: DateTime.now(),
       );
       
-      Navigator.pop(context, true); // Return true to indicate success
+      if (widget.contact != null) {
+        success = await contactProvider.updateContact(widget.contact!.id!, contactData);
+      } else {
+        success = await contactProvider.createContact(contactData);
+      }
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.contact != null
+                ? 'Contact updated successfully'
+                : 'Contact created successfully'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          Navigator.pop(context, true);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(contactProvider.error ?? 'An error occurred'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
   
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.contact != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Contact'),
+        title: Text(isEditing ? 'Edit Contact' : 'Add Contact'),
         actions: [
           if (_isLoading)
             const Center(
@@ -106,29 +187,29 @@ class _AddContactScreenState extends State<AddContactScreen> {
                     CircleAvatar(
                       radius: 50,
                       backgroundColor: AppColors.grey200,
-                      child: Icon(
-                        Icons.person,
-                        size: 50,
-                        color: AppColors.grey400,
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
+                      child: Text(
+                        widget.contact != null ? widget.contact!.initials : '',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
                           color: AppColors.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          size: 20,
-                          color: Colors.white,
                         ),
                       ),
                     ),
+                    if (!isEditing)
+                      const Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          backgroundColor: AppColors.primary,
+                          radius: 16,
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -217,6 +298,26 @@ class _AddContactScreenState extends State<AddContactScreen> {
                 ),
                 keyboardType: TextInputType.phone,
               ),
+              const SizedBox(height: AppSizes.paddingSm),
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(
+                  labelText: 'Address',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_on),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: AppSizes.paddingSm),
+              TextFormField(
+                controller: _websiteController,
+                decoration: const InputDecoration(
+                  labelText: 'Website',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.language),
+                ),
+                keyboardType: TextInputType.url,
+              ),
               const SizedBox(height: AppSizes.paddingLg),
               
               // Company section
@@ -257,7 +358,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
               ),
               const SizedBox(height: AppSizes.paddingSm),
               DropdownButtonFormField<String>(
-                initialValue: _selectedStatus,
+                value: _selectedStatus,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.label),
@@ -317,9 +418,9 @@ class _AddContactScreenState extends State<AddContactScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Create Contact',
-                          style: TextStyle(
+                      : Text(
+                          isEditing ? 'Update Contact' : 'Create Contact',
+                          style: const TextStyle(
                             fontSize: AppSizes.fontMd,
                             fontWeight: FontWeight.bold,
                           ),

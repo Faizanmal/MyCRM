@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'providers/auth_provider.dart';
+import 'providers/contacts_provider.dart';
+import 'providers/leads_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'services/notifications/notification_service.dart';
@@ -26,6 +28,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ContactsProvider()),
+        ChangeNotifierProvider(create: (_) => LeadsProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {

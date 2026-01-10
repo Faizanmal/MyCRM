@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/crm_models.dart';
+import '../../providers/leads_provider.dart';
+import 'add_lead_screen.dart';
 
 class LeadDetailScreen extends StatefulWidget {
   final Lead lead;
@@ -13,37 +16,72 @@ class LeadDetailScreen extends StatefulWidget {
 
 class _LeadDetailScreenState extends State<LeadDetailScreen> {
   late Lead _lead;
-  bool _isEditing = false;
-  
-  late TextEditingController _titleController;
-  late TextEditingController _companyController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  late TextEditingController _descriptionController;
   
   @override
   void initState() {
     super.initState();
     _lead = widget.lead;
-    _initControllers();
   }
   
-  void _initControllers() {
-    _titleController = TextEditingController(text: _lead.title ?? '');
-    _companyController = TextEditingController(text: _lead.company ?? '');
-    _emailController = TextEditingController(text: _lead.email ?? '');
-    _phoneController = TextEditingController(text: _lead.phone ?? '');
-    _descriptionController = TextEditingController(text: _lead.description ?? '');
+  void _editLead() async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddLeadScreen(lead: _lead),
+      ),
+    );
+
+    if (mounted) {
+      final updatedLead = context.read<LeadsProvider>()
+          .leads.firstWhere((l) => l.id == _lead.id, orElse: () => _lead);
+      setState(() {
+        _lead = updatedLead;
+      });
+    }
   }
   
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _companyController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
+  Future<void> _deleteLead() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Lead'),
+        content: Text('Are you sure you want to delete ${_lead.fullName}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final success = await context.read<LeadsProvider>().deleteLead(_lead.id!);
+
+      if (mounted) {
+        if (success) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Lead deleted'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to delete lead'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    }
   }
   
   Future<void> _convertToOpportunity() async {
@@ -66,13 +104,26 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
     );
     
     if (confirmed == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lead converted to opportunity'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-      Navigator.pop(context, true);
+      final contact = await context.read<LeadsProvider>().convertLead(_lead.id!);
+
+      if (mounted) {
+        if (contact != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Lead converted to opportunity'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          Navigator.pop(context, true);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to convert lead'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
     }
   }
   
@@ -95,21 +146,31 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Lead' : 'Lead Details'),
+        title: const Text('Lead Details'),
         actions: [
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => setState(() => _isEditing = true),
-            ),
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () {
-                setState(() => _isEditing = false);
-                _initControllers();
-              },
-            ),
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: _editLead,
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'delete') {
+                _deleteLead();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, color: AppColors.error),
+                    SizedBox(width: 8),
+                    Text('Delete', style: TextStyle(color: AppColors.error)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -130,12 +191,7 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             const SizedBox(height: AppSizes.paddingLg),
             
             // Actions
-            if (!_isEditing) _buildActionsSection(),
-            
-            if (_isEditing) ...[
-              const SizedBox(height: AppSizes.paddingLg),
-              _buildSaveButton(),
-            ],
+            _buildActionsSection(),
           ],
         ),
       ),
@@ -149,26 +205,13 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (_isEditing)
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Lead Title',
-                  border: OutlineInputBorder(),
-                ),
-                style: const TextStyle(
-                  fontSize: AppSizes.fontLg,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            else
-              Text(
-                _lead.title ?? 'No Title',
-                style: const TextStyle(
-                  fontSize: AppSizes.fontXl,
-                  fontWeight: FontWeight.bold,
-                ),
+            Text(
+              _lead.title ?? 'No Title',
+              style: const TextStyle(
+                fontSize: AppSizes.fontXl,
+                fontWeight: FontWeight.bold,
               ),
+            ),
             const SizedBox(height: AppSizes.paddingSm),
             Row(
               children: [
@@ -314,50 +357,11 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
             ),
             const SizedBox(height: AppSizes.paddingMd),
             
-            if (_isEditing) ...[
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: AppSizes.paddingSm),
-              TextField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Phone',
-                  prefixIcon: Icon(Icons.phone),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: AppSizes.paddingSm),
-              TextField(
-                controller: _companyController,
-                decoration: const InputDecoration(
-                  labelText: 'Company',
-                  prefixIcon: Icon(Icons.business),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: AppSizes.paddingSm),
-              TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  prefixIcon: Icon(Icons.description),
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-            ] else ...[
-              _buildInfoRow(Icons.email, 'Email', _lead.email ?? 'Not set'),
-              _buildInfoRow(Icons.phone, 'Phone', _lead.phone ?? 'Not set'),
-              _buildInfoRow(Icons.business, 'Company', _lead.company ?? 'Not set'),
-              if (_lead.description != null)
-                _buildInfoRow(Icons.description, 'Description', _lead.description!),
-            ],
+            _buildInfoRow(Icons.email, 'Email', _lead.email ?? 'Not set'),
+            _buildInfoRow(Icons.phone, 'Phone', _lead.phone ?? 'Not set'),
+            _buildInfoRow(Icons.business, 'Company', _lead.company ?? 'Not set'),
+            if (_lead.description != null)
+              _buildInfoRow(Icons.description, 'Description', _lead.description!),
           ],
         ),
       ),
@@ -431,38 +435,6 @@ class _LeadDetailScreenState extends State<LeadDetailScreen> {
           ),
         ),
       ],
-    );
-  }
-  
-  Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() => _isEditing = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Lead updated successfully'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: AppSizes.paddingMd),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-          ),
-        ),
-        child: const Text(
-          'Save Changes',
-          style: TextStyle(
-            fontSize: AppSizes.fontMd,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
     );
   }
 }
