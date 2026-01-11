@@ -375,7 +375,7 @@ export function ApiProvider({ children }: ApiProviderProps) {
   );
 }
 
-export default {
+const ApiClient = {
     api,
     queryKeys,
     useList,
@@ -388,3 +388,5 @@ export default {
     setAccessToken,
     getAccessToken,
 };
+
+export default ApiClient;

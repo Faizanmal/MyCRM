@@ -161,6 +161,7 @@ export function DataTable<TData>({
         return cols;
     }, [columns, showRowSelection, rowActions]);
 
+    // eslint-disable-next-line react-hooks/incompatible-library -- TanStack's useReactTable returns non-memoizable functions
     const table = useReactTable<TData>({
         data,
         columns: tableColumns,

@@ -35,7 +35,7 @@ export function lazyLoad<T extends ComponentType<unknown>>(
 /**
  * Default loading fallback component
  */
-function DefaultLoadingFallback(_props: { error?: Error; isLoading?: boolean; pastDelay?: boolean; retry?: () => void; timedOut?: boolean }) {
+function DefaultLoadingFallback() {
     return (
         <div className="flex items-center justify-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
@@ -184,7 +184,7 @@ export function LazyLoadOnView({
     rootMargin?: string;
     threshold?: number;
 }) {
-    const [_isVisible, setIsVisible] = useState(false);
+    const [, setIsVisible] = useState(false);
     const [hasBeenVisible, setHasBeenVisible] = useState(false);
     const containerRef = React.useRef<HTMLDivElement>(null);
 

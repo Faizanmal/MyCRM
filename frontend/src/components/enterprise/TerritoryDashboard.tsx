@@ -225,6 +225,7 @@ const fetchBalanceAnalysis = async (): Promise<BalanceAnalysis> => {
 };
 
 const fetchRecommendations = async (_type: string): Promise<Recommendation[]> => {
+  void _type;
   return [
     {
       type: 'capacity',

@@ -171,6 +171,7 @@ const fetchQuotaForecast = async (quotaId: string): Promise<QuotaForecast> => {
 };
 
 const fetchAIRecommendation = async (_quotaId: string): Promise<AIRecommendation> => {
+  void _quotaId;
   return {
     recommended_target: 480000,
     confidence: 0.82,

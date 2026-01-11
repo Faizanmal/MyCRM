@@ -280,7 +280,7 @@ export function ListSkeleton({
     );
 }
 
-export default {
+const LoadingSkeletons = {
     PageSkeleton,
     TableSkeleton,
     CardGridSkeleton,
@@ -290,3 +290,5 @@ export default {
     ChartSkeleton,
     ListSkeleton,
 };
+
+export default LoadingSkeletons;

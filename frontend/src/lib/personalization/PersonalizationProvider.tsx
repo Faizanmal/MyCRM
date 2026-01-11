@@ -246,7 +246,7 @@ interface PersonalizationProviderProps {
 export function PersonalizationProvider({ children, userId }: PersonalizationProviderProps) {
   const queryClient = useQueryClient();
   const [activeTour, setActiveTour] = useState<OnboardingTour | null>(null);
-  const [helpDismissed, setHelpDismissed] = useState<Set<string>>(new Set());
+  const [, setHelpDismissed] = useState<Set<string>>(new Set());
   // const [sessionId] = useState(() => `session_${Date.now()}`);
 
   // Fetch preferences

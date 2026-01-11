@@ -141,7 +141,6 @@ interface CallAnalytics {
 }
 
 export default function VoiceIntelligencePage() {
-  const [activeTab, setActiveTab] = useState('recordings');
   const [recordings, setRecordings] = useState<VoiceRecording[]>([]);
   const [selectedRecording, setSelectedRecording] = useState<VoiceRecording | null>(null);
   const [transcription, setTranscription] = useState<Transcription | null>(null);
@@ -149,7 +148,7 @@ export default function VoiceIntelligencePage() {
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [callScore, setCallScore] = useState<CallScore | null>(null);
   const [analytics, setAnalytics] = useState<CallAnalytics | null>(null);
-  const [_loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 

@@ -409,7 +409,7 @@ export function useSafeAreaInsets() {
     return insets;
 }
 
-export default {
+const Responsive = {
     useBreakpoint,
     useBreakpointUp,
     useBreakpointDown,
@@ -432,3 +432,5 @@ export default {
     ResponsiveStack,
     breakpoints,
 };
+
+export default Responsive;

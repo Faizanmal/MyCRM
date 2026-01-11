@@ -212,7 +212,7 @@ export function useRealtimeSubscription(
         const unsubscribe = subscribe(channel, callback);
         return unsubscribe;
 
-    }, [channel, subscribe, callback, ...deps]);
+    }, [channel, subscribe, callback, deps]);
 }
 
 // Hook for real-time notifications

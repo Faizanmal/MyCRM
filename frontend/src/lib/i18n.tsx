@@ -466,10 +466,12 @@ export function LanguageSelector({ className }: { className?: string }) {
     );
 }
 
-export default {
+const I18n = {
     I18nProvider,
     useI18n,
     useTranslation,
     LanguageSelector,
     locales,
 };
+
+export default I18n;

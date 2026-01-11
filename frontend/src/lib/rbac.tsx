@@ -397,7 +397,6 @@ export function ProtectedRoute({
         hasRole,
         hasMinimumRole,
         isLoading,
-        _user,
     } = useRBAC();
 
     useEffect(() => {

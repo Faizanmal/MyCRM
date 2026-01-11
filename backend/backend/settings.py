@@ -102,6 +102,14 @@ INSTALLED_APPS = [
     'predictive_lead_routing',
     'data_enrichment',
     'voice_intelligence',
+    # Enterprise Features (New)
+    'ai_chatbot',
+    'app_marketplace',
+    'esg_reporting',
+    'realtime_collaboration',
+    'enterprise',
+    'customer_portal',
+    'social_inbox',
 ]
 
 MIDDLEWARE = [

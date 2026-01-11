@@ -81,7 +81,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
   const handleDataUpdate = useCallback(
     (payload: DataUpdatePayload) => {
-      const { entity, id, action: _action } = payload;
+      const { entity, id } = payload;
 
       // Map entities to query keys
       const queryKeyMap: Record<string, string[]> = {

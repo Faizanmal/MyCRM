@@ -135,7 +135,7 @@ export default function EnhancedNotifications() {
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
     const [filter, setFilter] = useState<'all' | NotificationType>('all');
-    const [_isLoading, setIsLoading] = useState(true);
+    const [, setIsLoading] = useState(true);
     const router = useRouter();
 
     // Real-time connection status

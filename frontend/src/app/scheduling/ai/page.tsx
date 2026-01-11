@@ -110,7 +110,7 @@ export default function SmartSchedulingAIPage() {
   const [meetingPreps, setMeetingPreps] = useState<MeetingPrep[]>([]);
   const [reminders, setReminders] = useState<SmartReminder[]>([]);
   const [optimalSlots, setOptimalSlots] = useState<OptimalSlot[]>([]);
-  const [_loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [isPreferencesDialogOpen, setIsPreferencesDialogOpen] = useState(false);
   const [isFindingSlotsDialogOpen, setIsFindingSlotsDialogOpen] = useState(false);
   const [slotDuration, setSlotDuration] = useState(30);

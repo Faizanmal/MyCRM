@@ -75,6 +75,15 @@ urlpatterns = [
     path('api/v1/data-enrichment/', include('data_enrichment.urls')),
     path('api/v1/voice-intelligence/', include('voice_intelligence.urls')),
     path('api/v1/scheduling/ai/', include('smart_scheduling.ai_urls')),
+    
+    # Enterprise Features (New)
+    path('api/v1/ai-chatbot/', include('ai_chatbot.urls')),
+    path('api/v1/marketplace/', include('app_marketplace.urls')),
+    path('api/v1/esg/', include('esg_reporting.urls')),
+    path('api/v1/realtime-collab/', include('realtime_collaboration.urls')),
+    path('api/v1/security/', include('enterprise.urls')),
+    path('api/v1/customer-portal/', include('customer_portal.urls')),
+    path('api/v1/social-inbox/', include('social_inbox.urls')),
 ]
 
 if settings.DEBUG:

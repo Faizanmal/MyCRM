@@ -164,7 +164,7 @@ export default function AIRecommendations() {
         try {
             // Mark as completed
             await recommendationsAPI.complete(recommendation.id);
-        } catch (_error) {
+        } catch {
             // Continue navigation even if API fails
         }
         router.push(recommendation.action_url);

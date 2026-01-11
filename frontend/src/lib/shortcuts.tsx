@@ -466,9 +466,11 @@ export function ShortcutsHelpModal({ open, onOpenChange }: { open: boolean; onOp
     );
 }
 
-export default {
+const Shortcuts = {
     ShortcutProvider,
     useShortcuts,
     ShortcutKey,
     ShortcutsHelpModal,
 };
+
+export default Shortcuts;

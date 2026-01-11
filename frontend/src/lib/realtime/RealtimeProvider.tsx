@@ -950,6 +950,7 @@ export function useComments(entityType: string, entityId: string) {
 }
 
 export function useLocks(_entityType: string, _entityId: string) {
+  void _entityType; void _entityId;
   const { locks, acquireLock, releaseLock, isFieldLocked, getFieldLockHolder } = useRealtime();
   
   const entityLocks = useMemo(() => {

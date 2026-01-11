@@ -167,7 +167,8 @@ const api = {
       policy_name: 'Warn on Financial Export',
     },
   ],
-  classifyContent: async (_content: string): Promise<{
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  classifyContent: async (content: string): Promise<{
     matches: { classification: string; level: string }[];
     highest_level: string;
   }> => ({

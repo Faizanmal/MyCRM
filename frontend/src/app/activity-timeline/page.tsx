@@ -222,20 +222,15 @@ export default function ActivityTimelinePage() {
     activities.forEach(activity => {
       const date = new Date(activity.created_at);
       let key: string;
-      let label: string;
 
       if (isToday(date)) {
         key = 'today';
-        label = 'Today';
       } else if (isYesterday(date)) {
         key = 'yesterday';
-        label = 'Yesterday';
       } else if (isThisWeek(date)) {
         key = 'this_week';
-        label = 'This Week';
       } else {
         key = format(date, 'yyyy-MM');
-        label = format(date, 'MMMM yyyy');
       }
 
       if (!groups[key]) {

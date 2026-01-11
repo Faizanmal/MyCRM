@@ -13,6 +13,8 @@ import KeyboardShortcutsModal from "@/components/KeyboardShortcutsModal";
 import ProductTour from "@/components/ProductTour";
 import QuickActionsFab from "@/components/QuickActionsFab";
 import OnboardingChecklist from "@/components/OnboardingChecklist";
+import { PWAInitializer } from "@/components/PWAInitializer";
+import { OfflineIndicator, UpdatePrompt } from "@/components/mobile";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,6 +75,8 @@ export default function RootLayout({
             <AuthProvider>
               <AchievementProvider>
                 <RealtimeProvider>
+                  <PWAInitializer />
+                  <OfflineIndicator />
                   {children}
                   <CommandPalette />
                   <FloatingAIAssistant />
@@ -81,6 +85,7 @@ export default function RootLayout({
                   <ProductTour />
                   <QuickActionsFab />
                   <OnboardingChecklist />
+                  <UpdatePrompt />
                 </RealtimeProvider>
               </AchievementProvider>
             </AuthProvider>
