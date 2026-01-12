@@ -84,6 +84,18 @@ urlpatterns = [
     path('api/v1/security/', include('enterprise.urls')),
     path('api/v1/customer-portal/', include('customer_portal.urls')),
     path('api/v1/social-inbox/', include('social_inbox.urls')),
+    
+    # Futuristic Next-Gen Features
+    path('api/v1/quantum/', include('quantum_modeling.urls')),
+    path('api/v1/web3/', include('web3_integration.urls')),
+    path('api/v1/metaverse/', include('metaverse_experiences.urls')),
+    path('api/v1/ethical-ai/', include('ethical_ai_oversight.urls')),
+    path('api/v1/carbon/', include('carbon_tracking.urls')),
+    path('api/v1/neurological/', include('neurological_feedback.urls')),
+    path('api/v1/holographic/', include('holographic_collab.urls')),
+    path('api/v1/autonomous-workflow/', include('autonomous_workflow.urls')),
+    path('api/v1/interplanetary/', include('interplanetary_sync.urls')),
+    path('api/v1/biofeedback/', include('biofeedback_personalization.urls')),
 ]
 
 if settings.DEBUG:

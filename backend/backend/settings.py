@@ -110,6 +110,17 @@ INSTALLED_APPS = [
     'enterprise',
     'customer_portal',
     'social_inbox',
+    # Futuristic Next-Gen Features
+    'quantum_modeling',
+    'web3_integration',
+    'metaverse_experiences',
+    'ethical_ai_oversight',
+    'carbon_tracking',
+    'neurological_feedback',
+    'holographic_collab',
+    'autonomous_workflow',
+    'interplanetary_sync',
+    'biofeedback_personalization',
 ]
 
 MIDDLEWARE = [

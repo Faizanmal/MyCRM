@@ -1043,4 +1043,668 @@ export const dataEnrichmentAPI = {
   },
 };
 
+// AI Chatbot API
+export const aiChatbotAPI = {
+  // Chat
+  sendMessage: async (sessionId: string, message: string) => {
+    const response = await apiClient.post('/v1/ai-chatbot/chat/', { session_id: sessionId, message });
+    return response.data;
+  },
+
+  // Sessions
+  getSessions: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/ai-chatbot/sessions/', { params });
+    return response.data;
+  },
+
+  createSession: async (name?: string) => {
+    const response = await apiClient.post('/v1/ai-chatbot/sessions/', { name });
+    return response.data;
+  },
+
+  getSession: async (id: string) => {
+    const response = await apiClient.get(`/v1/ai-chatbot/sessions/${id}/`);
+    return response.data;
+  },
+
+  deleteSession: async (id: string) => {
+    const response = await apiClient.delete(`/v1/ai-chatbot/sessions/${id}/`);
+    return response.data;
+  },
+
+  // Email Generation
+  generateEmail: async (data: { context: string; tone?: string; recipient_id?: string }) => {
+    const response = await apiClient.post('/v1/ai-chatbot/generate-email/', data);
+    return response.data;
+  },
+
+  // Data Query
+  queryData: async (query: string) => {
+    const response = await apiClient.post('/v1/ai-chatbot/query/', { query });
+    return response.data;
+  },
+
+  // Suggestions
+  suggestActions: async (context?: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/ai-chatbot/suggest-actions/', context);
+    return response.data;
+  },
+
+  // Feedback
+  submitFeedback: async (messageId: string, rating: number, comment?: string) => {
+    const response = await apiClient.post(`/v1/ai-chatbot/messages/${messageId}/feedback/`, { rating, comment });
+    return response.data;
+  },
+
+  // Quick Actions
+  getQuickActions: async () => {
+    const response = await apiClient.get('/v1/ai-chatbot/quick-actions/');
+    return response.data;
+  },
+
+  createQuickAction: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/ai-chatbot/quick-actions/', data);
+    return response.data;
+  },
+
+  // Email Templates
+  getEmailTemplates: async () => {
+    const response = await apiClient.get('/v1/ai-chatbot/email-templates/');
+    return response.data;
+  },
+
+  createEmailTemplate: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/ai-chatbot/email-templates/', data);
+    return response.data;
+  },
+};
+
+// App Marketplace API
+export const appMarketplaceAPI = {
+  // Dashboard
+  getDashboard: async () => {
+    const response = await apiClient.get('/v1/marketplace/dashboard/');
+    return response.data;
+  },
+
+  // Categories
+  getCategories: async () => {
+    const response = await apiClient.get('/v1/marketplace/categories/');
+    return response.data;
+  },
+
+  // Apps
+  getApps: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/marketplace/apps/', { params });
+    return response.data;
+  },
+
+  getApp: async (id: string) => {
+    const response = await apiClient.get(`/v1/marketplace/apps/${id}/`);
+    return response.data;
+  },
+
+  searchApps: async (query: string) => {
+    const response = await apiClient.get('/v1/marketplace/apps/', { params: { search: query } });
+    return response.data;
+  },
+
+  // Install/Uninstall
+  installApp: async (appId: string) => {
+    const response = await apiClient.post(`/v1/marketplace/apps/${appId}/install/`);
+    return response.data;
+  },
+
+  uninstallApp: async (appId: string) => {
+    const response = await apiClient.post(`/v1/marketplace/apps/${appId}/uninstall/`);
+    return response.data;
+  },
+
+  // My Apps
+  getMyApps: async () => {
+    const response = await apiClient.get('/v1/marketplace/my-apps/');
+    return response.data;
+  },
+
+  getAppSettings: async (id: string) => {
+    const response = await apiClient.get(`/v1/marketplace/my-apps/${id}/settings/`);
+    return response.data;
+  },
+
+  updateAppSettings: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/marketplace/my-apps/${id}/settings/`, data);
+    return response.data;
+  },
+
+  // Developer Portal
+  getDeveloperApps: async () => {
+    const response = await apiClient.get('/v1/marketplace/developer/');
+    return response.data;
+  },
+
+  submitApp: async (data: FormData) => {
+    const response = await apiClient.post('/v1/marketplace/developer/', data);
+    return response.data;
+  },
+
+  updateAppSubmission: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/marketplace/developer/${id}/`, data);
+    return response.data;
+  },
+};
+
+// ESG Reporting API
+export const esgReportingAPI = {
+  // Dashboard
+  getDashboard: async () => {
+    const response = await apiClient.get('/v1/esg/dashboard/');
+    return response.data;
+  },
+
+  // Frameworks
+  getFrameworks: async () => {
+    const response = await apiClient.get('/v1/esg/frameworks/');
+    return response.data;
+  },
+
+  getFramework: async (id: string) => {
+    const response = await apiClient.get(`/v1/esg/frameworks/${id}/`);
+    return response.data;
+  },
+
+  // Categories
+  getCategories: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/esg/categories/', { params });
+    return response.data;
+  },
+
+  // Metrics
+  getMetrics: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/esg/metrics/', { params });
+    return response.data;
+  },
+
+  getMetric: async (id: string) => {
+    const response = await apiClient.get(`/v1/esg/metrics/${id}/`);
+    return response.data;
+  },
+
+  createMetric: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/esg/metrics/', data);
+    return response.data;
+  },
+
+  // Data Entries
+  getDataEntries: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/esg/data/', { params });
+    return response.data;
+  },
+
+  createDataEntry: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/esg/data/', data);
+    return response.data;
+  },
+
+  updateDataEntry: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/esg/data/${id}/`, data);
+    return response.data;
+  },
+
+  // Targets
+  getTargets: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/esg/targets/', { params });
+    return response.data;
+  },
+
+  createTarget: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/esg/targets/', data);
+    return response.data;
+  },
+
+  updateTarget: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/esg/targets/${id}/`, data);
+    return response.data;
+  },
+
+  // Reports
+  getReports: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/esg/reports/', { params });
+    return response.data;
+  },
+
+  createReport: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/esg/reports/', data);
+    return response.data;
+  },
+
+  generateReport: async (id: string) => {
+    const response = await apiClient.post(`/v1/esg/reports/${id}/generate/`);
+    return response.data;
+  },
+
+  downloadReport: async (id: string) => {
+    const response = await apiClient.get(`/v1/esg/reports/${id}/download/`, { responseType: 'blob' });
+    return response.data;
+  },
+
+  // Carbon Footprint
+  getCarbonData: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/esg/carbon/', { params });
+    return response.data;
+  },
+
+  createCarbonEntry: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/esg/carbon/', data);
+    return response.data;
+  },
+
+  // Supplier Assessments
+  getSupplierAssessments: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/esg/suppliers/', { params });
+    return response.data;
+  },
+
+  createSupplierAssessment: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/esg/suppliers/', data);
+    return response.data;
+  },
+};
+
+// Realtime Collaboration API
+export const realtimeCollabAPI = {
+  // Documents
+  getDocuments: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/realtime-collab/documents/', { params });
+    return response.data;
+  },
+
+  getDocument: async (id: string) => {
+    const response = await apiClient.get(`/v1/realtime-collab/documents/${id}/`);
+    return response.data;
+  },
+
+  createDocument: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/realtime-collab/documents/', data);
+    return response.data;
+  },
+
+  updateDocument: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/realtime-collab/documents/${id}/`, data);
+    return response.data;
+  },
+
+  deleteDocument: async (id: string) => {
+    const response = await apiClient.delete(`/v1/realtime-collab/documents/${id}/`);
+    return response.data;
+  },
+
+  // Sharing
+  shareDocument: async (id: string, data: { users: string[]; permission: string }) => {
+    const response = await apiClient.post(`/v1/realtime-collab/documents/${id}/share/`, data);
+    return response.data;
+  },
+
+  getSharedDocument: async (token: string) => {
+    const response = await apiClient.get(`/v1/realtime-collab/shared/${token}/`);
+    return response.data;
+  },
+
+  // My Collaborations
+  getMyCollaborations: async () => {
+    const response = await apiClient.get('/v1/realtime-collab/my-collaborations/');
+    return response.data;
+  },
+
+  // Templates
+  getTemplates: async () => {
+    const response = await apiClient.get('/v1/realtime-collab/templates/');
+    return response.data;
+  },
+
+  createTemplate: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/realtime-collab/templates/', data);
+    return response.data;
+  },
+
+  createFromTemplate: async (templateId: string, data: Record<string, unknown>) => {
+    const response = await apiClient.post(`/v1/realtime-collab/templates/${templateId}/use/`, data);
+    return response.data;
+  },
+
+  // Cursors & Presence
+  updateCursor: async (docId: string, position: { line: number; column: number }) => {
+    const response = await apiClient.post(`/v1/realtime-collab/documents/${docId}/cursor/`, position);
+    return response.data;
+  },
+};
+
+// Customer Portal API
+export const customerPortalAPI = {
+  // Authentication
+  login: async (credentials: { email: string; password: string }) => {
+    const response = await apiClient.post('/v1/customer-portal/auth/login/', credentials);
+    return response.data;
+  },
+
+  logout: async () => {
+    const response = await apiClient.post('/v1/customer-portal/auth/logout/');
+    return response.data;
+  },
+
+  resetPassword: async (email: string) => {
+    const response = await apiClient.post('/v1/customer-portal/auth/password-reset/', { email });
+    return response.data;
+  },
+
+  // Profile
+  getProfile: async () => {
+    const response = await apiClient.get('/v1/customer-portal/profile/');
+    return response.data;
+  },
+
+  updateProfile: async (data: Record<string, unknown>) => {
+    const response = await apiClient.put('/v1/customer-portal/profile/', data);
+    return response.data;
+  },
+
+  // Dashboard
+  getDashboard: async () => {
+    const response = await apiClient.get('/v1/customer-portal/dashboard/');
+    return response.data;
+  },
+
+  // Support Tickets
+  getTickets: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/customer-portal/tickets/', { params });
+    return response.data;
+  },
+
+  getTicket: async (id: string) => {
+    const response = await apiClient.get(`/v1/customer-portal/tickets/${id}/`);
+    return response.data;
+  },
+
+  createTicket: async (data: { subject: string; description: string; priority?: string }) => {
+    const response = await apiClient.post('/v1/customer-portal/tickets/', data);
+    return response.data;
+  },
+
+  updateTicket: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/customer-portal/tickets/${id}/`, data);
+    return response.data;
+  },
+
+  addTicketComment: async (id: string, message: string) => {
+    const response = await apiClient.post(`/v1/customer-portal/tickets/${id}/comments/`, { message });
+    return response.data;
+  },
+
+  // Orders
+  getOrders: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/customer-portal/orders/', { params });
+    return response.data;
+  },
+
+  getOrder: async (id: string) => {
+    const response = await apiClient.get(`/v1/customer-portal/orders/${id}/`);
+    return response.data;
+  },
+
+  // Knowledge Base
+  getKnowledgeBase: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/customer-portal/knowledge-base/', { params });
+    return response.data;
+  },
+
+  getArticle: async (id: string) => {
+    const response = await apiClient.get(`/v1/customer-portal/knowledge-base/${id}/`);
+    return response.data;
+  },
+
+  searchKnowledgeBase: async (query: string) => {
+    const response = await apiClient.get('/v1/customer-portal/knowledge-base/', { params: { search: query } });
+    return response.data;
+  },
+
+  // Notifications
+  getNotifications: async () => {
+    const response = await apiClient.get('/v1/customer-portal/notifications/');
+    return response.data;
+  },
+
+  markNotificationRead: async (id: string) => {
+    const response = await apiClient.post(`/v1/customer-portal/notifications/${id}/mark-read/`);
+    return response.data;
+  },
+};
+
+// Social Inbox API
+export const socialInboxAPI = {
+  // Dashboard
+  getDashboard: async () => {
+    const response = await apiClient.get('/v1/social-inbox/dashboard/');
+    return response.data;
+  },
+
+  // Social Accounts
+  getAccounts: async () => {
+    const response = await apiClient.get('/v1/social-inbox/accounts/');
+    return response.data;
+  },
+
+  connectAccount: async (platform: string, authData: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/social-inbox/accounts/', { platform, ...authData });
+    return response.data;
+  },
+
+  disconnectAccount: async (id: string) => {
+    const response = await apiClient.delete(`/v1/social-inbox/accounts/${id}/`);
+    return response.data;
+  },
+
+  refreshAccount: async (id: string) => {
+    const response = await apiClient.post(`/v1/social-inbox/accounts/${id}/refresh/`);
+    return response.data;
+  },
+
+  // Conversations
+  getConversations: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/social-inbox/conversations/', { params });
+    return response.data;
+  },
+
+  getConversation: async (id: string) => {
+    const response = await apiClient.get(`/v1/social-inbox/conversations/${id}/`);
+    return response.data;
+  },
+
+  replyToConversation: async (id: string, message: string) => {
+    const response = await apiClient.post(`/v1/social-inbox/conversations/${id}/reply/`, { message });
+    return response.data;
+  },
+
+  assignConversation: async (id: string, userId: string) => {
+    const response = await apiClient.post(`/v1/social-inbox/conversations/${id}/assign/`, { user_id: userId });
+    return response.data;
+  },
+
+  archiveConversation: async (id: string) => {
+    const response = await apiClient.post(`/v1/social-inbox/conversations/${id}/archive/`);
+    return response.data;
+  },
+
+  // Monitoring Rules
+  getMonitoringRules: async () => {
+    const response = await apiClient.get('/v1/social-inbox/monitoring-rules/');
+    return response.data;
+  },
+
+  createMonitoringRule: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/social-inbox/monitoring-rules/', data);
+    return response.data;
+  },
+
+  updateMonitoringRule: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/social-inbox/monitoring-rules/${id}/`, data);
+    return response.data;
+  },
+
+  deleteMonitoringRule: async (id: string) => {
+    const response = await apiClient.delete(`/v1/social-inbox/monitoring-rules/${id}/`);
+    return response.data;
+  },
+
+  // Posts
+  getPosts: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/social-inbox/posts/', { params });
+    return response.data;
+  },
+
+  createPost: async (data: { content: string; platforms: string[]; scheduled_at?: string }) => {
+    const response = await apiClient.post('/v1/social-inbox/posts/', data);
+    return response.data;
+  },
+
+  schedulePost: async (id: string, scheduledAt: string) => {
+    const response = await apiClient.post(`/v1/social-inbox/posts/${id}/schedule/`, { scheduled_at: scheduledAt });
+    return response.data;
+  },
+
+  publishPost: async (id: string) => {
+    const response = await apiClient.post(`/v1/social-inbox/posts/${id}/publish/`);
+    return response.data;
+  },
+};
+
+// Enterprise Security API
+export const enterpriseSecurityAPI = {
+  // Dashboard
+  getDashboard: async () => {
+    const response = await apiClient.get('/v1/security/dashboard/');
+    return response.data;
+  },
+
+  getRiskAssessment: async () => {
+    const response = await apiClient.get('/v1/security/risk-assessment/');
+    return response.data;
+  },
+
+  // Device Management
+  getDevices: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/security/devices/', { params });
+    return response.data;
+  },
+
+  getDevice: async (id: string) => {
+    const response = await apiClient.get(`/v1/security/devices/${id}/`);
+    return response.data;
+  },
+
+  trustDevice: async (id: string) => {
+    const response = await apiClient.post(`/v1/security/devices/${id}/trust/`);
+    return response.data;
+  },
+
+  blockDevice: async (id: string) => {
+    const response = await apiClient.post(`/v1/security/devices/${id}/block/`);
+    return response.data;
+  },
+
+  // Sessions
+  getSessions: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/security/sessions/', { params });
+    return response.data;
+  },
+
+  terminateSession: async (id: string) => {
+    const response = await apiClient.delete(`/v1/security/sessions/${id}/`);
+    return response.data;
+  },
+
+  terminateAllSessions: async () => {
+    const response = await apiClient.post('/v1/security/sessions/terminate-all/');
+    return response.data;
+  },
+
+  // Audit Logs
+  getAuditLogs: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/security/audit-logs/', { params });
+    return response.data;
+  },
+
+  exportAuditLogs: async (params?: { start_date?: string; end_date?: string }) => {
+    const response = await apiClient.get('/v1/security/audit-logs/export/', { params, responseType: 'blob' });
+    return response.data;
+  },
+
+  // Access Policies
+  getPolicies: async () => {
+    const response = await apiClient.get('/v1/security/policies/');
+    return response.data;
+  },
+
+  getPolicy: async (id: string) => {
+    const response = await apiClient.get(`/v1/security/policies/${id}/`);
+    return response.data;
+  },
+
+  createPolicy: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/security/policies/', data);
+    return response.data;
+  },
+
+  updatePolicy: async (id: string, data: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/security/policies/${id}/`, data);
+    return response.data;
+  },
+
+  deletePolicy: async (id: string) => {
+    const response = await apiClient.delete(`/v1/security/policies/${id}/`);
+    return response.data;
+  },
+
+  // Threat Indicators
+  getThreats: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/security/threats/', { params });
+    return response.data;
+  },
+
+  acknowledgeThreat: async (id: string) => {
+    const response = await apiClient.post(`/v1/security/threats/${id}/acknowledge/`);
+    return response.data;
+  },
+
+  // Security Incidents
+  getIncidents: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/security/incidents/', { params });
+    return response.data;
+  },
+
+  getIncident: async (id: string) => {
+    const response = await apiClient.get(`/v1/security/incidents/${id}/`);
+    return response.data;
+  },
+
+  createIncident: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/security/incidents/', data);
+    return response.data;
+  },
+
+  resolveIncident: async (id: string, data: { resolution: string }) => {
+    const response = await apiClient.post(`/v1/security/incidents/${id}/resolve/`, data);
+    return response.data;
+  },
+
+  // Data Classifications
+  getClassifications: async () => {
+    const response = await apiClient.get('/v1/security/classifications/');
+    return response.data;
+  },
+
+  createClassification: async (data: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/security/classifications/', data);
+    return response.data;
+  },
+};
+
 export default apiClient;

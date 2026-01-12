@@ -88,3 +88,4 @@ python-magic==0.4.27  # For secure file content validation
 # AI & Machine Learning (New Features)
 openai==1.3.0  # For AI content generation
 textblob==0.17.1  # For sentiment analysis (optional)
+numpy>=1.24.0

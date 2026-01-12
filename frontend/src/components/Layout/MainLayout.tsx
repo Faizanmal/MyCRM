@@ -42,7 +42,13 @@ import {
   MailCheck,
   Route,
   Database,
-  CalendarClock
+  CalendarClock,
+  MessageSquare,
+  Store,
+  Leaf,
+  Users2,
+  Globe,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NotificationsDropdown from '@/components/NotificationsDropdown';
@@ -68,7 +74,9 @@ const advancedNavigation = [
   { name: 'Integration Hub', href: '/integration-hub', icon: Puzzle },
   { name: 'AI Insights', href: '/ai-insights', icon: Sparkles },
   { name: 'AI Sales Assistant', href: '/ai-assistant', icon: Brain },
+  { name: 'AI Chatbot', href: '/ai-chatbot', icon: MessageSquare },
   { name: 'Gamification', href: '/gamification', icon: Trophy },
+  { name: 'App Marketplace', href: '/marketplace', icon: Store },
 ];
 
 const aiWorkflowNavigation = [
@@ -86,6 +94,9 @@ const premiumNavigation = [
   { name: 'Call Intelligence', href: '/conversation-intelligence', icon: Mic },
   { name: 'E-Signatures', href: '/document-esign', icon: FileSignature },
   { name: 'Social Selling', href: '/social-selling', icon: Share2 },
+  { name: 'Social Inbox', href: '/social-inbox', icon: Globe },
+  { name: 'Realtime Collab', href: '/realtime-collaboration', icon: Users2 },
+  { name: 'Customer Portal', href: '/customer-portal', icon: Users },
 ];
 
 const toolsNavigation = [
@@ -94,7 +105,9 @@ const toolsNavigation = [
   { name: 'Integrations', href: '/integrations', icon: Activity },
   { name: 'Workflows', href: '/workflows', icon: Workflow },
   { name: 'Import/Export', href: '/data', icon: Upload },
+  { name: 'ESG Reporting', href: '/esg-reporting', icon: Leaf },
   { name: 'Security', href: '/security', icon: Shield },
+  { name: 'Enterprise Security', href: '/enterprise-security', icon: ShieldCheck },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]; export default function MainLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
