@@ -58,7 +58,7 @@ class EmailDraftsTab extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: Colors.blue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -74,7 +74,7 @@ class EmailDraftsTab extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -159,19 +159,24 @@ class EmailDraftsTab extends StatelessWidget {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: emailTypeController.text,
-              decoration: const InputDecoration(
-                labelText: 'Email Type',
-                border: OutlineInputBorder(),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(4),
               ),
-              items: const [
-                DropdownMenuItem(value: 'cold_outreach', child: Text('Cold Outreach')),
-                DropdownMenuItem(value: 'follow_up', child: Text('Follow Up')),
-                DropdownMenuItem(value: 'proposal', child: Text('Proposal')),
-                DropdownMenuItem(value: 'meeting_request', child: Text('Meeting Request')),
-              ],
-              onChanged: (value) => emailTypeController.text = value!,
+              child: DropdownButton<String>(
+                value: emailTypeController.text,
+                onChanged: (value) => emailTypeController.text = value!,
+                items: const [
+                  DropdownMenuItem(value: 'cold_outreach', child: Text('Cold Outreach')),
+                  DropdownMenuItem(value: 'follow_up', child: Text('Follow Up')),
+                  DropdownMenuItem(value: 'proposal', child: Text('Proposal')),
+                  DropdownMenuItem(value: 'meeting_request', child: Text('Meeting Request')),
+                ],
+                isExpanded: true,
+                underline: const SizedBox(),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(

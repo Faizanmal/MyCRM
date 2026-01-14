@@ -321,7 +321,7 @@ class CollaborativeDocument(TenantAwareModel):
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='owned_documents'
+        related_name='collaboration_owned_documents'
     )
 
     # Link to deal room if applicable
@@ -352,7 +352,7 @@ class CollaborativeDocument(TenantAwareModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='locked_documents'
+        related_name='collaboration_locked_documents'
     )
 
     # Metadata
@@ -389,7 +389,7 @@ class DocumentComment(TenantAwareModel):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='document_comments'
+        related_name='collaboration_document_comments'
     )
 
     # Comment content
@@ -416,7 +416,7 @@ class DocumentComment(TenantAwareModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='resolved_comments'
+        related_name='collaboration_resolved_comments'
     )
     resolved_at = models.DateTimeField(null=True, blank=True)
 

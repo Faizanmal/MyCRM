@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { 
   BuildingOfficeIcon, 
   UserGroupIcon, 
@@ -13,6 +11,9 @@ import {
   CogIcon,
   UserPlusIcon
 } from '@heroicons/react/24/outline';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Types
 interface Organization {
@@ -693,3 +694,4 @@ export default function OrganizationsPage() {
     </MainLayout>
   );
 }
+

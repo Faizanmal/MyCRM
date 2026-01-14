@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import '../../core/utils/api_client.dart';
 
@@ -50,7 +51,7 @@ class NotificationService {
         'active': true,
       });
     } catch (e) {
-      print('Failed to register FCM token: $e');
+      debugPrint('Failed to register FCM token: $e');
     }
   }
 

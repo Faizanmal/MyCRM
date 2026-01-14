@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { CreditCard, Download, AlertCircle, CheckCircle } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { CreditCard, Download, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function BillingSettingsPage() {
   const [currentPlan, setCurrentPlan] = useState('pro');
@@ -75,7 +76,7 @@ export default function BillingSettingsPage() {
       setCurrentPlan(planId);
       toast.success('Plan changed successfully');
     } catch (error) {
-      console.log("Failed to change plan",error);
+      console.warn("Failed to change plan",error);
       toast.error('Failed to change plan');
     }
   };
@@ -98,7 +99,7 @@ export default function BillingSettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Professional Plan</h3>
@@ -224,7 +225,7 @@ export default function BillingSettingsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="p-3 border border-red-200 dark:border-red-900 rounded-lg bg-red-50 dark:bg-red-950 flex gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-red-800 dark:text-red-200 font-medium">Warning</p>
                   <p className="text-sm text-red-700 dark:text-red-300">Canceling your subscription will disable access to all features.</p>
@@ -238,3 +239,4 @@ export default function BillingSettingsPage() {
     </ProtectedRoute>
   );
 }
+

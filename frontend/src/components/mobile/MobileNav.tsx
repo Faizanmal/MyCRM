@@ -306,11 +306,14 @@ export function MobileListItem({
   return (
     <div
       onClick={onClick}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { onClick(); e.preventDefault(); } } : undefined}
+      tabIndex={onClick ? 0 : -1}
+      role={onClick ? 'button' : undefined}
       className={`flex items-center px-4 py-3 border-b border-gray-100 dark:border-gray-700 ${
         onClick ? 'active:bg-gray-50 dark:active:bg-gray-800 cursor-pointer' : ''
       }`}
     >
-      {avatar && <div className="flex-shrink-0 mr-3">{avatar}</div>}
+      {avatar && <div className="shrink-0 mr-3">{avatar}</div>}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -324,7 +327,8 @@ export function MobileListItem({
           </p>
         )}
       </div>
-      {rightContent && <div className="flex-shrink-0 ml-3">{rightContent}</div>}
+      {rightContent && <div className="shrink-0 ml-3">{rightContent}</div>}
     </div>
   );
 }
+

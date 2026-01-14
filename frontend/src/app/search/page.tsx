@@ -1,6 +1,38 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import {
+  Search,
+  Filter,
+  Clock,
+  Star,
+  User,
+  Users,
+  Target,
+  DollarSign,
+  CheckSquare,
+  Mail,
+  Phone,
+  Calendar,
+  FileText,
+  Tag,
+  ArrowRight,
+  Loader2,
+  SlidersHorizontal,
+  Save,
+  Trash2,
+  History,
+  Bookmark,
+  BookmarkPlus,
+  ExternalLink,
+  MoreHorizontal,
+  Hash,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import Link from 'next/link';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,38 +67,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Search,
-  Filter,
-  Clock,
-  Star,
-  User,
-  Users,
-  Target,
-  DollarSign,
-  CheckSquare,
-  Mail,
-  Phone,
-  Calendar,
-  FileText,
-  Tag,
-  ArrowRight,
-  Loader2,
-  SlidersHorizontal,
-  Save,
-  Trash2,
-  History,
-  Bookmark,
-  BookmarkPlus,
-  ExternalLink,
-  MoreHorizontal,
-  Hash,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react';
-import { toast } from 'sonner';
 import { globalSearchAPI, SearchResult, SavedSearch } from '@/lib/enterprise-api';
-import Link from 'next/link';
+
 
 const ENTITY_TYPES = [
   { value: 'all', label: 'All Types', icon: Search, color: 'bg-gray-500' },
@@ -386,7 +388,7 @@ export default function GlobalSearchPage() {
               className="mt-1"
             />
             <Link href={result.url} className="flex items-start gap-4 flex-1">
-              <div className={`p-2 rounded-lg ${colorClass} text-white flex-shrink-0`}>
+              <div className={`p-2 rounded-lg ${colorClass} text-white shrink-0`}>
                 <EntityIcon className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -448,7 +450,7 @@ export default function GlobalSearchPage() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <ArrowRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ArrowRight className="w-5 h-5 text-gray-400 shrink-0" />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -852,3 +854,4 @@ export default function GlobalSearchPage() {
     </ProtectedRoute>
   );
 }
+

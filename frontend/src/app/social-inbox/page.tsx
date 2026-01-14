@@ -1,19 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { 
   Inbox, 
   Send, 
@@ -28,26 +15,30 @@ import {
   MoreHorizontal,
   Archive,
   Star,
-  Clock,
-  User,
-  Reply,
   RefreshCw,
-  Settings,
-  Link,
   CheckCircle,
   AlertCircle,
-  Calendar,
-  Image,
-  Paperclip,
   Smile,
   Hash,
-  AtSign,
-  TrendingUp,
   Eye,
   Heart,
   Repeat2,
-  Share
+  Image as ImageIcon,
 } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { socialInboxAPI } from '@/lib/api';
 
 interface SocialAccount {
@@ -132,7 +123,7 @@ export default function SocialInboxPage() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [replyMessage, setReplyMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'starred'>('all');
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [newPost, setNewPost] = useState({ content: '', platforms: [] as string[], scheduled_at: '' });
@@ -144,7 +135,7 @@ export default function SocialInboxPage() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [dashData, accountsData, convoData, postsData, rulesData] = await Promise.all([
+      const [, accountsData, convoData, postsData, rulesData] = await Promise.all([
         socialInboxAPI.getDashboard(),
         socialInboxAPI.getAccounts(),
         socialInboxAPI.getConversations(),
@@ -376,7 +367,7 @@ export default function SocialInboxPage() {
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-4">
                       <Button variant="ghost" size="sm" className="h-8">
-                        <Image className="h-4 w-4 mr-1" />
+                        <ImageIcon className="h-4 w-4 mr-1" />
                         Image
                       </Button>
                       <Button variant="ghost" size="sm" className="h-8">
@@ -547,6 +538,9 @@ export default function SocialInboxPage() {
                             : 'hover:bg-muted'
                         }`}
                         onClick={() => setSelectedConversation(conversation)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSelectedConversation(conversation); e.preventDefault(); } }}
+                        tabIndex={0}
+                        role="button"
                       >
                         <div className="flex items-start gap-3">
                           <div className="relative">
@@ -781,3 +775,4 @@ export default function SocialInboxPage() {
     </div>
   );
 }
+

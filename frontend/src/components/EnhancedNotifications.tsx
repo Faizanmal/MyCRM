@@ -2,10 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-// import { Skeleton } from '@/components/ui/skeleton';
 import {
     Bell,
     X,
@@ -21,9 +17,14 @@ import {
     Trash2,
     MoreHorizontal,
 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+// import { Skeleton } from '@/components/ui/skeleton';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { activityAPI } from '@/lib/api';
 import { useRealtime, useRealtimeSubscription } from '@/hooks/useRealtimeNotifications';
 
@@ -178,7 +179,7 @@ export default function EnhancedNotifications() {
             setNotifications(apiNotifications.length > 0 ? apiNotifications : mockNotifications);
         } catch (error) {
             // Use mock data on error
-            console.log('Using mock notifications', error);
+            console.warn('Using mock notifications', error);
             setNotifications(mockNotifications);
         } finally {
             setIsLoading(false);
@@ -202,7 +203,7 @@ export default function EnhancedNotifications() {
             await activityAPI.markNotificationRead(id);
         } catch (error) {
             // Already updated locally
-            console.log('Failed to mark notification as read', error);
+            console.warn('Failed to mark notification as read', error);
         }
     }, []);
 
@@ -212,7 +213,7 @@ export default function EnhancedNotifications() {
             await activityAPI.markAllNotificationsRead();
         } catch (error) {
             // Already updated locally
-            console.log('Failed to mark all notifications as read', error);
+            console.warn('Failed to mark all notifications as read', error);
         }
         toast.success('All notifications marked as read');
     }, []);
@@ -446,3 +447,4 @@ export default function EnhancedNotifications() {
         </div>
     );
 }
+

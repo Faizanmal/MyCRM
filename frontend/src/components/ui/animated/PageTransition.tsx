@@ -2,13 +2,13 @@
 
 /**
  * Page Transition Component
- * 
+ *
  * Wrapper component that adds smooth page transitions when navigating between routes.
  */
-
 import { ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+
 import { pageTransition, pageTransitionFade } from '@/lib/animations';
 
 interface PageTransitionProps {
@@ -124,3 +124,4 @@ export function FadeInWhenVisible({ children, className }: FadeInWhenVisibleProp
     </motion.div>
   );
 }
+

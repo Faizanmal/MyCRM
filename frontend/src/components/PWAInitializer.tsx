@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+
 import { registerServiceWorker } from '@/lib/registerServiceWorker';
 
 export function PWAInitializer() {
@@ -55,13 +56,13 @@ export function PWAInitializer() {
 
     // Listen for online status changes
     window.addEventListener('online', async () => {
-      console.log('App is online - syncing...');
+      console.warn('App is online - syncing...');
       try {
         const { syncService } = await import('@/lib/offlineDB');
         const result = await syncService.sync();
         if (result.synced > 0) {
           // Could show a toast notification here
-          console.log(`Successfully synced ${result.synced} items`);
+          console.warn(`Successfully synced ${result.synced} items`);
         }
       } catch (error) {
         console.error('Sync failed:', error);
@@ -69,10 +70,11 @@ export function PWAInitializer() {
     });
 
     window.addEventListener('offline', () => {
-      console.log('App is offline - changes will be queued');
+      console.warn('App is offline - changes will be queued');
     });
 
   }, []);
 
   return null;
 }
+

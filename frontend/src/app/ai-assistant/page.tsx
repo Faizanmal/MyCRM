@@ -1,22 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 import {
   Sparkles,
   Mail,
@@ -37,6 +21,23 @@ import {
   Users
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { aiSalesAssistantAPI } from '@/lib/premium-features-api';
 
 interface EmailDraft {
@@ -677,3 +678,4 @@ export default function AISalesAssistantPage() {
     </ProtectedRoute>
   );
 }
+

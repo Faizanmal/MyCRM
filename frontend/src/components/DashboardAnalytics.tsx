@@ -7,13 +7,14 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend,
     ResponsiveContainer, ComposedChart
 } from 'recharts';
+import {
+    TrendingUp, TrendingDown, BarChart3, PieChart as PieChartIcon
+} from 'lucide-react';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-    TrendingUp, TrendingDown, BarChart3, PieChart as PieChartIcon
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -486,3 +487,4 @@ const dashboardAnalyticsComponents = {
 };
 
 export default dashboardAnalyticsComponents;
+

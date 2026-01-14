@@ -57,7 +57,7 @@ dependencies:
   
   # Charts & Visualization
   fl_chart: ^1.1.0
-  syncfusion_flutter_charts: ^31.1.19
+  syncfusion_flutter_charts: ^32.1.23
   
   # Forms & Validation
   flutter_form_builder: ^10.1.0
@@ -78,22 +78,23 @@ dependencies:
   # Image Picker
   image_picker: ^1.0.7
   file_picker: ^10.3.7
+  path_provider: ^2.1.3
   
   # Connectivity & Offline
-  connectivity_plus: ^6.1.4
+  connectivity_plus: ^7.0.0
   
   # Push Notifications
   flutter_local_notifications: ^19.2.1
   
   # Secure Storage
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: ^10.0.0
   
   # Biometric Auth
-  local_auth: ^2.3.0
-  record: ^5.1.0
-  permission_handler: ^11.3.0
-  firebase_messaging: ^14.7.15
-  firebase_core: ^3.1.0
+  local_auth: ^3.0.0
+  record: ^6.1.2
+  permission_handler: ^12.0.1
+  firebase_messaging: ^16.1.0
+  firebase_core: ^4.3.0
 
 dev_dependencies:
   flutter_test:

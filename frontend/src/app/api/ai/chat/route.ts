@@ -286,3 +286,4 @@ function generateFallbackResponse(message: string, intent: Intent): ChatResponse
     actions: [],
   };
 }
+

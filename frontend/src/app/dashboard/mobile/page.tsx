@@ -6,8 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { useDevice } from '@/hooks/useMobile';
-import { MobileShell, MobileHeader, MobileSearchBar } from '@/components/mobile';
 import { 
   ChartBarIcon, 
   UserGroupIcon, 
@@ -18,6 +16,9 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+
+import { useDevice } from '@/hooks/useMobile';
+import { MobileShell, MobileHeader, MobileSearchBar } from '@/components/mobile';
 
 // Quick stats component
 function QuickStats() {
@@ -234,6 +235,8 @@ export default function MobileDashboard() {
           <div
             className="fixed inset-0 bg-black/50 z-50"
             onClick={() => setShowNewMenu(false)}
+            onKeyDown={(e) => { if (e.key === 'Escape') setShowNewMenu(false); }}
+            tabIndex={0}
           />
           <div className="fixed bottom-0 left-0 right-0 z-50 p-4 safe-area-bottom animate-slide-up">
             <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden">
@@ -274,3 +277,4 @@ export default function MobileDashboard() {
     </MobileShell>
   );
 }
+

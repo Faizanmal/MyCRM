@@ -1,6 +1,30 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import {
+  Mail,
+  Plus,
+  Search,
+  Play,
+  Pause,
+  Copy,
+  BarChart3,
+  Users,
+  Zap,
+  Target,
+  Sparkles,
+  Eye,
+  MousePointer,
+  Reply,
+  RefreshCw,
+  MoreVertical,
+  Edit,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,29 +51,6 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Mail,
-  Plus,
-  Search,
-  Play,
-  Pause,
-  Copy,
-  BarChart3,
-  Users,
-  Zap,
-  Target,
-  Sparkles,
-  Eye,
-  MousePointer,
-  Reply,
-  RefreshCw,
-  MoreVertical,
-  Edit,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-} from 'lucide-react';
-import { toast } from 'sonner';
 import { emailSequenceAPI } from '@/lib/ai-workflow-api';
 
 interface EmailSequence {
@@ -354,7 +355,7 @@ export default function EmailSequencesPage() {
               </Button>
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  <Button className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     <Plus className="w-4 h-4 mr-2" />
                     New Sequence
                   </Button>
@@ -420,7 +421,7 @@ export default function EmailSequencesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
+              <Card className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -439,7 +440,7 @@ export default function EmailSequencesPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
+              <Card className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -458,7 +459,7 @@ export default function EmailSequencesPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
+              <Card className="bg-linear-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -477,7 +478,7 @@ export default function EmailSequencesPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200 dark:border-orange-800">
+              <Card className="bg-linear-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200 dark:border-orange-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -780,3 +781,4 @@ export default function EmailSequencesPage() {
     </ProtectedRoute>
   );
 }
+

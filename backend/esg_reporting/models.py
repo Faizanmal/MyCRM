@@ -161,7 +161,7 @@ class ESGDataEntry(models.Model):
         related_name='entries'
     )
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -250,7 +250,7 @@ class ESGTarget(models.Model):
         related_name='targets'
     )
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -313,7 +313,7 @@ class ESGReport(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -406,7 +406,7 @@ class CarbonFootprint(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -479,7 +479,7 @@ class SupplierESGAssessment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,

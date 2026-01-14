@@ -16,6 +16,7 @@ import React, {
   useState,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+
 import { useToast } from '@/hooks/use-toast';
 
 // =============================================================================
@@ -148,7 +149,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
           break;
 
         default:
-          console.log('[Realtime] Unknown message type:', type);
+          console.warn('[Realtime] Unknown message type:', type);
       }
     },
     [toast, handleDataUpdate]
@@ -158,7 +159,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const connect = useCallback(() => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      console.log('[Realtime] No auth token, skipping connection');
+      console.warn('[Realtime] No auth token, skipping connection');
       return;
     }
 
@@ -173,7 +174,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('[Realtime] Connected');
+        console.warn('[Realtime] Connected');
         setIsConnected(true);
         setConnectionState('connected');
         reconnectAttemptsRef.current = 0;
@@ -206,7 +207,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       };
 
       ws.onclose = () => {
-        console.log('[Realtime] Disconnected');
+        console.warn('[Realtime] Disconnected');
         setIsConnected(false);
         setConnectionState('disconnected');
 
@@ -530,3 +531,4 @@ export function ConnectionIndicator() {
 }
 
 export default RealtimeProvider;
+

@@ -1,12 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { quantumModelingAPI } from '@/lib/new-features-api';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
   CpuChipIcon, 
   SparklesIcon, 
@@ -16,9 +10,39 @@ import {
   RocketLaunchIcon
 } from '@heroicons/react/24/outline';
 
+import { quantumModelingAPI } from '@/lib/new-features-api';
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+
+interface QuantumSimulation {
+  id: string;
+  name: string;
+  status: string;
+  progress: number;
+  results?: Record<string, unknown>;
+  simulation_type_display: string;
+  description: string;
+  qubits_requested: number;
+  paths_simulated?: number;
+  quantum_advantage_factor?: number;
+  execution_time_ms?: number;
+}
+
+interface QuantumStatistics {
+  total_simulations: number;
+  success_rate: number;
+  average_runtime: number;
+  total_paths_simulated: number;
+  average_quantum_advantage: number;
+  running_simulations: number;
+}
+
 export default function QuantumModelingPage() {
-  const [simulations, setSimulations] = useState<any[]>([]);
-  const [statistics, setStatistics] = useState<any>(null);
+  const [simulations, setSimulations] = useState<QuantumSimulation[]>([]);
+  const [statistics, setStatistics] = useState<QuantumStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
 
@@ -206,10 +230,10 @@ export default function QuantumModelingPage() {
           </Card>
 
           {/* Info Card */}
-          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+          <Card className="bg-linear-to-r from-purple-50 to-blue-50 border-purple-200">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <RocketLaunchIcon className="w-12 h-12 text-purple-600 flex-shrink-0" />
+                <RocketLaunchIcon className="w-12 h-12 text-purple-600 shrink-0" />
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Quantum Computing Advantage</h3>
                   <p className="text-gray-700 mb-3">
@@ -231,3 +255,4 @@ export default function QuantumModelingPage() {
     </ProtectedRoute>
   );
 }
+

@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+
 import SettingsSidebar from '@/components/SettingsSidebar';
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
@@ -13,3 +14,4 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
         </div>
     );
 }
+

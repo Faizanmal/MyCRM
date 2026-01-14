@@ -1,13 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-// import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-// import { Label } from '@/components/ui/label';
 import { 
   Shield, 
   Smartphone,
@@ -26,6 +19,14 @@ import {
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
+
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+// import { Label } from '@/components/ui/label';
 
 // Types
 interface TrustedDevice {
@@ -154,13 +155,13 @@ const api = {
     ];
   },
   revokeDevice: async (deviceId: string): Promise<void> => {
-    console.log('Revoking device:', deviceId);
+    console.warn('Revoking device:', deviceId);
   },
   terminateSession: async (sessionId: string): Promise<void> => {
-    console.log('Terminating session:', sessionId);
+    console.warn('Terminating session:', sessionId);
   },
   verifyDevice: async (deviceId: string): Promise<void> => {
-    console.log('Verifying device:', deviceId);
+    console.warn('Verifying device:', deviceId);
   },
 };
 
@@ -624,3 +625,4 @@ export const ZeroTrustDashboard: React.FC = () => {
 };
 
 export default ZeroTrustDashboard;
+

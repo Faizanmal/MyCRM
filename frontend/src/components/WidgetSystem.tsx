@@ -21,6 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2, Settings, Maximize2, Minimize2 } from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -352,7 +353,7 @@ export function MetricWidget({
 export function ChartPlaceholder({ height = 150 }: { height?: number }) {
     return (
         <div
-            className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center"
+            className="bg-linear-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center"
             style={{ height }}
         >
             <span className="text-gray-400 text-sm">Chart Content</span>
@@ -382,3 +383,4 @@ export function ListWidget({
 }
 
 export default CustomizableDashboard;
+

@@ -9,6 +9,7 @@
 
 import React, { ReactNode } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
+
 import { useScrollAnimation } from '@/hooks/useAnimations';
 import { fadeInUp, cardHover } from '@/lib/animations';
 import { cn } from '@/lib/utils';
@@ -230,3 +231,4 @@ export function FeatureCard({ icon, title, description, delay = 0 }: FeatureCard
     </motion.div>
   );
 }
+

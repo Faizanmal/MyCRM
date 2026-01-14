@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Eye, Download, Trash2, Save, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { Eye, Download, Trash2, Save, Loader2 } from 'lucide-react';
 
 export default function PrivacySettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +40,7 @@ export default function PrivacySettingsPage() {
       if (!response.ok) throw new Error('Failed to save privacy settings');
       toast.success('Privacy settings updated successfully');
     } catch (error) {
-      console.log("Failed to save privacy settings",error);
+      console.warn("Failed to save privacy settings",error);
       toast.error('Failed to save privacy settings');
     } finally {
       setIsSaving(false);
@@ -52,7 +53,7 @@ export default function PrivacySettingsPage() {
       if (!response.ok) throw new Error('Failed to export data');
       toast.success('Your data export has been initiated. Check your email soon.');
     } catch (error) {
-      console.log("Failed to export data",error);
+      console.warn("Failed to export data",error);
       toast.error('Failed to export data');
     }
   };
@@ -65,7 +66,7 @@ export default function PrivacySettingsPage() {
       if (!response.ok) throw new Error('Failed to delete account');
       toast.success('Your account has been deleted');
     } catch (error) {
-      console.log("Failed to delete account",error);
+      console.warn("Failed to delete account",error);
       toast.error('Failed to delete account');
     }
   };
@@ -226,3 +227,4 @@ export default function PrivacySettingsPage() {
     </ProtectedRoute>
   );
 }
+

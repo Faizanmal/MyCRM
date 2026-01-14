@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { documentAPI } from '@/lib/api';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import {
   FolderIcon,
   CloudArrowUpIcon,
@@ -15,6 +12,10 @@ import {
   CheckCircleIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline';
+
+import { documentAPI } from '@/lib/api';
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 interface Document {
   id: string;
@@ -258,3 +259,4 @@ export default function DocumentsPage() {
     </ProtectedRoute>
   );
 }
+

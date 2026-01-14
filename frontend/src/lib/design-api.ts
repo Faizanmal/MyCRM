@@ -109,12 +109,12 @@ export interface Template {
 // ============= Auth API =============
 
 export const authAPI = {
-  login: async (username: string, password: string) => {
+  login: async (username: string, password: string): Promise<unknown> => {
     const response = await apiClient.post('/auth/login/', { username, password });
     return response.data;
   },
   
-  logout: () => {
+  logout: (): void => {
     localStorage.removeItem('auth_token');
   },
 };
@@ -122,36 +122,36 @@ export const authAPI = {
 // ============= Projects API =============
 
 export const projectsAPI = {
-  list: async () => {
+  list: async (): Promise<unknown> => {
     const response = await apiClient.get<Project[]>('/projects/projects/');
     return response.data;
   },
   
-  myProjects: async () => {
+  myProjects: async (): Promise<unknown> => {
     const response = await apiClient.get<Project[]>('/projects/projects/my_projects/');
     return response.data;
   },
   
-  get: async (id: number) => {
+  get: async (id: number): Promise<unknown> => {
     const response = await apiClient.get<Project>(`/projects/projects/${id}/`);
     return response.data;
   },
   
-  create: async (data: Partial<Project>) => {
+  create: async (data: Partial<Project>): Promise<unknown> => {
     const response = await apiClient.post<Project>('/projects/projects/', data);
     return response.data;
   },
   
-  update: async (id: number, data: Partial<Project>) => {
+  update: async (id: number, data: Partial<Project>): Promise<unknown> => {
     const response = await apiClient.patch<Project>(`/projects/projects/${id}/`, data);
     return response.data;
   },
   
-  delete: async (id: number) => {
+  delete: async (id: number): Promise<void> => {
     await apiClient.delete(`/projects/projects/${id}/`);
   },
   
-  saveDesign: async (id: number, design_data: Record<string, unknown>) => {
+  saveDesign: async (id: number, design_data: Record<string, unknown>): Promise<unknown> => {
     const response = await apiClient.post<Project>(
       `/projects/projects/${id}/save_design/`,
       { design_data }
@@ -159,17 +159,17 @@ export const projectsAPI = {
     return response.data;
   },
   
-  createVersion: async (id: number) => {
+  createVersion: async (id: number): Promise<unknown> => {
     const response = await apiClient.post(`/projects/projects/${id}/create_version/`);
     return response.data;
   },
   
-  getVersions: async (id: number) => {
+  getVersions: async (id: number): Promise<unknown> => {
     const response = await apiClient.get(`/projects/projects/${id}/versions/`);
     return response.data;
   },
   
-  restoreVersion: async (id: number, version_number: number) => {
+  restoreVersion: async (id: number, version_number: number): Promise<unknown> => {
     const response = await apiClient.post(
       `/projects/projects/${id}/restore_version/`,
       { version_number }
@@ -177,7 +177,7 @@ export const projectsAPI = {
     return response.data;
   },
   
-  addCollaborator: async (id: number, username: string) => {
+  addCollaborator: async (id: number, username: string): Promise<unknown> => {
     const response = await apiClient.post(
       `/projects/projects/${id}/add_collaborator/`,
       { username }
@@ -189,7 +189,7 @@ export const projectsAPI = {
 // ============= AI Services API =============
 
 export const aiAPI = {
-  generateLayout: async (prompt: string, design_type: 'graphic' | 'ui_ux' | 'logo' = 'ui_ux') => {
+  generateLayout: async (prompt: string, design_type: 'graphic' | 'ui_ux' | 'logo' = 'ui_ux'): Promise<unknown> => {
     const response = await apiClient.post('/ai/generate-layout/', {
       prompt,
       design_type,
@@ -202,17 +202,17 @@ export const aiAPI = {
     industry?: string;
     style?: string;
     colors?: string[];
-  }) => {
+  }): Promise<unknown> => {
     const response = await apiClient.post('/ai/generate-logo/', params);
     return response.data;
   },
   
-  generateColorPalette: async (theme: string) => {
+  generateColorPalette: async (theme: string): Promise<unknown> => {
     const response = await apiClient.post('/ai/generate-color-palette/', { theme });
     return response.data;
   },
   
-  suggestFonts: async (design_style: string, purpose: string = 'general') => {
+  suggestFonts: async (design_style: string, purpose: string = 'general'): Promise<unknown> => {
     const response = await apiClient.post('/ai/suggest-fonts/', {
       design_style,
       purpose,
@@ -220,7 +220,7 @@ export const aiAPI = {
     return response.data;
   },
   
-  refineDesign: async (current_design: Record<string, unknown>, refinement_instruction: string) => {
+  refineDesign: async (current_design: Record<string, unknown>, refinement_instruction: string): Promise<unknown> => {
     const response = await apiClient.post('/ai/refine-design/', {
       current_design,
       refinement_instruction,
@@ -228,7 +228,7 @@ export const aiAPI = {
     return response.data;
   },
   
-  generateImage: async (prompt: string, size: string = '1024x1024', style: string = 'vivid') => {
+  generateImage: async (prompt: string, size: string = '1024x1024', style: string = 'vivid'): Promise<unknown> => {
     const response = await apiClient.post('/ai/generate-image/', {
       prompt,
       size,
@@ -237,7 +237,7 @@ export const aiAPI = {
     return response.data;
   },
   
-  getRequests: async () => {
+  getRequests: async (): Promise<unknown> => {
     const response = await apiClient.get<AIGenerationRequest[]>('/ai/requests/');
     return response.data;
   },
@@ -246,26 +246,27 @@ export const aiAPI = {
 // ============= Components API =============
 
 export const componentsAPI = {
-  list: async (project_id: number) => {
+  list: async (project_id: number): Promise<unknown> => {
     const response = await apiClient.get<DesignComponent[]>('/projects/components/', {
       params: { project_id },
     });
     return response.data;
   },
   
-  create: async (data: Partial<DesignComponent>) => {
+  create: async (data: Partial<DesignComponent>): Promise<unknown> => {
     const response = await apiClient.post<DesignComponent>('/projects/components/', data);
     return response.data;
   },
   
-  update: async (id: number, data: Partial<DesignComponent>) => {
+  update: async (id: number, data: Partial<DesignComponent>): Promise<unknown> => {
     const response = await apiClient.patch<DesignComponent>(`/projects/components/${id}/`, data);
     return response.data;
   },
   
-  delete: async (id: number) => {
+  delete: async (id: number): Promise<void> => {
     await apiClient.delete(`/projects/components/${id}/`);
   },
 };
 
 export default apiClient;
+

@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { integrationAPI } from '@/lib/api';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import {
   PuzzlePieceIcon,
   BoltIcon,
@@ -14,6 +11,10 @@ import {
   PlusIcon,
   LinkIcon,
 } from '@heroicons/react/24/outline';
+
+import { integrationAPI } from '@/lib/api';
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Integration Platform Icons/Logos
 const integrationLogos: Record<string, string> = {
@@ -376,3 +377,4 @@ export default function IntegrationsPage() {
     </ProtectedRoute>
   );
 }
+

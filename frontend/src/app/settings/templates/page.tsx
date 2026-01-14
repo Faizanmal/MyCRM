@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { FileText, Copy, Edit2, Trash2, Plus, Save, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { FileText, Copy, Edit2, Trash2, Plus, Save, Loader2 } from 'lucide-react';
 
 interface Template {
   id: string;
@@ -80,7 +81,7 @@ export default function TemplatesSettingsPage() {
       setShowCreateForm(false);
       setNewTemplate({ name: '', type: 'email', content: '' });
     } catch (error) {
-      console.log(error);
+      console.warn(error);
       toast.error('Failed to create template');
     } finally {
       setIsSaving(false);
@@ -100,7 +101,7 @@ export default function TemplatesSettingsPage() {
       setTemplates(prev => prev.filter(t => t.id !== templateId));
       toast.success('Template deleted');
     } catch (error) {
-      console.log("Failed to delete template",error);
+      console.warn("Failed to delete template",error);
       toast.error('Failed to delete template');
     }
   };
@@ -294,3 +295,4 @@ export default function TemplatesSettingsPage() {
     </ProtectedRoute>
   );
 }
+

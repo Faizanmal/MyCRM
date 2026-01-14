@@ -357,21 +357,26 @@ class _AddContactScreenState extends State<AddContactScreen> {
                 ),
               ),
               const SizedBox(height: AppSizes.paddingSm),
-              DropdownButtonFormField<String>(
-                value: _selectedStatus,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.label),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                items: _statusOptions.map((status) {
-                  return DropdownMenuItem(
-                    value: status,
-                    child: Text(status),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() => _selectedStatus = value!);
-                },
+                child: DropdownButton<String>(
+                  value: _selectedStatus,
+                  onChanged: (value) {
+                    setState(() => _selectedStatus = value!);
+                  },
+                  items: _statusOptions.map((status) {
+                    return DropdownMenuItem(
+                      value: status,
+                      child: Text(status),
+                    );
+                  }).toList(),
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
               ),
               const SizedBox(height: AppSizes.paddingLg),
               

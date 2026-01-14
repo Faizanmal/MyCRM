@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Lock, Copy, Eye, EyeOff, Plus, Trash2, RefreshCw, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { Lock, Copy, Eye, EyeOff, Plus, Trash2, RefreshCw, Loader2 } from 'lucide-react';
 
 interface ApiKey {
   id: string;
@@ -82,7 +83,7 @@ export default function ApiSettingsPage() {
       setKeyName('');
       setShowKeyForm(false);
     } catch (error) {
-      console.log("Failed to create API key",error);
+      console.warn("Failed to create API key",error);
       toast.error('Failed to create API key');
     } finally {
       setIsSaving(false);
@@ -107,7 +108,7 @@ export default function ApiSettingsPage() {
       setApiKeys(prev => prev.filter(k => k.id !== keyId));
       toast.success('API key deleted');
     } catch (error) {
-      console.log("Failed to delete API key",error);
+      console.warn("Failed to delete API key",error);
       toast.error('Failed to delete API key');
     }
   };
@@ -124,7 +125,7 @@ export default function ApiSettingsPage() {
 
       toast.success('API key rotated successfully');
     } catch (error) {
-      console.log("Failed to rotate API key",error);
+      console.warn("Failed to rotate API key",error);
       toast.error('Failed to rotate API key');
     }
   };
@@ -316,3 +317,4 @@ export default function ApiSettingsPage() {
     </ProtectedRoute>
   );
 }
+

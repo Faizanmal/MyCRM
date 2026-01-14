@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Keyboard, Edit2, Save, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 // import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { Keyboard, Edit2, Save, Loader2 } from 'lucide-react';
 
 interface Shortcut {
   id: string;
@@ -55,7 +56,7 @@ export default function ShortcutsSettingsPage() {
       toast.success('Shortcut updated');
       setEditingId(null);
     } catch (error) {
-      console.log("Failed to update shortcut",error);
+      console.warn("Failed to update shortcut",error);
       toast.error('Failed to update shortcut');
     } finally {
       setIsSaving(false);
@@ -75,7 +76,7 @@ export default function ShortcutsSettingsPage() {
 
       toast.success('Shortcuts reset to defaults');
     } catch (error) {
-      console.log("Failed to reset shortcuts",error);
+      console.warn("Failed to reset shortcuts",error);
       toast.error('Failed to reset shortcuts');
     }
   };
@@ -227,3 +228,4 @@ export default function ShortcutsSettingsPage() {
     </ProtectedRoute>
   );
 }
+

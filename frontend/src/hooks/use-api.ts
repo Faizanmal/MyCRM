@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { meetingsAPI, actionItemsAPI, notesAPI, tagsAPI } from '@/lib/api';
-import type { Meeting, ActionItem, Tag } from '@/lib/api';
+
+import { meetingsAPI, actionItemsAPI, notesAPI, tagsAPI, type Meeting, type ActionItem, type Tag } from '@/lib/api';
 
 type MeetingCreatePayload = Record<string, unknown> | FormData;
 
@@ -253,3 +253,4 @@ export function useFavorites() {
     queryFn: () => meetingsAPI.getFavorites(),
   });
 }
+

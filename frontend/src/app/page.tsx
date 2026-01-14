@@ -2,13 +2,14 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
   Users, TrendingUp, 
   Sparkles, ArrowRight, Zap, Shield, 
   Target, Globe, Clock, CheckCircle
 } from 'lucide-react';
+
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 // Landing page that redirects authenticated users to dashboard

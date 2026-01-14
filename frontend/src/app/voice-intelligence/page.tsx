@@ -1,18 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-// import { Label } from '@/components/ui/label';
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
 import {
   Mic,
   Phone,
@@ -44,6 +32,19 @@ import {
   Zap,
   Brain
 } from 'lucide-react';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 import { voiceIntelligenceAPI } from '@/lib/ai-workflow-api';
 
 interface VoiceRecording {
@@ -542,6 +543,9 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                       className={`p-3 border rounded-lg cursor-pointer transition-colors ${selectedRecording?.id === recording.id ? 'border-violet-500 bg-violet-50' : 'hover:bg-gray-50'
                         }`}
                       onClick={() => selectRecording(recording)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { selectRecording(recording); e.preventDefault(); } }}
+                      tabIndex={0}
+                      role="button"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -748,7 +752,7 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                               </Button>
                             </div>
 
-                            <div className="p-4 border rounded-lg max-h-[400px] overflow-y-auto">
+                            <div className="p-4 border rounded-lg max-h-100 overflow-y-auto">
                               <pre className="whitespace-pre-wrap text-sm font-sans">
                                 {transcription.full_transcript}
                               </pre>
@@ -797,7 +801,7 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                                   type="checkbox"
                                   checked={action.status === 'completed'}
                                   className="mt-1 h-4 w-4 rounded border-gray-300"
-                                  onChange={() => { }}
+                                  onChange={() => { /* TODO: implement action status toggle */ }}
                                 />
                                 <div>
                                   <p className={`font-medium ${action.status === 'completed' ? 'line-through text-gray-400' : ''}`}>
@@ -1060,3 +1064,4 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
     </ProtectedRoute>
   );
 }
+

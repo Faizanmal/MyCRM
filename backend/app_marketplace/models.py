@@ -231,7 +231,7 @@ class AppInstallation(models.Model):
     
     # Installation scope
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,

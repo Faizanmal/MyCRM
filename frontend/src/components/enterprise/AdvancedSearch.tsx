@@ -3,6 +3,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Search, Save, Star, X, Plus } from 'lucide-react';
+import axios from 'axios';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Search, Save, Star, X, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+
 
 interface SearchFilter {
   field: string;
@@ -381,3 +383,4 @@ function SaveSearchDialog({ onSave }: { onSave: (name: string) => void }) {
     </Dialog>
   );
 }
+

@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { analyticsAPI } from '@/lib/api';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import {
   ChartBarIcon,
   CurrencyDollarIcon,
@@ -27,6 +24,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+
+import { analyticsAPI } from '@/lib/api';
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
@@ -349,3 +350,4 @@ export default function PipelineAnalyticsPage() {
     </ProtectedRoute>
   );
 }
+

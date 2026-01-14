@@ -1,7 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { 
+  Users, 
+  Ticket, 
+  ShoppingCart, 
+  BookOpen, 
+  Bell, 
+  Search, 
+  Plus, 
+  MessageSquare,
+  CheckCircle,
+  AlertCircle,
+  ExternalLink,
+  ChevronRight,
+  Send,
+  Package,
+  TrendingUp,
+  Eye,
+  Settings
+} from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,29 +32,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { 
-  Users, 
-  Ticket, 
-  ShoppingCart, 
-  BookOpen, 
-  Bell, 
-  Search, 
-  Plus, 
-  MessageSquare,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  HelpCircle,
-  FileText,
-  ExternalLink,
-  ChevronRight,
-  Send,
-  Package,
-  CreditCard,
-  TrendingUp,
-  Eye,
-  Settings
-} from 'lucide-react';
 import { customerPortalAPI } from '@/lib/api';
 
 interface Ticket {
@@ -100,7 +97,7 @@ export default function CustomerPortalPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isCreateTicketOpen, setIsCreateTicketOpen] = useState(false);
   const [newTicket, setNewTicket] = useState({ subject: '', description: '', priority: 'medium' });
@@ -470,7 +467,7 @@ export default function CustomerPortalPage() {
                             {getPriorityBadge(ticket.priority)}
                           </div>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
                       </div>
                       <p className="text-xs text-muted-foreground mt-2">
                         Updated: {new Date(ticket.updated_at).toLocaleDateString()}
@@ -501,7 +498,7 @@ export default function CustomerPortalPage() {
                   </CardHeader>
                   <Separator />
                   <CardContent className="flex-1 overflow-hidden p-0">
-                    <ScrollArea className="h-[400px] p-4">
+                    <ScrollArea className="h-100 p-4">
                       <div className="space-y-4">
                         {selectedTicket.messages.map((msg) => (
                           <div key={msg.id} className={`flex ${msg.is_staff ? 'justify-start' : 'justify-end'}`}>
@@ -618,7 +615,7 @@ export default function CustomerPortalPage() {
                         </span>
                       </div>
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
                   </div>
                 </CardContent>
               </Card>
@@ -663,3 +660,4 @@ export default function CustomerPortalPage() {
     </div>
   );
 }
+

@@ -410,3 +410,4 @@ export function useShare() {
 
   return { canShare, share };
 }
+

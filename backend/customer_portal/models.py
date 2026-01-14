@@ -47,7 +47,7 @@ class CustomerAccount(models.Model):
     
     # Branding (for white-label)
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,

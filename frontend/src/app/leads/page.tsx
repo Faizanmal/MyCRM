@@ -1,6 +1,24 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { 
+  UserPlus, 
+  Search,
+  MoreVertical,
+  Edit,
+  Trash2,
+  TrendingUp,
+  DollarSign,
+  Star,
+  Flame,
+  RefreshCw,
+  AlertCircle,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,24 +49,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  UserPlus, 
-  Search,
-  MoreVertical,
-  Edit,
-  Trash2,
-  TrendingUp,
-  DollarSign,
-  Star,
-  Flame,
-  RefreshCw,
-  AlertCircle,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
 import { leadsAPI } from '@/lib/api';
-import { toast } from 'sonner';
+
 
 interface Lead {
   id: number;
@@ -763,3 +765,4 @@ export default function LeadsPage() {
     </ProtectedRoute>
   );
 }
+

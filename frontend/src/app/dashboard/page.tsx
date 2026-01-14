@@ -1,12 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users,
   UserPlus,
@@ -23,9 +17,16 @@ import {
   Target,
   RefreshCw
 } from 'lucide-react';
+import { toast } from 'sonner';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { dashboardAPI, contactsAPI, leadsAPI, opportunitiesAPI, tasksAPI } from '@/lib/api';
-import { toast } from 'sonner';
 import AIRecommendations from '@/components/AIRecommendations';
 
 interface DashboardMetrics {
@@ -651,3 +652,4 @@ export default function DashboardPage() {
     </ProtectedRoute>
   );
 }
+

@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+
 import { cn } from '@/lib/utils';
 
 interface SkeletonProps {
@@ -304,3 +305,4 @@ export function PageSkeleton() {
     </div>
   );
 }
+

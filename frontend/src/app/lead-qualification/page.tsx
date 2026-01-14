@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Target, Award, Workflow, TrendingUp, Plus, Edit, Trash2,
   Play, Pause, BarChart3, Users, CheckCircle, XCircle
 } from 'lucide-react';
 import Link from 'next/link';
+
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface Lead {
   id: number;
@@ -513,3 +514,4 @@ export default function LeadQualificationPage() {
     </div>
   );
 }
+

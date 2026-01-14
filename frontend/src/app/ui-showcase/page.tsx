@@ -1,9 +1,5 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { 
   Sparkles, 
   Zap, 
@@ -14,6 +10,11 @@ import {
   DollarSign,
   Target
 } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function UIShowcasePage() {
   return (
@@ -190,3 +191,4 @@ export default function UIShowcasePage() {
     </div>
   );
 }
+

@@ -2,8 +2,9 @@
 
 import React, { lazy, Suspense, ComponentType, ReactNode, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Skeleton } from '@/components/ui/skeleton';
 import Image, { ImageProps } from 'next/image';
+
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Lazy Loading Utilities
@@ -280,3 +281,4 @@ const lazyLoadingUtils = {
 };
 
 export default lazyLoadingUtils;
+

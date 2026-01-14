@@ -59,7 +59,7 @@ class SocialAccount(models.Model):
     
     # Organization
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -308,7 +308,7 @@ class SocialMonitoringRule(models.Model):
     
     # Organization
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,

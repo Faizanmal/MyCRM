@@ -3,9 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   BarChart3,
   Users,
@@ -50,6 +47,10 @@ import {
   Globe,
   ShieldCheck,
 } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { cn } from '@/lib/utils';
 import NotificationsDropdown from '@/components/NotificationsDropdown';
 
@@ -218,7 +219,7 @@ const toolsNavigation = [
               </h3>
 
               {navigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                const isActive = pathname === item.href || pathname?.startsWith(`${item.href  }/`);
                 return (
                   <Link key={item.name} href={item.href}>
                     <Button
@@ -249,7 +250,7 @@ const toolsNavigation = [
               </h3>
 
               {analyticsNavigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                const isActive = pathname === item.href || pathname?.startsWith(`${item.href  }/`);
                 return (
                   <Link key={item.name} href={item.href}>
                     <Button
@@ -280,7 +281,7 @@ const toolsNavigation = [
               </h3>
 
               {advancedNavigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                const isActive = pathname === item.href || pathname?.startsWith(`${item.href  }/`);
                 return (
                   <Link key={item.name} href={item.href}>
                     <Button
@@ -311,7 +312,7 @@ const toolsNavigation = [
               </h3>
 
               {aiWorkflowNavigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                const isActive = pathname === item.href || pathname?.startsWith(`${item.href  }/`);
                 return (
                   <Link key={item.name} href={item.href}>
                     <Button
@@ -342,7 +343,7 @@ const toolsNavigation = [
               </h3>
 
               {premiumNavigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                const isActive = pathname === item.href || pathname?.startsWith(`${item.href  }/`);
                 return (
                   <Link key={item.name} href={item.href}>
                     <Button
@@ -373,7 +374,7 @@ const toolsNavigation = [
               </h3>
 
               {toolsNavigation.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                const isActive = pathname === item.href || pathname?.startsWith(`${item.href  }/`);
                 return (
                   <Link key={item.name} href={item.href}>
                     <Button
@@ -399,10 +400,11 @@ const toolsNavigation = [
 
         {/* Mobile Sidebar with modern styling */}
         {mobileMenuOpen && (
-          <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setMobileMenuOpen(false)}>
+          <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setMobileMenuOpen(false)} onKeyDown={(e) => { if (e.key === 'Escape') setMobileMenuOpen(false); }} tabIndex={0}>
             <aside
               className="absolute left-0 top-0 bottom-0 w-72 glass shadow-2xl animate-in slide-in-from-left duration-300"
               onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
             >
               <div className="p-4 border-b border-border/50 flex items-center justify-between">
                 <h2 className="font-bold text-lg gradient-text">Navigation</h2>
@@ -587,3 +589,4 @@ const toolsNavigation = [
     </div>
   );
 }
+

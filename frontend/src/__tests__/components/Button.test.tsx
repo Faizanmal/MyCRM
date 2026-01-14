@@ -5,6 +5,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
+
 import { Button } from '@/components/ui/button';
 
 describe('Button Component', () => {
@@ -72,3 +73,4 @@ describe('Button Component', () => {
         expect(link).toHaveAttribute('href', '/test');
     });
 });
+

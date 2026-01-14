@@ -3,17 +3,6 @@
 import React from 'react';
 // import { useQuery } from '@tanstack/react-query';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
   Trophy,
   Medal,
   Target,
@@ -31,6 +20,18 @@ import {
   Clock,
   Send,
 } from 'lucide-react';
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // Types
 interface Achievement {
@@ -322,7 +323,7 @@ const OverviewTab: React.FC<{ stats: UserStats }> = ({ stats }) => (
       <CardContent className="p-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="h-24 w-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+            <div className="h-24 w-24 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
               <span className="text-3xl font-bold text-white">{stats.level}</span>
             </div>
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-xs">
@@ -433,11 +434,11 @@ const AchievementsTab: React.FC = () => (
               <div
                 className={`h-14 w-14 rounded-lg flex items-center justify-center ${
                   achievement.rarity === 'legendary'
-                    ? 'bg-gradient-to-br from-yellow-400 to-orange-500'
+                    ? 'bg-linear-to-br from-yellow-400 to-orange-500'
                     : achievement.rarity === 'epic'
-                    ? 'bg-gradient-to-br from-purple-400 to-purple-600'
+                    ? 'bg-linear-to-br from-purple-400 to-purple-600'
                     : achievement.rarity === 'rare'
-                    ? 'bg-gradient-to-br from-blue-400 to-blue-600'
+                    ? 'bg-linear-to-br from-blue-400 to-blue-600'
                     : 'bg-muted'
                 }`}
               >
@@ -784,3 +785,4 @@ export default function GamificationDashboard() {
     </div>
   );
 }
+

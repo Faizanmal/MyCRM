@@ -1,6 +1,26 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { 
+  UserPlus, 
+  Search,
+  Filter,
+  MoreVertical,
+  Mail,
+  Phone,
+  Edit,
+  Trash2,
+  Building2,
+  MapPin,
+  Download,
+  Upload,
+  RefreshCw,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,26 +45,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { 
-  UserPlus, 
-  Search,
-  Filter,
-  MoreVertical,
-  Mail,
-  Phone,
-  Edit,
-  Trash2,
-  Building2,
-  MapPin,
-  Download,
-  Upload,
-  RefreshCw,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
 import { contactsAPI } from '@/lib/api';
-import { toast } from 'sonner';
+
 
 interface Contact {
   id: number;
@@ -659,3 +661,4 @@ export default function ContactsPage() {
     </ProtectedRoute>
   );
 }
+

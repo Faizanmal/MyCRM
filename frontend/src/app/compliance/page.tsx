@@ -8,6 +8,7 @@
 'use client';
 
 import React from 'react';
+
 import { ComplianceDashboard } from '@/components/enterprise/ComplianceDashboard';
 
 export default function CompliancePage() {
@@ -17,3 +18,4 @@ export default function CompliancePage() {
     </div>
   );
 }
+

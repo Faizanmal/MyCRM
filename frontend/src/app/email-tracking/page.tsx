@@ -1,6 +1,23 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import {
+  Mail,
+  Send,
+  Eye,
+  MousePointer,
+  Reply,
+  Clock,
+  Plus,
+  Search,
+  Play,
+  Pause,
+  RefreshCw,
+  FileText,
+  Zap
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,22 +36,6 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Mail,
-  Send,
-  Eye,
-  MousePointer,
-  Reply,
-  Clock,
-  Plus,
-  Search,
-  Play,
-  Pause,
-  RefreshCw,
-  FileText,
-  Zap
-} from 'lucide-react';
-import { toast } from 'sonner';
 import { emailTrackingAPI } from '@/lib/premium-features-api';
 
 interface TrackedEmail {
@@ -570,3 +571,4 @@ export default function EmailTrackingPage() {
     </ProtectedRoute>
   );
 }
+

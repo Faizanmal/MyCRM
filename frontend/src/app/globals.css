@@ -978,7 +978,7 @@ select:focus-visible {
 
 @keyframes float {
   0%, 100% {
-    transform: translateY(0px);
+    transform: translateY(0);
   }
   50% {
     transform: translateY(-20px);
@@ -1220,7 +1220,7 @@ select:focus-visible {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
   }
   50% {
-    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    border-radius: 30% 60% 70% 40% / 50% 60% 30%;
   }
 }
 
@@ -1245,7 +1245,7 @@ select:focus-visible {
 }
 
 @keyframes blink-caret {
-  from, to {
+  0%, 100% {
     border-color: transparent;
   }
   50% {
@@ -1385,10 +1385,7 @@ select:focus-visible {
   }
   
   .safe-area-inset {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 }
 
@@ -1467,7 +1464,7 @@ select:focus-visible {
 }
 
 /* Mobile-optimized input fields */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   input,
   textarea,
   select {

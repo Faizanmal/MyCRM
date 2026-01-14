@@ -10,6 +10,7 @@
 import React, { ReactNode } from 'react';
 import { motion, Variants, HTMLMotionProps } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+
 import { cn } from '@/lib/utils';
 
 // Animation Variants
@@ -294,3 +295,4 @@ export function RevealContainer({
     </div>
   );
 }
+

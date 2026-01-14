@@ -1,6 +1,27 @@
 'use client';
 
 import React from 'react';
+import {
+  Accessibility,
+  Eye,
+  EyeOff,
+  Keyboard,
+  Mic,
+  MicOff,
+  Monitor,
+  Type,
+  Brain,
+  Contrast,
+  Palette,
+  ZoomIn,
+  Focus,
+  PlayCircle,
+  Timer,
+  BookOpen,
+  CheckCircle,
+  Info,
+} from 'lucide-react';
+
 import { useAccessibility } from '@/lib/accessibility/AccessibilityProvider';
 import {
   Card,
@@ -22,26 +43,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Accessibility,
-  Eye,
-  EyeOff,
-  Keyboard,
-  Mic,
-  MicOff,
-  Monitor,
-  Type,
-  Brain,
-  Contrast,
-  Palette,
-  ZoomIn,
-  Focus,
-  PlayCircle,
-  Timer,
-  BookOpen,
-  CheckCircle,
-  Info,
-} from 'lucide-react';
 
 // Visual Settings Tab
 const VisualSettingsTab: React.FC = () => {
@@ -728,3 +729,4 @@ export default function AccessibilitySettings() {
     </div>
   );
 }
+

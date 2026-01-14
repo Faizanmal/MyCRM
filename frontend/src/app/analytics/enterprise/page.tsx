@@ -8,6 +8,7 @@
 'use client';
 
 import React from 'react';
+
 import { AnalyticsDashboard } from '@/components/enterprise/AnalyticsDashboard';
 
 export default function EntAnalyticsPage() {
@@ -17,3 +18,4 @@ export default function EntAnalyticsPage() {
     </div>
   );
 }
+

@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { 
   ShieldCheckIcon, 
   KeyIcon, 
@@ -15,6 +13,9 @@ import {
   LinkIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 // Types
 interface SSOProvider {
@@ -818,3 +819,4 @@ export default function SSOSettingsPage() {
     </MainLayout>
   );
 }
+

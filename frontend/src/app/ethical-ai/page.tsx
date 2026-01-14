@@ -1,17 +1,47 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ShieldCheckIcon, ExclamationTriangleIcon, CheckCircleIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+
 import { ethicalAIAPI } from '@/lib/new-features-api';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheckIcon, ExclamationTriangleIcon, CheckCircleIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+
+interface BiasDetection {
+  id: string;
+  model_name: string;
+  bias_score: number;
+  detected_at: string;
+  status: string;
+  severity: string;
+  bias_type: string;
+  detection_date: string;
+  confidence_score: number;
+  is_resolved: boolean;
+  affected_groups?: string[];
+  mitigation_recommendations?: string[];
+}
+
+interface DecisionAudit {
+  id: string;
+  decision: string;
+  confidence: number;
+  ethical_score: number;
+  audited_at: string;
+  model_name: string;
+  decision_type: string;
+  flagged_for_review: boolean;
+  timestamp: string;
+  confidence_score: number;
+  explanation: string;
+}
 
 export default function EthicalAIPage() {
-  const [biasDetections, setBiasDetections] = useState<any[]>([]);
-  const [audits, setAudits] = useState<any[]>([]);
+  const [biasDetections, setBiasDetections] = useState<BiasDetection[]>([]);
+  const [audits, setAudits] = useState<DecisionAudit[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -107,7 +137,7 @@ export default function EthicalAIPage() {
                         )}
                       </div>
                       
-                      {detection.affected_groups?.length > 0 && (
+                      {detection.affected_groups && detection.affected_groups.length > 0 && (
                         <div className="mt-3 p-3 bg-orange-50 rounded">
                           <div className="text-sm font-medium mb-1">Affected Groups:</div>
                           <div className="flex flex-wrap gap-2">
@@ -118,7 +148,7 @@ export default function EthicalAIPage() {
                         </div>
                       )}
 
-                      {detection.mitigation_recommendations?.length > 0 && (
+                      {detection.mitigation_recommendations && detection.mitigation_recommendations.length > 0 && (
                         <div className="mt-3">
                           <div className="text-sm font-medium mb-2">Recommendations:</div>
                           <ul className="text-sm text-gray-600 space-y-1">
@@ -180,24 +210,24 @@ export default function EthicalAIPage() {
           </Card>
 
           {/* Info */}
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <Card className="bg-linear-to-r from-blue-50 to-purple-50 border-blue-200">
             <CardContent className="pt-6">
               <h3 className="font-semibold text-lg mb-3">Ethical AI Features</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <CheckCircleIcon className="w-5 h-5 text-green-600 shrink-0" />
                   <span>Real-time bias detection across all AI models</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <CheckCircleIcon className="w-5 h-5 text-green-600 shrink-0" />
                   <span>Explainable AI decisions with full transparency</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <CheckCircleIcon className="w-5 h-5 text-green-600 shrink-0" />
                   <span>User-controlled ethics sliders for model sensitivity</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0" />
+                  <CheckCircleIcon className="w-5 h-5 text-green-600 shrink-0" />
                   <span>Compliance with AI fairness regulations</span>
                 </li>
               </ul>
@@ -208,3 +238,4 @@ export default function EthicalAIPage() {
     </ProtectedRoute>
   );
 }
+

@@ -160,3 +160,4 @@ function determineOverallStatus(
   if (hasDegraded) return 'degraded';
   return 'healthy';
 }
+

@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Upload, Save, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { toast } from 'sonner';
-import { Upload, Save, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfileSettingsPage() {
@@ -47,7 +48,7 @@ export default function ProfileSettingsPage() {
       
       toast.success('Profile updated successfully');
     } catch (error) {
-      console.log("Failed to update profile",error);
+      console.warn("Failed to update profile",error);
       toast.error('Failed to update profile');
     } finally {
       setIsSaving(false);
@@ -201,3 +202,4 @@ export default function ProfileSettingsPage() {
     </ProtectedRoute>
   );
 }
+

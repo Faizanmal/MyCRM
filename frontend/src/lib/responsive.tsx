@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
+
 import { cn } from '@/lib/utils';
 
 /**
@@ -174,35 +175,35 @@ interface ResponsiveProps {
     className?: string;
 }
 
-export function MobileOnly({ children, className }: ResponsiveProps) {
+export function MobileOnly({ children, className }: ResponsiveProps): React.ReactNode {
     const isMobile = useIsMobile();
 
     if (!isMobile) return null;
     return <div className={className}>{children}</div>;
 }
 
-export function TabletOnly({ children, className }: ResponsiveProps) {
+export function TabletOnly({ children, className }: ResponsiveProps): React.ReactNode {
     const isTablet = useIsTablet();
 
     if (!isTablet) return null;
     return <div className={className}>{children}</div>;
 }
 
-export function DesktopOnly({ children, className }: ResponsiveProps) {
+export function DesktopOnly({ children, className }: ResponsiveProps): React.ReactNode {
     const isDesktop = useIsDesktop();
 
     if (!isDesktop) return null;
     return <div className={className}>{children}</div>;
 }
 
-export function MobileAndTablet({ children, className }: ResponsiveProps) {
+export function MobileAndTablet({ children, className }: ResponsiveProps): React.ReactNode {
     const isDesktop = useIsDesktop();
 
     if (isDesktop) return null;
     return <div className={className}>{children}</div>;
 }
 
-export function TabletAndDesktop({ children, className }: ResponsiveProps) {
+export function TabletAndDesktop({ children, className }: ResponsiveProps): React.ReactNode {
     const isMobile = useIsMobile();
 
     if (isMobile) return null;
@@ -218,7 +219,7 @@ interface ResponsiveRenderProps {
     desktop?: ReactNode;
 }
 
-export function ResponsiveRender({ mobile, tablet, desktop }: ResponsiveRenderProps) {
+export function ResponsiveRender({ mobile, tablet, desktop }: ResponsiveRenderProps): React.JSX.Element {
     const breakpoint = useBreakpoint();
 
     if (breakpoint === 'xs' || breakpoint === 'sm') {
@@ -245,7 +246,7 @@ export function Container({
     size = 'xl',
     className,
     padding = true
-}: ContainerProps) {
+}: ContainerProps): React.JSX.Element {
     const maxWidths = {
         sm: 'max-w-screen-sm',
         md: 'max-w-screen-md',
@@ -288,7 +289,7 @@ export function ResponsiveGrid({
     cols = { xs: 1, sm: 2, md: 3, lg: 4 },
     gap = 4,
     className,
-}: ResponsiveGridProps) {
+}: ResponsiveGridProps): React.JSX.Element {
     const gridCols = {
         1: 'grid-cols-1',
         2: 'grid-cols-2',
@@ -336,7 +337,7 @@ export function ResponsiveStack({
     direction = { default: 'column', md: 'row' },
     gap = 4,
     className,
-}: ResponsiveStackProps) {
+}: ResponsiveStackProps): React.JSX.Element {
     const directions = {
         row: 'flex-row',
         column: 'flex-col',
@@ -387,7 +388,7 @@ export function useResponsiveValue<T>(values: {
 /**
  * Safe area insets for mobile (notch, home indicator)
  */
-export function useSafeAreaInsets() {
+export function useSafeAreaInsets(): { top: number; right: number; bottom: number; left: number; } {
     const [insets] = useState(() => {
         if (typeof document !== 'undefined') {
             const style = getComputedStyle(document.documentElement);
@@ -434,3 +435,4 @@ const Responsive = {
 };
 
 export default Responsive;
+

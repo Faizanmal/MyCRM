@@ -423,3 +423,4 @@ export function useFormatters() {
   const { formatDate, formatTime, formatDateTime, formatNumber, formatCurrency, locale } = useI18n();
   return { formatDate, formatTime, formatDateTime, formatNumber, formatCurrency, locale };
 }
+

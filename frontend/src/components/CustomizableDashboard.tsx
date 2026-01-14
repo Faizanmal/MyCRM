@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
     GripVertical,
     Settings,
@@ -23,6 +21,9 @@ import {
     Save,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface Widget {
     id: string;
@@ -292,3 +293,4 @@ export default function CustomizableDashboard() {
         </div>
     );
 }
+

@@ -15,7 +15,6 @@ class OfflineSyncService {
   late Box<Map> _cacheBox;
   late Box<String> _metadataBox;
   late Box<Map> _socialCacheBox;
-  late Box<Map> _voiceCacheBox;
   
   bool _isInitialized = false;
   bool _isSyncing = false;
@@ -37,7 +36,6 @@ class OfflineSyncService {
     _cacheBox = await Hive.openBox<Map>('offline_cache');
     _metadataBox = await Hive.openBox<String>('sync_metadata');
     _socialCacheBox = await Hive.openBox<Map>('social_cache');
-    _voiceCacheBox = await Hive.openBox<Map>('voice_cache');
     
     // Listen to connectivity changes
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {

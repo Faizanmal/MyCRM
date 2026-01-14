@@ -9,6 +9,7 @@
 
 import React, { ReactNode } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
+
 import { cn } from '@/lib/utils';
 
 interface PremiumCardProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
@@ -243,3 +244,4 @@ export function GradientBorderCard({
     </div>
   );
 }
+

@@ -1,14 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
 import { 
   Store, 
   Search, 
@@ -32,6 +24,15 @@ import {
   Shield,
   Globe
 } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { ScrollArea } from '@/components/ui/scroll-area';
+// import { Separator } from '@/components/ui/separator';
+// import { Progress } from '@/components/ui/progress';
 import { appMarketplaceAPI } from '@/lib/api';
 
 interface App {
@@ -88,7 +89,7 @@ export default function MarketplacePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedApp, setSelectedApp] = useState<App | null>(null);
+  const [_selectedApp, setSelectedApp] = useState<App | null>(null);
   const [activeTab, setActiveTab] = useState('browse');
 
   useEffect(() => {
@@ -530,3 +531,4 @@ export default function MarketplacePage() {
     </div>
   );
 }
+

@@ -3,6 +3,25 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Map,
+  Building2,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  RefreshCw,
+  Plus,
+  Settings,
+  BarChart3,
+  ArrowRightLeft,
+  Zap,
+  ChevronRight,
+  ChevronDown,
+  Globe,
+  Factory,
+  CircleDot,
+} from 'lucide-react';
+
+import {
   Card,
   CardContent,
   CardDescription,
@@ -28,24 +47,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Map,
-  Building2,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  Plus,
-  Settings,
-  BarChart3,
-  ArrowRightLeft,
-  Zap,
-  ChevronRight,
-  ChevronDown,
-  Globe,
-  Factory,
-  CircleDot,
-} from 'lucide-react';
 
 // Types
 interface Territory {
@@ -291,6 +292,9 @@ const TerritoryTreeItem: React.FC<{
         }`}
         style={{ paddingLeft: `${level * 24 + 12}px` }}
         onClick={() => onSelect(territory)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { onSelect(territory); e.preventDefault(); } }}
+        tabIndex={0}
+        role="button"
       >
         <div className="flex items-center gap-3">
           {hasChildren ? (
@@ -795,3 +799,4 @@ export default function TerritoryDashboard() {
     </div>
   );
 }
+

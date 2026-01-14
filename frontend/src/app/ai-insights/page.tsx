@@ -2,14 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  aiInsightsAPI,
-  ChurnPrediction,
-  NextBestAction,
-  AIGeneratedContent,
-} from '@/lib/new-features-api';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import {
   SparklesIcon,
   ExclamationTriangleIcon,
   LightBulbIcon,
@@ -19,6 +11,15 @@ import {
   CheckCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+
+import {
+  aiInsightsAPI,
+  ChurnPrediction,
+  NextBestAction,
+  AIGeneratedContent,
+} from '@/lib/new-features-api';
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -287,7 +288,7 @@ export default function Page() {
                     <CardContent>
                       <div className="text-2xl font-bold">
                         {churnStats.average_probability 
-                          ? (churnStats.average_probability * 100).toFixed(1) + '%'
+                          ? `${(churnStats.average_probability * 100).toFixed(1)  }%`
                           : '0%'}
                       </div>
                     </CardContent>
@@ -509,3 +510,4 @@ export default function Page() {
     </ProtectedRoute>
   );
 }
+

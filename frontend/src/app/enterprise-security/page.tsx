@@ -1,21 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { 
-  Shield, 
-  Lock, 
+  Shield,
   AlertTriangle, 
   CheckCircle, 
   XCircle, 
@@ -31,18 +18,28 @@ import {
   RefreshCw,
   Trash2,
   Settings,
-  Key,
   Users,
   FileText,
   Activity,
-  TrendingUp,
-  TrendingDown,
   MapPin,
   LogOut,
   Ban,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+// import { Label } from '@/components/ui/label';
+// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// import { Textarea } from '@/components/ui/textarea';
 import { enterpriseSecurityAPI } from '@/lib/api';
 
 interface SecurityDashboard {
@@ -127,8 +124,8 @@ export default function EnterpriseSecurityPage() {
   const [policies, setPolicies] = useState<AccessPolicy[]>([]);
   const [threats, setThreats] = useState<Threat[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [, setIsLoading] = useState(true);
+  const [] = useState('');
   const [selectedDateRange, setSelectedDateRange] = useState('7d');
 
   useEffect(() => {
@@ -728,3 +725,4 @@ export default function EnterpriseSecurityPage() {
     </div>
   );
 }
+

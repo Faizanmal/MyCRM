@@ -8,6 +8,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useSpring, useTransform, useInView } from 'framer-motion';
+
 import { cn } from '@/lib/utils';
 
 interface AnimatedCounterProps {
@@ -264,3 +265,4 @@ export function ProgressBar({
     </div>
   );
 }
+

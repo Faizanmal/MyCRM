@@ -11,6 +11,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+
 import graphqlClient, {
   QUERIES,
   MUTATIONS,
@@ -662,3 +663,4 @@ export function useGraphQLError() {
 
   return { error, handleError, clearError };
 }
+

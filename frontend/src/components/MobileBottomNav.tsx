@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import {
     Home,
     Users,
@@ -19,6 +18,8 @@ import {
     Calendar,
     User,
 } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 // Types
 interface NavItem {
@@ -46,10 +47,10 @@ const mainNavItems: NavItem[] = [
 
 // Quick actions for the FAB menu
 const defaultQuickActions: QuickAction[] = [
-    { id: 'contact', icon: Users, label: 'New Contact', color: 'bg-blue-500', onClick: () => { } },
-    { id: 'deal', icon: Target, label: 'New Deal', color: 'bg-green-500', onClick: () => { } },
-    { id: 'task', icon: CheckSquare, label: 'New Task', color: 'bg-purple-500', onClick: () => { } },
-    { id: 'email', icon: Mail, label: 'Send Email', color: 'bg-orange-500', onClick: () => { } },
+    { id: 'contact', icon: Users, label: 'New Contact', color: 'bg-blue-500', onClick: () => { /* TODO: implement new contact */ } },
+    { id: 'deal', icon: Target, label: 'New Deal', color: 'bg-green-500', onClick: () => { /* TODO: implement new deal */ } },
+    { id: 'task', icon: CheckSquare, label: 'New Task', color: 'bg-purple-500', onClick: () => { /* TODO: implement new task */ } },
+    { id: 'email', icon: Mail, label: 'Send Email', color: 'bg-orange-500', onClick: () => { /* TODO: implement send email */ } },
 ];
 
 // More menu items
@@ -208,7 +209,7 @@ export default function MobileBottomNav() {
                             href={item.href}
                             className={cn(
                                 'flex flex-col items-center justify-center w-14 h-14 rounded-xl transition-colors',
-                                pathname === item.href || pathname.startsWith(item.href + '/')
+                                pathname === item.href || pathname.startsWith(`${item.href  }/`)
                                     ? 'text-blue-500'
                                     : 'text-gray-500'
                             )}
@@ -275,3 +276,4 @@ export default function MobileBottomNav() {
 // Export for customization
 export { mainNavItems, moreMenuItems, defaultQuickActions };
 export type { NavItem, QuickAction };
+

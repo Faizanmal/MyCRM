@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Upload, FileUp, AlertCircle, CheckCircle, Loader2, Download } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +11,6 @@ import { Button } from '@/components/ui/button';
 // import { Input } from '@/components/ui/input';
 // import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { toast } from 'sonner';
-import { Upload, FileUp, AlertCircle, CheckCircle, Loader2, Download } from 'lucide-react';
 
 export default function ImportSettingsPage() {
   const [isImporting, setIsImporting] = useState(false);
@@ -60,7 +61,7 @@ export default function ImportSettingsPage() {
       setImportFile(null);
       setImportProgress(0);
     } catch (error) {
-      console.log("Failed to import data",error);
+      console.warn("Failed to import data",error);
       toast.error('Failed to import data');
     } finally {
       setIsImporting(false);
@@ -225,3 +226,4 @@ export default function ImportSettingsPage() {
     </ProtectedRoute>
   );
 }
+

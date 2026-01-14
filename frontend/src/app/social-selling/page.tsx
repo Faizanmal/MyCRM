@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { 
+  Share2, Linkedin, Twitter, Users, TrendingUp, MessageSquare, 
+  Heart, Repeat2, Eye, Send, Calendar, Search, UserPlus, Target,
+  BarChart3, Clock, Sparkles, Globe, CheckCircle, AlertCircle
+} from "lucide-react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,11 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Share2, Linkedin, Twitter, Users, TrendingUp, MessageSquare, 
-  Heart, Repeat2, Eye, Send, Calendar, Search, UserPlus, Target,
-  BarChart3, Clock, Sparkles, Globe, CheckCircle, AlertCircle
-} from "lucide-react";
 
 interface SocialProfile {
   id: number;
@@ -95,7 +96,7 @@ export default function SocialSellingPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Social Selling Hub
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -107,7 +108,7 @@ export default function SocialSellingPage() {
             <Calendar className="w-4 h-4 mr-2" />
             Content Calendar
           </Button>
-          <Button className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
+          <Button className="bg-linear-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
             <Share2 className="w-4 h-4 mr-2" />
             Connect Account
           </Button>
@@ -116,7 +117,7 @@ export default function SocialSellingPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
+        <Card className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -129,7 +130,7 @@ export default function SocialSellingPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
+        <Card className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -142,7 +143,7 @@ export default function SocialSellingPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
+        <Card className="bg-linear-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -155,7 +156,7 @@ export default function SocialSellingPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200 dark:border-orange-800">
+        <Card className="bg-linear-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200 dark:border-orange-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -240,7 +241,7 @@ export default function SocialSellingPage() {
                         <Clock className="w-4 h-4 mr-2" />
                         Schedule
                       </Button>
-                      <Button className="bg-gradient-to-r from-blue-600 to-cyan-600">
+                      <Button className="bg-linear-to-r from-blue-600 to-cyan-600">
                         <Send className="w-4 h-4 mr-2" />
                         Post Now
                       </Button>
@@ -456,3 +457,4 @@ export default function SocialSellingPage() {
     </div>
   );
 }
+

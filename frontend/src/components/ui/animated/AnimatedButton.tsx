@@ -9,6 +9,7 @@
 import React, { ReactNode, useState } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 interface AnimatedButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
@@ -192,7 +193,7 @@ export function IconButton({
     <AnimatedButton
       variant={variant}
       size={size}
-      className={cn('!p-0 rounded-full', sizeClasses[size], className)}
+      className={cn('p-0! rounded-full', sizeClasses[size], className)}
       {...props}
     >
       {icon}
@@ -233,7 +234,7 @@ export function FAB({
         variant="primary"
         size="lg"
         glow
-        className={cn('!p-0 w-14 h-14 rounded-full shadow-2xl', className)}
+        className={cn('p-0! w-14 h-14 rounded-full shadow-2xl', className)}
         {...props}
       >
         {icon}
@@ -257,3 +258,4 @@ export function ButtonGroup({ children, className }: ButtonGroupProps) {
     </div>
   );
 }
+

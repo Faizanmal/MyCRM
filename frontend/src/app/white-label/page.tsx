@@ -1,6 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { 
+  Package, Users, DollarSign, 
+  CheckCircle, XCircle, Clock, Palette, Globe,
+  Building2, Download, Plus, Edit,
+  ArrowUpRight, AlertCircle, Star
+} from "lucide-react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { 
-  Package, Users, DollarSign, 
-  CheckCircle, XCircle, Clock, Palette, Globe,
-  Building2, Download, Plus, Edit,
-  ArrowUpRight, AlertCircle, Star
-} from "lucide-react";
 
 interface Subscription {
   id: number;
@@ -105,7 +106,7 @@ export default function WhiteLabelBillingPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
             White Label & Billing
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -117,7 +118,7 @@ export default function WhiteLabelBillingPage() {
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
-          <Button className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700">
+          <Button className="bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700">
             <Plus className="w-4 h-4 mr-2" />
             New Subscription
           </Button>
@@ -126,7 +127,7 @@ export default function WhiteLabelBillingPage() {
 
       {/* Revenue Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
+        <Card className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -142,7 +143,7 @@ export default function WhiteLabelBillingPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
+        <Card className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -157,7 +158,7 @@ export default function WhiteLabelBillingPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
+        <Card className="bg-linear-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -172,7 +173,7 @@ export default function WhiteLabelBillingPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/50 dark:to-red-900/30 border-red-200 dark:border-red-800">
+        <Card className="bg-linear-to-br from-red-50 to-red-100 dark:from-red-950/50 dark:to-red-900/30 border-red-200 dark:border-red-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -316,7 +317,7 @@ export default function WhiteLabelBillingPage() {
                     ))}
                   </ul>
                   <Button 
-                    className={`w-full mt-6 ${plan.popular ? "bg-gradient-to-r from-amber-600 to-orange-600" : ""}`}
+                    className={`w-full mt-6 ${plan.popular ? "bg-linear-to-r from-amber-600 to-orange-600" : ""}`}
                     variant={plan.popular ? "default" : "outline"}
                   >
                     {plan.popular ? "Get Started" : "Choose Plan"}
@@ -488,7 +489,7 @@ export default function WhiteLabelBillingPage() {
                   </p>
                 </div>
                 
-                <Button className="w-full bg-gradient-to-r from-amber-600 to-orange-600">
+                <Button className="w-full bg-linear-to-r from-amber-600 to-orange-600">
                   Save Brand Settings
                 </Button>
               </CardContent>
@@ -538,3 +539,4 @@ export default function WhiteLabelBillingPage() {
     </div>
   );
 }
+

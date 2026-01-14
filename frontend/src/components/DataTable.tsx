@@ -29,6 +29,7 @@ import {
     Download,
     MoreHorizontal,
 } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -307,6 +308,9 @@ export function DataTable<TData>({
                                                         header.column.getCanSort() && 'cursor-pointer select-none'
                                                     )}
                                                     onClick={header.column.getToggleSortingHandler()}
+                                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { const handler = header.column.getToggleSortingHandler(); if (handler) handler(e); e.preventDefault(); } }}
+                                                    tabIndex={header.column.getCanSort() ? 0 : -1}
+                                                    role={header.column.getCanSort() ? 'button' : undefined}
                                                 >
                                                     {flexRender(
                                                         header.column.columnDef.header,
@@ -512,3 +516,4 @@ export function RowActions({
 }
 
 export default DataTable;
+

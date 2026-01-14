@@ -958,3 +958,4 @@ export const pageTransitions = {
     exit: { opacity: 0, filter: 'blur(10px)', transition: { duration: 0.3 } },
   },
 };
+

@@ -2,19 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-    BarChart,
-    DonutChart,
-    HorizontalBarChart,
-    FunnelChart,
-    HeatMap,
-} from '@/components/charts/DashboardCharts';
 import {
     TrendingUp,
     TrendingDown,
@@ -34,6 +21,20 @@ import {
     Zap,
     Percent,
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    BarChart,
+    DonutChart,
+    HorizontalBarChart,
+    FunnelChart,
+    HeatMap,
+} from '@/components/charts/DashboardCharts';
 
 // Types
 interface TeamMember {
@@ -224,7 +225,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
                     <Card className="relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-500/5" />
+                        <div className="absolute inset-0 bg-linear-to-br from-green-500/10 to-emerald-500/5" />
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-gray-500">Total Revenue</span>
@@ -242,7 +243,7 @@ export default function AdminDashboard() {
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                     <Card className="relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/5" />
+                        <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-indigo-500/5" />
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-gray-500">Deals Closed</span>
@@ -260,7 +261,7 @@ export default function AdminDashboard() {
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                     <Card className="relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/5" />
+                        <div className="absolute inset-0 bg-linear-to-br from-purple-500/10 to-pink-500/5" />
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-gray-500">Conversion Rate</span>
@@ -278,7 +279,7 @@ export default function AdminDashboard() {
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                     <Card className="relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/5" />
+                        <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 to-orange-500/5" />
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-gray-500">Active Leads</span>
@@ -470,3 +471,4 @@ export default function AdminDashboard() {
         </div>
     );
 }
+

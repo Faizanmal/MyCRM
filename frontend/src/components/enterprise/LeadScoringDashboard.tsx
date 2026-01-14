@@ -2,14 +2,16 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { TrendingUp, Target, Flame, Users, BarChart3, RefreshCw } from 'lucide-react';
+import axios from 'axios';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Target, Flame, Users, BarChart3, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+
 
 interface Lead {
   id: string;
@@ -283,3 +285,4 @@ function LeadList({ leads, category }: { leads: Lead[]; category: string }) {
     </div>
   );
 }
+

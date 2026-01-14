@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { activityAPI } from '@/lib/api';
 import {
   BellIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
+
+import { activityAPI } from '@/lib/api';
 import { useRealtime } from '@/components/enterprise/RealtimeProvider';
 
 interface Notification {
@@ -233,3 +234,4 @@ export default function NotificationsDropdown() {
     </div>
   );
 }
+

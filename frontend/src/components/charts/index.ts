@@ -15,3 +15,4 @@ export {
     HeatMap,
     default as ChartsDemoPage,
 } from './DashboardCharts';
+

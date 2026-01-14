@@ -1,10 +1,11 @@
 'use client';
 
+import { Upload, Download } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent } from '@/components/ui/card';
 import DataImportExport from '@/components/enterprise/DataImportExport';
-import { Upload, Download } from 'lucide-react';
 
 export default function DataPage() {
   return (
@@ -34,3 +35,4 @@ export default function DataPage() {
     </ProtectedRoute>
   );
 }
+

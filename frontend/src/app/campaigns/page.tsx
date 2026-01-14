@@ -1,10 +1,11 @@
 'use client';
 
+import { Mail } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent } from '@/components/ui/card';
 import EmailCampaignManager from '@/components/enterprise/EmailCampaignManager';
-import { Mail } from 'lucide-react';
 
 export default function CampaignsPage() {
   return (
@@ -33,3 +34,4 @@ export default function CampaignsPage() {
     </ProtectedRoute>
   );
 }
+

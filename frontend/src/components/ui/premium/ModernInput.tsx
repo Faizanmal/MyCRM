@@ -10,6 +10,7 @@
 import React, { forwardRef, ReactNode, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, Check, Eye, EyeOff } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 
 interface ModernInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -300,3 +301,4 @@ export const ModernTextarea = forwardRef<HTMLTextAreaElement, ModernTextareaProp
 });
 
 ModernTextarea.displayName = 'ModernTextarea';
+

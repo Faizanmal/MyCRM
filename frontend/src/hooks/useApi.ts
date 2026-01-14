@@ -14,6 +14,7 @@ import {
   UseQueryOptions,
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
 import api from '@/lib/api';
 import type {
   Contact,
@@ -221,7 +222,7 @@ export function useDeleteContact(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/contacts/${id}/`).then(() => { }),
+    mutationFn: (id: string) => api.delete(`/contacts/${id}/`).then(() => { /* no-op */ }),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.contacts.lists() });
       queryClient.removeQueries({ queryKey: queryKeys.contacts.detail(id) });
@@ -413,7 +414,7 @@ export function useDeleteOpportunity() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => api.delete(`/opportunities/${id}/`).then(() => { }),
+    mutationFn: (id: string) => api.delete(`/opportunities/${id}/`).then(() => { /* no-op */ }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.opportunities.lists() });
       toast.success('Opportunity deleted successfully');
@@ -663,3 +664,4 @@ export function useInvalidateRelated() {
     },
   };
 }
+

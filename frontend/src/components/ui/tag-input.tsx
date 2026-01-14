@@ -9,6 +9,7 @@ type Tag = {
 
 import * as React from 'react';
 import { X, Plus } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -161,3 +162,4 @@ export function TagInput({ selectedTags, onChange, className }: TagInputProps) {
     </div>
   );
 }
+

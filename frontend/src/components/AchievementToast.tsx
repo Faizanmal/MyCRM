@@ -16,8 +16,10 @@ import {
     Sparkles,
     X,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
 import Confetti from './Confetti';
 
 // Achievement types and icons
@@ -168,12 +170,12 @@ function AchievementToast({ achievement, onDismiss }: AchievementToastProps) {
                 stiffness: 300,
                 damping: 25
             }}
-            className="fixed top-6 left-1/2 -translate-x-1/2 z-[101]"
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-101"
         >
             <div
                 className={cn(
                     "relative overflow-hidden rounded-2xl p-1",
-                    "bg-gradient-to-r",
+                    "bg-linear-to-r",
                     colors.bg,
                     "shadow-2xl",
                     colors.glow
@@ -201,7 +203,7 @@ function AchievementToast({ achievement, onDismiss }: AchievementToastProps) {
                             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                             className={cn(
                                 "h-16 w-16 rounded-xl flex items-center justify-center",
-                                "bg-gradient-to-br",
+                                "bg-linear-to-br",
                                 colors.bg,
                                 colors.border,
                                 "border-2 shadow-lg"
@@ -265,7 +267,7 @@ function AchievementToast({ achievement, onDismiss }: AchievementToastProps) {
                         transition={{ duration: 5, ease: 'linear' }}
                         className={cn(
                             "absolute bottom-0 left-0 right-0 h-1 origin-left",
-                            "bg-gradient-to-r",
+                            "bg-linear-to-r",
                             colors.bg
                         )}
                     />
@@ -323,3 +325,4 @@ export function triggerDemoAchievement(showAchievement: (a: Achievement) => void
     const randomAchievement = demoAchievements[Math.floor(Math.random() * demoAchievements.length)];
     showAchievement(randomAchievement);
 }
+

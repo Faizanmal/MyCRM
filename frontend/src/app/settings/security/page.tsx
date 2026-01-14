@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Lock, Key, Shield, LogOut, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
-import { Lock, Key, Shield, LogOut, Loader2 } from 'lucide-react';
 
 export default function SecuritySettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
@@ -44,7 +45,7 @@ export default function SecuritySettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      console.log("Failed to change password",error);
+      console.warn("Failed to change password",error);
       toast.error('Failed to change password');
     } finally {
       setIsSaving(false);
@@ -64,7 +65,7 @@ export default function SecuritySettingsPage() {
       setTwoFAEnabled(enabled);
       toast.success(`Two-factor authentication ${enabled ? 'enabled' : 'disabled'}`);
     } catch (error) {
-      console.log("Failed to update two-factor authentication",error);
+      console.warn("Failed to update two-factor authentication",error);
       toast.error('Failed to update two-factor authentication');
     }
   };
@@ -200,3 +201,4 @@ export default function SecuritySettingsPage() {
     </ProtectedRoute>
   );
 }
+

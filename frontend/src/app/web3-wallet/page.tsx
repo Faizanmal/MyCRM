@@ -1,19 +1,51 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { WalletIcon, KeyIcon, ShieldCheckIcon, SparklesIcon, CubeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+
 import { web3API } from '@/lib/new-features-api';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { WalletIcon, KeyIcon, ShieldCheckIcon, SparklesIcon, CubeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+
+interface Web3Wallet {
+  address: string;
+  balance: string;
+  network: string;
+  connected: boolean;
+  wallet_address: string;
+  blockchain_network: string;
+  is_verified: boolean;
+  active_permissions?: unknown[];
+}
+
+interface NFTReward {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  redeemed: boolean;
+  reward_name: string;
+  points_value: number;
+}
+
+interface AccessGrant {
+  id: string;
+  resource: string;
+  permissions: string[];
+  expires_at: string;
+  requester: string;
+  purpose: string;
+  is_active: boolean;
+}
 
 export default function Web3WalletPage() {
-  const [wallet, setWallet] = useState<any>(null);
-  const [nftRewards, setNftRewards] = useState<any[]>([]);
-  const [accessGrants, setAccessGrants] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [wallet, setWallet] = useState<Web3Wallet | null>(null);
+  const [nftRewards, setNftRewards] = useState<NFTReward[]>([]);
+  const [accessGrants, setAccessGrants] = useState<AccessGrant[]>([]);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -42,8 +74,8 @@ export default function Web3WalletPage() {
       const res = await web3API.createWallet();
       setWallet(res.data);
       alert('Data Wallet Created Successfully!');
-    } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to create wallet');
+    } catch (error) {
+      alert((error as Error)?.message || 'Failed to create wallet');
     }
   };
 
@@ -52,7 +84,7 @@ export default function Web3WalletPage() {
       await web3API.redeemNFT(id);
       alert('NFT Reward Redeemed Successfully!');
       loadData();
-    } catch (error) {
+    } catch {
       alert('Failed to redeem NFT');
     }
   };
@@ -75,7 +107,7 @@ export default function Web3WalletPage() {
 
           {/* Wallet Overview */}
           {!wallet ? (
-            <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <Card className="bg-linear-to-r from-blue-50 to-purple-50 border-blue-200">
               <CardContent className="pt-6">
                 <div className="text-center py-8">
                   <WalletIcon className="w-20 h-20 mx-auto mb-4 text-blue-600" />
@@ -188,14 +220,14 @@ export default function Web3WalletPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {nftRewards.map((nft) => (
                     <div key={nft.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
-                      <div className="aspect-square bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg mb-3 flex items-center justify-center">
+                      <div className="aspect-square bg-linear-to-br from-purple-400 to-pink-600 rounded-lg mb-3 flex items-center justify-center">
                         <SparklesIcon className="w-16 h-16 text-white" />
                       </div>
                       <h3 className="font-semibold mb-1">{nft.reward_name}</h3>
                       <p className="text-sm text-gray-600 mb-2">{nft.description}</p>
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">{nft.points_value} pts</Badge>
-                        {!nft.is_redeemed ? (
+                        {!nft.redeemed ? (
                           <Button size="sm" onClick={() => redeemNFT(nft.id)}>
                             Redeem
                           </Button>
@@ -211,24 +243,24 @@ export default function Web3WalletPage() {
           </Card>
 
           {/* Info */}
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <Card className="bg-linear-to-r from-blue-50 to-purple-50 border-blue-200">
             <CardContent className="pt-6">
               <h3 className="font-semibold text-lg mb-3">Web3 Benefits</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
                 <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 shrink-0" />
                   <span>Full ownership and control of your data via blockchain</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 shrink-0" />
                   <span>Grant temporary, revocable access to your information</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 shrink-0" />
                   <span>Earn NFT rewards for engagement milestones</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 shrink-0" />
                   <span>Smart contracts for automated, trustless agreements</span>
                 </li>
               </ul>
@@ -239,3 +271,4 @@ export default function Web3WalletPage() {
     </ProtectedRoute>
   );
 }
+

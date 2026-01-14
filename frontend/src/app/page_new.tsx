@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Home() {
@@ -20,3 +21,4 @@ export default function Home() {
     </ProtectedRoute>
   );
 }
+

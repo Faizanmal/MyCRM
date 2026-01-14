@@ -2,16 +2,17 @@
 
 // import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-// import { Button } from '@/components/ui/button';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     BarChart3,
     PieChart,
     ArrowUpRight,
     ArrowDownRight,
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+// import { Button } from '@/components/ui/button';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Types
 interface DataPoint {
@@ -88,7 +89,7 @@ export function BarChart({ data, height = 200, showLabels = true, animated = tru
                                     </div>
 
                                     {/* Gradient overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-white/0 to-white/20 rounded-t-md" />
+                                    <div className="absolute inset-0 bg-linear-to-t from-white/0 to-white/20 rounded-t-md" />
                                 </motion.div>
                             </div>
 
@@ -689,3 +690,4 @@ export default function ChartsDemoPage() {
         </div>
     );
 }
+

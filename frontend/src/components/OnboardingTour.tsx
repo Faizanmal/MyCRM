@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Check, Circle } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -182,7 +183,7 @@ export function OnboardingTourProvider({
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[9998]"
+                            className="fixed inset-0 z-9998"
                             style={{
                                 background: 'rgba(0, 0, 0, 0.5)',
                                 clipPath: `polygon(
@@ -206,7 +207,7 @@ export function OnboardingTourProvider({
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="fixed z-[9999] pointer-events-none"
+                            className="fixed z-9999 pointer-events-none"
                             style={{
                                 top: targetRect.top - 10,
                                 left: targetRect.left - 10,
@@ -223,7 +224,7 @@ export function OnboardingTourProvider({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 10 }}
-                            className="fixed z-[10000] w-80"
+                            className="fixed z-10000 w-80"
                             style={getTooltipPosition()}
                         >
                             <Card className="shadow-xl border-2 border-blue-500">
@@ -375,3 +376,4 @@ export const leadsTour: TourStep[] = [
 ];
 
 export default OnboardingTourProvider;
+

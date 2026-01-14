@@ -327,6 +327,9 @@ export function DataTable<TData, TValue>({
                             'cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200'
                           )}
                           onClick={header.column.getToggleSortingHandler()}
+                          onKeyDown={header.column.getCanSort() ? (e) => { if (e.key === 'Enter' || e.key === ' ') { const handler = header.column.getToggleSortingHandler(); if (handler) handler(e); e.preventDefault(); } } : undefined}
+                          tabIndex={header.column.getCanSort() ? 0 : -1}
+                          role={header.column.getCanSort() ? 'button' : undefined}
                         >
                           {flexRender(
                             header.column.columnDef.header,
@@ -496,3 +499,4 @@ export function DataTable<TData, TValue>({
 }
 
 export default DataTable;
+

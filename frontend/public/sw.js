@@ -17,7 +17,7 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Opened cache');
+      console.warn('Opened cache');
       return cache.addAll(urlsToCache);
     })
   );
@@ -31,7 +31,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
+            console.warn('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -152,7 +152,7 @@ async function syncData() {
     });
 
     if (response.ok) {
-      console.log('Data synced successfully');
+      console.warn('Data synced successfully');
     }
   } catch (error) {
     console.error('Sync failed:', error);

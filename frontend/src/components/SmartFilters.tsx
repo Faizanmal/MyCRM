@@ -2,9 +2,6 @@
 
 import { useState, useCallback, useMemo, ReactNode } from 'react';
 // import { useInView } from 'react-intersection-observer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
     ChevronDown,
     ChevronUp,
@@ -16,6 +13,10 @@ import {
     Tag,
     Search
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -417,3 +418,4 @@ export const opportunityFilters: FilterConfig[] = [
 ];
 
 export default SmartFilters;
+

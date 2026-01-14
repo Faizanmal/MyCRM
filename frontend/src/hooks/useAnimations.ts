@@ -351,3 +351,4 @@ export function useCountAnimation(
 
   return { count, startAnimation, resetAnimation, isAnimating };
 }
+

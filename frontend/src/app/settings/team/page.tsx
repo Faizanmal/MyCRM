@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Users, UserPlus, Trash2, Mail, Loader2, Shield } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { toast } from 'sonner';
-import { Users, UserPlus, Trash2, Mail, Loader2, Shield } from 'lucide-react';
 
 interface TeamMember {
   id: string;
@@ -50,7 +51,7 @@ export default function TeamSettingsPage() {
       toast.success(`Invitation sent to ${inviteEmail}`);
       setInviteEmail('');
     } catch (error) {
-      console.log("Failed to send team invitation",error);
+      console.warn("Failed to send team invitation",error);
       toast.error('Failed to send team invitation');
     } finally {
       setIsSaving(false);
@@ -70,7 +71,7 @@ export default function TeamSettingsPage() {
       setTeamMembers(prev => prev.filter(m => m.id !== memberId));
       toast.success('Team member removed');
     } catch (error) {
-      console.log("Failed to remove team member",error);
+      console.warn("Failed to remove team member",error);
       toast.error('Failed to remove team member');
     }
   };
@@ -208,3 +209,4 @@ export default function TeamSettingsPage() {
     </ProtectedRoute>
   );
 }
+

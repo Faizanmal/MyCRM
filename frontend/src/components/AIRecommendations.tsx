@@ -2,9 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
     TrendingUp,
     AlertTriangle,
@@ -17,8 +14,13 @@ import {
     RefreshCw,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { recommendationsAPI } from '@/lib/api';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { recommendationsAPI } from '@/lib/api';
+
 
 interface AIRecommendation {
     id: string;
@@ -134,7 +136,7 @@ export default function AIRecommendations() {
             }
         } catch (error) {
             // Use fallback recommendations if API fails
-            console.log('Using fallback recommendations',error);
+            console.warn('Using fallback recommendations',error);
             setRecommendations(fallbackRecommendations);
         } finally {
             setIsLoading(false);
@@ -156,7 +158,7 @@ export default function AIRecommendations() {
             toast.success('Recommendation dismissed');
         } catch (error) {
             // Silently handle - already removed from UI
-            console.log('Dismiss synced locally',error);
+            console.warn('Dismiss synced locally',error);
         }
     };
 
@@ -177,7 +179,7 @@ export default function AIRecommendations() {
             await fetchRecommendations(true);
             toast.success('Recommendations refreshed');
         } catch (error) {
-            console.log('Failed to refresh recommendations',error);
+            console.warn('Failed to refresh recommendations',error);
             toast.error('Failed to refresh recommendations');
             setIsRefreshing(false);
         }
@@ -185,7 +187,7 @@ export default function AIRecommendations() {
 
     if (isLoading) {
         return (
-            <div className="rounded-xl border bg-gradient-to-br from-indigo-50/50 via-purple-50/30 to-pink-50/50 dark:from-indigo-900/10 dark:via-purple-900/5 dark:to-pink-900/10 p-4">
+            <div className="rounded-xl border bg-linear-to-br from-indigo-50/50 via-purple-50/30 to-pink-50/50 dark:from-indigo-900/10 dark:via-purple-900/5 dark:to-pink-900/10 p-4">
                 <div className="flex items-center gap-3 mb-4">
                     <Skeleton className="w-10 h-10 rounded-lg" />
                     <div>
@@ -208,7 +210,7 @@ export default function AIRecommendations() {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-xl border bg-gradient-to-br from-indigo-50/50 via-purple-50/30 to-pink-50/50 dark:from-indigo-900/10 dark:via-purple-900/5 dark:to-pink-900/10 overflow-hidden"
+            className="rounded-xl border bg-linear-to-br from-indigo-50/50 via-purple-50/30 to-pink-50/50 dark:from-indigo-900/10 dark:via-purple-900/5 dark:to-pink-900/10 overflow-hidden"
         >
             {/* Header */}
             <div className="p-4 flex items-center justify-between border-b dark:border-gray-800">
@@ -216,7 +218,7 @@ export default function AIRecommendations() {
                     <motion.div
                         animate={{ rotate: [0, 10, -10, 0] }}
                         transition={{ duration: 2, repeat: Infinity }}
-                        className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg"
+                        className="p-2 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg"
                     >
                         <Sparkles className="w-5 h-5 text-white" />
                     </motion.div>
@@ -338,3 +340,4 @@ export default function AIRecommendations() {
         </motion.div>
     );
 }
+

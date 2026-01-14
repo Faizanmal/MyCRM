@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -40,3 +41,4 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
 
   return <>{children}</>;
 }
+

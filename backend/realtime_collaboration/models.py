@@ -60,10 +60,10 @@ class CollaborativeDocument(models.Model):
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='owned_documents'
+        related_name='realtime_owned_documents'
     )
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -78,21 +78,21 @@ class CollaborativeDocument(models.Model):
     
     # Related entities
     related_lead = models.ForeignKey(
-        'leads.Lead',
+        'lead_management.Lead',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='collaborative_documents'
     )
     related_opportunity = models.ForeignKey(
-        'opportunities.Opportunity',
+        'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='collaborative_documents'
     )
     related_contact = models.ForeignKey(
-        'contacts.Contact',
+        'contact_management.Contact',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -106,7 +106,7 @@ class CollaborativeDocument(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='locked_documents'
+        related_name='realtime_locked_documents'
     )
     locked_at = models.DateTimeField(null=True, blank=True)
     
@@ -268,7 +268,7 @@ class DocumentComment(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='resolved_comments'
+        related_name='realtime_resolved_comments'
     )
     resolved_at = models.DateTimeField(null=True, blank=True)
     
@@ -276,7 +276,7 @@ class DocumentComment(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='document_comments'
+        related_name='realtime_document_comments'
     )
     
     # Timestamps
@@ -417,12 +417,12 @@ class DocumentTemplate(models.Model):
     # Ownership
     is_system = models.BooleanField(default=False)
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='realtime_document_templates')
     
     # Stats
     use_count = models.IntegerField(default=0)

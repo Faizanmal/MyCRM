@@ -1,35 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Leaf, 
-  BarChart3, 
   Target, 
   FileText, 
   TrendingUp, 
   TrendingDown,
-  AlertTriangle,
-  CheckCircle,
   Download,
   Plus,
   Calendar,
   Building2,
-  Droplets,
   Zap,
-  Recycle,
   Users,
   Globe,
   Award,
   Factory,
   Truck
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { esgReportingAPI } from '@/lib/api';
 
 interface ESGMetric {
@@ -87,7 +83,7 @@ export default function ESGReportingPage() {
   const [reports, setReports] = useState<ESGReport[]>([]);
   const [carbonData, setCarbonData] = useState<CarbonEntry[]>([]);
   const [suppliers, setSuppliers] = useState<SupplierAssessment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('2026');
 
   useEffect(() => {
@@ -97,7 +93,7 @@ export default function ESGReportingPage() {
   const loadESGData = async () => {
     setIsLoading(true);
     try {
-      const [dashboardData, metricsData, targetsData, reportsData, carbonDataRes, suppliersData] = await Promise.all([
+      const [, metricsData, targetsData, reportsData, carbonDataRes, suppliersData] = await Promise.all([
         esgReportingAPI.getDashboard(),
         esgReportingAPI.getMetrics(),
         esgReportingAPI.getTargets(),
@@ -610,3 +606,4 @@ export default function ESGReportingPage() {
     </div>
   );
 }
+

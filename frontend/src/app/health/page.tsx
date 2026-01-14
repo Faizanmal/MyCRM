@@ -8,6 +8,7 @@
 'use client';
 
 import React from 'react';
+
 import { HealthDashboard } from '@/components/enterprise/HealthDashboard';
 
 export default function HealthPage() {
@@ -17,3 +18,4 @@ export default function HealthPage() {
     </div>
   );
 }
+

@@ -1,13 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import DashboardAndReports from '@/components/enterprise/DashboardAndReports';
 import { 
   FileText, 
   Plus, 
@@ -21,8 +14,17 @@ import {
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
-import { reportsAPI } from '@/lib/api';
 import { toast } from 'sonner';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import DashboardAndReports from '@/components/enterprise/DashboardAndReports';
+import { reportsAPI } from '@/lib/api';
+
 
 interface Report {
   id: number;
@@ -391,3 +393,4 @@ export default function ReportsPage() {
     </ProtectedRoute>
   );
 }
+

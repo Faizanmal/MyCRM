@@ -1,5 +1,7 @@
 'use client';
 
+import { Shield, FileText, Lock } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SecurityDashboard from '@/components/enterprise/SecurityDashboard';
 import AuditLogViewer from '@/components/enterprise/AuditLogViewer';
 import PermissionManagement from '@/components/enterprise/PermissionManagement';
-import { Shield, FileText, Lock } from 'lucide-react';
 
 export default function SecurityPage() {
   return (
@@ -71,3 +72,4 @@ export default function SecurityPage() {
     </ProtectedRoute>
   );
 }
+

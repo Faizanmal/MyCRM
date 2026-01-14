@@ -9,6 +9,7 @@
 
 import React, { ReactNode } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
+
 import { cn } from '@/lib/utils';
 
 interface GlassCardProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
@@ -99,7 +100,7 @@ export function GlassCardHeader({
     <div className={cn('flex items-center justify-between mb-4', className)}>
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="p-2 rounded-xl bg-gradient-to-br from-primary-500/10 to-purple-500/10 text-primary">
+          <div className="p-2 rounded-xl bg-linear-to-br from-primary-500/10 to-purple-500/10 text-primary">
             {icon}
           </div>
         )}
@@ -194,3 +195,4 @@ export function GlassCardFooter({
     </div>
   );
 }
+

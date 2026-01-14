@@ -6,6 +6,7 @@
 
 'use client';
 
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ReactNode, useState } from 'react';
@@ -66,7 +67,7 @@ interface QueryProviderProps {
 /**
  * QueryProvider component that wraps the application with React Query
  */
-export function QueryProvider({ children }: QueryProviderProps) {
+export function QueryProvider({ children }: QueryProviderProps): React.JSX.Element {
   // Create QueryClient inside component to avoid sharing state between requests in SSR
   const [queryClient] = useState(
     () =>
@@ -92,7 +93,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
 /**
  * Create a pre-configured QueryClient for server-side rendering
  */
-export function createQueryClient() {
+export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -107,3 +108,4 @@ export function createQueryClient() {
 }
 
 export default QueryProvider;
+

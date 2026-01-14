@@ -19,10 +19,10 @@ export default function InstallPrompt() {
         navigator.serviceWorker
           .register('/sw.js')
           .then((registration) => {
-            console.log('SW registered: ', registration);
+            console.warn('SW registered: ', registration);
           })
           .catch((registrationError) => {
-            console.log('SW registration failed: ', registrationError);
+            console.warn('SW registration failed: ', registrationError);
           });
       });
     }
@@ -46,7 +46,7 @@ export default function InstallPrompt() {
 
     // Listen for successful install
     window.addEventListener('appinstalled', () => {
-      console.log('PWA installed');
+      console.warn('PWA installed');
       setShowPrompt(false);
       setDeferredPrompt(null);
     });
@@ -64,7 +64,7 @@ export default function InstallPrompt() {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     
-    console.log(`User response to install prompt: ${outcome}`);
+    console.warn(`User response to install prompt: ${outcome}`);
     
     setDeferredPrompt(null);
     setShowPrompt(false);
@@ -184,3 +184,4 @@ export default function InstallPrompt() {
     </div>
   );
 }
+

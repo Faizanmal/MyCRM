@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
-import 'dart:ui';
 import '../../providers/voice_provider.dart';
 import '../../core/utils/api_client.dart';
 
@@ -15,7 +14,7 @@ class VoiceRecorderScreen extends StatefulWidget {
 class _VoiceRecorderScreenState extends State<VoiceRecorderScreen> {
   late VoiceIntelligenceProvider _provider;
   final TextEditingController _titleController = TextEditingController();
-  Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
 
   @override
@@ -110,7 +109,7 @@ class _VoiceRecorderScreenState extends State<VoiceRecorderScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.red.withOpacity(0.3),
+                              color: Colors.red.withValues(alpha: 0.3),
                               blurRadius: 10,
                               spreadRadius: 5,
                             )
@@ -147,10 +146,13 @@ class _VoiceRecorderScreenState extends State<VoiceRecorderScreen> {
                           onPressed: () async {
                             _stopTimer();
                             await provider.stopAndUpload(title: _titleController.text);
+                            // ignore: use_build_context_synchronously
                             if (mounted) {
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Recording uploaded! Analysis will be available shortly.')),
                               );
+                              // ignore: use_build_context_synchronously
                               Navigator.pop(context);
                             }
                           },

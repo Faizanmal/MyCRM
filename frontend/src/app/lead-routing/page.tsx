@@ -1,6 +1,30 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import {
+  Route,
+  Users,
+  UserCheck,
+  UserPlus,
+  Target,
+  TrendingUp,
+  Clock,
+
+  RefreshCw,
+  Plus,
+  Search,
+  Settings,
+  BarChart3,
+  ArrowRight,
+  Shuffle,
+  MoreVertical,
+  Zap,
+  Award,
+  MapPin,
+  Building2,
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,29 +52,6 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import {
-  Route,
-  Users,
-  UserCheck,
-  UserPlus,
-  Target,
-  TrendingUp,
-  Clock,
-
-  RefreshCw,
-  Plus,
-  Search,
-  Settings,
-  BarChart3,
-  ArrowRight,
-  Shuffle,
-  MoreVertical,
-  Zap,
-  Award,
-  MapPin,
-  Building2,
-} from 'lucide-react';
-import { toast } from 'sonner';
 import { leadRoutingAPI } from '@/lib/ai-workflow-api';
 
 interface SalesRep {
@@ -382,7 +383,7 @@ export default function LeadRoutingPage() {
               </Button>
               <Dialog open={createRuleDialogOpen} onOpenChange={setCreateRuleDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  <Button className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     <Plus className="w-4 h-4 mr-2" />
                     New Rule
                   </Button>
@@ -434,7 +435,7 @@ export default function LeadRoutingPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
+              <Card className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -453,7 +454,7 @@ export default function LeadRoutingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
+              <Card className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -472,7 +473,7 @@ export default function LeadRoutingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
+              <Card className="bg-linear-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -491,7 +492,7 @@ export default function LeadRoutingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200 dark:border-orange-800">
+              <Card className="bg-linear-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200 dark:border-orange-800">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -627,7 +628,7 @@ export default function LeadRoutingPage() {
                           <div className="flex items-center gap-3">
                             <Avatar className="h-12 w-12">
                               <AvatarImage src={rep.avatar_url} />
-                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                              <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-500 text-white">
                                 {rep.user_name.split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
                             </Avatar>
@@ -809,3 +810,4 @@ export default function LeadRoutingPage() {
     </ProtectedRoute>
   );
 }
+

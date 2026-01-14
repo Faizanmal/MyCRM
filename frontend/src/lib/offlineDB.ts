@@ -428,8 +428,9 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   window.addEventListener('online', () => {
     syncService.sync().then(({ synced, failed }) => {
       if (synced > 0 || failed > 0) {
-        console.log(`Sync complete: ${synced} synced, ${failed} failed`);
+        console.warn(`Sync complete: ${synced} synced, ${failed} failed`);
       }
     });
   });
 }
+

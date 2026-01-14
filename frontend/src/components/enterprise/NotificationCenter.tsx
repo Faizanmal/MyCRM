@@ -2,15 +2,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Bell, Mail, CheckCircle, X, Trash2 } from 'lucide-react';
+import axios from 'axios';
+import { formatDistanceToNow } from 'date-fns';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Mail, CheckCircle, X, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-import { formatDistanceToNow } from 'date-fns';
+
 
 interface Notification {
   id: string;
@@ -307,3 +309,4 @@ function NotificationItem({
     </Card>
   );
 }
+

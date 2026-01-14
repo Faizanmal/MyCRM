@@ -1,6 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { Shield, Smartphone, AlertCircle, CheckCircle2, Key } from 'lucide-react';
+import axios from 'axios';
+import Image from 'next/image';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,10 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Smartphone, AlertCircle, CheckCircle2, Key } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import axios from 'axios';
-import Image from 'next/image';
+
 
 export default function TwoFactorAuthPage() {
   const { user, refreshUser } = useAuth();
@@ -349,3 +351,4 @@ export default function TwoFactorAuthPage() {
     </ProtectedRoute>
   );
 }
+

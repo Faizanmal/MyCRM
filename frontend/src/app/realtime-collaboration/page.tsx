@@ -1,23 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   FileEdit, 
   Plus, 
   Search, 
-  Share2, 
-  Users, 
+  Share2,
   Clock, 
   Eye, 
   Edit3,
@@ -28,12 +16,21 @@ import {
   Globe,
   FileText,
   FolderOpen,
-  MoreHorizontal,
-  MessageSquare,
   History,
   UserPlus,
-  CheckCircle
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+// import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { realtimeCollabAPI } from '@/lib/api';
 
 interface CollabDocument {
@@ -235,15 +232,6 @@ export default function RealtimeCollaborationPage() {
     } catch (error) {
       console.error('Failed to delete document:', error);
       setDocuments(documents.filter(d => d.id !== id));
-    }
-  };
-
-  const shareDocument = async (docId: string, users: string[], permission: string) => {
-    try {
-      await realtimeCollabAPI.shareDocument(docId, { users, permission });
-      setIsShareDialogOpen(false);
-    } catch (error) {
-      console.error('Failed to share document:', error);
     }
   };
 
@@ -611,3 +599,4 @@ export default function RealtimeCollaborationPage() {
     </div>
   );
 }
+

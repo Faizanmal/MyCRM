@@ -375,6 +375,8 @@ export default function CollaborationPage() {
                       selectedRoom === room.id ? 'border-blue-500 shadow-md' : 'border-gray-200'
                     }`}
                     onClick={() => setSelectedRoom(room.id)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSelectedRoom(room.id); e.preventDefault(); } }}
+                    tabIndex={0}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -456,6 +458,8 @@ export default function CollaborationPage() {
                         : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
                     }`}
                     onClick={() => setSelectedChannel(channel.id)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setSelectedChannel(channel.id); e.preventDefault(); } }}
+                    tabIndex={0}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center">
@@ -555,7 +559,7 @@ export default function CollaborationPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="flex items-center justify-center h-full min-h-[400px]">
+                  <div className="flex items-center justify-center h-full min-h-100">
                     <div className="text-center text-gray-500">
                       <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                       <p>Select a channel to view messages</p>
@@ -755,3 +759,4 @@ export default function CollaborationPage() {
     </div>
   );
 }
+

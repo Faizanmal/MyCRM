@@ -196,7 +196,7 @@ class SecurityAuditLog(models.Model):
         blank=True
     )
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
@@ -260,7 +260,7 @@ class AccessPolicy(models.Model):
     
     # Scope
     tenant = models.ForeignKey(
-        'multi_tenant.Tenant',
+        'multi_tenant.Organization',
         on_delete=models.CASCADE,
         null=True,
         blank=True,

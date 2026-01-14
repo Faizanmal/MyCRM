@@ -2,10 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Bot,
     X,
@@ -23,6 +19,11 @@ import {
     ThumbsUp,
     ThumbsDown,
 } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -173,7 +174,7 @@ export default function FloatingAIAssistant() {
                             onClick={() => setIsOpen(true)}
                             className={cn(
                                 "h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300",
-                                "bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500",
+                                "bg-linear-to-br from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-500 hover:via-blue-500 hover:to-indigo-500",
                                 "border-2 border-white/20"
                             )}
                         >
@@ -203,13 +204,13 @@ export default function FloatingAIAssistant() {
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
                         className={cn(
-                            "fixed bottom-6 right-6 z-50 w-[400px] rounded-2xl shadow-2xl overflow-hidden",
+                            "fixed bottom-6 right-6 z-50 w-100 rounded-2xl shadow-2xl overflow-hidden",
                             "bg-background/95 backdrop-blur-xl border border-border/50",
                             "dark:bg-gray-900/95"
                         )}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600">
+                        <div className="flex items-center justify-between p-4 bg-linear-to-r from-purple-600 via-blue-600 to-indigo-600">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
                                     <Sparkles className="h-5 w-5 text-white" />
@@ -254,7 +255,7 @@ export default function FloatingAIAssistant() {
                                             <div className="space-y-4">
                                                 {/* Welcome Message */}
                                                 <div className="text-center py-4">
-                                                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 flex items-center justify-center mx-auto mb-3">
+                                                    <div className="h-16 w-16 rounded-full bg-linear-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 flex items-center justify-center mx-auto mb-3">
                                                         <Lightbulb className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                                                     </div>
                                                     <h4 className="font-semibold mb-1">Hi! I&apos;m your AI Sales Assistant</h4>
@@ -290,7 +291,7 @@ export default function FloatingAIAssistant() {
                                                         )}
                                                     >
                                                         {message.role === 'assistant' && (
-                                                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shrink-0">
+                                                            <div className="h-8 w-8 rounded-full bg-linear-to-br from-purple-500 to-blue-500 flex items-center justify-center shrink-0">
                                                                 <Bot className="h-4 w-4 text-white" />
                                                             </div>
                                                         )}
@@ -400,3 +401,4 @@ export default function FloatingAIAssistant() {
         </>
     );
 }
+

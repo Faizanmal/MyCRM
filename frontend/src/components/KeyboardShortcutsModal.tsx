@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Keyboard, Search, User, Calendar, Moon, ArrowUp, CornerDownLeft, X as XIcon } from 'lucide-react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 // import { Badge } from '@/components/ui/badge';
-import { Keyboard, Search, User, Calendar, Moon, ArrowUp, CornerDownLeft, X as XIcon } from 'lucide-react';
 
 interface ShortcutGroup {
     title: string;
@@ -143,3 +144,4 @@ export default function KeyboardShortcutsModal() {
         </Dialog>
     );
 }
+

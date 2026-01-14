@@ -1,6 +1,30 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import {
+  LayoutDashboard,
+  Plus,
+  Pencil,
+  Trash2,
+  BarChart3,
+  LineChart,
+  PieChart,
+  AreaChart,
+  TrendingUp,
+  Users,
+  Target,
+  ListChecks,
+  Map,
+  Table,
+  Loader2,
+  Share2,
+  Lock,
+  Unlock,
+  Grid3X3,
+  Activity,
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,29 +56,6 @@ import {
 //   DropdownMenuSeparator,
 //   DropdownMenuTrigger,
 // } from '@/components/ui/dropdown-menu';
-import {
-  LayoutDashboard,
-  Plus,
-  Pencil,
-  Trash2,
-  BarChart3,
-  LineChart,
-  PieChart,
-  AreaChart,
-  TrendingUp,
-  Users,
-  Target,
-  ListChecks,
-  Map,
-  Table,
-  Loader2,
-  Share2,
-  Lock,
-  Unlock,
-  Grid3X3,
-  Activity,
-} from 'lucide-react';
-import { toast } from 'sonner';
 import { dashboardWidgetsAPI, DashboardWidget, UserDashboard, DashboardWidgetPlacement } from '@/lib/enterprise-api';
 
 const WIDGET_TYPES = [
@@ -363,7 +364,7 @@ export default function DashboardCustomizationPage() {
               </Badge>
             )}
           </div>
-          <div className={`text-3xl font-bold bg-gradient-to-r ${gradientClass} bg-clip-text text-transparent`}>
+          <div className={`text-3xl font-bold bg-linear-to-r ${gradientClass} bg-clip-text text-transparent`}>
             {data?.value || '—'}
           </div>
         </div>
@@ -378,7 +379,7 @@ export default function DashboardCustomizationPage() {
             {(data?.data || [65, 45, 75, 55, 85, 70, 90]).map((value, i) => (
               <div
                 key={i}
-                className={`flex-1 rounded-t bg-gradient-to-t ${gradientClass} opacity-80`}
+                className={`flex-1 rounded-t bg-linear-to-t ${gradientClass} opacity-80`}
                 style={{ height: `${value}%` }}
               />
             ))}
@@ -424,7 +425,7 @@ export default function DashboardCustomizationPage() {
                   setFormData(initialFormData);
                   setShowWidgetDialog(true);
                 }}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600"
+                className="bg-linear-to-r from-blue-600 to-indigo-600"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Widget
@@ -788,7 +789,7 @@ export default function DashboardCustomizationPage() {
                 <Button
                   onClick={handleCreateWidget}
                   disabled={saving}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600"
+                  className="bg-linear-to-r from-blue-600 to-indigo-600"
                 >
                   {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {editingWidget ? 'Update Widget' : 'Create Widget'}
@@ -833,3 +834,4 @@ export default function DashboardCustomizationPage() {
     </ProtectedRoute>
   );
 }
+

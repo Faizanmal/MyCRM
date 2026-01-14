@@ -2,10 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Search,
     X,
@@ -25,6 +21,11 @@ import {
     Loader2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SearchResult {
     id: string;
@@ -202,6 +203,9 @@ export default function SmartSearch() {
             {/* Search Trigger */}
             <div
                 onClick={() => setIsOpen(true)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setIsOpen(true); e.preventDefault(); } }}
+                tabIndex={0}
+                role="button"
                 className="relative flex items-center cursor-pointer"
             >
                 <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
@@ -277,7 +281,7 @@ export default function SmartSearch() {
                                                         whileHover={{ scale: 1.02 }}
                                                         whileTap={{ scale: 0.98 }}
                                                         onClick={() => setQuery(suggestion.query)}
-                                                        className="flex items-center gap-2 p-2.5 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 hover:from-purple-100 hover:to-blue-100 dark:hover:from-purple-900/30 dark:hover:to-blue-900/30 transition-colors text-left"
+                                                        className="flex items-center gap-2 p-2.5 rounded-lg bg-linear-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 hover:from-purple-100 hover:to-blue-100 dark:hover:from-purple-900/30 dark:hover:to-blue-900/30 transition-colors text-left"
                                                     >
                                                         <suggestion.icon className="w-4 h-4 text-purple-500" />
                                                         <span className="text-sm font-medium">{suggestion.text}</span>
@@ -391,3 +395,4 @@ export default function SmartSearch() {
         </>
     );
 }
+

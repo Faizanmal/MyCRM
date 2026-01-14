@@ -2,16 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 // import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import {
     Settings,
@@ -29,6 +19,17 @@ import {
     Loader2,
     Check,
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Slider } from '@/components/ui/slider';
 import { useUserPreferences } from '@/hooks/useInteractiveFeatures';
 
 // Types
@@ -180,7 +181,7 @@ export default function UserPreferencesPage() {
             setHasChanges(false);
             toast.success('Settings saved successfully');
         } catch (error) {
-            console.log("Failed to save settings",error);
+            console.warn("Failed to save settings",error);
             toast.error('Failed to save settings');
         } finally {
             setIsSaving(false);
@@ -747,3 +748,4 @@ export default function UserPreferencesPage() {
         </div>
     );
 }
+

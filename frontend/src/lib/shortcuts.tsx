@@ -8,9 +8,10 @@ import {
     Calendar, Settings, Plus,
     FileText, Mail, ArrowRight,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
 
 /**
  * Keyboard Shortcuts & Command Palette
@@ -42,7 +43,7 @@ interface ShortcutContextType {
 
 const ShortcutContext = createContext<ShortcutContextType | null>(null);
 
-export function useShortcuts() {
+export function useShortcuts(): ShortcutContextType {
     const context = useContext(ShortcutContext);
     if (!context) {
         throw new Error('useShortcuts must be used within ShortcutProvider');
@@ -54,7 +55,7 @@ interface ShortcutProviderProps {
     children: ReactNode;
 }
 
-export function ShortcutProvider({ children }: ShortcutProviderProps) {
+export function ShortcutProvider({ children }: ShortcutProviderProps): React.JSX.Element {
     const router = useRouter();
     const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
     const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -315,13 +316,13 @@ function CommandPalette() {
                         />
                     </div>
 
-                    <Command.List className="max-h-[400px] overflow-y-auto p-2">
+                    <Command.List className="max-h-100 overflow-y-auto p-2">
                         <Command.Empty className="py-6 text-center text-sm text-gray-500">
                             No results found.
                         </Command.Empty>
 
                         {/* Navigation */}
-                        <Command.Group heading="Navigation" className="[&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-gray-500 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
+                        <Command.Group heading="Navigation" className="**:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:text-gray-500 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5">
                             {navigationItems.map((item) => (
                                 <Command.Item
                                     key={item.path}
@@ -336,7 +337,7 @@ function CommandPalette() {
                         </Command.Group>
 
                         {/* Actions */}
-                        <Command.Group heading="Quick Actions" className="[&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-gray-500 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
+                        <Command.Group heading="Quick Actions" className="**:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:text-gray-500 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5">
                             {actionItems.map((item) => (
                                 <Command.Item
                                     key={item.path}
@@ -350,9 +351,9 @@ function CommandPalette() {
                         </Command.Group>
 
                         {/* Shortcuts Help */}
-                        <Command.Group heading="Keyboard Shortcuts" className="[&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-gray-500 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
+                        <Command.Group heading="Keyboard Shortcuts" className="**:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:text-gray-500 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5">
                             <Command.Item
-                                onSelect={() => { }}
+                                onSelect={() => { /* TODO: show all shortcuts */ }}
                                 className="flex items-center justify-between gap-3 px-3 py-2 text-sm rounded-md cursor-pointer aria-selected:bg-blue-50"
                             >
                                 <span>Show all shortcuts</span>
@@ -392,7 +393,7 @@ interface ShortcutKeyProps {
     className?: string;
 }
 
-export function ShortcutKey({ keys, className }: ShortcutKeyProps) {
+export function ShortcutKey({ keys, className }: ShortcutKeyProps): React.JSX.Element {
     const keyArray = Array.isArray(keys) ? keys : [keys];
 
     const formatKey = (key: string) => {
@@ -430,7 +431,7 @@ export function ShortcutKey({ keys, className }: ShortcutKeyProps) {
 /**
  * Shortcuts Help Modal
  */
-export function ShortcutsHelpModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function ShortcutsHelpModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }): React.JSX.Element {
     const { shortcuts } = useShortcuts();
 
     const categories = shortcuts.reduce((acc, shortcut) => {
@@ -474,3 +475,4 @@ const Shortcuts = {
 };
 
 export default Shortcuts;
+

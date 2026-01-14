@@ -84,7 +84,7 @@ export function RealtimeNotificationProvider({ children }: { children: ReactNode
             ws.onopen = () => {
                 setIsConnected(true);
                 reconnectAttemptsRef.current = 0;
-                console.log('WebSocket connected');
+                console.warn('WebSocket connected');
             };
 
             ws.onmessage = (event) => {
@@ -193,8 +193,8 @@ export function useRealtime() {
         return {
             isConnected: false,
             lastMessage: null,
-            subscribe: () => () => { },
-            send: () => { },
+            subscribe: () => () => { /* mock */ },
+            send: () => { /* mock */ },
         };
     }
     return context;
@@ -231,3 +231,4 @@ export function useRealtimeNotifications() {
 
     return { notifications, clearNotifications };
 }
+

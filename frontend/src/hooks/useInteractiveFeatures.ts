@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+
 import {
     preferencesAPI,
     onboardingAPI,
@@ -610,3 +611,4 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
     return [storedValue, setValue, removeValue] as const;
 }
+

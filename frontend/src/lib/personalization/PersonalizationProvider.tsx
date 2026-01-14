@@ -420,7 +420,7 @@ export function PersonalizationProvider({ children, userId }: PersonalizationPro
     // Send to analytics/tracking service
     // In production, this would batch events and send to API
     if (process.env.NODE_ENV === 'development') {
-      console.log('Track event:', eventType, eventData);
+      console.warn('Track event:', eventType, eventData);
     }
   }, []);
 
@@ -640,7 +640,7 @@ export function CommandPalette() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-32">
-      <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
+      <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} onKeyDown={(e) => { if (e.key === 'Escape') setIsOpen(false); }} tabIndex={0} />
       <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-lg">
         <input
           type="text"
@@ -673,3 +673,4 @@ export function CommandPalette() {
     </div>
   );
 }
+

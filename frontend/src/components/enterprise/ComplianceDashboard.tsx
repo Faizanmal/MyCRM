@@ -9,6 +9,26 @@
 
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  Download,
+  Eye,
+  FileCheck,
+  FileText,
+  History,
+  Lock,
+  PenLine,
+  RefreshCw,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Trash2,
+  UserX,
+  XCircle,
+} from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,25 +53,6 @@ import {
 //   DialogTitle,
 //   DialogTrigger,
 // } from '@/components/ui/dialog';
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  Download,
-  Eye,
-  FileCheck,
-  FileText,
-  History,
-  Lock,
-  PenLine,
-  RefreshCw,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  Trash2,
-  UserX,
-  XCircle,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // =============================================================================
@@ -236,7 +237,7 @@ export function ComplianceDashboard({ className }: { className?: string }) {
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-4 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/20">
+              <div className="p-4 rounded-full bg-linear-to-r from-green-500/20 to-emerald-500/20">
                 <ShieldCheck className="h-8 w-8 text-green-500" />
               </div>
               <div>
@@ -917,3 +918,4 @@ function ConsentStatusBadge({ status }: { status: string }) {
 }
 
 export default ComplianceDashboard;
+

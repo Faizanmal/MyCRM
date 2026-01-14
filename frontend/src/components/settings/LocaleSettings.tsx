@@ -1,6 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import {
+  Globe,
+  Languages,
+  Clock,
+  DollarSign,
+  Calendar,
+  Check,
+  Sparkles,
+  Upload,
+  Download,
+  Search,
+  RefreshCw
+} from 'lucide-react';
+
 import { useI18n } from '@/lib/i18n/I18nProvider';
 import {
   Card,
@@ -24,19 +38,6 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-  Globe,
-  Languages,
-  Clock,
-  DollarSign,
-  Calendar,
-  Check,
-  Sparkles,
-  Upload,
-  Download,
-  Search,
-  RefreshCw
-} from 'lucide-react';
 
 // Language Settings Component
 const LanguageSettings: React.FC = () => {
@@ -593,3 +594,4 @@ export default function LocaleSettings() {
     </div>
   );
 }
+

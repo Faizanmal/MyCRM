@@ -1,36 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Type,
   Hash,
@@ -62,6 +32,37 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { customFieldsAPI, CustomField } from '@/lib/enterprise-api';
 
 const FIELD_TYPES = [
@@ -357,7 +358,7 @@ export default function CustomFieldsPage() {
                 setFormData({ ...initialFormData });
                 setShowCreateDialog(true);
               }}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              className="bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Custom Field
@@ -366,13 +367,13 @@ export default function CustomFieldsPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
+            <Card className="bg-linear-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{fields.length}</div>
                 <div className="text-sm text-purple-600 dark:text-purple-400">Total Fields</div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+            <Card className="bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-green-700 dark:text-green-300">
                   {fields.filter(f => f.is_visible).length}
@@ -380,7 +381,7 @@ export default function CustomFieldsPage() {
                 <div className="text-sm text-green-600 dark:text-green-400">Visible Fields</div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-800">
+            <Card className="bg-linear-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-800">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                   {fields.filter(f => f.is_required).length}
@@ -388,7 +389,7 @@ export default function CustomFieldsPage() {
                 <div className="text-sm text-blue-600 dark:text-blue-400">Required Fields</div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800">
+            <Card className="bg-linear-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200 dark:border-amber-800">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">
                   {fields.filter(f => f.is_searchable).length}
@@ -831,7 +832,7 @@ export default function CustomFieldsPage() {
                 <Button
                   onClick={handleCreateField}
                   disabled={saving}
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600"
+                  className="bg-linear-to-r from-purple-600 to-indigo-600"
                 >
                   {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {editingField ? 'Update Field' : 'Create Field'}
@@ -844,3 +845,4 @@ export default function CustomFieldsPage() {
     </ProtectedRoute>
   );
 }
+

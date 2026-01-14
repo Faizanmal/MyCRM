@@ -387,3 +387,4 @@ describe('Edge Cases', () => {
         expect(screen.getByText('0%')).toBeTruthy();
     });
 });
+

@@ -2,13 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { 
   Building2, 
   Users, 
@@ -19,6 +12,14 @@ import {
   ArrowLeft,
   Sparkles
 } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 interface OrganizationData {
   name: string;
@@ -320,6 +321,9 @@ export default function OnboardingPage() {
                       importChoice === 'skip' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => setImportChoice('skip')}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setImportChoice('skip'); e.preventDefault(); } }}
+                    tabIndex={0}
+                    role="button"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -337,6 +341,9 @@ export default function OnboardingPage() {
                       importChoice === 'csv' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => setImportChoice('csv')}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setImportChoice('csv'); e.preventDefault(); } }}
+                    tabIndex={0}
+                    role="button"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -354,6 +361,9 @@ export default function OnboardingPage() {
                       importChoice === 'import' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => setImportChoice('import')}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { setImportChoice('import'); e.preventDefault(); } }}
+                    tabIndex={0}
+                    role="button"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -553,3 +563,4 @@ export default function OnboardingPage() {
     </div>
   );
 }
+

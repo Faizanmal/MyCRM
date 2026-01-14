@@ -10,8 +10,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
 import { Menu, X } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 
 interface NavItem {
   label: string;
@@ -271,3 +272,4 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
     </nav>
   );
 }
+

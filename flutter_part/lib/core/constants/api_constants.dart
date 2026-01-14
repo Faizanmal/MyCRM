@@ -221,7 +221,6 @@ class ApiConstants {
   static const String esignAnalytics = '$v1/documents/analytics/';
 
   // ==================== Conversation Intelligence (v1) Endpoints ====================
-  static const String callRecordings = '$v1/conversation-intelligence/recordings/';
   static String processRecording(String id) => '$v1/conversation-intelligence/recordings/$id/process/';
   static String getTranscript(String id) => '$v1/conversation-intelligence/recordings/$id/transcript/';
   static const String searchTranscripts = '$v1/conversation-intelligence/transcripts/search/';

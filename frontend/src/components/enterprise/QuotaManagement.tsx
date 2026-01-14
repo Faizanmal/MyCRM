@@ -3,6 +3,26 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Target,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Award,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Calendar,
+  Sparkles,
+  ArrowUp,
+  ArrowDown,
+  Edit,
+  History,
+  BarChart3,
+  Calculator,
+} from 'lucide-react';
+
+import {
   Card,
   CardContent,
   CardDescription,
@@ -29,25 +49,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 // import { Textarea } from '@/components/ui/textarea';
-import {
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Users,
-  Award,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  DollarSign,
-  Calendar,
-  Sparkles,
-  ArrowUp,
-  ArrowDown,
-  Edit,
-  History,
-  BarChart3,
-  Calculator,
-} from 'lucide-react';
 
 // Types
 interface QuotaSummary {
@@ -946,3 +947,4 @@ export default function QuotaManagement() {
     </div>
   );
 }
+

@@ -1,6 +1,26 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { 
+  Calendar, 
+  Plus,
+  Search,
+  Filter,
+  CheckCircle2,
+  Circle,
+  Clock,
+  Flag,
+  User,
+  MoreVertical,
+  RefreshCw,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  Edit
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,26 +52,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Calendar, 
-  Plus,
-  Search,
-  Filter,
-  CheckCircle2,
-  Circle,
-  Clock,
-  Flag,
-  User,
-  MoreVertical,
-  RefreshCw,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Trash2,
-  Edit
-} from 'lucide-react';
 import { tasksAPI } from '@/lib/api';
-import { toast } from 'sonner';
+
 
 interface Task {
   id: number;
@@ -630,3 +632,4 @@ export default function TasksPage() {
     </ProtectedRoute>
   );
 }
+

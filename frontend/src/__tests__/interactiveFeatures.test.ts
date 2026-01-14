@@ -66,7 +66,6 @@ import {
     useKeyboardShortcut,
     useLocalStorage,
 } from '@/hooks/useInteractiveFeatures';
-
 import {
     preferencesAPI,
     onboardingAPI,
@@ -577,3 +576,4 @@ describe('Component Integration', () => {
         expect(preferencesAPI.getPreferences).toHaveBeenCalledTimes(2);
     });
 });
+

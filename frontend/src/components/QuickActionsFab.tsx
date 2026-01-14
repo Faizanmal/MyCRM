@@ -223,7 +223,7 @@ export default function QuickActionsFab() {
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={action.action}
-                                        className={`w-12 h-12 rounded-full bg-gradient-to-br ${action.color} text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-shadow`}
+                                        className={`w-12 h-12 rounded-full bg-linear-to-br ${action.color} text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-shadow`}
                                     >
                                         <action.icon className="w-5 h-5" />
                                     </motion.button>
@@ -240,7 +240,7 @@ export default function QuickActionsFab() {
                     onClick={() => setIsOpen(!isOpen)}
                     className={`w-14 h-14 rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 ${isOpen
                             ? 'bg-gray-900 dark:bg-gray-700'
-                            : 'bg-gradient-to-br from-blue-600 to-purple-600'
+                            : 'bg-linear-to-br from-blue-600 to-purple-600'
                         }`}
                 >
                     <motion.div
@@ -274,3 +274,4 @@ export default function QuickActionsFab() {
         </>
     );
 }
+

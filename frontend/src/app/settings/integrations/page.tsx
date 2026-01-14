@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Plug, Settings, Link, Unlink, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
-import { Plug, Settings, Link, Unlink, Loader2 } from 'lucide-react';
 
 interface Integration {
   id: string;
@@ -96,7 +97,7 @@ export default function IntegrationsSettingsPage() {
         `${integration.name} ${!integration.enabled ? 'enabled' : 'disabled'}`
       );
     } catch (error) {
-      console.log("Failed to update integration",error);
+      console.warn("Failed to update integration",error);
       toast.error('Failed to update integration');
     } finally {
       setIsSaving(false);
@@ -119,7 +120,7 @@ export default function IntegrationsSettingsPage() {
 
       toast.success('Integration connected successfully');
     } catch (error) {
-      console.log("Failed to connect integration",error);
+      console.warn("Failed to connect integration",error);
       toast.error('Failed to connect integration');
     } finally {
       setIsSaving(false);
@@ -143,7 +144,7 @@ export default function IntegrationsSettingsPage() {
 
       toast.success('Integration disconnected');
     } catch (error) {
-      console.log("Failed to disconnect integration",error);
+      console.warn("Failed to disconnect integration",error);
       toast.error('Failed to disconnect integration');
     } finally {
       setIsSaving(false);
@@ -286,3 +287,4 @@ export default function IntegrationsSettingsPage() {
     </ProtectedRoute>
   );
 }
+

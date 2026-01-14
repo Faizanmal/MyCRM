@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   LayoutDashboard, FileText, BarChart3, TrendingUp, Plus, Edit,
   Play, Calendar, Download, Users, Settings
 } from 'lucide-react';
+
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface Dashboard {
   id: number;
@@ -396,3 +397,4 @@ export default function AdvancedReportingPage() {
     </div>
   );
 }
+

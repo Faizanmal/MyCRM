@@ -3,6 +3,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  Workflow, Play, Pause, Plus, Trash2, Settings, Copy, 
+  Mail, CheckSquare, Edit, Bell, Webhook, Clock, Zap 
+} from 'lucide-react';
+import axios from 'axios';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,12 +19,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Workflow, Play, Pause, Plus, Trash2, Settings, Copy, 
-  Mail, CheckSquare, Edit, Bell, Webhook, Clock, Zap 
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+
 
 interface WorkflowAction {
   type: string;
@@ -619,3 +621,4 @@ function ActionEditor({
     </Card>
   );
 }
+

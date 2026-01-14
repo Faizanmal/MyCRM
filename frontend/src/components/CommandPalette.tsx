@@ -3,16 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    CommandDialog,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-    CommandSeparator,
-    CommandShortcut,
-} from '@/components/ui/command';
-import {
     BarChart3,
     Users,
     UserPlus,
@@ -49,6 +39,17 @@ import {
     Sun,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+    CommandShortcut,
+} from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
 
 interface CommandItem {
@@ -299,3 +300,4 @@ export default function CommandPalette() {
         </>
     );
 }
+

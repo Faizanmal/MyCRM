@@ -2,16 +2,6 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import {
     Bell,
@@ -36,6 +26,17 @@ import {
     BellOff,
     Zap,
 } from 'lucide-react';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 // Types
 interface NotificationChannel {
@@ -321,7 +322,7 @@ export default function NotificationPreferencesPage() {
             setHasChanges(false);
             toast.success('Notification preferences saved');
         } catch (error) {
-            console.log("Failed to save preferences",error);
+            console.warn("Failed to save preferences",error);
             toast.error('Failed to save preferences');
         } finally {
             setIsSaving(false);
@@ -744,3 +745,4 @@ export default function NotificationPreferencesPage() {
         </div>
     );
 }
+

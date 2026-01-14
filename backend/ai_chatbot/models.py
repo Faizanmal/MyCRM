@@ -210,7 +210,7 @@ class EmailTemplate(models.Model):
     avg_open_rate = models.FloatField(null=True, blank=True)
     avg_response_rate = models.FloatField(null=True, blank=True)
     
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='ai_chatbot_email_templates')
     is_active = models.BooleanField(default=True)
     
     created_at = models.DateTimeField(auto_now_add=True)

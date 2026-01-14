@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { usePWAInstall } from '@/hooks/useMobile';
 import { XMarkIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
+
+import { usePWAInstall } from '@/hooks/useMobile';
 
 interface PWAInstallPromptProps {
   delay?: number; // Delay before showing prompt (ms)
@@ -62,7 +63,7 @@ export function PWAInstallPrompt({ delay = 5000 }: PWAInstallPromptProps) {
         </button>
 
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
+          <div className="shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center">
             <DevicePhoneMobileIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="flex-1">
@@ -140,7 +141,7 @@ export function IOSInstallPrompt() {
         
         <ol className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
           <li className="flex items-center gap-2">
-            <span className="flex-shrink-0 w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium">
+            <span className="shrink-0 w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium">
               1
             </span>
             Tap the share button
@@ -149,13 +150,13 @@ export function IOSInstallPrompt() {
             </svg>
           </li>
           <li className="flex items-center gap-2">
-            <span className="flex-shrink-0 w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium">
+            <span className="shrink-0 w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium">
               2
             </span>
             Scroll down and tap &quot;Add to Home Screen&quot;
           </li>
           <li className="flex items-center gap-2">
-            <span className="flex-shrink-0 w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium">
+            <span className="shrink-0 w-5 h-5 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs font-medium">
               3
             </span>
             Tap &quot;Add&quot; to confirm
@@ -234,3 +235,4 @@ export function UpdatePrompt() {
     </div>
   );
 }
+

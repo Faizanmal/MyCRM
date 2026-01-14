@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { 
+  FileSignature, FileText, Upload, Send, Clock, CheckCircle, 
+  XCircle, AlertCircle, Eye, Download, PenTool, 
+  FilePlus, Search, MoreHorizontal, Calendar, Mail, Shield
+} from "lucide-react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  FileSignature, FileText, Upload, Send, Clock, CheckCircle, 
-  XCircle, AlertCircle, Eye, Download, PenTool, 
-  FilePlus, Search, MoreHorizontal, Calendar, Mail, Shield
-} from "lucide-react";
 
 interface Document {
   id: number;
@@ -148,7 +149,7 @@ export default function DocumentEsignPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             Document & E-Sign
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -160,7 +161,7 @@ export default function DocumentEsignPage() {
             <Upload className="w-4 h-4 mr-2" />
             Upload Document
           </Button>
-          <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+          <Button className="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
             <FilePlus className="w-4 h-4 mr-2" />
             New Document
           </Button>
@@ -169,7 +170,7 @@ export default function DocumentEsignPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
+        <Card className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -181,7 +182,7 @@ export default function DocumentEsignPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
+        <Card className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -193,7 +194,7 @@ export default function DocumentEsignPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950/50 dark:to-yellow-900/30 border-yellow-200 dark:border-yellow-800">
+        <Card className="bg-linear-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950/50 dark:to-yellow-900/30 border-yellow-200 dark:border-yellow-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -205,7 +206,7 @@ export default function DocumentEsignPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950/50 dark:to-gray-900/30 border-gray-200 dark:border-gray-800">
+        <Card className="bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-950/50 dark:to-gray-900/30 border-gray-200 dark:border-gray-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -317,7 +318,7 @@ export default function DocumentEsignPage() {
                           <PenTool className="w-4 h-4 mr-2" />
                           Edit
                         </Button>
-                        <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-purple-600">
+                        <Button size="sm" className="bg-linear-to-r from-indigo-600 to-purple-600">
                           <Send className="w-4 h-4 mr-2" />
                           Send for Signature
                         </Button>
@@ -356,7 +357,7 @@ export default function DocumentEsignPage() {
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
                     </Button>
-                    <Button size="sm" className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600">
+                    <Button size="sm" className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600">
                       Use Template
                     </Button>
                   </div>
@@ -413,7 +414,7 @@ export default function DocumentEsignPage() {
       </Tabs>
 
       {/* Security Banner */}
-      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
+      <Card className="bg-linear-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 dark:border-green-800">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/50">
@@ -431,3 +432,4 @@ export default function DocumentEsignPage() {
     </div>
   );
 }
+

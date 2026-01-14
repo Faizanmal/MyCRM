@@ -8,18 +8,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Bot,
   Copy,
@@ -37,6 +25,19 @@ import {
   Calendar,
   TrendingUp,
 } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 // =============================================================================
@@ -229,7 +230,7 @@ export function AIAssistantChat({
       <CardHeader className="pb-3 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
+            <div className="p-2 rounded-full bg-linear-to-r from-purple-500 to-blue-500">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
             <div>
@@ -370,7 +371,7 @@ function MessageBubble({
           </>
         ) : (
           <>
-            <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500">
+            <AvatarFallback className="bg-linear-to-r from-purple-500 to-blue-500">
               <Bot className="h-4 w-4 text-white" />
             </AvatarFallback>
           </>
@@ -496,3 +497,4 @@ function QuickActionButton({
 }
 
 export default AIAssistantChat;
+

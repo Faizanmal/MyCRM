@@ -3,7 +3,7 @@
  * Registers the enhanced service worker for PWA support
  */
 
-export function registerServiceWorker() {
+export function registerServiceWorker(): void {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
     return;
   }
@@ -15,7 +15,7 @@ export function registerServiceWorker() {
         scope: '/',
       });
 
-      console.log('Service Worker registered:', registration.scope);
+      console.warn('Service Worker registered:', registration.scope);
 
       // Check for updates
       registration.addEventListener('updatefound', () => {
@@ -25,7 +25,7 @@ export function registerServiceWorker() {
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             // New service worker available
-            console.log('New service worker available');
+            console.warn('New service worker available');
             
             // Notify user of update
             if (window.confirm('A new version is available! Reload to update?')) {
@@ -46,7 +46,7 @@ export function registerServiceWorker() {
             import('./offlineDB').then(({ syncService }) => {
               syncService.sync().then(({ synced, failed }) => {
                 if (synced > 0) {
-                  console.log(`Synced ${synced} items`);
+                  console.warn(`Synced ${synced} items`);
                 }
                 if (failed > 0) {
                   console.warn(`Failed to sync ${failed} items`);
@@ -56,12 +56,12 @@ export function registerServiceWorker() {
             break;
 
           case 'CACHE_UPDATED':
-            console.log('Cache updated:', payload);
+            console.warn('Cache updated:', payload);
             break;
 
           case 'NOTIFICATION_CLICKED':
             // Handle notification clicks
-            console.log('Notification clicked:', payload);
+            console.warn('Notification clicked:', payload);
             break;
         }
       });
@@ -82,9 +82,9 @@ export function registerServiceWorker() {
           await registration.periodicSync.register('sync-contacts', {
             minInterval: 24 * 60 * 60 * 1000, // 24 hours
           });
-          console.log('Periodic sync registered');
+          console.warn('Periodic sync registered');
         } catch (error) {
-          console.log('Periodic sync not available:', error);
+          console.warn('Periodic sync not available:', error);
         }
       }
 
@@ -133,3 +133,4 @@ export async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegis
     return null;
   }
 }
+

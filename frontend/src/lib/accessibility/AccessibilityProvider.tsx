@@ -463,3 +463,4 @@ export function useKeyboardShortcut(
     return () => unregisterShortcut(id);
   }, [id, name, keys, action, handler, scope, registerShortcut, unregisterShortcut]);
 }
+

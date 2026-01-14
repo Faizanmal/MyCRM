@@ -3,6 +3,12 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { 
+  Upload, Download, FileSpreadsheet,
+  CheckCircle, ArrowRight, Table
+} from 'lucide-react';
+import axios from 'axios';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,12 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Upload, Download, FileSpreadsheet,
-  CheckCircle, ArrowRight, Table
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
+
 
 interface FieldMapping {
   [key: string]: string;
@@ -664,3 +666,4 @@ function ImportHistory() {
     </Card>
   );
 }
+

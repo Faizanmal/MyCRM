@@ -1,13 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { 
   Bot, 
   Send, 
@@ -25,6 +18,14 @@ import {
   Clock,
   Zap
 } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import { aiChatbotAPI } from '@/lib/api';
 
 interface ChatMessage {
@@ -220,7 +221,7 @@ export default function AIChatbotPage() {
       const demoResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'I understand you\'re asking about: "' + inputMessage + '"\n\nLet me help you with that. Based on your CRM data, here are some insights I can provide...\n\nWould you like me to elaborate on any specific aspect?',
+        content: `I understand you're asking about: "${  inputMessage  }"\n\nLet me help you with that. Based on your CRM data, here are some insights I can provide...\n\nWould you like me to elaborate on any specific aspect?`,
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, demoResponse]);
@@ -304,6 +305,8 @@ export default function AIChatbotPage() {
                       : 'bg-muted/50 hover:bg-muted'
                   }`}
                   onClick={() => selectSession(session)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { selectSession(session); e.preventDefault(); } }}
+                  tabIndex={0}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{session.name}</p>
@@ -531,3 +534,4 @@ export default function AIChatbotPage() {
     </div>
   );
 }
+

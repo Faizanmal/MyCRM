@@ -8,6 +8,7 @@
 
 import React, { useRef, useState, useEffect, ReactNode } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
+
 import { cn } from '@/lib/utils';
 
 interface SpotlightEffectProps {
@@ -268,3 +269,4 @@ export function TiltCard({
     </motion.div>
   );
 }
+

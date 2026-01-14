@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { Building2, Save, Loader2 } from 'lucide-react';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { Building2, Save, Loader2 } from 'lucide-react';
 
 export default function OrganizationSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
@@ -42,7 +43,7 @@ export default function OrganizationSettingsPage() {
 
       toast.success('Organization settings updated successfully');
     } catch (error) {
-      console.log("Failed to update organization settings",error);
+      console.warn("Failed to update organization settings",error);
       toast.error('Failed to update organization settings');
     } finally {
       setIsSaving(false);
@@ -212,3 +213,4 @@ export default function OrganizationSettingsPage() {
     </ProtectedRoute>
   );
 }
+

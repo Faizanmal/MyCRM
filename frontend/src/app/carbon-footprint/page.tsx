@@ -1,17 +1,39 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { GlobeAltIcon, CloudIcon, BoltIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+
 import { carbonTrackingAPI } from '@/lib/new-features-api';
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { GlobeAltIcon, CloudIcon, BoltIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+
+interface CarbonFootprint {
+  id: string;
+  timestamp: string;
+  activity: string;
+  carbon_impact: number;
+  category: string;
+  interaction_type: string;
+  carbon_grams: number;
+  offset_applied: boolean;
+}
+
+interface CarbonStatistics {
+  total_footprint: number;
+  monthly_average: number;
+  reduction_percentage: number;
+  offset_amount: number;
+  total_carbon_grams: number;
+  offset_percentage: number;
+  carbon_saved_grams: number;
+}
 
 export default function CarbonFootprintPage() {
-  const [footprints, setFootprints] = useState<any[]>([]);
-  const [statistics, setStatistics] = useState<any>(null);
+  const [footprints, setFootprints] = useState<CarbonFootprint[]>([]);
+  const [statistics, setStatistics] = useState<CarbonStatistics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -118,7 +140,7 @@ export default function CarbonFootprintPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+          <Card className="bg-linear-to-r from-green-50 to-blue-50 border-green-200">
             <CardContent className="pt-6">
               <h3 className="font-semibold text-lg mb-3">Carbon Tracking Benefits</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-700">
@@ -134,3 +156,4 @@ export default function CarbonFootprintPage() {
     </ProtectedRoute>
   );
 }
+

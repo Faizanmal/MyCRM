@@ -68,3 +68,4 @@ export async function GET() {
     documentation: '/api/graphql/playground',
   });
 }
+

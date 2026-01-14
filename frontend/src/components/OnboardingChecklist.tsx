@@ -2,10 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
     CheckCircle2,
     Circle,
@@ -26,7 +22,13 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { onboardingAPI } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ChecklistItem {
     id: string;
@@ -114,8 +116,15 @@ export default function OnboardingChecklist() {
     const [items, setItems] = useState<ChecklistItem[]>([]);
     const [totalXp, setTotalXp] = useState(0);
     const router = useRouter();
+    const { isAuthenticated } = useAuth();
 
     const loadOnboardingProgress = useCallback(async () => {
+        if (!isAuthenticated) {
+            // Don't fetch if not authenticated
+            setIsDismissed(true);
+            return;
+        }
+
         try {
             // Try to fetch from backend
             const status = await onboardingAPI.getStatus();
@@ -163,7 +172,7 @@ export default function OnboardingChecklist() {
             }
             setIsDismissed(false);
         }
-    }, []);
+    }, [isAuthenticated]);
 
     useEffect(() => {
         // Defer call to avoid synchronous setState inside effect
@@ -192,12 +201,14 @@ export default function OnboardingChecklist() {
         localStorage.setItem(CHECKLIST_STORAGE_KEY, JSON.stringify(updatedItems));
 
         try {
-            // Sync with backend
-            await onboardingAPI.completeStep(id, item.points);
+            // Sync with backend only if authenticated
+            if (isAuthenticated) {
+                await onboardingAPI.completeStep(id, item.points);
+            }
         } catch (error) {
             // Already saved locally, continue
             console.error('Failed to sync step completion:', error);
-            console.log('Step completion synced locally');
+            console.warn('Step completion synced locally');
         }
 
         toast.success(`🎉 +${item.points} XP earned!`, {
@@ -208,7 +219,7 @@ export default function OnboardingChecklist() {
         if (updatedItems.every(item => item.completed)) {
             setTimeout(() => {
                 toast.success('🏆 Onboarding Complete!', {
-                    description: 'You earned a total of ' + maxPoints + ' XP!',
+                    description: `You earned a total of ${  maxPoints  } XP!`,
                 });
             }, 500);
         }
@@ -229,17 +240,19 @@ export default function OnboardingChecklist() {
         localStorage.setItem(CHECKLIST_DISMISSED_KEY, 'true');
 
         try {
-            await onboardingAPI.dismissTour();
+            if (isAuthenticated) {
+                await onboardingAPI.dismissTour();
+            }
         } catch (error) {
             // Already saved locally
             console.error('Failed to sync checklist dismissal:', error);
-            console.log('Checklist dismissal synced locally');
+            console.warn('Checklist dismissal synced locally');
         }
 
         toast.info('You can find the checklist in Settings anytime');
     };
 
-    if (isDismissed || completedCount === items.length) {
+    if (isDismissed || completedCount === items.length || !isAuthenticated) {
         return null;
     }
 
@@ -251,7 +264,7 @@ export default function OnboardingChecklist() {
         >
             <Card className="shadow-xl border-2 border-blue-100 dark:border-blue-900 overflow-hidden">
                 {/* Header */}
-                <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+                <CardHeader className="pb-2 bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <motion.div
@@ -353,7 +366,7 @@ export default function OnboardingChecklist() {
                 </AnimatePresence>
 
                 {/* Bonus reward teaser */}
-                <div className="px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-t">
+                <div className="px-4 py-2 bg-linear-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-t">
                     <div className="flex items-center gap-2 text-xs">
                         <Gift className="w-4 h-4 text-amber-500" />
                         <span className="text-amber-700 dark:text-amber-400 font-medium">
@@ -365,3 +378,4 @@ export default function OnboardingChecklist() {
         </motion.div>
     );
 }
+

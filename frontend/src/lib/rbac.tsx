@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
 // ==================== Types ====================
@@ -216,7 +216,7 @@ const RBACContext = createContext<RBACContextType | undefined>(undefined);
 
 // ==================== Provider ====================
 
-export function RBACProvider({ children }: { children: ReactNode }) {
+export function RBACProvider({ children }: { children: ReactNode }): React.JSX.Element {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -323,7 +323,7 @@ export function RBACProvider({ children }: { children: ReactNode }) {
 
 // ==================== Hook ====================
 
-export function useRBAC() {
+export function useRBAC(): RBACContextType {
     const context = useContext(RBACContext);
     if (context === undefined) {
         throw new Error('useRBAC must be used within a RBACProvider');
@@ -339,7 +339,7 @@ interface WithPermissionProps {
     children: ReactNode;
 }
 
-export function WithPermission({ permission, fallback = null, children }: WithPermissionProps) {
+export function WithPermission({ permission, fallback = null, children }: WithPermissionProps): React.ReactNode {
     const { hasPermission, isLoading } = useRBAC();
 
     if (isLoading) return null;
@@ -355,7 +355,7 @@ interface WithRoleProps {
     children: ReactNode;
 }
 
-export function WithRole({ role, minimum = false, fallback = null, children }: WithRoleProps) {
+export function WithRole({ role, minimum = false, fallback = null, children }: WithRoleProps): React.ReactNode {
     const { hasRole, hasMinimumRole, isLoading } = useRBAC();
 
     if (isLoading) return null;
@@ -388,7 +388,7 @@ export function ProtectedRoute({
     redirectTo = '/dashboard',
     fallback,
     children,
-}: ProtectedRouteProps) {
+}: ProtectedRouteProps): React.ReactNode {
     const router = useRouter();
     const {
         hasPermission,
@@ -488,7 +488,7 @@ export function ProtectedRoute({
 
 // ==================== Access Denied Component ====================
 
-export function AccessDenied() {
+export function AccessDenied(): React.JSX.Element {
     const router = useRouter();
 
     return (
@@ -545,3 +545,4 @@ export function getRoleColor(role: Role): string {
     };
     return colors[role] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 }
+

@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { integrationHubAPI, Integration, IntegrationProvider } from '@/lib/new-features-api';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import {
   PuzzlePieceIcon,
   CheckCircleIcon,
@@ -15,6 +12,10 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+
+import { integrationHubAPI, Integration, IntegrationProvider } from '@/lib/new-features-api';
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +84,7 @@ export default function IntegrationHubPage() {
       if (response.data.success) {
         alert('Connection test successful!');
       } else {
-        alert('Connection test failed: ' + (response.data.message || 'Unknown error'));
+        alert(`Connection test failed: ${  response.data.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Failed to test connection:', error);
@@ -375,3 +376,4 @@ export default function IntegrationHubPage() {
     </ProtectedRoute>
   );
 }
+

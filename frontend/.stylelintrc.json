@@ -1,0 +1,37 @@
+{
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-tailwindcss"
+  ],
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "layer",
+          "screen",
+          "theme"
+        ]
+      }
+    ],
+
+    "color-function-notation": null,
+    "color-function-alias-notation": null,
+    "alpha-value-notation": null,
+    "hue-degree-notation": null,
+    "color-hex-length": null,
+
+    "no-duplicate-selectors": null,
+    "no-descending-specificity": null,
+    "selector-class-pattern": null,
+
+    "property-no-vendor-prefix": null,
+
+    "rule-empty-line-before": null,
+    "custom-property-empty-line-before": null,
+    "font-family-name-quotes": null,
+    "value-keyword-case": null
+  }
+}

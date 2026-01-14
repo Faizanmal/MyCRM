@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import {
     Settings,
     User,
@@ -26,6 +25,8 @@ import {
     Menu,
     X,
 } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -307,3 +308,4 @@ export default function SettingsSidebar() {
 // Export for use in settings layout
 export { settingsNavigation };
 export type { NavItem, NavSection };
+

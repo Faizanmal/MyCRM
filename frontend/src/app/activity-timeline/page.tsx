@@ -1,27 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import MainLayout from '@/components/Layout/MainLayout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Activity,
   User,
@@ -49,8 +28,31 @@ import {
   AtSign,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { activityTimelineAPI, Activity as ActivityType } from '@/lib/enterprise-api';
 import { format, formatDistanceToNow, isToday, isYesterday, isThisWeek } from 'date-fns';
+
+import MainLayout from '@/components/Layout/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { activityTimelineAPI, Activity as ActivityType } from '@/lib/enterprise-api';
+
 
 const ACTION_ICONS: Record<string, React.ElementType> = {
   created: Plus,
@@ -251,7 +253,7 @@ export default function ActivityTimelinePage() {
 
     return sortedKeys.map(key => ({
       date: key,
-      label: key === 'today' ? 'Today' : key === 'yesterday' ? 'Yesterday' : key === 'this_week' ? 'This Week' : format(new Date(key + '-01'), 'MMMM yyyy'),
+      label: key === 'today' ? 'Today' : key === 'yesterday' ? 'Yesterday' : key === 'this_week' ? 'This Week' : format(new Date(`${key  }-01`), 'MMMM yyyy'),
       activities: groups[key],
     }));
   };
@@ -318,7 +320,7 @@ export default function ActivityTimelinePage() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+            <Card className="bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/50">
@@ -333,7 +335,7 @@ export default function ActivityTimelinePage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+            <Card className="bg-linear-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
@@ -348,7 +350,7 @@ export default function ActivityTimelinePage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+            <Card className="bg-linear-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/50">
@@ -363,7 +365,7 @@ export default function ActivityTimelinePage() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+            <Card className="bg-linear-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50">
@@ -498,7 +500,7 @@ export default function ActivityTimelinePage() {
                                     <div className="flex items-start gap-3">
                                       <Avatar className="w-10 h-10">
                                         <AvatarImage src={activity.actor.avatar} />
-                                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm">
+                                        <AvatarFallback className="bg-linear-to-br from-indigo-500 to-purple-600 text-white text-sm">
                                           {getInitials(activity.actor.first_name, activity.actor.last_name)}
                                         </AvatarFallback>
                                       </Avatar>
@@ -596,3 +598,4 @@ export default function ActivityTimelinePage() {
     </ProtectedRoute>
   );
 }
+

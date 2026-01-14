@@ -1,6 +1,26 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { 
+  TrendingUp, 
+  Search,
+  MoreVertical,
+  DollarSign,
+  Calendar,
+  Building2,
+  User,
+  Target,
+  CheckCircle2,
+  RefreshCw,
+  AlertCircle,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  Edit
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import MainLayout from '@/components/Layout/MainLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,26 +52,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  TrendingUp, 
-  Search,
-  MoreVertical,
-  DollarSign,
-  Calendar,
-  Building2,
-  User,
-  Target,
-  CheckCircle2,
-  RefreshCw,
-  AlertCircle,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  Trash2,
-  Edit
-} from 'lucide-react';
 import { opportunitiesAPI } from '@/lib/api';
-import { toast } from 'sonner';
+
 
 interface Opportunity {
   id: number;
@@ -715,3 +717,4 @@ export default function OpportunitiesPage() {
     </ProtectedRoute>
   );
 }
+

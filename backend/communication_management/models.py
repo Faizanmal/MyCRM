@@ -103,7 +103,7 @@ class EmailTemplate(models.Model):
     is_active = models.BooleanField(default=True)
 
     # Ownership
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='communication_email_templates')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

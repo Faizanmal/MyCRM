@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+import { PlusIcon } from '@heroicons/react/24/outline';
+
 import { MobileNav, FloatingActionButton } from '@/components/mobile/MobileNav';
 import { PWAInstallPrompt, IOSInstallPrompt, OfflineIndicator, UpdatePrompt } from '@/components/mobile/PWAInstallPrompt';
 import { useDevice, useOnlineStatus } from '@/hooks/useMobile';
-import { PlusIcon } from '@heroicons/react/24/outline';
 
 interface MobileShellProps {
   children: React.ReactNode;
@@ -89,7 +90,7 @@ export function MobileHeader({
     >
       <div className="flex items-center justify-between px-4 h-14">
         <div className="flex items-center gap-3">
-          {leftAction && <div className="flex-shrink-0">{leftAction}</div>}
+          {leftAction && <div className="shrink-0">{leftAction}</div>}
           <div>
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
               {title}
@@ -101,7 +102,7 @@ export function MobileHeader({
             )}
           </div>
         </div>
-        {rightAction && <div className="flex-shrink-0">{rightAction}</div>}
+        {rightAction && <div className="shrink-0">{rightAction}</div>}
       </div>
     </header>
   );
@@ -183,6 +184,8 @@ export function BottomSheet({
       <div
         className="fixed inset-0 bg-black/50 z-50 transition-opacity"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        tabIndex={0}
       />
 
       {/* Sheet */}
@@ -233,6 +236,8 @@ export function ActionSheet({ isOpen, onClose, actions }: ActionSheetProps) {
       <div
         className="fixed inset-0 bg-black/50 z-50"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        tabIndex={0}
       />
 
       {/* Sheet */}
@@ -251,7 +256,7 @@ export function ActionSheet({ isOpen, onClose, actions }: ActionSheetProps) {
                   : 'text-gray-900 dark:text-white'
               }`}
             >
-              {action.icon && <span className="flex-shrink-0">{action.icon}</span>}
+              {action.icon && <span className="shrink-0">{action.icon}</span>}
               <span className="font-medium">{action.label}</span>
             </button>
           ))}
@@ -322,3 +327,4 @@ export function MobileSkeleton({ type = 'list', count = 3 }: MobileSkeletonProps
     </div>
   );
 }
+

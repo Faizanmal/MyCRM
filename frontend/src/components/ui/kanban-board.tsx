@@ -108,6 +108,9 @@ function KanbanCard({ opportunity, onClick, isDragging }: KanbanCardProps) {
         isCurrentlyDragging && 'opacity-50 shadow-lg ring-2 ring-blue-500'
       )}
       onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { onClick?.(); e.preventDefault(); } }}
+      tabIndex={0}
+      role="button"
     >
       {/* Drag Handle & Actions */}
       <div className="mb-3 flex items-center justify-between">
@@ -219,7 +222,7 @@ function KanbanColumn({
   const totalValue = opportunities.reduce((sum, opp) => sum + opp.value, 0);
 
   return (
-    <div className="flex h-full w-80 flex-shrink-0 flex-col rounded-lg bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-full w-80 shrink-0 flex-col rounded-lg bg-gray-50 dark:bg-gray-900">
       {/* Column Header */}
       <div
         className="sticky top-0 z-10 rounded-t-lg border-b border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900"
@@ -406,7 +409,7 @@ export function KanbanBoard({
         {stages.map((stage) => (
           <div
             key={stage.id}
-            className="h-[600px] w-80 flex-shrink-0 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800"
+            className="h-[600px] w-80 shrink-0 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800"
           />
         ))}
       </div>
@@ -446,3 +449,4 @@ export function KanbanBoard({
 }
 
 export default KanbanBoard;
+

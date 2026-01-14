@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final bioService = authProvider.biometricService;
         if (bioService != null && await bioService.isAvailable && !bioService.isBiometricEnabled) {
           _showBiometricSetupDialog(bioService);
-        } else {
+        } else if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const HomeScreen()),
           );
