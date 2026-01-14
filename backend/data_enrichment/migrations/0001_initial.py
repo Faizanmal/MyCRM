@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(blank=True, max_length=300)),
                 ("legal_name", models.CharField(blank=True, max_length=300)),
                 ("description", models.TextField(blank=True)),
-                ("founded_year", models.IntegerField(blank=True, null=True)),
+                ("founded_year", models.IntegerField(blank=True)),
                 ("industry", models.CharField(blank=True, max_length=200)),
                 ("sub_industry", models.CharField(blank=True, max_length=200)),
                 (
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                     models.JSONField(default=dict, help_text="SIC, NAICS codes"),
                 ),
                 ("sector", models.CharField(blank=True, max_length=100)),
-                ("employee_count", models.IntegerField(blank=True, null=True)),
+                ("employee_count", models.IntegerField(blank=True)),
                 (
                     "employee_range",
                     models.CharField(
@@ -66,14 +66,14 @@ class Migration(migrations.Migration):
                 (
                     "annual_revenue",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 ("revenue_range", models.CharField(blank=True, max_length=100)),
                 (
                     "funding_total",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 ("funding_rounds", models.JSONField(default=list)),
@@ -102,11 +102,11 @@ class Migration(migrations.Migration):
                 ("key_people", models.JSONField(default=list)),
                 ("technologies", models.JSONField(default=list)),
                 ("tech_categories", models.JSONField(default=dict)),
-                ("alexa_rank", models.IntegerField(blank=True, null=True)),
-                ("monthly_visits", models.BigIntegerField(blank=True, null=True)),
-                ("traffic_rank", models.IntegerField(blank=True, null=True)),
+                ("alexa_rank", models.IntegerField(blank=True)),
+                ("monthly_visits", models.BigIntegerField(blank=True)),
+                ("traffic_rank", models.IntegerField(blank=True)),
                 ("enrichment_score", models.IntegerField(default=0)),
-                ("last_enriched_at", models.DateTimeField(blank=True, null=True)),
+                ("last_enriched_at", models.DateTimeField(blank=True)),
                 ("enrichment_sources", models.JSONField(default=list)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -276,8 +276,8 @@ class Migration(migrations.Migration):
                 ("processed_records", models.IntegerField(default=0)),
                 ("successful_records", models.IntegerField(default=0)),
                 ("failed_records", models.IntegerField(default=0)),
-                ("started_at", models.DateTimeField(blank=True, null=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("started_at", models.DateTimeField(blank=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "enrichment_types",
                     models.JSONField(
@@ -360,7 +360,7 @@ class Migration(migrations.Migration):
                 ("employment_history", models.JSONField(default=list)),
                 ("education", models.JSONField(default=list)),
                 ("skills", models.JSONField(default=list)),
-                ("last_enriched_at", models.DateTimeField(blank=True, null=True)),
+                ("last_enriched_at", models.DateTimeField(blank=True)),
                 ("enrichment_sources", models.JSONField(default=list)),
                 ("data_freshness_score", models.FloatField(default=1.0)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -422,7 +422,7 @@ class Migration(migrations.Migration):
                 ("error_message", models.TextField(blank=True)),
                 ("fields_enriched", models.JSONField(default=list)),
                 ("data_returned", models.JSONField(default=dict)),
-                ("response_time_ms", models.IntegerField(blank=True, null=True)),
+                ("response_time_ms", models.IntegerField(blank=True)),
                 ("api_credits_used", models.IntegerField(default=1)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
@@ -504,7 +504,7 @@ class Migration(migrations.Migration):
                 ("preferred_providers", models.JSONField(default=list)),
                 ("is_active", models.BooleanField(default=True)),
                 ("times_triggered", models.IntegerField(default=0)),
-                ("last_triggered_at", models.DateTimeField(blank=True, null=True)),
+                ("last_triggered_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -537,44 +537,44 @@ class Migration(migrations.Migration):
                 (
                     "annual_revenue",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 ("revenue_currency", models.CharField(default="USD", max_length=3)),
-                ("revenue_year", models.IntegerField(blank=True, null=True)),
-                ("revenue_growth_rate", models.FloatField(blank=True, null=True)),
+                ("revenue_year", models.IntegerField(blank=True)),
+                ("revenue_growth_rate", models.FloatField(blank=True)),
                 (
                     "total_funding",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 ("last_funding_round", models.CharField(blank=True, max_length=50)),
                 (
                     "last_funding_amount",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
-                ("last_funding_date", models.DateField(blank=True, null=True)),
+                ("last_funding_date", models.DateField(blank=True)),
                 ("investors", models.JSONField(default=list)),
                 (
                     "estimated_valuation",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
-                ("valuation_date", models.DateField(blank=True, null=True)),
+                ("valuation_date", models.DateField(blank=True)),
                 (
                     "market_cap",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 ("stock_symbol", models.CharField(blank=True, max_length=10)),
                 ("stock_exchange", models.CharField(blank=True, max_length=20)),
                 ("credit_rating", models.CharField(blank=True, max_length=20)),
-                ("risk_score", models.IntegerField(blank=True, null=True)),
+                ("risk_score", models.IntegerField(blank=True)),
                 ("last_updated_at", models.DateTimeField(auto_now=True)),
                 ("data_source", models.CharField(blank=True, max_length=100)),
                 (
@@ -642,9 +642,9 @@ class Migration(migrations.Migration):
                 ("source", models.CharField(blank=True, max_length=100)),
                 ("source_url", models.URLField(blank=True)),
                 ("detected_at", models.DateTimeField(auto_now_add=True)),
-                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField(blank=True)),
                 ("was_actioned", models.BooleanField(default=False)),
-                ("actioned_at", models.DateTimeField(blank=True, null=True)),
+                ("actioned_at", models.DateTimeField(blank=True)),
                 (
                     "actioned_by",
                     models.ForeignKey(
@@ -718,7 +718,7 @@ class Migration(migrations.Migration):
                 ("full_content", models.TextField(blank=True)),
                 ("source_name", models.CharField(blank=True, max_length=200)),
                 ("source_url", models.URLField(blank=True)),
-                ("published_at", models.DateTimeField(blank=True, null=True)),
+                ("published_at", models.DateTimeField(blank=True)),
                 (
                     "sentiment",
                     models.CharField(
@@ -739,7 +739,7 @@ class Migration(migrations.Migration):
                 ("trigger_reason", models.TextField(blank=True)),
                 ("recommended_action", models.TextField(blank=True)),
                 ("is_read", models.BooleanField(default=False)),
-                ("read_at", models.DateTimeField(blank=True, null=True)),
+                ("read_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "company",
@@ -799,14 +799,14 @@ class Migration(migrations.Migration):
                 ("headline", models.TextField(blank=True)),
                 ("bio", models.TextField(blank=True)),
                 ("avatar_url", models.URLField(blank=True)),
-                ("followers_count", models.IntegerField(blank=True, null=True)),
-                ("following_count", models.IntegerField(blank=True, null=True)),
-                ("connections_count", models.IntegerField(blank=True, null=True)),
-                ("posts_count", models.IntegerField(blank=True, null=True)),
-                ("last_active", models.DateTimeField(blank=True, null=True)),
+                ("followers_count", models.IntegerField(blank=True)),
+                ("following_count", models.IntegerField(blank=True)),
+                ("connections_count", models.IntegerField(blank=True)),
+                ("posts_count", models.IntegerField(blank=True)),
+                ("last_active", models.DateTimeField(blank=True)),
                 ("recent_posts", models.JSONField(default=list)),
                 ("interests", models.JSONField(default=list)),
-                ("engagement_rate", models.FloatField(blank=True, null=True)),
+                ("engagement_rate", models.FloatField(blank=True)),
                 ("last_synced_at", models.DateTimeField(auto_now=True)),
                 (
                     "enrichment_profile",

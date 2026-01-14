@@ -42,7 +42,7 @@ class SocialProfile(models.Model):
     engagement_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
     # Metadata
-    last_synced = models.DateTimeField(null=True, blank=True)
+    last_synced = models.DateTimeField(blank=True)
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -134,8 +134,8 @@ class SocialEngagement(models.Model):
     ai_suggested = models.BooleanField(default=False)
     ai_suggestion_text = models.TextField(blank=True)
 
-    scheduled_for = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    scheduled_for = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -157,7 +157,7 @@ class LinkedInIntegration(models.Model):
     # OAuth tokens
     access_token = models.TextField(blank=True)
     refresh_token = models.TextField(blank=True)
-    token_expires_at = models.DateTimeField(null=True, blank=True)
+    token_expires_at = models.DateTimeField(blank=True)
 
     # Profile info
     linkedin_id = models.CharField(max_length=100, blank=True)
@@ -265,10 +265,10 @@ class ProspectInSequence(models.Model):
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     current_step = models.IntegerField(default=0)
-    next_action_at = models.DateTimeField(null=True, blank=True)
+    next_action_at = models.DateTimeField(blank=True)
 
     enrolled_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         unique_together = ['sequence', 'profile']
@@ -319,10 +319,10 @@ class SocialInsight(models.Model):
     )
 
     is_actioned = models.BooleanField(default=False)
-    actioned_at = models.DateTimeField(null=True, blank=True)
+    actioned_at = models.DateTimeField(blank=True)
 
     discovered_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     class Meta:
         ordering = ['-discovered_at']

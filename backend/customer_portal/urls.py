@@ -6,9 +6,15 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    PortalAuthView, PortalLogoutView, PortalPasswordResetView,
-    CustomerProfileView, SupportTicketViewSet, CustomerOrderViewSet,
-    KnowledgeBaseViewSet, PortalNotificationViewSet, PortalDashboardView
+    CustomerOrderViewSet,
+    CustomerProfileView,
+    KnowledgeBaseViewSet,
+    PortalAuthView,
+    PortalDashboardView,
+    PortalLogoutView,
+    PortalNotificationViewSet,
+    PortalPasswordResetView,
+    SupportTicketViewSet,
 )
 
 app_name = 'customer_portal'
@@ -24,13 +30,13 @@ urlpatterns = [
     path('auth/login/', PortalAuthView.as_view(), name='login'),
     path('auth/logout/', PortalLogoutView.as_view(), name='logout'),
     path('auth/password-reset/', PortalPasswordResetView.as_view(), name='password-reset'),
-    
+
     # Profile
     path('profile/', CustomerProfileView.as_view(), name='profile'),
-    
+
     # Dashboard
     path('dashboard/', PortalDashboardView.as_view(), name='dashboard'),
-    
+
     # ViewSet routes
     path('', include(router.urls)),
 ]

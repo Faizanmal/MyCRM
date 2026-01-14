@@ -3,9 +3,15 @@ Real-Time Collaboration Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    CollaborativeDocument, DocumentVersion, DocumentCollaborator,
-    DocumentComment, EditingSession, DocumentOperation, DocumentTemplate
+    CollaborativeDocument,
+    DocumentCollaborator,
+    DocumentComment,
+    DocumentOperation,
+    DocumentTemplate,
+    DocumentVersion,
+    EditingSession,
 )
 
 
@@ -15,7 +21,7 @@ class DocumentCollaboratorSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     email = serializers.EmailField(source='user.email', read_only=True)
     avatar_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentCollaborator
         fields = [
@@ -41,7 +47,7 @@ class AddCollaboratorSerializer(serializers.Serializer):
 
 class DocumentVersionSerializer(serializers.ModelSerializer):
     created_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentVersion
         fields = [
@@ -58,7 +64,7 @@ class DocumentVersionSerializer(serializers.ModelSerializer):
 
 class DocumentVersionListSerializer(serializers.ModelSerializer):
     created_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentVersion
         fields = [
@@ -76,7 +82,7 @@ class DocumentCommentSerializer(serializers.ModelSerializer):
     author_avatar = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentComment
         fields = [
@@ -107,7 +113,7 @@ class DocumentCommentSerializer(serializers.ModelSerializer):
 class EditingSessionSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
     user_avatar = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = EditingSession
         fields = [
@@ -127,7 +133,7 @@ class CollaborativeDocumentListSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
     collaborator_count = serializers.SerializerMethodField()
     active_editors = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CollaborativeDocument
         fields = [
@@ -152,7 +158,7 @@ class CollaborativeDocumentDetailSerializer(serializers.ModelSerializer):
     active_sessions = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
     unresolved_comments = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CollaborativeDocument
         fields = [
@@ -201,7 +207,7 @@ class ApplyOperationSerializer(serializers.Serializer):
 
 class DocumentTemplateSerializer(serializers.ModelSerializer):
     created_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = DocumentTemplate
         fields = [

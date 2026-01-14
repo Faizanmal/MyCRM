@@ -14,14 +14,14 @@ class User(AbstractUser):
     ]
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='sales_rep')
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-    department = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True)
+    department = models.CharField(max_length=100, blank=True)
     # is_active is already in AbstractUser, but we can keep it explicit if needed.
     # AbstractUser already has is_active, calling it out again is fine
-    last_login_ip = models.GenericIPAddressField(blank=True, null=True)
+    last_login_ip = models.GenericIPAddressField(blank=True)
     two_factor_enabled = models.BooleanField(default=False)
-    two_factor_secret = models.CharField(max_length=32, blank=True, null=True)
+    two_factor_secret = models.CharField(max_length=32, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -53,7 +53,7 @@ class UserProfile(models.Model):
     """Additional user profile information"""
     # Use settings.AUTH_USER_MODEL to refer to the active user model
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
-    bio = models.TextField(blank=True, null=True)
+    bio = models.TextField(blank=True)
     timezone = models.CharField(max_length=50, default='UTC')
     language = models.CharField(max_length=10, default='en')
     notification_preferences = models.JSONField(default=dict)
@@ -74,7 +74,7 @@ class Permission(models.Model):
     """Custom permissions for CRM modules"""
     name = models.CharField(max_length=100, unique=True)
     codename = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     module = models.CharField(max_length=50)  # contacts, leads, opportunities, etc.
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -115,13 +115,13 @@ class AuditLog(models.Model):
     ]
 
     # Use settings.AUTH_USER_MODEL here too
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_audit_logs')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, related_name='user_audit_logs')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     model_name = models.CharField(max_length=100)
-    object_id = models.CharField(max_length=100, blank=True, null=True)
+    object_id = models.CharField(max_length=100, blank=True)
     details = models.JSONField(default=dict)
     ip_address = models.GenericIPAddressField()
-    user_agent = models.TextField(blank=True, null=True)
+    user_agent = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

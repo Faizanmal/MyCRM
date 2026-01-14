@@ -5,7 +5,7 @@ Customer Portal Signals
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from .models import SupportTicket, TicketComment, PortalNotification
+from .models import PortalNotification, SupportTicket, TicketComment
 
 
 @receiver(post_save, sender=TicketComment)
@@ -15,7 +15,7 @@ def notify_ticket_comment(sender, instance, created, **kwargs):
     """
     if created and not instance.is_internal:
         ticket = instance.ticket
-        
+
         # If comment is from internal user, notify customer
         if instance.internal_user and not instance.customer:
             PortalNotification.objects.create(
@@ -25,7 +25,7 @@ def notify_ticket_comment(sender, instance, created, **kwargs):
                 message=f'Your support ticket "{ticket.subject}" has a new response.',
                 action_url=f'/portal/tickets/{ticket.id}'
             )
-            
+
             # Update first response time if not set
             if not ticket.first_response_at:
                 from django.utils import timezone

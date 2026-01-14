@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import *
+
+# Models are defined in models.py
 
 # Auto-generated serializers for ethical_ai_oversight
 # Add model-specific serializers here as needed

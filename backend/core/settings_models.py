@@ -237,15 +237,15 @@ class ExportJob(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     progress = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
 
-    file_path = models.CharField(max_length=500, blank=True, null=True)
-    file_size = models.BigIntegerField(null=True, blank=True)  # In bytes
+    file_path = models.CharField(max_length=500, blank=True)
+    file_size = models.BigIntegerField(blank=True)  # In bytes
 
-    error_message = models.TextField(blank=True, null=True)
+    error_message = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -415,8 +415,8 @@ class UserRoleAssignment(models.Model):
     )
 
     # Optional: restrict to specific team/organization
-    team_id = models.CharField(max_length=100, blank=True, null=True)
-    organization_id = models.CharField(max_length=100, blank=True, null=True)
+    team_id = models.CharField(max_length=100, blank=True)
+    organization_id = models.CharField(max_length=100, blank=True)
 
     assigned_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

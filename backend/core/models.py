@@ -23,11 +23,11 @@ class AuditLog(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='core_audit_logs')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='core_audit_logs')
     action = models.CharField(max_length=100)
-    resource = models.CharField(max_length=200, null=True, blank=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.TextField(null=True, blank=True)
+    resource = models.CharField(max_length=200, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
+    user_agent = models.TextField(blank=True)
     metadata = models.JSONField(default=dict, blank=True)
     risk_level = models.CharField(max_length=20, choices=RISK_LEVELS, default='low')
     timestamp = models.DateTimeField(default=timezone.now)
@@ -64,7 +64,7 @@ class SystemConfiguration(models.Model):
     config_type = models.CharField(max_length=20, choices=CONFIG_TYPES)
     description = models.TextField(blank=True)
     is_encrypted = models.BooleanField(default=False)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -93,8 +93,8 @@ class APIKey(models.Model):
     permissions = models.JSONField(default=list)  # List of allowed permissions
     rate_limit = models.IntegerField(default=1000)  # Requests per hour
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    last_used = models.DateTimeField(null=True, blank=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    last_used = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -124,12 +124,12 @@ class DataBackup(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     backup_type = models.CharField(max_length=20, choices=BACKUP_TYPES)
     file_path = models.CharField(max_length=500)
-    file_size = models.BigIntegerField(null=True, blank=True)  # Size in bytes
+    file_size = models.BigIntegerField(blank=True)  # Size in bytes
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='running')
-    error_message = models.TextField(null=True, blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    error_message = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_data_backups'
@@ -194,10 +194,10 @@ class WorkflowExecution(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='running')
     steps_completed = models.IntegerField(default=0)
     total_steps = models.IntegerField(default=0)
-    error_message = models.TextField(null=True, blank=True)
+    error_message = models.TextField(blank=True)
     execution_log = models.JSONField(default=list)  # Detailed execution log
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_workflow_executions'
@@ -237,7 +237,7 @@ class Integration(models.Model):
     configuration = models.JSONField(default=dict)  # Integration-specific config
     credentials = models.JSONField(default=dict)  # Encrypted credentials
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='configuring')
-    last_sync = models.DateTimeField(null=True, blank=True)
+    last_sync = models.DateTimeField(blank=True)
     sync_frequency = models.IntegerField(default=60)  # Minutes between syncs
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -303,8 +303,8 @@ class SystemHealth(models.Model):
 
     component = models.CharField(max_length=50, choices=COMPONENT_TYPES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    response_time = models.FloatField(null=True, blank=True)  # Response time in ms
-    error_message = models.TextField(null=True, blank=True)
+    response_time = models.FloatField(blank=True)  # Response time in ms
+    error_message = models.TextField(blank=True)
     metrics = models.JSONField(default=dict)  # Additional metrics
     checked_at = models.DateTimeField(auto_now_add=True)
 
@@ -327,10 +327,10 @@ class UserPermission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='custom_permissions')
     permission = models.CharField(max_length=100)
     is_granted = models.BooleanField(default=True)  # True = grant, False = revoke
-    granted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='granted_permissions')
+    granted_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='granted_permissions')
     reason = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -353,7 +353,7 @@ class PermissionGroup(models.Model):
     description = models.TextField(blank=True)
     permissions = models.JSONField(default=list)  # List of permission codes
     is_active = models.BooleanField(default=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -370,7 +370,7 @@ class UserPermissionGroup(models.Model):
     """Many-to-many relationship between users and permission groups"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='permission_groups')
     group = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE, related_name='user_assignments')
-    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='group_assignments')
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='group_assignments')
     assigned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -387,7 +387,7 @@ class Team(models.Model):
     """Teams for collaborative access control"""
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='managed_teams')
+    manager = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='managed_teams')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -438,10 +438,10 @@ class DataImportLog(models.Model):
     errors = models.JSONField(default=list)
     field_mapping = models.JSONField(default=dict)
     validate_only = models.BooleanField(default=False)
-    imported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    imported_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_data_import_logs'
@@ -472,7 +472,7 @@ class Notification(models.Model):
     notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='info')
     link = models.CharField(max_length=500, blank=True)  # Optional link to related resource
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -587,7 +587,7 @@ class ScheduledReport(models.Model):
     recipients = models.JSONField(default=list)  # Email addresses
     export_format = models.CharField(max_length=10, default='pdf')
     is_active = models.BooleanField(default=True)
-    last_run = models.DateTimeField(null=True, blank=True)
+    last_run = models.DateTimeField(blank=True)
     next_run = models.DateTimeField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -604,7 +604,7 @@ class ScheduledReport(models.Model):
 class SearchLog(models.Model):
     """Log search queries for analytics"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
     model_name = models.CharField(max_length=100)
     query = models.TextField()
     filters = models.JSONField(default=dict)
@@ -644,11 +644,11 @@ class EmailLog(models.Model):
     html_body = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='queued')
     error_message = models.TextField(blank=True)
-    tracking_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
-    opened_at = models.DateTimeField(null=True, blank=True)
+    tracking_id = models.CharField(max_length=100, unique=True, blank=True)
+    opened_at = models.DateTimeField(blank=True)
     open_count = models.IntegerField(default=0)
     click_count = models.IntegerField(default=0)
-    sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
     sent_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -694,18 +694,18 @@ class EmailCampaign(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
-    template = models.ForeignKey(NotificationTemplate, on_delete=models.SET_NULL, null=True)
+    template = models.ForeignKey(NotificationTemplate, on_delete=models.SET_NULL)
     recipients = models.JSONField(default=list)
     recipient_count = models.IntegerField(default=0)
     sent_count = models.IntegerField(default=0)
     opened_count = models.IntegerField(default=0)
     clicked_count = models.IntegerField(default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    scheduled_time = models.DateTimeField(null=True, blank=True)
+    scheduled_time = models.DateTimeField(blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='core_email_campaigns')
     created_at = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_core_email_campaigns'

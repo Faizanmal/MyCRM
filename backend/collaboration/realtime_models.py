@@ -30,7 +30,7 @@ class CollaborationSession(models.Model):
     # Timing
     started_at = models.DateTimeField(auto_now_add=True)
     last_activity_at = models.DateTimeField(auto_now=True)
-    ended_at = models.DateTimeField(null=True, blank=True)
+    ended_at = models.DateTimeField(blank=True)
 
     # Created by
     created_by = models.ForeignKey(
@@ -89,20 +89,20 @@ class SessionParticipant(models.Model):
     )
 
     # Cursor/selection tracking
-    cursor_position = models.JSONField(null=True, blank=True)
+    cursor_position = models.JSONField(blank=True)
     # e.g., {"field": "description", "offset": 150, "length": 0}
 
-    selection = models.JSONField(null=True, blank=True)
+    selection = models.JSONField(blank=True)
     # e.g., {"field": "description", "start": 100, "end": 150}
 
     # UI state
-    viewport = models.JSONField(null=True, blank=True)
+    viewport = models.JSONField(blank=True)
     # e.g., {"scrollTop": 500, "section": "details"}
 
     # Timing
     joined_at = models.DateTimeField(auto_now_add=True)
     last_seen_at = models.DateTimeField(auto_now=True)
-    left_at = models.DateTimeField(null=True, blank=True)
+    left_at = models.DateTimeField(blank=True)
 
     # Connection info
     connection_id = models.CharField(max_length=100, blank=True)
@@ -146,12 +146,12 @@ class CollaborationChange(models.Model):
     field_path = models.CharField(max_length=200)  # e.g., "description", "custom_fields.notes"
 
     # Change content
-    old_value = models.JSONField(null=True, blank=True)
-    new_value = models.JSONField(null=True, blank=True)
+    old_value = models.JSONField(blank=True)
+    new_value = models.JSONField(blank=True)
 
     # For text operations (OT/CRDT)
-    position = models.PositiveIntegerField(null=True, blank=True)  # Offset in text
-    length = models.PositiveIntegerField(null=True, blank=True)  # Length of affected text
+    position = models.PositiveIntegerField(blank=True)  # Offset in text
+    length = models.PositiveIntegerField(blank=True)  # Length of affected text
 
     # Versioning
     base_version = models.PositiveIntegerField()  # Version this change is based on
@@ -253,7 +253,7 @@ class EntityLock(models.Model):
     # Timing
     acquired_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    released_at = models.DateTimeField(null=True, blank=True)
+    released_at = models.DateTimeField(blank=True)
 
     # Auto-release settings
     auto_release_on_disconnect = models.BooleanField(default=True)
@@ -315,7 +315,7 @@ class ConflictRecord(models.Model):
         blank=True
     )
 
-    resolved_value = models.JSONField(null=True, blank=True)
+    resolved_value = models.JSONField(blank=True)
     resolved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -323,7 +323,7 @@ class ConflictRecord(models.Model):
         blank=True,
         related_name='resolved_conflicts'
     )
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -342,8 +342,8 @@ class Comment(models.Model):
     field_path = models.CharField(max_length=200, blank=True)  # Specific field
 
     # For inline comments (text selection)
-    selection_start = models.PositiveIntegerField(null=True, blank=True)
-    selection_end = models.PositiveIntegerField(null=True, blank=True)
+    selection_start = models.PositiveIntegerField(blank=True)
+    selection_end = models.PositiveIntegerField(blank=True)
     quoted_text = models.TextField(blank=True)
 
     # Comment content
@@ -401,7 +401,7 @@ class Comment(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(blank=True)
     resolved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -429,7 +429,7 @@ class Presence(models.Model):
     # Current location
     current_page = models.CharField(max_length=500)
     current_entity_type = models.CharField(max_length=50, blank=True)
-    current_entity_id = models.UUIDField(null=True, blank=True)
+    current_entity_id = models.UUIDField(blank=True)
 
     # Status
     status = models.CharField(

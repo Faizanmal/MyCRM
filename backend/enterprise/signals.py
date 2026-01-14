@@ -3,8 +3,8 @@ Security Signals for automatic audit logging
 """
 
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+
 from .services import SecurityService
 
 

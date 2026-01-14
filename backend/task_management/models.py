@@ -32,7 +32,7 @@ class Task(models.Model):
 
     # Basic Information
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     task_type = models.CharField(max_length=20, choices=TASK_TYPE_CHOICES, default='other')
 
     # Assignment
@@ -44,17 +44,17 @@ class Task(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
 
     # Dates
-    due_date = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    reminder_date = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
+    reminder_date = models.DateTimeField(blank=True)
 
     # Related Objects
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, null=True, blank=True, related_name='tasks')
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, null=True, blank=True, related_name='tasks')
-    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, null=True, blank=True, related_name='tasks')
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, blank=True, related_name='tasks')
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, blank=True, related_name='tasks')
+    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, blank=True, related_name='tasks')
 
     # Additional Information
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     custom_fields = models.JSONField(default=dict, blank=True)
 
@@ -85,7 +85,7 @@ class CalendarEvent(models.Model):
 
     # Basic Information
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default='meeting')
 
     # Scheduling
@@ -99,16 +99,16 @@ class CalendarEvent(models.Model):
     attendees = models.ManyToManyField(User, blank=True, related_name='attended_events')
 
     # Location
-    location = models.CharField(max_length=200, blank=True, null=True)
-    meeting_link = models.URLField(blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True)
+    meeting_link = models.URLField(blank=True)
 
     # Related Objects
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, null=True, blank=True, related_name='events')
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, null=True, blank=True, related_name='events')
-    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, null=True, blank=True, related_name='events')
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, blank=True, related_name='events')
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, blank=True, related_name='events')
+    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, blank=True, related_name='events')
 
     # Additional Information
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     custom_fields = models.JSONField(default=dict, blank=True)
 
@@ -137,23 +137,23 @@ class Reminder(models.Model):
 
     # Basic Information
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     reminder_type = models.CharField(max_length=20, choices=REMINDER_TYPE_CHOICES, default='custom')
 
     # Scheduling
     reminder_time = models.DateTimeField()
     is_sent = models.BooleanField(default=False)
-    sent_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
 
     # Assignment
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reminders')
 
     # Related Objects
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True, related_name='reminders')
-    event = models.ForeignKey(CalendarEvent, on_delete=models.CASCADE, null=True, blank=True, related_name='reminders')
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, null=True, blank=True, related_name='reminders')
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, null=True, blank=True, related_name='reminders')
-    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, null=True, blank=True, related_name='reminders')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, blank=True, related_name='reminders')
+    event = models.ForeignKey(CalendarEvent, on_delete=models.CASCADE, blank=True, related_name='reminders')
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, blank=True, related_name='reminders')
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, blank=True, related_name='reminders')
+    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, blank=True, related_name='reminders')
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -172,11 +172,11 @@ class Reminder(models.Model):
 class TaskTemplate(models.Model):
     """Templates for common tasks"""
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     task_type = models.CharField(max_length=20, choices=Task.TASK_TYPE_CHOICES, default='other')
     priority = models.CharField(max_length=20, choices=Task.PRIORITY_CHOICES, default='medium')
     default_due_days = models.IntegerField(default=7)  # Days from creation
-    notes_template = models.TextField(blank=True, null=True)
+    notes_template = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

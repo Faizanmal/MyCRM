@@ -6,8 +6,10 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    CollaborativeDocumentViewSet, DocumentTemplateViewSet,
-    SharedDocumentView, MyCollaborationsView
+    CollaborativeDocumentViewSet,
+    DocumentTemplateViewSet,
+    MyCollaborationsView,
+    SharedDocumentView,
 )
 
 app_name = 'realtime_collaboration'

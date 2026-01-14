@@ -1,7 +1,13 @@
 from django.contrib import admin
+
 from .models import (
-    CollaborativeDocument, DocumentVersion, DocumentCollaborator,
-    DocumentComment, EditingSession, DocumentOperation, DocumentTemplate
+    CollaborativeDocument,
+    DocumentCollaborator,
+    DocumentComment,
+    DocumentOperation,
+    DocumentTemplate,
+    DocumentVersion,
+    EditingSession,
 )
 
 

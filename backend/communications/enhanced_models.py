@@ -76,7 +76,7 @@ class UnifiedInboxMessage(models.Model):
     parent_message = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='replies'
     )
 
@@ -93,19 +93,19 @@ class UnifiedInboxMessage(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='inbox_messages'
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='inbox_messages'
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='inbox_messages'
     )
 
@@ -114,7 +114,7 @@ class UnifiedInboxMessage(models.Model):
     is_starred = models.BooleanField(default=False)
 
     # Snooze
-    snoozed_until = models.DateTimeField(null=True, blank=True)
+    snoozed_until = models.DateTimeField(blank=True)
 
     # External references
     external_id = models.CharField(max_length=500, blank=True)
@@ -122,8 +122,8 @@ class UnifiedInboxMessage(models.Model):
 
     # Timestamps
     received_at = models.DateTimeField()
-    read_at = models.DateTimeField(null=True, blank=True)
-    replied_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(blank=True)
+    replied_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -200,14 +200,14 @@ class MultiChannelCampaign(models.Model):
 
     # Schedule
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    start_date = models.DateTimeField(null=True, blank=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+    start_date = models.DateTimeField(blank=True)
+    end_date = models.DateTimeField(blank=True)
 
     # Goals
     goals = models.JSONField(default=dict)  # Expected outcomes
 
     # Budget
-    budget = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    budget = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
     spent = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     # Metrics
@@ -261,7 +261,7 @@ class CampaignStep(models.Model):
     # Content (for message steps)
     subject = models.CharField(max_length=500, blank=True)
     body = models.TextField(blank=True)
-    template_id = models.UUIDField(null=True, blank=True)
+    template_id = models.UUIDField(blank=True)
 
     # Delay (for delay steps)
     delay_days = models.IntegerField(default=0)
@@ -271,8 +271,8 @@ class CampaignStep(models.Model):
     conditions = models.JSONField(default=list)
 
     # Branching
-    on_success_step = models.UUIDField(null=True, blank=True)
-    on_failure_step = models.UUIDField(null=True, blank=True)
+    on_success_step = models.UUIDField(blank=True)
+    on_failure_step = models.UUIDField(blank=True)
 
     # Metrics
     sent_count = models.IntegerField(default=0)
@@ -315,12 +315,12 @@ class CampaignRecipient(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.CASCADE,
-        null=True, blank=True
+        blank=True
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.CASCADE,
-        null=True, blank=True
+        blank=True
     )
     email = models.EmailField()
 
@@ -329,7 +329,7 @@ class CampaignRecipient(models.Model):
     current_step = models.ForeignKey(
         CampaignStep,
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Engagement
@@ -340,8 +340,8 @@ class CampaignRecipient(models.Model):
 
     # Timing
     entered_at = models.DateTimeField(auto_now_add=True)
-    next_step_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    next_step_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'campaign_recipients'
@@ -371,7 +371,7 @@ class AdvancedEmailTracking(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Email details
@@ -380,36 +380,36 @@ class AdvancedEmailTracking(models.Model):
 
     # Tracking events
     delivered = models.BooleanField(default=False)
-    delivered_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(blank=True)
 
     opened = models.BooleanField(default=False)
     open_count = models.IntegerField(default=0)
-    first_opened_at = models.DateTimeField(null=True, blank=True)
-    last_opened_at = models.DateTimeField(null=True, blank=True)
+    first_opened_at = models.DateTimeField(blank=True)
+    last_opened_at = models.DateTimeField(blank=True)
 
     clicked = models.BooleanField(default=False)
     click_count = models.IntegerField(default=0)
     clicked_urls = models.JSONField(default=list)
-    first_clicked_at = models.DateTimeField(null=True, blank=True)
-    last_clicked_at = models.DateTimeField(null=True, blank=True)
+    first_clicked_at = models.DateTimeField(blank=True)
+    last_clicked_at = models.DateTimeField(blank=True)
 
     replied = models.BooleanField(default=False)
-    replied_at = models.DateTimeField(null=True, blank=True)
+    replied_at = models.DateTimeField(blank=True)
 
     bounced = models.BooleanField(default=False)
     bounce_type = models.CharField(max_length=50, blank=True)
-    bounced_at = models.DateTimeField(null=True, blank=True)
+    bounced_at = models.DateTimeField(blank=True)
 
     unsubscribed = models.BooleanField(default=False)
-    unsubscribed_at = models.DateTimeField(null=True, blank=True)
+    unsubscribed_at = models.DateTimeField(blank=True)
 
     complained = models.BooleanField(default=False)
-    complained_at = models.DateTimeField(null=True, blank=True)
+    complained_at = models.DateTimeField(blank=True)
 
     # Engagement scoring
     engagement_score = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    time_to_open_seconds = models.IntegerField(null=True, blank=True)
-    read_duration_seconds = models.IntegerField(null=True, blank=True)
+    time_to_open_seconds = models.IntegerField(blank=True)
+    read_duration_seconds = models.IntegerField(blank=True)
 
     # Predictive
     unsubscribe_risk = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -486,7 +486,7 @@ class EmailTrackingEvent(models.Model):
     user_agent = models.TextField(blank=True)
 
     # Location
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     country = models.CharField(max_length=100, blank=True)
     city = models.CharField(max_length=100, blank=True)
 
@@ -519,7 +519,7 @@ class CommunicationPreference(models.Model):
 
     # Email preferences
     email_frequency = models.CharField(max_length=20, default='normal')
-    preferred_email_time = models.TimeField(null=True, blank=True)
+    preferred_email_time = models.TimeField(blank=True)
 
     # Topics/Categories
     opted_in_topics = models.JSONField(default=list)
@@ -531,13 +531,13 @@ class CommunicationPreference(models.Model):
 
     # Engagement history
     avg_response_time_hours = models.DecimalField(
-        max_digits=6, decimal_places=2, null=True, blank=True
+        max_digits=6, decimal_places=2, blank=True
     )
     most_engaged_channel = models.CharField(max_length=30, blank=True)
 
     # Unsubscribe tracking
     global_unsubscribe = models.BooleanField(default=False)
-    unsubscribed_at = models.DateTimeField(null=True, blank=True)
+    unsubscribed_at = models.DateTimeField(blank=True)
     unsubscribe_reason = models.TextField(blank=True)
 
     updated_at = models.DateTimeField(auto_now=True)

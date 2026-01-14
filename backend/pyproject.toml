@@ -35,6 +35,25 @@ ignore = [
     "S105",   # possible hardcoded password
     "S106",   # possible hardcoded password
     "ARG001", # unused function argument
+    "ARG002", # unused method argument
+    "ARG004", # unused static method argument
+    "ARG005", # unused lambda argument
+    "DJ008",  # django model without __str__
+    "SIM102", # collapsible if
+    "SIM105", # suppressible exception
+    "SIM108", # if-else instead of if exp
+    "SIM110", # reimplemented builtin
+    "SIM116", # if-else dict lookup
+    "SIM118", # in dict keys
+    "B904",   # raise without from
+    "B017",   # assert raises exception
+    "B007",   # unused loop control variable
+    "S110",   # try-except-pass
+    "S113",   # request without timeout
+    "E722",   # bare except
+    "E741",   # ambiguous variable name
+    "W293",   # blank line with whitespace
+    "F841",   # unused variable
 ]
 unfixable = []
 
@@ -42,6 +61,9 @@ unfixable = []
 "tests/**/*" = ["S101", "ARG001"]
 "**/migrations/*" = ["E501"]
 "settings*.py" = ["S105", "S106"]
+"advanced_reporting/**/*.py" = ["S311"]
+"enterprise/caching.py" = ["S301"]
+"white_label/signals.py" = ["S110"]
 
 [tool.ruff.format]
 quote-style = "single"

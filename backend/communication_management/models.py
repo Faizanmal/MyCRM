@@ -28,35 +28,35 @@ class Communication(models.Model):
     direction = models.CharField(max_length=20, choices=DIRECTION_CHOICES)
 
     # Content
-    content = models.TextField(blank=True, null=True)
-    summary = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True)
+    summary = models.TextField(blank=True)
 
     # Participants
-    from_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='sent_communications')
-    to_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='received_communications')
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='sent_communications')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='received_communications')
 
     # External Information
-    from_email = models.EmailField(blank=True, null=True)
-    to_email = models.EmailField(blank=True, null=True)
-    from_phone = models.CharField(max_length=20, blank=True, null=True)
-    to_phone = models.CharField(max_length=20, blank=True, null=True)
+    from_email = models.EmailField(blank=True)
+    to_email = models.EmailField(blank=True)
+    from_phone = models.CharField(max_length=20, blank=True)
+    to_phone = models.CharField(max_length=20, blank=True)
 
     # Related Objects
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, null=True, blank=True, related_name='communications')
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, null=True, blank=True, related_name='communications')
-    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, null=True, blank=True, related_name='communications')
-    task = models.ForeignKey('task_management.Task', on_delete=models.CASCADE, null=True, blank=True, related_name='communications')
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, blank=True, related_name='communications')
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, blank=True, related_name='communications')
+    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, blank=True, related_name='communications')
+    task = models.ForeignKey('task_management.Task', on_delete=models.CASCADE, blank=True, related_name='communications')
 
     # Email Specific Fields
-    email_id = models.CharField(max_length=255, blank=True, null=True)  # External email ID
+    email_id = models.CharField(max_length=255, blank=True)  # External email ID
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(blank=True)
     is_replied = models.BooleanField(default=False)
-    replied_at = models.DateTimeField(null=True, blank=True)
+    replied_at = models.DateTimeField(blank=True)
 
     # Call Specific Fields
-    call_duration = models.IntegerField(null=True, blank=True)  # Duration in seconds
-    call_recording_url = models.URLField(blank=True, null=True)
+    call_duration = models.IntegerField(blank=True)  # Duration in seconds
+    call_recording_url = models.URLField(blank=True)
 
     # Additional Information
     tags = models.JSONField(default=list, blank=True)
@@ -93,7 +93,7 @@ class EmailTemplate(models.Model):
     subject = models.CharField(max_length=200)
     template_type = models.CharField(max_length=20, choices=TEMPLATE_TYPE_CHOICES, default='custom')
     content = models.TextField()
-    html_content = models.TextField(blank=True, null=True)
+    html_content = models.TextField(blank=True)
 
     # Variables that can be used in the template
     variables = models.JSONField(default=list, blank=True)  # List of available variables
@@ -128,11 +128,11 @@ class EmailCampaign(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE)
 
     # Scheduling
-    scheduled_date = models.DateTimeField(null=True, blank=True)
+    scheduled_date = models.DateTimeField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Recipients
@@ -151,7 +151,7 @@ class EmailCampaign(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='communication_email_campaigns')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    sent_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_email_campaigns'
@@ -181,7 +181,7 @@ class CommunicationRule(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     rule_type = models.CharField(max_length=20, choices=RULE_TYPE_CHOICES)
     trigger = models.CharField(max_length=30, choices=TRIGGER_CHOICES)
 
@@ -212,10 +212,10 @@ class CommunicationRule(models.Model):
 class CommunicationLog(models.Model):
     """Log of communication rule executions"""
     rule = models.ForeignKey(CommunicationRule, on_delete=models.CASCADE, related_name='execution_logs')
-    communication = models.ForeignKey(Communication, on_delete=models.CASCADE, null=True, blank=True)
+    communication = models.ForeignKey(Communication, on_delete=models.CASCADE, blank=True)
     executed_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, default='success')  # success, failed, skipped
-    error_message = models.TextField(blank=True, null=True)
+    error_message = models.TextField(blank=True)
 
     class Meta:
         db_table = 'crm_communication_logs'

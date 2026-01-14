@@ -58,8 +58,8 @@ class UserConsent(TenantAwareModel):
     consent_type = models.ForeignKey(ConsentType, on_delete=models.CASCADE, related_name='user_consents')
     is_granted = models.BooleanField(default=False)
     consent_date = models.DateTimeField(auto_now_add=True)
-    expiry_date = models.DateTimeField(null=True, blank=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    expiry_date = models.DateTimeField(blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
     consent_method = models.CharField(
         max_length=50,
@@ -71,7 +71,7 @@ class UserConsent(TenantAwareModel):
         ],
         default='explicit'
     )
-    withdrawn_at = models.DateTimeField(null=True, blank=True)
+    withdrawn_at = models.DateTimeField(blank=True)
     withdrawal_reason = models.TextField(blank=True)
     version = models.IntegerField(default=1)
     metadata = models.JSONField(default=dict, blank=True)
@@ -128,10 +128,10 @@ class DataExportRequest(TenantAwareModel):
         default='json'
     )
     file_url = models.URLField(blank=True)
-    file_size_bytes = models.BigIntegerField(null=True, blank=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    file_size_bytes = models.BigIntegerField(blank=True)
+    expires_at = models.DateTimeField(blank=True)
     requested_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
     error_message = models.TextField(blank=True)
     notes = models.TextField(blank=True)
 
@@ -174,7 +174,7 @@ class DataDeletionRequest(TenantAwareModel):
     )
     reason = models.TextField(blank=True)
     requested_at = models.DateTimeField(auto_now_add=True)
-    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(blank=True)
     reviewed_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -182,7 +182,7 @@ class DataDeletionRequest(TenantAwareModel):
         blank=True,
         related_name='reviewed_deletion_requests'
     )
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
     rejection_reason = models.TextField(blank=True)
     backup_created = models.BooleanField(default=False)
     backup_location = models.CharField(max_length=500, blank=True)
@@ -240,7 +240,7 @@ class DataProcessingActivity(TenantAwareModel):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_reviewed = models.DateField(null=True, blank=True)
+    last_reviewed = models.DateField(blank=True)
 
     class Meta:
         db_table = 'gdpr_processing_activities'
@@ -275,7 +275,7 @@ class DataBreachIncident(TenantAwareModel):
     )
     discovered_at = models.DateTimeField()
     reported_at = models.DateTimeField(auto_now_add=True)
-    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='reported_breaches')
+    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='reported_breaches')
     affected_users_count = models.IntegerField(default=0)
     affected_users = models.ManyToManyField(User, related_name='data_breaches', blank=True)
     data_categories_affected = models.JSONField(default=list)
@@ -294,16 +294,16 @@ class DataBreachIncident(TenantAwareModel):
         default='identified'
     )
     authority_notified = models.BooleanField(default=False)
-    authority_notification_date = models.DateTimeField(null=True, blank=True)
+    authority_notification_date = models.DateTimeField(blank=True)
     users_notified = models.BooleanField(default=False)
-    user_notification_date = models.DateTimeField(null=True, blank=True)
+    user_notification_date = models.DateTimeField(blank=True)
     notification_required = models.BooleanField(
         default=True,
         help_text='Whether notification to authorities is required (within 72 hours)'
     )
     risk_assessment = models.TextField(blank=True)
     lessons_learned = models.TextField(blank=True)
-    closed_at = models.DateTimeField(null=True, blank=True)
+    closed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'gdpr_breach_incidents'
@@ -336,7 +336,7 @@ class DataAccessLog(TenantAwareModel):
         help_text='Specific fields accessed'
     )
     purpose = models.CharField(max_length=200, blank=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
     accessed_at = models.DateTimeField(auto_now_add=True)
     metadata = models.JSONField(default=dict, blank=True)
@@ -374,7 +374,7 @@ class PrivacyNotice(TenantAwareModel):
     is_current = models.BooleanField(default=True)
     requires_acceptance = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
 
     class Meta:
         db_table = 'gdpr_privacy_notices'

@@ -3,9 +3,14 @@ Social Inbox Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    SocialAccount, SocialConversation, SocialMessage,
-    SocialMonitoringRule, SocialPost, SocialAnalytics
+    SocialAccount,
+    SocialAnalytics,
+    SocialConversation,
+    SocialMessage,
+    SocialMonitoringRule,
+    SocialPost,
 )
 
 

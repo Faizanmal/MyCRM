@@ -61,10 +61,10 @@ class MeetingFollowUp(models.Model):
 
     # Status tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    sent_at = models.DateTimeField(null=True, blank=True)
-    opened_at = models.DateTimeField(null=True, blank=True)
-    clicked_at = models.DateTimeField(null=True, blank=True)
-    replied_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
+    opened_at = models.DateTimeField(blank=True)
+    clicked_at = models.DateTimeField(blank=True)
+    replied_at = models.DateTimeField(blank=True)
 
     # Error tracking
     last_error = models.TextField(blank=True)
@@ -114,7 +114,7 @@ class FollowUpSequence(models.Model):
 
     # Stats
     times_used = models.IntegerField(default=0)
-    avg_reply_rate = models.FloatField(null=True, blank=True)
+    avg_reply_rate = models.FloatField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -156,19 +156,19 @@ class MeetingOutcome(models.Model):
 
     # Next steps
     next_meeting_scheduled = models.BooleanField(default=False)
-    next_meeting_date = models.DateTimeField(null=True, blank=True)
+    next_meeting_date = models.DateTimeField(blank=True)
 
     # AI-generated summary
     ai_summary = models.TextField(blank=True)
     key_points = models.JSONField(default=list)
-    sentiment_score = models.FloatField(null=True, blank=True, help_text="-1 to 1")
+    sentiment_score = models.FloatField(blank=True, help_text="-1 to 1")
 
     # Deal progression
     deal_progressed = models.BooleanField(null=True)
     new_deal_stage = models.CharField(max_length=100, blank=True)
 
     recorded_at = models.DateTimeField(auto_now_add=True)
-    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL)
 
     class Meta:
         db_table = 'meeting_outcomes'
@@ -201,15 +201,15 @@ class RecurringMeetingPattern(models.Model):
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
 
     # Schedule
-    day_of_week = models.IntegerField(null=True, blank=True, help_text="0=Monday, 6=Sunday")
-    day_of_month = models.IntegerField(null=True, blank=True)
+    day_of_week = models.IntegerField(blank=True, help_text="0=Monday, 6=Sunday")
+    day_of_month = models.IntegerField(blank=True)
     preferred_time = models.TimeField()
 
     # Contact (optional - for recurring 1:1s)
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='recurring_meetings'
     )
 

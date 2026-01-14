@@ -53,7 +53,7 @@ class DealRoom(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    archived_at = models.DateTimeField(null=True, blank=True)
+    archived_at = models.DateTimeField(blank=True)
 
     # Statistics
     message_count = models.PositiveIntegerField(default=0)
@@ -156,7 +156,7 @@ class Channel(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    archived_at = models.DateTimeField(null=True, blank=True)
+    archived_at = models.DateTimeField(blank=True)
 
     # Statistics
     message_count = models.PositiveIntegerField(default=0)
@@ -258,8 +258,8 @@ class Message(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    edited_at = models.DateTimeField(null=True, blank=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
+    edited_at = models.DateTimeField(blank=True)
+    deleted_at = models.DateTimeField(blank=True)
 
     # Flags
     is_pinned = models.BooleanField(default=False)
@@ -396,8 +396,8 @@ class DocumentComment(TenantAwareModel):
     content = models.TextField()
 
     # Location in document
-    page_number = models.PositiveIntegerField(null=True, blank=True)
-    position = models.JSONField(null=True, blank=True)  # {"x": 100, "y": 200}
+    page_number = models.PositiveIntegerField(blank=True)
+    position = models.JSONField(blank=True)  # {"x": 100, "y": 200}
     highlighted_text = models.TextField(blank=True)
 
     # Threading
@@ -418,7 +418,7 @@ class DocumentComment(TenantAwareModel):
         blank=True,
         related_name='collaboration_resolved_comments'
     )
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -598,7 +598,7 @@ class ApprovalInstance(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     # Attachments and context
     attachments = models.JSONField(default=list, blank=True)
@@ -660,7 +660,7 @@ class ApprovalAction(TenantAwareModel):
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
 
     class Meta:
         ordering = ['created_at']

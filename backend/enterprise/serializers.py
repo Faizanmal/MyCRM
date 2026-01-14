@@ -3,9 +3,15 @@ Zero-Trust Security Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    DeviceFingerprint, SecuritySession, SecurityAuditLog,
-    AccessPolicy, ThreatIndicator, SecurityIncident, DataClassification
+    AccessPolicy,
+    DataClassification,
+    DeviceFingerprint,
+    SecurityAuditLog,
+    SecurityIncident,
+    SecuritySession,
+    ThreatIndicator,
 )
 
 
@@ -34,7 +40,7 @@ class RegisterDeviceSerializer(serializers.Serializer):
 
 class SecuritySessionSerializer(serializers.ModelSerializer):
     device = DeviceFingerprintSerializer(read_only=True)
-    
+
     class Meta:
         model = SecuritySession
         fields = [
@@ -46,7 +52,7 @@ class SecuritySessionSerializer(serializers.ModelSerializer):
 
 class SecurityAuditLogSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SecurityAuditLog
         fields = [
@@ -91,7 +97,7 @@ class ThreatIndicatorSerializer(serializers.ModelSerializer):
 class SecurityIncidentSerializer(serializers.ModelSerializer):
     assigned_to_name = serializers.SerializerMethodField()
     affected_user_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SecurityIncident
         fields = [
@@ -112,7 +118,7 @@ class SecurityIncidentSerializer(serializers.ModelSerializer):
 
 class SecurityIncidentDetailSerializer(SecurityIncidentSerializer):
     affected_users = serializers.SerializerMethodField()
-    
+
     class Meta(SecurityIncidentSerializer.Meta):
         fields = SecurityIncidentSerializer.Meta.fields + [
             'affected_users', 'evidence', 'containment_actions',

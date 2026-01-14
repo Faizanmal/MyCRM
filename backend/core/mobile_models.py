@@ -46,7 +46,7 @@ class OfflineSyncQueue(models.Model):
     # Data
     payload = models.JSONField()
     local_timestamp = models.DateTimeField()
-    server_timestamp = models.DateTimeField(null=True, blank=True)
+    server_timestamp = models.DateTimeField(blank=True)
 
     # Sync status
     status = models.CharField(max_length=20, choices=SYNC_STATUS, default='pending')
@@ -54,7 +54,7 @@ class OfflineSyncQueue(models.Model):
     retry_count = models.IntegerField(default=0)
 
     # Conflict resolution
-    conflict_data = models.JSONField(null=True, blank=True)
+    conflict_data = models.JSONField(blank=True)
     resolution = models.CharField(max_length=50, blank=True)  # client_wins, server_wins, merged
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -95,13 +95,13 @@ class DeviceRegistration(models.Model):
     push_provider = models.CharField(max_length=50, blank=True)  # fcm, apns
 
     # Sync settings
-    last_sync_at = models.DateTimeField(null=True, blank=True)
+    last_sync_at = models.DateTimeField(blank=True)
     sync_enabled = models.BooleanField(default=True)
     sync_interval_minutes = models.IntegerField(default=15)
 
     # Status
     is_active = models.BooleanField(default=True)
-    last_active_at = models.DateTimeField(null=True, blank=True)
+    last_active_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -163,16 +163,16 @@ class BusinessCardScan(models.Model):
     created_contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     created_lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Location where scanned
-    scan_location = models.JSONField(null=True, blank=True)
+    scan_location = models.JSONField(blank=True)
     event_name = models.CharField(max_length=200, blank=True)
     notes = models.TextField(blank=True)
 
@@ -209,7 +209,7 @@ class LocationCheckIn(models.Model):
     # Location
     latitude = models.DecimalField(max_digits=10, decimal_places=8)
     longitude = models.DecimalField(max_digits=11, decimal_places=8)
-    accuracy_meters = models.IntegerField(null=True, blank=True)
+    accuracy_meters = models.IntegerField(blank=True)
 
     # Address
     address = models.TextField(blank=True)
@@ -227,31 +227,31 @@ class LocationCheckIn(models.Model):
 
     # Duration tracking
     check_in_time = models.DateTimeField()
-    check_out_time = models.DateTimeField(null=True, blank=True)
-    duration_minutes = models.IntegerField(null=True, blank=True)
+    check_out_time = models.DateTimeField(blank=True)
+    duration_minutes = models.IntegerField(blank=True)
 
     # Linked CRM objects
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Auto-created activity
     activity = models.ForeignKey(
         'activity_feed.Activity',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -319,10 +319,10 @@ class MobileActivityLog(models.Model):
 
     # Location (optional)
     latitude = models.DecimalField(
-        max_digits=10, decimal_places=8, null=True, blank=True
+        max_digits=10, decimal_places=8, blank=True
     )
     longitude = models.DecimalField(
-        max_digits=11, decimal_places=8, null=True, blank=True
+        max_digits=11, decimal_places=8, blank=True
     )
 
     # Connection status
@@ -377,24 +377,24 @@ class VoiceNote(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Created tasks
     created_tasks = models.JSONField(default=list)
 
     # Location
-    recorded_location = models.JSONField(null=True, blank=True)
+    recorded_location = models.JSONField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

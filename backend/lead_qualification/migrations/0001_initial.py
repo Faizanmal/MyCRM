@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 (
                     "time_constraint_days",
                     models.IntegerField(
-                        blank=True, help_text="Days since lead creation", null=True
+                        blank=True, help_text="Days since lead creation"
                     ),
                 ),
                 ("is_active", models.BooleanField(default=True)),
@@ -145,7 +145,7 @@ class Migration(migrations.Migration):
                 ("is_active", models.BooleanField(default=True)),
                 ("priority", models.IntegerField(default=0)),
                 ("execution_count", models.IntegerField(default=0)),
-                ("last_executed_at", models.DateTimeField(blank=True, null=True)),
+                ("last_executed_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -283,7 +283,7 @@ class Migration(migrations.Migration):
                 ("result_data", models.JSONField(default=dict)),
                 ("error_message", models.TextField(blank=True)),
                 ("started_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "lead",
                     models.ForeignKey(
@@ -346,7 +346,7 @@ class Migration(migrations.Migration):
                 (
                     "confidence_score",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=5, null=True
+                        blank=True, decimal_places=2, max_digits=5
                     ),
                 ),
                 (
@@ -393,7 +393,7 @@ class Migration(migrations.Migration):
                         ]
                     ),
                 ),
-                ("previous_score", models.IntegerField(blank=True, null=True)),
+                ("previous_score", models.IntegerField(blank=True)),
                 (
                     "score_breakdown",
                     models.JSONField(default=dict, help_text="Points by category"),

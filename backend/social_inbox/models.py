@@ -4,6 +4,7 @@ Unified inbox for social media interactions across multiple platforms.
 """
 
 import uuid
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
@@ -13,7 +14,7 @@ User = get_user_model()
 
 class SocialAccount(models.Model):
     """Connected social media accounts"""
-    
+
     PLATFORM_CHOICES = [
         ('twitter', 'Twitter/X'),
         ('linkedin', 'LinkedIn'),
@@ -22,7 +23,7 @@ class SocialAccount(models.Model):
         ('youtube', 'YouTube'),
         ('tiktok', 'TikTok'),
     ]
-    
+
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('disconnected', 'Disconnected'),
@@ -31,7 +32,7 @@ class SocialAccount(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     # Platform info
     platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
     account_id = models.CharField(max_length=255)
@@ -39,24 +40,24 @@ class SocialAccount(models.Model):
     account_handle = models.CharField(max_length=255, blank=True)
     profile_url = models.URLField(blank=True)
     profile_image_url = models.URLField(blank=True)
-    
+
     # OAuth tokens (encrypted in production)
     access_token = models.TextField()
     refresh_token = models.TextField(blank=True)
-    token_expires_at = models.DateTimeField(null=True, blank=True)
-    
+    token_expires_at = models.DateTimeField(blank=True)
+
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    last_sync_at = models.DateTimeField(null=True, blank=True)
+    last_sync_at = models.DateTimeField(blank=True)
     sync_error = models.TextField(blank=True)
-    
+
     # Settings
     auto_sync_enabled = models.BooleanField(default=True)
     sync_interval_minutes = models.IntegerField(default=15)
     monitor_mentions = models.BooleanField(default=True)
     monitor_messages = models.BooleanField(default=True)
     monitor_comments = models.BooleanField(default=True)
-    
+
     # Organization
     tenant = models.ForeignKey(
         'multi_tenant.Organization',
@@ -65,7 +66,7 @@ class SocialAccount(models.Model):
         blank=True,
         related_name='social_accounts'
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -87,7 +88,7 @@ class SocialAccount(models.Model):
 
 class SocialConversation(models.Model):
     """A conversation thread from social media"""
-    
+
     TYPE_CHOICES = [
         ('mention', 'Mention'),
         ('direct_message', 'Direct Message'),
@@ -95,7 +96,7 @@ class SocialConversation(models.Model):
         ('post', 'Post'),
         ('story_reply', 'Story Reply'),
     ]
-    
+
     STATUS_CHOICES = [
         ('new', 'New'),
         ('open', 'Open'),
@@ -103,7 +104,7 @@ class SocialConversation(models.Model):
         ('resolved', 'Resolved'),
         ('spam', 'Spam'),
     ]
-    
+
     PRIORITY_CHOICES = [
         ('low', 'Low'),
         ('normal', 'Normal'),
@@ -112,7 +113,7 @@ class SocialConversation(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     # Source
     social_account = models.ForeignKey(
         SocialAccount,
@@ -122,15 +123,15 @@ class SocialConversation(models.Model):
     conversation_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
     external_id = models.CharField(max_length=255)
     external_url = models.URLField(blank=True)
-    
+
     # Participant info
     participant_id = models.CharField(max_length=255)
     participant_name = models.CharField(max_length=255)
     participant_handle = models.CharField(max_length=255, blank=True)
     participant_profile_url = models.URLField(blank=True)
     participant_profile_image = models.URLField(blank=True)
-    participant_followers_count = models.IntegerField(null=True, blank=True)
-    
+    participant_followers_count = models.IntegerField(blank=True)
+
     # Linked CRM entities
     linked_contact = models.ForeignKey(
         'contact_management.Contact',
@@ -146,7 +147,7 @@ class SocialConversation(models.Model):
         blank=True,
         related_name='social_conversations'
     )
-    
+
     # Status and assignment
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='normal')
@@ -157,29 +158,29 @@ class SocialConversation(models.Model):
         blank=True,
         related_name='assigned_social_conversations'
     )
-    
+
     # Sentiment analysis
-    sentiment_score = models.FloatField(null=True, blank=True, help_text="-1 to 1")
+    sentiment_score = models.FloatField(blank=True, help_text="-1 to 1")
     sentiment_label = models.CharField(max_length=20, blank=True)  # positive, negative, neutral
-    sentiment_analyzed_at = models.DateTimeField(null=True, blank=True)
-    
+    sentiment_analyzed_at = models.DateTimeField(blank=True)
+
     # AI suggestions
     suggested_response = models.TextField(blank=True)
     response_tone = models.CharField(max_length=50, blank=True)
-    
+
     # Tags and labels
     tags = models.JSONField(default=list, blank=True)
     labels = models.JSONField(default=list, blank=True)
-    
+
     # Counts
     message_count = models.IntegerField(default=1)
     unread_count = models.IntegerField(default=1)
-    
+
     # Timestamps
     first_message_at = models.DateTimeField()
     last_message_at = models.DateTimeField()
-    first_response_at = models.DateTimeField(null=True, blank=True)
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    first_response_at = models.DateTimeField(blank=True)
+    resolved_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -201,29 +202,29 @@ class SocialConversation(models.Model):
 
 class SocialMessage(models.Model):
     """Individual message within a conversation"""
-    
+
     DIRECTION_CHOICES = [
         ('inbound', 'Inbound'),
         ('outbound', 'Outbound'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     conversation = models.ForeignKey(
         SocialConversation,
         on_delete=models.CASCADE,
         related_name='messages'
     )
-    
+
     # Message info
     external_id = models.CharField(max_length=255)
     direction = models.CharField(max_length=10, choices=DIRECTION_CHOICES)
     content = models.TextField()
     content_type = models.CharField(max_length=50, default='text')
-    
+
     # Media attachments
     attachments = models.JSONField(default=list, blank=True)
-    
+
     # For outbound messages
     sent_by = models.ForeignKey(
         User,
@@ -232,16 +233,16 @@ class SocialMessage(models.Model):
         blank=True,
         related_name='sent_social_messages'
     )
-    
+
     # Engagement metrics
     likes_count = models.IntegerField(default=0)
     shares_count = models.IntegerField(default=0)
     replies_count = models.IntegerField(default=0)
-    
+
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(null=True, blank=True)
-    
+    read_at = models.DateTimeField(blank=True)
+
     # Timestamps
     platform_created_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -261,14 +262,14 @@ class SocialMessage(models.Model):
 
 class SocialMonitoringRule(models.Model):
     """Rules for monitoring social media mentions and keywords"""
-    
+
     RULE_TYPE_CHOICES = [
         ('keyword', 'Keyword'),
         ('hashtag', 'Hashtag'),
         ('mention', 'Mention'),
         ('competitor', 'Competitor'),
     ]
-    
+
     ACTION_CHOICES = [
         ('notify', 'Send Notification'),
         ('assign', 'Auto-assign'),
@@ -278,16 +279,16 @@ class SocialMonitoringRule(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     rule_type = models.CharField(max_length=20, choices=RULE_TYPE_CHOICES)
-    
+
     # Matching criteria
     keywords = models.JSONField(default=list, help_text="List of keywords to match")
     platforms = models.JSONField(default=list, help_text="Platforms to monitor")
     exclude_keywords = models.JSONField(default=list, blank=True)
-    
+
     # Actions
     actions = models.JSONField(default=list, help_text="Actions to take when matched")
     auto_assign_to = models.ForeignKey(
@@ -300,12 +301,12 @@ class SocialMonitoringRule(models.Model):
     auto_response_template = models.TextField(blank=True)
     auto_tags = models.JSONField(default=list, blank=True)
     auto_priority = models.CharField(max_length=20, blank=True)
-    
+
     # Status
     is_active = models.BooleanField(default=True)
     matches_count = models.IntegerField(default=0)
-    last_matched_at = models.DateTimeField(null=True, blank=True)
-    
+    last_matched_at = models.DateTimeField(blank=True)
+
     # Organization
     tenant = models.ForeignKey(
         'multi_tenant.Organization',
@@ -314,7 +315,7 @@ class SocialMonitoringRule(models.Model):
         blank=True,
         related_name='social_monitoring_rules'
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -330,7 +331,7 @@ class SocialMonitoringRule(models.Model):
 
 class SocialPost(models.Model):
     """Scheduled and published social media posts"""
-    
+
     STATUS_CHOICES = [
         ('draft', 'Draft'),
         ('scheduled', 'Scheduled'),
@@ -340,33 +341,33 @@ class SocialPost(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     # Content
     content = models.TextField()
     media_urls = models.JSONField(default=list, blank=True)
-    
+
     # Targeting
     social_accounts = models.ManyToManyField(
         SocialAccount,
         related_name='posts'
     )
-    
+
     # Scheduling
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    scheduled_at = models.DateTimeField(null=True, blank=True)
-    published_at = models.DateTimeField(null=True, blank=True)
-    
+    scheduled_at = models.DateTimeField(blank=True)
+    published_at = models.DateTimeField(blank=True)
+
     # Results per platform
     publish_results = models.JSONField(default=dict, blank=True)
-    
+
     # Engagement metrics (aggregated)
     total_likes = models.IntegerField(default=0)
     total_shares = models.IntegerField(default=0)
     total_comments = models.IntegerField(default=0)
     total_reach = models.IntegerField(default=0)
-    
+
     # Organization
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -382,37 +383,37 @@ class SocialPost(models.Model):
 
 class SocialAnalytics(models.Model):
     """Daily analytics for social accounts"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     social_account = models.ForeignKey(
         SocialAccount,
         on_delete=models.CASCADE,
         related_name='analytics'
     )
     date = models.DateField()
-    
+
     # Follower metrics
     followers_count = models.IntegerField(default=0)
     followers_gained = models.IntegerField(default=0)
     followers_lost = models.IntegerField(default=0)
-    
+
     # Engagement metrics
     impressions = models.IntegerField(default=0)
     reach = models.IntegerField(default=0)
     engagement_rate = models.FloatField(default=0)
-    
+
     # Content metrics
     posts_count = models.IntegerField(default=0)
     likes_received = models.IntegerField(default=0)
     comments_received = models.IntegerField(default=0)
     shares_received = models.IntegerField(default=0)
-    
+
     # Inbox metrics
     messages_received = models.IntegerField(default=0)
     messages_sent = models.IntegerField(default=0)
-    avg_response_time_minutes = models.FloatField(null=True, blank=True)
-    
+    avg_response_time_minutes = models.FloatField(blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

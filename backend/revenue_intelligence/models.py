@@ -49,7 +49,7 @@ class RevenueTarget(models.Model):
 
     # Target values
     target_amount = models.DecimalField(max_digits=15, decimal_places=2)
-    stretch_target = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    stretch_target = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
 
     # Actuals (updated via signals/tasks)
     achieved_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
@@ -145,7 +145,7 @@ class DealScore(models.Model):
 
     # Trend tracking
     score_trend = models.CharField(max_length=20, default='stable')  # improving, declining, stable
-    previous_score = models.IntegerField(null=True, blank=True)
+    previous_score = models.IntegerField(blank=True)
 
     # Timestamps
     calculated_at = models.DateTimeField(auto_now=True)
@@ -178,11 +178,11 @@ class DealVelocity(models.Model):
     days_in_stage = models.IntegerField(help_text="Days spent in previous stage")
 
     # Benchmarks
-    avg_days_for_stage = models.IntegerField(null=True, help_text="Average days in this stage")
+    avg_days_for_stage = models.IntegerField(help_text="Average days in this stage")
     is_on_track = models.BooleanField(default=True)
 
     # Context
-    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     notes = models.TextField(blank=True)
 
     class Meta:
@@ -202,7 +202,7 @@ class PipelineSnapshot(models.Model):
     snapshot_date = models.DateField(default=timezone.now)
 
     # User/Team level
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     team = models.CharField(max_length=100, blank=True)
 
     # Pipeline metrics
@@ -258,7 +258,7 @@ class Competitor(models.Model):
 
     # Threat assessment
     threat_level = models.CharField(max_length=20, choices=THREAT_LEVELS, default='medium')
-    market_share = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    market_share = models.DecimalField(max_digits=5, decimal_places=2)
 
     # Win/Loss against this competitor
     deals_won_against = models.IntegerField(default=0)
@@ -272,7 +272,7 @@ class Competitor(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
 
     class Meta:
         db_table = 'competitors'
@@ -353,7 +353,7 @@ class RevenueForecast(models.Model):
     period_end = models.DateField()
 
     # User/Team
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     team = models.CharField(max_length=100, blank=True)
 
     # Forecast values
@@ -371,8 +371,8 @@ class RevenueForecast(models.Model):
     at_risk_deals = models.DecimalField(max_digits=15, decimal_places=2, default=0)
 
     # Accuracy tracking (for completed periods)
-    actual_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True)
-    accuracy_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    actual_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    accuracy_percentage = models.DecimalField(max_digits=5, decimal_places=2)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -422,13 +422,13 @@ class DealRiskAlert(models.Model):
     # Status
     is_active = models.BooleanField(default=True)
     is_acknowledged = models.BooleanField(default=False)
-    acknowledged_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    acknowledged_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    acknowledged_at = models.DateTimeField(blank=True)
 
     # Resolution
     is_resolved = models.BooleanField(default=False)
     resolution_notes = models.TextField(blank=True)
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

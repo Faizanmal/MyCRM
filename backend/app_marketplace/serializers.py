@@ -3,15 +3,20 @@ App Marketplace Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    AppCategory, AppDeveloper, MarketplaceApp, AppVersion,
-    AppInstallation, AppReview
+    AppCategory,
+    AppDeveloper,
+    AppInstallation,
+    AppReview,
+    AppVersion,
+    MarketplaceApp,
 )
 
 
 class AppCategorySerializer(serializers.ModelSerializer):
     app_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = AppCategory
         fields = ['id', 'name', 'slug', 'description', 'icon', 'app_count']
@@ -32,7 +37,7 @@ class AppDeveloperSerializer(serializers.ModelSerializer):
 class MarketplaceAppListSerializer(serializers.ModelSerializer):
     developer_name = serializers.CharField(source='developer.name')
     category_name = serializers.CharField(source='category.name', allow_null=True)
-    
+
     class Meta:
         model = MarketplaceApp
         fields = [
@@ -47,7 +52,7 @@ class MarketplaceAppDetailSerializer(serializers.ModelSerializer):
     developer = AppDeveloperSerializer(read_only=True)
     category = AppCategorySerializer(read_only=True)
     is_installed = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = MarketplaceApp
         fields = [
@@ -82,7 +87,7 @@ class AppVersionSerializer(serializers.ModelSerializer):
 
 class AppInstallationSerializer(serializers.ModelSerializer):
     app = MarketplaceAppListSerializer(read_only=True)
-    
+
     class Meta:
         model = AppInstallation
         fields = [
@@ -97,7 +102,7 @@ class AppInstallSerializer(serializers.Serializer):
 
 class AppReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = AppReview
         fields = [

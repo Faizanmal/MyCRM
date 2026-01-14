@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
                 (
                     "target_value",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 (
@@ -261,13 +261,13 @@ class Migration(migrations.Migration):
                 (
                     "previous_value",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 (
                     "change_percentage",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=7, null=True
+                        blank=True, decimal_places=2, max_digits=7
                     ),
                 ),
                 (
@@ -356,7 +356,7 @@ class Migration(migrations.Migration):
                 ("is_public", models.BooleanField(default=False)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("last_generated_at", models.DateTimeField(blank=True, null=True)),
+                ("last_generated_at", models.DateTimeField(blank=True)),
                 (
                     "owner",
                     models.ForeignKey(
@@ -424,12 +424,12 @@ class Migration(migrations.Migration):
                 (
                     "day_of_week",
                     models.IntegerField(
-                        blank=True, help_text="0=Monday, 6=Sunday", null=True
+                        blank=True, help_text="0=Monday, 6=Sunday"
                     ),
                 ),
                 (
                     "day_of_month",
-                    models.IntegerField(blank=True, help_text="1-31", null=True),
+                    models.IntegerField(blank=True, help_text="1-31"),
                 ),
                 (
                     "recipients",
@@ -444,8 +444,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("is_active", models.BooleanField(default=True)),
-                ("last_sent_at", models.DateTimeField(blank=True, null=True)),
-                ("next_run_at", models.DateTimeField(blank=True, null=True)),
+                ("last_sent_at", models.DateTimeField(blank=True)),
+                ("next_run_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -497,12 +497,12 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("filters_used", models.JSONField(default=dict)),
-                ("rows_returned", models.IntegerField(blank=True, null=True)),
+                ("rows_returned", models.IntegerField(blank=True)),
                 ("file_path", models.CharField(blank=True, max_length=500)),
-                ("file_size_bytes", models.BigIntegerField(blank=True, null=True)),
+                ("file_size_bytes", models.BigIntegerField(blank=True)),
                 ("error_message", models.TextField(blank=True)),
                 ("started_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "executed_by",
                     models.ForeignKey(

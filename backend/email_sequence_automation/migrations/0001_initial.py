@@ -103,7 +103,7 @@ class Migration(migrations.Migration):
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("activated_at", models.DateTimeField(blank=True, null=True)),
+                ("activated_at", models.DateTimeField(blank=True)),
                 (
                     "owner",
                     models.ForeignKey(
@@ -168,7 +168,7 @@ class Migration(migrations.Migration):
                 ("total_enrolled", models.IntegerField(default=0)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("last_triggered_at", models.DateTimeField(blank=True, null=True)),
+                ("last_triggered_at", models.DateTimeField(blank=True)),
                 (
                     "sequence",
                     models.ForeignKey(
@@ -372,17 +372,17 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("next_action_at", models.DateTimeField(blank=True, null=True)),
+                ("next_action_at", models.DateTimeField(blank=True)),
                 ("enrollment_trigger", models.CharField(blank=True, max_length=100)),
                 ("exit_reason", models.CharField(blank=True, max_length=200)),
-                ("exited_at", models.DateTimeField(blank=True, null=True)),
+                ("exited_at", models.DateTimeField(blank=True)),
                 ("emails_sent", models.IntegerField(default=0)),
                 ("emails_opened", models.IntegerField(default=0)),
                 ("emails_clicked", models.IntegerField(default=0)),
                 ("emails_replied", models.IntegerField(default=0)),
                 ("personalization_data", models.JSONField(default=dict)),
                 ("enrolled_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "contact",
@@ -546,7 +546,7 @@ class Migration(migrations.Migration):
                 ),
                 ("description", models.TextField(blank=True)),
                 ("metadata", models.JSONField(default=dict)),
-                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True)),
                 ("user_agent", models.TextField(blank=True)),
                 ("timestamp", models.DateTimeField(auto_now_add=True)),
                 (
@@ -622,7 +622,7 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("winner_selected_at", models.DateTimeField(blank=True, null=True)),
+                ("winner_selected_at", models.DateTimeField(blank=True)),
                 ("auto_select_winner", models.BooleanField(default=True)),
                 (
                     "results",
@@ -630,8 +630,8 @@ class Migration(migrations.Migration):
                         default=dict, help_text="Statistical test results"
                     ),
                 ),
-                ("started_at", models.DateTimeField(blank=True, null=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("started_at", models.DateTimeField(blank=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (

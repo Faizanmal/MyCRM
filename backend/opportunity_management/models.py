@@ -26,11 +26,11 @@ class Opportunity(models.Model):
 
     # Basic Information
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
 
     # Contact and Company
     contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, related_name='opportunities')
-    company_name = models.CharField(max_length=200, blank=True, null=True)
+    company_name = models.CharField(max_length=200, blank=True)
 
     # Sales Information
     stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default='prospecting')
@@ -39,16 +39,16 @@ class Opportunity(models.Model):
     currency = models.CharField(max_length=3, default='USD')
 
     # Assignment and Ownership
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_opportunities')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='assigned_opportunities')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_opportunities')
 
     # Dates
     expected_close_date = models.DateField()
-    actual_close_date = models.DateField(null=True, blank=True)
-    last_activity_date = models.DateTimeField(null=True, blank=True)
+    actual_close_date = models.DateField(blank=True)
+    last_activity_date = models.DateTimeField(blank=True)
 
     # Additional Information
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     custom_fields = models.JSONField(default=dict, blank=True)
 
@@ -74,7 +74,7 @@ class Opportunity(models.Model):
 class OpportunityStage(models.Model):
     """Custom stages for opportunities"""
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     probability = models.IntegerField(default=0)
     order = models.IntegerField(default=0)
     is_closed = models.BooleanField(default=False)
@@ -108,7 +108,7 @@ class OpportunityActivity(models.Model):
     opportunity = models.ForeignKey(Opportunity, on_delete=models.CASCADE, related_name='activities')
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPE_CHOICES)
     subject = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -122,11 +122,11 @@ class OpportunityActivity(models.Model):
 class Product(models.Model):
     """Products/Services that can be sold"""
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
-    sku = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    description = models.TextField(blank=True)
+    sku = models.CharField(max_length=100, unique=True, blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='USD')
-    category = models.CharField(max_length=100, blank=True, null=True)
+    category = models.CharField(max_length=100, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

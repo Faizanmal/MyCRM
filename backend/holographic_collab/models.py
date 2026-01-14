@@ -1,6 +1,8 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.db import models
-import uuid
+
 
 class HolographicSession(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
@@ -12,10 +14,10 @@ class HolographicSession(models.Model):
     hologram_quality = models.CharField(max_length=20, default='high')
     gesture_controls_enabled = models.BooleanField(default=True)
     bandwidth_requirement_mbps = models.IntegerField(default=50)
-    recording_url = models.URLField(blank=True, null=True)
+    recording_url = models.URLField(blank=True)
     status = models.CharField(max_length=20, default='scheduled')
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-scheduled_at']
 

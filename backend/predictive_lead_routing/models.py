@@ -47,7 +47,7 @@ class SalesRepProfile(models.Model):
     # Deal Size Preferences
     min_deal_size = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     max_deal_size = models.DecimalField(max_digits=12, decimal_places=2, default=1000000)
-    preferred_deal_size = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    preferred_deal_size = models.DecimalField(max_digits=12, decimal_places=2, blank=True)
 
     # Performance Metrics
     total_leads_assigned = models.IntegerField(default=0)
@@ -60,10 +60,10 @@ class SalesRepProfile(models.Model):
 
     # AI Scoring
     overall_performance_score = models.DecimalField(max_digits=5, decimal_places=2, default=50)
-    last_performance_update = models.DateTimeField(null=True, blank=True)
+    last_performance_update = models.DateTimeField(blank=True)
 
     # Round Robin
-    last_assignment_at = models.DateTimeField(null=True, blank=True)
+    last_assignment_at = models.DateTimeField(blank=True)
     assignment_weight = models.IntegerField(default=100, validators=[MinValueValidator(1), MaxValueValidator(200)])
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -128,7 +128,7 @@ class RoutingRule(models.Model):
     target_teams = models.JSONField(default=list, help_text="Team IDs to route to")
 
     # Fallback
-    fallback_rep = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='fallback_rules')
+    fallback_rep = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='fallback_rules')
 
     # Settings
     is_active = models.BooleanField(default=True)
@@ -178,12 +178,12 @@ class LeadAssignment(models.Model):
 
     # Assignment details
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lead_assignments')
-    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='made_assignments')
-    previous_assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_assignments')
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='made_assignments')
+    previous_assignee = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='previous_assignments')
 
     # Method and rule
     assignment_method = models.CharField(max_length=20, choices=ASSIGNMENT_METHODS)
-    routing_rule = models.ForeignKey(RoutingRule, on_delete=models.SET_NULL, null=True, blank=True)
+    routing_rule = models.ForeignKey(RoutingRule, on_delete=models.SET_NULL, blank=True)
 
     # AI Routing scores
     match_score = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="AI match score 0-100")
@@ -195,12 +195,12 @@ class LeadAssignment(models.Model):
 
     # Timing
     assigned_at = models.DateTimeField(auto_now_add=True)
-    accepted_at = models.DateTimeField(null=True, blank=True)
-    first_response_at = models.DateTimeField(null=True, blank=True)
+    accepted_at = models.DateTimeField(blank=True)
+    first_response_at = models.DateTimeField(blank=True)
 
     # Outcome tracking
     outcome = models.CharField(max_length=50, blank=True)
-    outcome_at = models.DateTimeField(null=True, blank=True)
+    outcome_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'lead_assignments'
@@ -283,7 +283,7 @@ class RebalancingEvent(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     trigger_reason = models.CharField(max_length=20, choices=TRIGGER_REASONS)
-    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
 
     # Scope
     affected_reps = models.ManyToManyField(User, related_name='rebalancing_events')
@@ -297,7 +297,7 @@ class RebalancingEvent(models.Model):
     after_distribution = models.JSONField(default=dict)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'lead_rebalancing_events'
@@ -387,12 +387,12 @@ class RepSkillAssignment(models.Model):
     skill = models.ForeignKey(SkillCertification, on_delete=models.CASCADE, related_name='rep_assignments')
 
     proficiency_level = models.IntegerField(choices=PROFICIENCY_LEVELS, default=2)
-    certified_date = models.DateField(null=True, blank=True)
-    expiry_date = models.DateField(null=True, blank=True)
+    certified_date = models.DateField(blank=True)
+    expiry_date = models.DateField(blank=True)
 
     # Verification
     verified = models.BooleanField(default=False)
-    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -425,7 +425,7 @@ class TerritoryDefinition(models.Model):
     postal_codes = models.JSONField(default=list)
 
     # Assignment
-    primary_rep = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='primary_territories')
+    primary_rep = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='primary_territories')
     backup_reps = models.ManyToManyField(User, blank=True, related_name='backup_territories')
 
     is_active = models.BooleanField(default=True)
@@ -458,7 +458,7 @@ class LeadQualityScore(models.Model):
 
     # Routing recommendations
     recommended_rep_ids = models.JSONField(default=list)
-    recommended_rule_id = models.UUIDField(null=True, blank=True)
+    recommended_rule_id = models.UUIDField(blank=True)
     priority_tier = models.CharField(max_length=20, default='standard')
 
     # Metadata

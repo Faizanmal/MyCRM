@@ -112,14 +112,14 @@ class OnboardingProgress(models.Model):
     # Tour status
     tour_completed = models.BooleanField(default=False)
     tour_dismissed = models.BooleanField(default=False)
-    tour_completed_at = models.DateTimeField(null=True, blank=True)
+    tour_completed_at = models.DateTimeField(blank=True)
 
     # XP and gamification
     onboarding_xp = models.IntegerField(default=0)
 
     # Timestamps
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_onboarding_progress'
@@ -186,7 +186,7 @@ class AIRecommendation(models.Model):
         null=True,
         blank=True
     )
-    object_id = models.CharField(max_length=255, null=True, blank=True)
+    object_id = models.CharField(max_length=255, blank=True)
     related_entity = GenericForeignKey('content_type', 'object_id')
 
     # Action
@@ -204,9 +204,9 @@ class AIRecommendation(models.Model):
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
-    dismissed_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
+    dismissed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_ai_recommendations'
@@ -294,7 +294,7 @@ class SmartFilter(models.Model):
 
     # Usage tracking
     use_count = models.IntegerField(default=0)
-    last_used_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(blank=True)
 
     # Sharing
     is_shared = models.BooleanField(default=False)

@@ -49,14 +49,14 @@ class DeviceTrust(models.Model):
     # Trust status
     trust_level = models.CharField(max_length=20, choices=TRUST_LEVELS, default='untrusted')
     is_trusted = models.BooleanField(default=False)
-    trust_expires_at = models.DateTimeField(null=True, blank=True)
+    trust_expires_at = models.DateTimeField(blank=True)
 
     # Verification
-    verified_at = models.DateTimeField(null=True, blank=True)
+    verified_at = models.DateTimeField(blank=True)
     verified_via = models.CharField(max_length=50, blank=True)  # 'email', 'sms', 'mfa'
 
     # Location
-    last_ip_address = models.GenericIPAddressField(null=True, blank=True)
+    last_ip_address = models.GenericIPAddressField(blank=True)
     last_location = models.JSONField(default=dict)
 
     # Activity
@@ -65,7 +65,7 @@ class DeviceTrust(models.Model):
 
     # Revocation
     is_revoked = models.BooleanField(default=False)
-    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_at = models.DateTimeField(blank=True)
     revoked_reason = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -93,7 +93,7 @@ class SecuritySession(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='security_sessions')
-    device = models.ForeignKey(DeviceTrust, on_delete=models.SET_NULL, null=True, blank=True)
+    device = models.ForeignKey(DeviceTrust, on_delete=models.SET_NULL, blank=True)
 
     # Session info
     session_key = models.CharField(max_length=64, unique=True)
@@ -123,7 +123,7 @@ class SecuritySession(models.Model):
     sensitive_actions_count = models.IntegerField(default=0)
 
     # Termination
-    terminated_at = models.DateTimeField(null=True, blank=True)
+    terminated_at = models.DateTimeField(blank=True)
     termination_reason = models.CharField(max_length=100, blank=True)
 
     class Meta:
@@ -160,12 +160,12 @@ class ImmutableAuditLog(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     # Actor
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='audit_logs')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='audit_logs')
     user_email = models.EmailField()  # Preserved even if user deleted
     user_role = models.CharField(max_length=100)
 
     # Session context
-    session = models.ForeignKey(SecuritySession, on_delete=models.SET_NULL, null=True)
+    session = models.ForeignKey(SecuritySession, on_delete=models.SET_NULL)
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField(blank=True)
     device_fingerprint = models.CharField(max_length=256, blank=True)
@@ -256,7 +256,7 @@ class DataClassification(models.Model):
     can_share_external = models.BooleanField(default=True)
 
     # Retention
-    retention_days = models.IntegerField(null=True, blank=True)
+    retention_days = models.IntegerField(blank=True)
     auto_delete = models.BooleanField(default=False)
 
     # Patterns for auto-classification
@@ -338,17 +338,17 @@ class DLPIncident(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    policy = models.ForeignKey(DLPPolicy, on_delete=models.SET_NULL, null=True, related_name='incidents')
+    policy = models.ForeignKey(DLPPolicy, on_delete=models.SET_NULL, related_name='incidents')
 
     # Actor
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='dlp_incidents')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='dlp_incidents')
     user_email = models.EmailField()
 
     # Context
     action_attempted = models.CharField(max_length=100)
     resource_type = models.CharField(max_length=100)
     resource_id = models.CharField(max_length=100)
-    classification = models.ForeignKey(DataClassification, on_delete=models.SET_NULL, null=True)
+    classification = models.ForeignKey(DataClassification, on_delete=models.SET_NULL)
 
     # Detection
     detection_method = models.CharField(max_length=100)
@@ -361,14 +361,14 @@ class DLPIncident(models.Model):
     # Investigation
     status = models.CharField(max_length=20, choices=INCIDENT_STATUS, default='new')
     assigned_to = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User, on_delete=models.SET_NULL, blank=True,
         related_name='assigned_dlp_incidents'
     )
     notes = models.TextField(blank=True)
 
     # Timestamps
     occurred_at = models.DateTimeField(auto_now_add=True)
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'dlp_incidents'

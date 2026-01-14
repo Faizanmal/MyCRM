@@ -1,6 +1,8 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.db import models
-import uuid
+
 
 class WorkflowVariant(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
@@ -11,7 +13,7 @@ class WorkflowVariant(models.Model):
     status = models.CharField(max_length=20, default='testing')
     created_by_ai = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-created_at']
 
@@ -25,7 +27,7 @@ class ABTestResult(models.Model):
     statistical_significance = models.FloatField()
     sample_size = models.IntegerField()
     test_date = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-test_date']
 
@@ -37,8 +39,8 @@ class AIWorkflowProposal(models.Model):
     confidence_score = models.FloatField()
     reasoning = models.TextField()
     status = models.CharField(max_length=20, default='pending')
-    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-created_at']

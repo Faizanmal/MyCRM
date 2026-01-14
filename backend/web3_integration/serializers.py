@@ -1,10 +1,17 @@
 from rest_framework import serializers
-from .models import DataWallet, DataAccessGrant, NFTLoyaltyReward, SmartContract, BlockchainTransaction
+
+from .models import (
+    BlockchainTransaction,
+    DataAccessGrant,
+    DataWallet,
+    NFTLoyaltyReward,
+    SmartContract,
+)
 
 
 class DataWalletSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = DataWallet
         fields = ['id', 'user', 'user_email', 'wallet_address', 'public_key', 'blockchain_network',
@@ -21,7 +28,7 @@ class DataAccessGrantSerializer(serializers.ModelSerializer):
 
 class NFTLoyaltyRewardSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = NFTLoyaltyReward
         fields = '__all__'
@@ -30,7 +37,7 @@ class NFTLoyaltyRewardSerializer(serializers.ModelSerializer):
 
 class SmartContractSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    
+
     class Meta:
         model = SmartContract
         fields = '__all__'
@@ -39,7 +46,7 @@ class SmartContractSerializer(serializers.ModelSerializer):
 
 class BlockchainTransactionSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = BlockchainTransaction
         fields = '__all__'

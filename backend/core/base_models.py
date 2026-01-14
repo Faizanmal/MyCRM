@@ -45,7 +45,7 @@ class SoftDeleteModel(models.Model):
     Objects are marked as deleted instead of being removed from the database.
     """
     is_deleted = models.BooleanField(default=False, db_index=True)
-    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(blank=True)
     deleted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -244,7 +244,7 @@ class ActivityTrackableMixin(models.Model):
     Mixin to add activity tracking to a model.
     Tracks last activity and activity count.
     """
-    last_activity_at = models.DateTimeField(null=True, blank=True)
+    last_activity_at = models.DateTimeField(blank=True)
     activity_count = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -287,7 +287,7 @@ class AuditLog(models.Model):
         null=True,
         related_name='audit_logs'
     )
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True, default='')
     session_id = models.CharField(max_length=255, blank=True, default='')
 
@@ -295,7 +295,7 @@ class AuditLog(models.Model):
     action = models.CharField(max_length=50, choices=ACTION_CHOICES, db_index=True)
 
     # Target object
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.CharField(max_length=255, blank=True, default='')
     object_repr = models.CharField(max_length=500, blank=True, default='')
 
@@ -476,7 +476,7 @@ class FeatureFlag(models.Model):
         if self.rollout_percentage > 0:
             import hashlib
             hash_input = f"{self.name}:{user.pk}"
-            hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
+            hash_value = int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
             return (hash_value % 100) < self.rollout_percentage
 
         return False
@@ -523,10 +523,10 @@ class Notification(TimeStampedModel):
 
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(blank=True)
 
     # Related object
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True)
     object_id = models.CharField(max_length=255, blank=True, default='')
 
     # Action URL

@@ -247,7 +247,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("longest_streak", models.IntegerField(default=0)),
-                ("last_activity_date", models.DateField(blank=True, null=True)),
+                ("last_activity_date", models.DateField(blank=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "user",
@@ -277,8 +277,8 @@ class Migration(migrations.Migration):
                 ),
                 ("current_value", models.FloatField(default=0)),
                 ("is_completed", models.BooleanField(default=False)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
-                ("rank", models.IntegerField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
+                ("rank", models.IntegerField(blank=True)),
                 (
                     "challenge",
                     models.ForeignKey(
@@ -338,7 +338,7 @@ class Migration(migrations.Migration):
                         max_length=50,
                     ),
                 ),
-                ("reference_id", models.IntegerField(blank=True, null=True)),
+                ("reference_id", models.IntegerField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "user",

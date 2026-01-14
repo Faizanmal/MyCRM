@@ -38,13 +38,13 @@ class Organization(models.Model):
         blank=True,
         help_text="Custom domain for this organization"
     )
-    logo = models.ImageField(upload_to='organization_logos/', null=True, blank=True)
-    website = models.URLField(max_length=500, null=True, blank=True)
+    logo = models.ImageField(upload_to='organization_logos/', blank=True)
+    website = models.URLField(max_length=500, blank=True)
 
     # Contact information
     email = models.EmailField()
-    phone = models.CharField(max_length=20, null=True, blank=True)
-    address = models.TextField(null=True, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
 
     # Subscription details
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='trial')
@@ -54,11 +54,11 @@ class Organization(models.Model):
     max_storage_mb = models.PositiveIntegerField(default=500)
 
     # Billing
-    billing_email = models.EmailField(null=True, blank=True)
-    stripe_customer_id = models.CharField(max_length=100, null=True, blank=True)
-    subscription_start = models.DateField(null=True, blank=True)
-    subscription_end = models.DateField(null=True, blank=True)
-    trial_ends_at = models.DateField(null=True, blank=True)
+    billing_email = models.EmailField(blank=True)
+    stripe_customer_id = models.CharField(max_length=100, blank=True)
+    subscription_start = models.DateField(blank=True)
+    subscription_end = models.DateField(blank=True)
+    trial_ends_at = models.DateField(blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -203,7 +203,7 @@ class OrganizationInvitation(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    accepted_at = models.DateTimeField(null=True, blank=True)
+    accepted_at = models.DateTimeField(blank=True)
 
     class Meta:
         ordering = ['-created_at']

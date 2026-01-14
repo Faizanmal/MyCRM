@@ -3,10 +3,16 @@ ESG Reporting Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    ESGFramework, ESGMetricCategory, ESGMetricDefinition,
-    ESGDataEntry, ESGTarget, ESGReport, CarbonFootprint,
-    SupplierESGAssessment
+    CarbonFootprint,
+    ESGDataEntry,
+    ESGFramework,
+    ESGMetricCategory,
+    ESGMetricDefinition,
+    ESGReport,
+    ESGTarget,
+    SupplierESGAssessment,
 )
 
 
@@ -18,7 +24,7 @@ class ESGFrameworkSerializer(serializers.ModelSerializer):
 
 class ESGMetricCategorySerializer(serializers.ModelSerializer):
     metric_count = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ESGMetricCategory
         fields = ['id', 'name', 'pillar', 'description', 'icon', 'metric_count']
@@ -31,7 +37,7 @@ class ESGMetricDefinitionSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     pillar = serializers.CharField(source='category.pillar', read_only=True)
     frameworks = ESGFrameworkSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = ESGMetricDefinition
         fields = [
@@ -46,7 +52,7 @@ class ESGDataEntrySerializer(serializers.ModelSerializer):
     metric_name = serializers.CharField(source='metric.name', read_only=True)
     metric_unit = serializers.CharField(source='metric.unit', read_only=True)
     entered_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ESGDataEntry
         fields = [
@@ -66,7 +72,7 @@ class ESGDataEntrySerializer(serializers.ModelSerializer):
 
 class ESGTargetSerializer(serializers.ModelSerializer):
     metric_name = serializers.CharField(source='metric.name', read_only=True)
-    
+
     class Meta:
         model = ESGTarget
         fields = [
@@ -80,7 +86,7 @@ class ESGTargetSerializer(serializers.ModelSerializer):
 class ESGReportSerializer(serializers.ModelSerializer):
     framework_name = serializers.CharField(source='framework.name', read_only=True)
     created_by_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ESGReport
         fields = [
@@ -99,7 +105,7 @@ class ESGReportSerializer(serializers.ModelSerializer):
 class CarbonFootprintSerializer(serializers.ModelSerializer):
     scope_display = serializers.CharField(source='get_scope_display', read_only=True)
     category_display = serializers.CharField(source='get_category_display', read_only=True)
-    
+
     class Meta:
         model = CarbonFootprint
         fields = [

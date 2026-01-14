@@ -145,7 +145,7 @@ class Report(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_generated_at = models.DateTimeField(null=True, blank=True)
+    last_generated_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_report'
@@ -184,20 +184,20 @@ class ReportSchedule(models.Model):
 
     # Schedule configuration
     schedule_time = models.TimeField(help_text="Time to send (24-hour format)")
-    day_of_week = models.IntegerField(null=True, blank=True, help_text="0=Monday, 6=Sunday")
-    day_of_month = models.IntegerField(null=True, blank=True, help_text="1-31")
+    day_of_week = models.IntegerField(blank=True, help_text="0=Monday, 6=Sunday")
+    day_of_month = models.IntegerField(blank=True, help_text="1-31")
 
     # Delivery configuration
     recipients = models.JSONField(default=list, help_text="Email addresses or user IDs")
     delivery_config = models.JSONField(default=dict, help_text="Additional delivery settings")
 
     is_active = models.BooleanField(default=True)
-    last_sent_at = models.DateTimeField(null=True, blank=True)
-    next_run_at = models.DateTimeField(null=True, blank=True)
+    last_sent_at = models.DateTimeField(blank=True)
+    next_run_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='report_schedules')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='report_schedules')
 
     class Meta:
         db_table = 'crm_report_schedule'
@@ -222,18 +222,18 @@ class ReportExecution(models.Model):
     ]
 
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='executions')
-    schedule = models.ForeignKey(ReportSchedule, on_delete=models.SET_NULL, null=True, blank=True, related_name='executions')
+    schedule = models.ForeignKey(ReportSchedule, on_delete=models.SET_NULL, blank=True, related_name='executions')
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='queued')
     filters_used = models.JSONField(default=dict)
-    rows_returned = models.IntegerField(null=True, blank=True)
+    rows_returned = models.IntegerField(blank=True)
     file_path = models.CharField(max_length=500, blank=True)
-    file_size_bytes = models.BigIntegerField(null=True, blank=True)
+    file_size_bytes = models.BigIntegerField(blank=True)
     error_message = models.TextField(blank=True)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='report_executions')
+    completed_at = models.DateTimeField(blank=True)
+    executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='report_executions')
 
     class Meta:
         db_table = 'crm_report_execution'
@@ -270,7 +270,7 @@ class KPI(models.Model):
     data_source = models.JSONField(default=dict)
 
     # Target settings
-    target_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    target_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
     unit = models.CharField(max_length=50, default='number', help_text="e.g., currency, percentage")
 
     # Display settings
@@ -306,8 +306,8 @@ class KPIValue(models.Model):
     period_end = models.DateTimeField()
 
     # Comparison with previous period
-    previous_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    change_percentage = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    previous_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
+    change_percentage = models.DecimalField(max_digits=7, decimal_places=2, blank=True)
 
     metadata = models.JSONField(default=dict, help_text="Additional context")
     calculated_at = models.DateTimeField(auto_now_add=True)

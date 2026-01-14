@@ -3,6 +3,7 @@ WebSocket Routing for Real-Time Collaboration
 """
 
 from django.urls import re_path
+
 from . import consumers
 
 websocket_urlpatterns = [

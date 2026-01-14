@@ -70,7 +70,7 @@ class EmailSequence(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    activated_at = models.DateTimeField(null=True, blank=True)
+    activated_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'automation_email_sequences'
@@ -132,8 +132,8 @@ class SequenceStep(models.Model):
     # Conditional logic
     condition_type = models.CharField(max_length=30, choices=CONDITION_TYPES, blank=True)
     condition_config = models.JSONField(default=dict)
-    branch_yes_step = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='yes_branches')
-    branch_no_step = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='no_branches')
+    branch_yes_step = models.ForeignKey('self', blank=True, on_delete=models.SET_NULL, related_name='yes_branches')
+    branch_no_step = models.ForeignKey('self', blank=True, on_delete=models.SET_NULL, related_name='no_branches')
 
     # Step-specific configuration
     config = models.JSONField(default=dict, help_text="Type-specific configuration")
@@ -243,22 +243,22 @@ class SequenceEnrollment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sequence = models.ForeignKey(EmailSequence, on_delete=models.CASCADE, related_name='enrollments')
     contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, related_name='automation_sequence_enrollments')
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, null=True, blank=True, related_name='sequence_enrollments')
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, blank=True, related_name='sequence_enrollments')
 
     # Current position
-    current_step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_enrollments')
+    current_step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, blank=True, related_name='current_enrollments')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
 
     # Scheduling
-    next_action_at = models.DateTimeField(null=True, blank=True)
+    next_action_at = models.DateTimeField(blank=True)
 
     # Enrollment source
-    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sequence_enrollments')
+    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='sequence_enrollments')
     enrollment_trigger = models.CharField(max_length=100, blank=True)
 
     # Exit tracking
     exit_reason = models.CharField(max_length=200, blank=True)
-    exited_at = models.DateTimeField(null=True, blank=True)
+    exited_at = models.DateTimeField(blank=True)
 
     # Analytics
     emails_sent = models.IntegerField(default=0)
@@ -271,7 +271,7 @@ class SequenceEnrollment(models.Model):
 
     # Timestamps
     enrolled_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -314,7 +314,7 @@ class SequenceActivity(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     enrollment = models.ForeignKey(SequenceEnrollment, on_delete=models.CASCADE, related_name='activities')
-    step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, null=True, blank=True)
+    step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, blank=True)
 
     activity_type = models.CharField(max_length=30, choices=ACTIVITY_TYPES)
     description = models.TextField(blank=True)
@@ -323,7 +323,7 @@ class SequenceActivity(models.Model):
     metadata = models.JSONField(default=dict)
 
     # Tracking
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -370,16 +370,16 @@ class ABTest(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Winner
-    winning_variant = models.ForeignKey(SequenceEmail, null=True, blank=True, on_delete=models.SET_NULL, related_name='won_tests')
-    winner_selected_at = models.DateTimeField(null=True, blank=True)
+    winning_variant = models.ForeignKey(SequenceEmail, blank=True, on_delete=models.SET_NULL, related_name='won_tests')
+    winner_selected_at = models.DateTimeField(blank=True)
     auto_select_winner = models.BooleanField(default=True)
 
     # Results
     results = models.JSONField(default=dict, help_text="Statistical test results")
 
     # Timestamps
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -432,7 +432,7 @@ class AutomatedTrigger(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_triggered_at = models.DateTimeField(null=True, blank=True)
+    last_triggered_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'email_automated_triggers'
@@ -471,7 +471,7 @@ class EmailPersonalizationToken(models.Model):
     ai_prompt = models.TextField(blank=True, help_text="Prompt for AI-generated tokens")
 
     # Ownership
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='personalization_tokens')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='personalization_tokens')
     is_system = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)

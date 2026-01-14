@@ -63,8 +63,8 @@ class WorkflowDefinition(models.Model):
 
     # Settings
     allow_multiple = models.BooleanField(default=False)  # Multiple instances per record
-    max_concurrent = models.IntegerField(null=True, blank=True)
-    timeout_hours = models.IntegerField(null=True, blank=True)
+    max_concurrent = models.IntegerField(blank=True)
+    timeout_hours = models.IntegerField(blank=True)
 
     # Version control
     version = models.IntegerField(default=1)
@@ -157,7 +157,7 @@ class WorkflowNode(models.Model):
     position_y = models.IntegerField(default=0)
 
     # Execution settings
-    timeout_minutes = models.IntegerField(null=True, blank=True)
+    timeout_minutes = models.IntegerField(blank=True)
     retry_count = models.IntegerField(default=0)
     retry_delay_minutes = models.IntegerField(default=5)
 
@@ -257,7 +257,7 @@ class WorkflowInstance(models.Model):
 
     # Timing
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
     last_activity_at = models.DateTimeField(auto_now=True)
 
     # Error info
@@ -265,7 +265,7 @@ class WorkflowInstance(models.Model):
     error_node = models.CharField(max_length=100, blank=True)
 
     # Resume info
-    resume_at = models.DateTimeField(null=True, blank=True)  # For delays/schedules
+    resume_at = models.DateTimeField(blank=True)  # For delays/schedules
     resume_data = models.JSONField(default=dict)
 
     class Meta:
@@ -308,9 +308,9 @@ class WorkflowNodeExecution(models.Model):
     output_data = models.JSONField(default=dict)
 
     # Timing
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    execution_time_ms = models.IntegerField(null=True, blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
+    execution_time_ms = models.IntegerField(blank=True)
 
     # Retry info
     attempt_number = models.IntegerField(default=1)
@@ -390,12 +390,12 @@ class WorkflowApprovalRequest(models.Model):
     delegated_reason = models.TextField(blank=True)
 
     # Timing
-    due_date = models.DateTimeField(null=True, blank=True)
-    responded_at = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(blank=True)
+    responded_at = models.DateTimeField(blank=True)
 
     # Reminders
     reminder_sent_count = models.IntegerField(default=0)
-    last_reminder_at = models.DateTimeField(null=True, blank=True)
+    last_reminder_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -497,7 +497,7 @@ class WorkflowVariable(models.Model):
     variable_type = models.CharField(max_length=20, choices=VARIABLE_TYPES)
 
     # Default value
-    default_value = models.JSONField(null=True, blank=True)
+    default_value = models.JSONField(blank=True)
 
     # Validation
     is_required = models.BooleanField(default=False)

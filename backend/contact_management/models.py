@@ -22,46 +22,46 @@ class Contact(models.Model):
     ]
 
     # Basic Information
-    salutation = models.CharField(max_length=10, choices=SALUTATION_CHOICES, blank=True, null=True)
+    salutation = models.CharField(max_length=10, choices=SALUTATION_CHOICES, blank=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True)
+    mobile = models.CharField(max_length=20, blank=True)
 
     # Company Information
-    company_name = models.CharField(max_length=200, blank=True, null=True)
-    job_title = models.CharField(max_length=100, blank=True, null=True)
-    department = models.CharField(max_length=100, blank=True, null=True)
+    company_name = models.CharField(max_length=200, blank=True)
+    job_title = models.CharField(max_length=100, blank=True)
+    department = models.CharField(max_length=100, blank=True)
 
     # Address Information
-    address_line_1 = models.CharField(max_length=200, blank=True, null=True)
-    address_line_2 = models.CharField(max_length=200, blank=True, null=True)
-    city = models.CharField(max_length=100, blank=True, null=True)
-    state = models.CharField(max_length=100, blank=True, null=True)
-    postal_code = models.CharField(max_length=20, blank=True, null=True)
-    country = models.CharField(max_length=100, blank=True, null=True)
+    address_line_1 = models.CharField(max_length=200, blank=True)
+    address_line_2 = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    country = models.CharField(max_length=100, blank=True)
 
     # CRM Information
     contact_type = models.CharField(max_length=20, choices=CONTACT_TYPE_CHOICES, default='prospect')
-    source = models.CharField(max_length=100, blank=True, null=True)  # How they found us
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_contacts')
+    source = models.CharField(max_length=100, blank=True)  # How they found us
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='assigned_contacts')
     status = models.CharField(max_length=50, default='active')
 
     # Social Media
-    website = models.URLField(blank=True, null=True)
-    linkedin = models.URLField(blank=True, null=True)
-    twitter = models.CharField(max_length=100, blank=True, null=True)
+    website = models.URLField(blank=True)
+    linkedin = models.URLField(blank=True)
+    twitter = models.CharField(max_length=100, blank=True)
 
     # Additional Information
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     custom_fields = models.JSONField(default=dict, blank=True)
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_contacts')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='created_contacts')
 
     class Meta:
         db_table = 'crm_contacts'
@@ -80,7 +80,7 @@ class Contact(models.Model):
 class ContactGroup(models.Model):
     """Groups for organizing contacts"""
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     contacts = models.ManyToManyField(Contact, blank=True, related_name='groups')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -113,7 +113,7 @@ class ContactImport(models.Model):
     error_log = models.JSONField(default=list, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_contact_imports'

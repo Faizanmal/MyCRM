@@ -46,7 +46,7 @@ class DocumentTemplate(models.Model):
 
     # Analytics
     times_used = models.IntegerField(default=0)
-    avg_completion_time = models.DurationField(null=True, blank=True)
+    avg_completion_time = models.DurationField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -100,8 +100,8 @@ class Document(models.Model):
 
     # Content
     content_html = models.TextField()  # Final rendered content
-    content_pdf = models.FileField(upload_to='esign/documents/', null=True, blank=True)
-    signed_pdf = models.FileField(upload_to='esign/signed/', null=True, blank=True)
+    content_pdf = models.FileField(upload_to='esign/documents/', blank=True)
+    signed_pdf = models.FileField(upload_to='esign/signed/', blank=True)
 
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
@@ -114,9 +114,9 @@ class Document(models.Model):
     )
 
     # Timing
-    sent_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     # Settings
     require_all_signatures = models.BooleanField(default=True)
@@ -128,7 +128,7 @@ class Document(models.Model):
     access_code_required = models.BooleanField(default=False)
 
     # Value tracking
-    document_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    document_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -179,17 +179,17 @@ class DocumentRecipient(models.Model):
     access_token = models.CharField(max_length=100, unique=True)
     access_code = models.CharField(max_length=20, blank=True)  # Optional PIN
 
-    viewed_at = models.DateTimeField(null=True, blank=True)
-    signed_at = models.DateTimeField(null=True, blank=True)
-    declined_at = models.DateTimeField(null=True, blank=True)
+    viewed_at = models.DateTimeField(blank=True)
+    signed_at = models.DateTimeField(blank=True)
+    declined_at = models.DateTimeField(blank=True)
     decline_reason = models.TextField(blank=True)
 
     # IP tracking
-    viewed_from_ip = models.GenericIPAddressField(null=True, blank=True)
-    signed_from_ip = models.GenericIPAddressField(null=True, blank=True)
+    viewed_from_ip = models.GenericIPAddressField(blank=True)
+    signed_from_ip = models.GenericIPAddressField(blank=True)
 
     # Reminders
-    last_reminder_sent = models.DateTimeField(null=True, blank=True)
+    last_reminder_sent = models.DateTimeField(blank=True)
     reminders_sent_count = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -248,7 +248,7 @@ class SignatureField(models.Model):
 
     # Value
     value = models.TextField(blank=True)
-    filled_at = models.DateTimeField(null=True, blank=True)
+    filled_at = models.DateTimeField(blank=True)
 
     class Meta:
         ordering = ['page_number', 'y_position', 'x_position']
@@ -323,7 +323,7 @@ class DocumentAuditLog(models.Model):
     action = models.CharField(max_length=20, choices=ACTION_TYPES)
     details = models.TextField(blank=True)
 
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -374,7 +374,7 @@ class DocumentAnalytics(models.Model):
     documents_declined = models.IntegerField(default=0)
 
     # Performance metrics
-    avg_completion_hours = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    avg_completion_hours = models.DecimalField(max_digits=10, decimal_places=2)
     total_value_sent = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     total_value_signed = models.DecimalField(max_digits=15, decimal_places=2, default=0)
 

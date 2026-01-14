@@ -102,7 +102,7 @@ class VoiceCommand(models.Model):
 
     # Analytics
     usage_count = models.IntegerField(default=0)
-    last_used_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -284,7 +284,7 @@ class AccessibilityIssue(models.Model):
 
     # Resolution
     resolution_notes = models.TextField(blank=True)
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(blank=True)
 
     # Metadata
     screenshot = models.URLField(blank=True)

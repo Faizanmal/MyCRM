@@ -49,7 +49,7 @@ class TranslationKey(models.Model):
     default_value = models.TextField()
 
     # Metadata
-    max_length = models.IntegerField(null=True, blank=True)  # For UI constraints
+    max_length = models.IntegerField(blank=True)  # For UI constraints
     context_screenshot = models.URLField(blank=True)  # Screenshot showing context
 
     # Status
@@ -87,7 +87,7 @@ class Translation(models.Model):
 
     # Quality
     is_machine_translated = models.BooleanField(default=False)
-    confidence_score = models.FloatField(null=True, blank=True)  # For MT
+    confidence_score = models.FloatField(blank=True)  # For MT
 
     # Audit
     translated_by = models.ForeignKey(
@@ -102,7 +102,7 @@ class Translation(models.Model):
         null=True,
         related_name='reviewed_translations'
     )
-    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -135,7 +135,7 @@ class Currency(models.Model):
 
     # Exchange rate (relative to base currency)
     exchange_rate = models.DecimalField(max_digits=20, decimal_places=10, default=1)
-    exchange_rate_updated_at = models.DateTimeField(null=True, blank=True)
+    exchange_rate_updated_at = models.DateTimeField(blank=True)
 
     # Status
     is_active = models.BooleanField(default=True)
@@ -263,7 +263,7 @@ class UserLocalePreference(models.Model):
     # Overrides
     date_format_override = models.CharField(max_length=50, blank=True)
     time_format_override = models.CharField(max_length=50, blank=True)
-    first_day_of_week_override = models.IntegerField(null=True, blank=True)
+    first_day_of_week_override = models.IntegerField(blank=True)
 
     # Auto-detection
     auto_detect_timezone = models.BooleanField(default=True)

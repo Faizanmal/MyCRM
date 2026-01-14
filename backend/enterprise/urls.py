@@ -6,10 +6,15 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    DeviceFingerprintViewSet, SecuritySessionViewSet,
-    SecurityAuditLogViewSet, AccessPolicyViewSet,
-    ThreatIndicatorViewSet, SecurityIncidentViewSet,
-    DataClassificationViewSet, SecurityDashboardView, RiskAssessmentView
+    AccessPolicyViewSet,
+    DataClassificationViewSet,
+    DeviceFingerprintViewSet,
+    RiskAssessmentView,
+    SecurityAuditLogViewSet,
+    SecurityDashboardView,
+    SecurityIncidentViewSet,
+    SecuritySessionViewSet,
+    ThreatIndicatorViewSet,
 )
 
 app_name = 'enterprise'

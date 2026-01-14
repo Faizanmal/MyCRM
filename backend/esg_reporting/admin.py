@@ -1,8 +1,14 @@
 from django.contrib import admin
+
 from .models import (
-    ESGFramework, ESGMetricCategory, ESGMetricDefinition,
-    ESGDataEntry, ESGTarget, ESGReport, CarbonFootprint,
-    SupplierESGAssessment
+    CarbonFootprint,
+    ESGDataEntry,
+    ESGFramework,
+    ESGMetricCategory,
+    ESGMetricDefinition,
+    ESGReport,
+    ESGTarget,
+    SupplierESGAssessment,
 )
 
 

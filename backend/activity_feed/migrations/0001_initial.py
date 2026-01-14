@@ -221,7 +221,7 @@ class Migration(migrations.Migration):
                     models.TextField(help_text="Text snippet where mention occurred"),
                 ),
                 ("is_read", models.BooleanField(default=False)),
-                ("read_at", models.DateTimeField(blank=True, null=True)),
+                ("read_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "content_type",
@@ -288,9 +288,9 @@ class Migration(migrations.Migration):
                 ),
                 ("title", models.CharField(max_length=255)),
                 ("message", models.TextField()),
-                ("object_id", models.CharField(blank=True, max_length=255, null=True)),
+                ("object_id", models.CharField(blank=True, max_length=255)),
                 ("is_read", models.BooleanField(default=False)),
-                ("read_at", models.DateTimeField(blank=True, null=True)),
+                ("read_at", models.DateTimeField(blank=True)),
                 ("action_url", models.CharField(blank=True, max_length=500)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (

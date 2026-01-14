@@ -1,7 +1,13 @@
 from django.contrib import admin
+
 from .models import (
-    DeviceFingerprint, SecuritySession, SecurityAuditLog,
-    AccessPolicy, ThreatIndicator, SecurityIncident, DataClassification
+    AccessPolicy,
+    DataClassification,
+    DeviceFingerprint,
+    SecurityAuditLog,
+    SecurityIncident,
+    SecuritySession,
+    ThreatIndicator,
 )
 
 

@@ -123,7 +123,7 @@ class Migration(migrations.Migration):
                     models.JSONField(default=dict, help_text="Previous values"),
                 ),
                 ("new_values", models.JSONField(default=dict, help_text="New values")),
-                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True)),
                 ("user_agent", models.TextField(blank=True)),
                 (
                     "request_id",
@@ -202,18 +202,18 @@ class Migration(migrations.Migration):
                 ("help_text", models.TextField(blank=True)),
                 ("placeholder", models.CharField(blank=True, max_length=200)),
                 ("is_required", models.BooleanField(default=False)),
-                ("min_length", models.IntegerField(blank=True, null=True)),
-                ("max_length", models.IntegerField(blank=True, null=True)),
+                ("min_length", models.IntegerField(blank=True)),
+                ("max_length", models.IntegerField(blank=True)),
                 (
                     "min_value",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=20, null=True
+                        blank=True, decimal_places=2, max_digits=20
                     ),
                 ),
                 (
                     "max_value",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=20, null=True
+                        blank=True, decimal_places=2, max_digits=20
                     ),
                 ),
                 ("regex_pattern", models.CharField(blank=True, max_length=500)),
@@ -338,13 +338,13 @@ class Migration(migrations.Migration):
                 (
                     "value_number",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=20, null=True
+                        blank=True, decimal_places=2, max_digits=20
                     ),
                 ),
-                ("value_boolean", models.BooleanField(blank=True, null=True)),
-                ("value_date", models.DateField(blank=True, null=True)),
-                ("value_datetime", models.DateTimeField(blank=True, null=True)),
-                ("value_json", models.JSONField(blank=True, null=True)),
+                ("value_boolean", models.BooleanField(blank=True)),
+                ("value_date", models.DateField(blank=True)),
+                ("value_datetime", models.DateTimeField(blank=True)),
+                ("value_json", models.JSONField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -468,7 +468,7 @@ class Migration(migrations.Migration):
                         default=300,
                     ),
                 ),
-                ("last_refreshed_at", models.DateTimeField(blank=True, null=True)),
+                ("last_refreshed_at", models.DateTimeField(blank=True)),
                 (
                     "is_public",
                     models.BooleanField(
@@ -575,8 +575,8 @@ class Migration(migrations.Migration):
                 ("object_id", models.CharField(max_length=255)),
                 ("field_name", models.CharField(max_length=100)),
                 ("field_label", models.CharField(blank=True, max_length=100)),
-                ("old_value", models.TextField(blank=True, null=True)),
-                ("new_value", models.TextField(blank=True, null=True)),
+                ("old_value", models.TextField(blank=True)),
+                ("new_value", models.TextField(blank=True)),
                 (
                     "old_value_display",
                     models.TextField(blank=True, help_text="Human-readable old value"),

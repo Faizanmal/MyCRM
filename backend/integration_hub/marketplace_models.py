@@ -73,8 +73,8 @@ class MarketplaceApp(models.Model):
 
     # Pricing
     pricing_model = models.CharField(max_length=20, choices=PRICING_MODELS, default='free')
-    price_monthly = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    price_yearly = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    price_monthly = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
+    price_yearly = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
 
     # Integration details
     oauth_client_id = models.CharField(max_length=500, blank=True)
@@ -102,7 +102,7 @@ class MarketplaceApp(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    published_at = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'marketplace_apps'
@@ -140,18 +140,18 @@ class AppInstallation(models.Model):
     # OAuth tokens
     access_token = models.TextField(blank=True)
     refresh_token = models.TextField(blank=True)
-    token_expires_at = models.DateTimeField(null=True, blank=True)
+    token_expires_at = models.DateTimeField(blank=True)
 
     # Configuration
     config = models.JSONField(default=dict)
     permissions_granted = models.JSONField(default=list)
 
     # Usage
-    last_used = models.DateTimeField(null=True, blank=True)
+    last_used = models.DateTimeField(blank=True)
     api_calls_count = models.IntegerField(default=0)
 
     installed_at = models.DateTimeField(auto_now_add=True)
-    uninstalled_at = models.DateTimeField(null=True, blank=True)
+    uninstalled_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'app_installations'
@@ -186,7 +186,7 @@ class AppReview(models.Model):
 
     # Developer response
     developer_response = models.TextField(blank=True)
-    developer_responded_at = models.DateTimeField(null=True, blank=True)
+    developer_responded_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -266,9 +266,9 @@ class CustomWebhook(models.Model):
     total_triggers = models.IntegerField(default=0)
     successful_deliveries = models.IntegerField(default=0)
     failed_deliveries = models.IntegerField(default=0)
-    last_triggered = models.DateTimeField(null=True, blank=True)
-    last_success = models.DateTimeField(null=True, blank=True)
-    last_failure = models.DateTimeField(null=True, blank=True)
+    last_triggered = models.DateTimeField(blank=True)
+    last_success = models.DateTimeField(blank=True)
+    last_failure = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -345,7 +345,7 @@ class WebhookDeliveryLog(models.Model):
     request_body = models.TextField()
 
     # Response
-    response_status = models.IntegerField(null=True, blank=True)
+    response_status = models.IntegerField(blank=True)
     response_headers = models.JSONField(default=dict)
     response_body = models.TextField(blank=True)
 
@@ -355,7 +355,7 @@ class WebhookDeliveryLog(models.Model):
 
     # Timing
     attempt_number = models.IntegerField(default=1)
-    duration_ms = models.IntegerField(null=True, blank=True)
+    duration_ms = models.IntegerField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -383,14 +383,14 @@ class APIRateLimit(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='rate_limits'
     )
     api_key = models.CharField(max_length=200, blank=True)
     app = models.ForeignKey(
         MarketplaceApp,
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='rate_limits'
     )
 
@@ -406,7 +406,7 @@ class APIRateLimit(models.Model):
 
     # Current usage
     current_count = models.IntegerField(default=0)
-    period_start = models.DateTimeField(null=True, blank=True)
+    period_start = models.DateTimeField(blank=True)
 
     # Status
     is_active = models.BooleanField(default=True)
@@ -431,13 +431,13 @@ class APIUsageLog(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     api_key = models.CharField(max_length=200, blank=True)
     app = models.ForeignKey(
         MarketplaceApp,
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Request details
@@ -449,11 +449,11 @@ class APIUsageLog(models.Model):
     response_time_ms = models.IntegerField()
 
     # Client info
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.CharField(max_length=500, blank=True)
 
     # Rate limiting
-    rate_limit_remaining = models.IntegerField(null=True, blank=True)
+    rate_limit_remaining = models.IntegerField(blank=True)
     was_rate_limited = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -478,12 +478,12 @@ class APIUsageMetrics(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        null=True, blank=True
+        blank=True
     )
     app = models.ForeignKey(
         MarketplaceApp,
         on_delete=models.CASCADE,
-        null=True, blank=True
+        blank=True
     )
 
     # Period

@@ -25,8 +25,8 @@ class AISchedulingPreference(models.Model):
     max_consecutive_meetings = models.IntegerField(default=3)
 
     # Focus time preferences
-    focus_time_start = models.TimeField(null=True, blank=True)
-    focus_time_end = models.TimeField(null=True, blank=True)
+    focus_time_start = models.TimeField(blank=True)
+    focus_time_end = models.TimeField(blank=True)
     focus_days = models.JSONField(default=list, help_text="Days to protect focus time")
 
     # Energy levels by time
@@ -43,7 +43,7 @@ class AISchedulingPreference(models.Model):
 
     # Learning metrics
     data_points_count = models.IntegerField(default=0)
-    last_learning_at = models.DateTimeField(null=True, blank=True)
+    last_learning_at = models.DateTimeField(blank=True)
     preference_confidence = models.FloatField(default=0.0)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -206,7 +206,7 @@ class MeetingPrepAI(models.Model):
 
     # Deal context
     deal_stage = models.CharField(max_length=100, blank=True)
-    deal_value = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    deal_value = models.DecimalField(max_digits=15, decimal_places=2)
     win_probability = models.FloatField(null=True)
     recommended_next_steps = models.JSONField(default=list)
 
@@ -444,7 +444,7 @@ class AttendeeIntelligence(models.Model):
 
     # Communication preferences
     reminder_response_rate = models.FloatField(null=True)
-    best_reminder_timing = models.IntegerField(null=True, help_text="Minutes before")
+    best_reminder_timing = models.IntegerField(help_text="Minutes before")
     best_communication_channel = models.CharField(max_length=20, blank=True)
 
     # Scores

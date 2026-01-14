@@ -1,6 +1,8 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.db import models
-import uuid
+
 
 class VirtualShowroom(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
@@ -15,7 +17,7 @@ class VirtualShowroom(models.Model):
     visitors_count = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-created_at']
 
@@ -31,9 +33,9 @@ class AvatarMeeting(models.Model):
     spatial_audio_enabled = models.BooleanField(default=True)
     haptic_feedback_enabled = models.BooleanField(default=False)
     real_time_translation = models.BooleanField(default=True)
-    recording_url = models.URLField(blank=True, null=True)
+    recording_url = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-scheduled_at']
 

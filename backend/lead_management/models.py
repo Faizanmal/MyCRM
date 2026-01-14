@@ -37,9 +37,9 @@ class Lead(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    company_name = models.CharField(max_length=200, blank=True, null=True)
-    job_title = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True)
+    company_name = models.CharField(max_length=200, blank=True)
+    job_title = models.CharField(max_length=100, blank=True)
 
     # Lead Information
     lead_source = models.CharField(max_length=50, choices=LEAD_SOURCE_CHOICES, default='website')
@@ -47,27 +47,27 @@ class Lead(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
 
     # Assignment and Ownership
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='assigned_leads')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_leads')
 
     # Lead Scoring and Qualification
     lead_score = models.IntegerField(default=0)
-    estimated_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    estimated_value = models.DecimalField(max_digits=12, decimal_places=2, blank=True)
     probability = models.IntegerField(default=0)  # Percentage
 
     # Communication
-    last_contact_date = models.DateTimeField(null=True, blank=True)
-    next_follow_up = models.DateTimeField(null=True, blank=True)
+    last_contact_date = models.DateTimeField(blank=True)
+    next_follow_up = models.DateTimeField(blank=True)
 
     # Additional Information
-    notes = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True)
     tags = models.JSONField(default=list, blank=True)
     custom_fields = models.JSONField(default=dict, blank=True)
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    converted_at = models.DateTimeField(null=True, blank=True)
+    converted_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_leads'
@@ -97,7 +97,7 @@ class LeadActivity(models.Model):
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='activities')
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPE_CHOICES)
     subject = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -111,7 +111,7 @@ class LeadActivity(models.Model):
 class LeadAssignmentRule(models.Model):
     """Rules for automatic lead assignment"""
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     criteria = models.JSONField(default=dict)  # Conditions for assignment
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
@@ -133,10 +133,10 @@ class LeadAssignmentRule(models.Model):
 class LeadConversion(models.Model):
     """Track lead conversions to opportunities"""
     lead = models.OneToOneField(Lead, on_delete=models.CASCADE, related_name='conversion')
-    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, null=True, blank=True)
+    opportunity = models.ForeignKey('opportunity_management.Opportunity', on_delete=models.CASCADE, blank=True)
     converted_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    conversion_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    conversion_notes = models.TextField(blank=True, null=True)
+    conversion_value = models.DecimalField(max_digits=12, decimal_places=2, blank=True)
+    conversion_notes = models.TextField(blank=True)
     converted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

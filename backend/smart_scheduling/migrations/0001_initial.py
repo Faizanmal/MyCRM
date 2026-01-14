@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ("reminder_response_rate", models.FloatField(null=True)),
                 (
                     "best_reminder_timing",
-                    models.IntegerField(help_text="Minutes before", null=True),
+                    models.IntegerField(help_text="Minutes before"),
                 ),
                 (
                     "best_communication_channel",
@@ -131,7 +131,7 @@ class Migration(migrations.Migration):
                 (
                     "max_per_day",
                     models.IntegerField(
-                        blank=True, help_text="Max bookings per day", null=True
+                        blank=True, help_text="Max bookings per day"
                     ),
                 ),
                 ("color", models.CharField(default="#3B82F6", max_length=7)),
@@ -179,8 +179,8 @@ class Migration(migrations.Migration):
                 ("preferred_meeting_duration", models.IntegerField(default=30)),
                 ("max_meetings_per_day", models.IntegerField(default=8)),
                 ("max_consecutive_meetings", models.IntegerField(default=3)),
-                ("focus_time_start", models.TimeField(blank=True, null=True)),
-                ("focus_time_end", models.TimeField(blank=True, null=True)),
+                ("focus_time_start", models.TimeField(blank=True)),
+                ("focus_time_end", models.TimeField(blank=True)),
                 (
                     "focus_days",
                     models.JSONField(
@@ -199,7 +199,7 @@ class Migration(migrations.Migration):
                 ("prefer_batched_meetings", models.BooleanField(default=False)),
                 ("batch_meeting_days", models.JSONField(default=list)),
                 ("data_points_count", models.IntegerField(default=0)),
-                ("last_learning_at", models.DateTimeField(blank=True, null=True)),
+                ("last_learning_at", models.DateTimeField(blank=True)),
                 ("preference_confidence", models.FloatField(default=0.0)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -260,7 +260,7 @@ class Migration(migrations.Migration):
                 ("reminder_1h_sent", models.BooleanField(default=False)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("cancelled_at", models.DateTimeField(blank=True, null=True)),
+                ("cancelled_at", models.DateTimeField(blank=True)),
                 ("cancellation_reason", models.TextField(blank=True)),
                 (
                     "contact",
@@ -337,7 +337,7 @@ class Migration(migrations.Migration):
                 ("deal_stage", models.CharField(blank=True, max_length=100)),
                 (
                     "deal_value",
-                    models.DecimalField(decimal_places=2, max_digits=15, null=True),
+                    models.DecimalField(decimal_places=2, max_digits=15),
                 ),
                 ("win_probability", models.FloatField(null=True)),
                 ("recommended_next_steps", models.JSONField(default=list)),
@@ -395,7 +395,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("scheduled_at", models.DateTimeField()),
-                ("sent_at", models.DateTimeField(blank=True, null=True)),
+                ("sent_at", models.DateTimeField(blank=True)),
                 ("is_sent", models.BooleanField(default=False)),
                 ("for_guest", models.BooleanField(default=True)),
                 (

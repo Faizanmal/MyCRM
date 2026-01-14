@@ -3,7 +3,8 @@ AI Chatbot Serializers
 """
 
 from rest_framework import serializers
-from .models import ChatSession, ChatMessage, QuickAction, EmailTemplate
+
+from .models import ChatMessage, ChatSession, EmailTemplate, QuickAction
 
 
 class ChatMessageSerializer(serializers.ModelSerializer):
@@ -18,7 +19,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
 
 class ChatSessionListSerializer(serializers.ModelSerializer):
     last_message = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ChatSession
         fields = [
@@ -39,7 +40,7 @@ class ChatSessionListSerializer(serializers.ModelSerializer):
 
 class ChatSessionDetailSerializer(serializers.ModelSerializer):
     messages = ChatMessageSerializer(many=True, read_only=True)
-    
+
     class Meta:
         model = ChatSession
         fields = [

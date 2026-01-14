@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
                 ),
                 ("scoring_factors", models.JSONField(default=dict)),
                 ("recommended_rep_ids", models.JSONField(default=list)),
-                ("recommended_rule_id", models.UUIDField(blank=True, null=True)),
+                ("recommended_rule_id", models.UUIDField(blank=True)),
                 ("priority_tier", models.CharField(default="standard", max_length=20)),
                 ("model_version", models.CharField(max_length=50)),
                 ("scored_at", models.DateTimeField(auto_now_add=True)),
@@ -208,7 +208,7 @@ class Migration(migrations.Migration):
                 ("before_distribution", models.JSONField(default=dict)),
                 ("after_distribution", models.JSONField(default=dict)),
                 ("started_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "affected_reps",
                     models.ManyToManyField(
@@ -426,7 +426,7 @@ class Migration(migrations.Migration):
                 (
                     "preferred_deal_size",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=12, null=True
+                        blank=True, decimal_places=2, max_digits=12
                     ),
                 ),
                 ("total_leads_assigned", models.IntegerField(default=0)),
@@ -462,9 +462,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "last_performance_update",
-                    models.DateTimeField(blank=True, null=True),
+                    models.DateTimeField(blank=True),
                 ),
-                ("last_assignment_at", models.DateTimeField(blank=True, null=True)),
+                ("last_assignment_at", models.DateTimeField(blank=True)),
                 (
                     "assignment_weight",
                     models.IntegerField(
@@ -597,10 +597,10 @@ class Migration(migrations.Migration):
                 ),
                 ("status_reason", models.CharField(blank=True, max_length=200)),
                 ("assigned_at", models.DateTimeField(auto_now_add=True)),
-                ("accepted_at", models.DateTimeField(blank=True, null=True)),
-                ("first_response_at", models.DateTimeField(blank=True, null=True)),
+                ("accepted_at", models.DateTimeField(blank=True)),
+                ("first_response_at", models.DateTimeField(blank=True)),
                 ("outcome", models.CharField(blank=True, max_length=50)),
-                ("outcome_at", models.DateTimeField(blank=True, null=True)),
+                ("outcome_at", models.DateTimeField(blank=True)),
                 (
                     "assigned_by",
                     models.ForeignKey(
@@ -686,8 +686,8 @@ class Migration(migrations.Migration):
                         default=2,
                     ),
                 ),
-                ("certified_date", models.DateField(blank=True, null=True)),
-                ("expiry_date", models.DateField(blank=True, null=True)),
+                ("certified_date", models.DateField(blank=True)),
+                ("expiry_date", models.DateField(blank=True)),
                 ("verified", models.BooleanField(default=False)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (

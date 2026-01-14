@@ -40,8 +40,8 @@ class PushSubscription(models.Model):
     notify_mentions = models.BooleanField(default=True)
 
     # Quiet hours
-    quiet_start = models.TimeField(null=True, blank=True)
-    quiet_end = models.TimeField(null=True, blank=True)
+    quiet_start = models.TimeField(blank=True)
+    quiet_end = models.TimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -108,9 +108,9 @@ class PushNotification(models.Model):
     error_message = models.TextField(blank=True)
 
     # Tracking
-    sent_at = models.DateTimeField(null=True, blank=True)
-    delivered_at = models.DateTimeField(null=True, blank=True)
-    clicked_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
+    delivered_at = models.DateTimeField(blank=True)
+    clicked_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -166,8 +166,8 @@ class BackgroundSyncJob(models.Model):
 
     # Timing
     requested_at = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'background_sync_jobs'
@@ -260,13 +260,13 @@ class OfflineAction(models.Model):
     max_retries = models.IntegerField(default=3)
 
     # Response (after sync)
-    response_status = models.IntegerField(null=True, blank=True)
-    response_data = models.JSONField(null=True, blank=True)
+    response_status = models.IntegerField(blank=True)
+    response_data = models.JSONField(blank=True)
     error_message = models.TextField(blank=True)
 
     # Timestamps
     created_offline_at = models.DateTimeField()  # When action was taken offline
-    synced_at = models.DateTimeField(null=True, blank=True)
+    synced_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -291,7 +291,7 @@ class InstallationAnalytics(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='pwa_installations'
     )
 
@@ -305,17 +305,17 @@ class InstallationAnalytics(models.Model):
 
     # Prompt tracking
     prompt_shown = models.BooleanField(default=False)
-    prompt_shown_at = models.DateTimeField(null=True, blank=True)
+    prompt_shown_at = models.DateTimeField(blank=True)
     prompt_dismissed = models.BooleanField(default=False)
     prompt_accepted = models.BooleanField(default=False)
 
     # Installation timestamps
-    installed_at = models.DateTimeField(null=True, blank=True)
-    uninstalled_at = models.DateTimeField(null=True, blank=True)
+    installed_at = models.DateTimeField(blank=True)
+    uninstalled_at = models.DateTimeField(blank=True)
 
     # Usage tracking
     standalone_launches = models.IntegerField(default=0)
-    last_standalone_launch = models.DateTimeField(null=True, blank=True)
+    last_standalone_launch = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

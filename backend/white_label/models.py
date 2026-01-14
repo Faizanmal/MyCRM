@@ -44,9 +44,9 @@ class WhiteLabelPartner(models.Model):
     custom_domain = models.CharField(max_length=200, blank=True)  # crm.partner.com
 
     # Logo and colors
-    logo = models.ImageField(upload_to='partners/logos/', null=True, blank=True)
-    logo_dark = models.ImageField(upload_to='partners/logos/', null=True, blank=True)
-    favicon = models.ImageField(upload_to='partners/favicons/', null=True, blank=True)
+    logo = models.ImageField(upload_to='partners/logos/', blank=True)
+    logo_dark = models.ImageField(upload_to='partners/logos/', blank=True)
+    favicon = models.ImageField(upload_to='partners/favicons/', blank=True)
     primary_color = models.CharField(max_length=7, default='#2563eb')
     secondary_color = models.CharField(max_length=7, default='#1e40af')
     accent_color = models.CharField(max_length=7, default='#3b82f6')
@@ -189,12 +189,12 @@ class Organization(models.Model):
     )
 
     # Trial
-    trial_ends_at = models.DateTimeField(null=True, blank=True)
+    trial_ends_at = models.DateTimeField(blank=True)
 
     # Billing
     stripe_customer_id = models.CharField(max_length=100, blank=True)
     stripe_subscription_id = models.CharField(max_length=100, blank=True)
-    current_period_ends_at = models.DateTimeField(null=True, blank=True)
+    current_period_ends_at = models.DateTimeField(blank=True)
 
     # Usage tracking
     current_users = models.IntegerField(default=1)
@@ -309,9 +309,9 @@ class Invoice(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Dates
-    issued_at = models.DateTimeField(null=True, blank=True)
-    due_at = models.DateTimeField(null=True, blank=True)
-    paid_at = models.DateTimeField(null=True, blank=True)
+    issued_at = models.DateTimeField(blank=True)
+    due_at = models.DateTimeField(blank=True)
+    paid_at = models.DateTimeField(blank=True)
 
     # Period
     period_start = models.DateField()
@@ -452,7 +452,7 @@ class PartnerPayout(models.Model):
         default='pending'
     )
 
-    paid_at = models.DateTimeField(null=True, blank=True)
+    paid_at = models.DateTimeField(blank=True)
     stripe_transfer_id = models.CharField(max_length=100, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

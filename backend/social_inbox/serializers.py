@@ -3,16 +3,21 @@ Social Inbox Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    SocialAccount, SocialConversation, SocialMessage,
-    SocialMonitoringRule, SocialPost, SocialAnalytics
+    SocialAccount,
+    SocialAnalytics,
+    SocialConversation,
+    SocialMessage,
+    SocialMonitoringRule,
+    SocialPost,
 )
 
 
 class SocialAccountSerializer(serializers.ModelSerializer):
     """Serializer for social accounts"""
     is_token_expired = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SocialAccount
         fields = [
@@ -30,7 +35,7 @@ class SocialAccountSerializer(serializers.ModelSerializer):
 class SocialMessageSerializer(serializers.ModelSerializer):
     """Serializer for social messages"""
     sender_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SocialMessage
         fields = [
@@ -50,7 +55,7 @@ class SocialConversationListSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(source='social_account.platform')
     account_name = serializers.CharField(source='social_account.account_name')
     last_message = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SocialConversation
         fields = [
@@ -78,7 +83,7 @@ class SocialConversationDetailSerializer(serializers.ModelSerializer):
     assigned_to_name = serializers.SerializerMethodField()
     linked_contact_name = serializers.SerializerMethodField()
     linked_lead_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SocialConversation
         fields = [
@@ -121,7 +126,7 @@ class SendMessageSerializer(serializers.Serializer):
 
 class SocialMonitoringRuleSerializer(serializers.ModelSerializer):
     """Serializer for monitoring rules"""
-    
+
     class Meta:
         model = SocialMonitoringRule
         fields = [
@@ -136,7 +141,7 @@ class SocialMonitoringRuleSerializer(serializers.ModelSerializer):
 class SocialPostSerializer(serializers.ModelSerializer):
     """Serializer for social posts"""
     platform_names = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SocialPost
         fields = [
@@ -153,7 +158,7 @@ class SocialPostSerializer(serializers.ModelSerializer):
 
 class SocialAnalyticsSerializer(serializers.ModelSerializer):
     """Serializer for social analytics"""
-    
+
     class Meta:
         model = SocialAnalytics
         fields = [

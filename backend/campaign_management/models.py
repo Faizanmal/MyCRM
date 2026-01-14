@@ -41,12 +41,12 @@ class Campaign(models.Model):
     content_text = models.TextField(blank=True, help_text="Plain text fallback")
 
     # Scheduling
-    scheduled_at = models.DateTimeField(null=True, blank=True)
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    scheduled_at = models.DateTimeField(blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     # Targeting
-    segment = models.ForeignKey('CampaignSegment', on_delete=models.SET_NULL, null=True, blank=True)
+    segment = models.ForeignKey('CampaignSegment', on_delete=models.SET_NULL, blank=True)
 
     # A/B Testing
     enable_ab_test = models.BooleanField(default=False)
@@ -62,7 +62,7 @@ class Campaign(models.Model):
     unsubscribed_count = models.IntegerField(default=0)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_campaigns')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='created_campaigns')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -117,7 +117,7 @@ class CampaignSegment(models.Model):
     # Cached count
     contact_count = models.IntegerField(default=0)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -148,8 +148,8 @@ class CampaignRecipient(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='recipients')
 
     # Recipient info
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, null=True, blank=True)
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, null=True, blank=True)
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, blank=True)
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, blank=True)
     email = models.EmailField()
 
     # Status
@@ -159,12 +159,12 @@ class CampaignRecipient(models.Model):
     variant = models.CharField(max_length=50, blank=True, help_text="A/B test variant (A, B, etc.)")
 
     # Tracking
-    sent_at = models.DateTimeField(null=True, blank=True)
-    delivered_at = models.DateTimeField(null=True, blank=True)
-    opened_at = models.DateTimeField(null=True, blank=True)
-    first_clicked_at = models.DateTimeField(null=True, blank=True)
-    bounced_at = models.DateTimeField(null=True, blank=True)
-    unsubscribed_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
+    delivered_at = models.DateTimeField(blank=True)
+    opened_at = models.DateTimeField(blank=True)
+    first_clicked_at = models.DateTimeField(blank=True)
+    bounced_at = models.DateTimeField(blank=True)
+    unsubscribed_at = models.DateTimeField(blank=True)
 
     # Engagement
     open_count = models.IntegerField(default=0)
@@ -202,7 +202,7 @@ class CampaignClick(models.Model):
     clicked_at = models.DateTimeField(default=timezone.now)
 
     # Tracking details
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
 
     class Meta:
@@ -249,11 +249,11 @@ class EmailTemplate(models.Model):
     )
 
     # Preview
-    thumbnail = models.ImageField(upload_to='email_templates/', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='email_templates/', blank=True)
 
     is_active = models.BooleanField(default=True)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='campaign_email_templates')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='campaign_email_templates')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "market_share",
-                    models.DecimalField(decimal_places=2, max_digits=5, null=True),
+                    models.DecimalField(decimal_places=2, max_digits=5),
                 ),
                 ("deals_won_against", models.IntegerField(default=0)),
                 ("deals_lost_to", models.IntegerField(default=0)),
@@ -122,10 +122,10 @@ class Migration(migrations.Migration):
                 ("recommended_action", models.TextField()),
                 ("is_active", models.BooleanField(default=True)),
                 ("is_acknowledged", models.BooleanField(default=False)),
-                ("acknowledged_at", models.DateTimeField(blank=True, null=True)),
+                ("acknowledged_at", models.DateTimeField(blank=True)),
                 ("is_resolved", models.BooleanField(default=False)),
                 ("resolution_notes", models.TextField(blank=True)),
-                ("resolved_at", models.DateTimeField(blank=True, null=True)),
+                ("resolved_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "acknowledged_by",
@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
                 ("weaknesses", models.JSONField(default=list)),
                 ("recommended_actions", models.JSONField(default=list)),
                 ("score_trend", models.CharField(default="stable", max_length=20)),
-                ("previous_score", models.IntegerField(blank=True, null=True)),
+                ("previous_score", models.IntegerField(blank=True)),
                 ("calculated_at", models.DateTimeField(auto_now=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
@@ -253,7 +253,7 @@ class Migration(migrations.Migration):
                 (
                     "avg_days_for_stage",
                     models.IntegerField(
-                        help_text="Average days in this stage", null=True
+                        help_text="Average days in this stage"
                     ),
                 ),
                 ("is_on_track", models.BooleanField(default=True)),
@@ -340,11 +340,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "actual_amount",
-                    models.DecimalField(decimal_places=2, max_digits=15, null=True),
+                    models.DecimalField(decimal_places=2, max_digits=15),
                 ),
                 (
                     "accuracy_percentage",
-                    models.DecimalField(decimal_places=2, max_digits=5, null=True),
+                    models.DecimalField(decimal_places=2, max_digits=5),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
@@ -540,7 +540,7 @@ class Migration(migrations.Migration):
                 (
                     "stretch_target",
                     models.DecimalField(
-                        blank=True, decimal_places=2, max_digits=15, null=True
+                        blank=True, decimal_places=2, max_digits=15
                     ),
                 ),
                 (

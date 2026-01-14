@@ -184,13 +184,13 @@ class QuickAction(models.Model):
     # Status
     is_dismissed = models.BooleanField(default=False)
     is_completed = models.BooleanField(default=False)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     # Generated from
     source_insight = models.CharField(max_length=100, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'ai_quick_actions'
@@ -299,12 +299,12 @@ class SmartContent(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Input
@@ -322,10 +322,10 @@ class SmartContent(models.Model):
 
     # Usage
     was_used = models.BooleanField(default=False)
-    used_at = models.DateTimeField(null=True, blank=True)
+    used_at = models.DateTimeField(blank=True)
 
     # Feedback
-    rating = models.IntegerField(null=True, blank=True)
+    rating = models.IntegerField(blank=True)
     feedback = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

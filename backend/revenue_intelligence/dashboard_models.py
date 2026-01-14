@@ -55,18 +55,18 @@ class RevenueForecast(models.Model):
 
     # Historical comparison
     previous_period_actual = models.DecimalField(
-        max_digits=15, decimal_places=2, null=True, blank=True
+        max_digits=15, decimal_places=2, blank=True
     )
     yoy_growth_rate = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
+        max_digits=8, decimal_places=2, blank=True
     )
 
     # Tracking
     actual_revenue = models.DecimalField(
-        max_digits=15, decimal_places=2, null=True, blank=True
+        max_digits=15, decimal_places=2, blank=True
     )
     accuracy_score = models.DecimalField(
-        max_digits=5, decimal_places=2, null=True, blank=True
+        max_digits=5, decimal_places=2, blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -129,10 +129,10 @@ class CohortAnalysis(models.Model):
 
     # Comparison
     benchmark_avg = models.DecimalField(
-        max_digits=15, decimal_places=2, null=True, blank=True
+        max_digits=15, decimal_places=2, blank=True
     )
     vs_benchmark = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
+        max_digits=8, decimal_places=2, blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -263,14 +263,14 @@ class SalesVelocity(models.Model):
 
     # Trends
     velocity_change = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
+        max_digits=8, decimal_places=2, blank=True
     )
     velocity_trend = models.CharField(max_length=20, blank=True)  # up, down, stable
 
     # Bottlenecks
     bottleneck_stage = models.CharField(max_length=100, blank=True)
     bottleneck_impact = models.DecimalField(
-        max_digits=15, decimal_places=2, null=True, blank=True
+        max_digits=15, decimal_places=2, blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -322,7 +322,7 @@ class RevenueLeakage(models.Model):
 
     # Trend
     vs_previous_period = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
+        max_digits=8, decimal_places=2, blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -508,10 +508,10 @@ class RevenueIntelligenceSnapshot(models.Model):
 
     # Trends
     pipeline_trend_7d = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
+        max_digits=8, decimal_places=2, blank=True
     )
     forecast_trend_7d = models.DecimalField(
-        max_digits=8, decimal_places=2, null=True, blank=True
+        max_digits=8, decimal_places=2, blank=True
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -3,9 +3,8 @@ WebSocket Consumer for Real-Time Collaborative Editing
 Uses Django Channels for WebSocket communication.
 """
 
-import json
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.utils import timezone
 
 
@@ -31,7 +30,7 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
 
         # Create editing session
         session = await self.create_editing_session()
-        
+
         # Notify others of new user
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -90,10 +89,10 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     async def handle_operation(self, content):
         """Handle document edit operation"""
         operation = content.get('operation', {})
-        
+
         # Save operation to database
         saved_op = await self.save_operation(operation)
-        
+
         if saved_op:
             # Broadcast to other users
             await self.channel_layer.group_send(
@@ -110,9 +109,9 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     async def handle_cursor_move(self, content):
         """Handle cursor position update"""
         position = content.get('position', {})
-        
+
         await self.update_cursor_position(position)
-        
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -126,7 +125,7 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     async def handle_selection_change(self, content):
         """Handle text selection update"""
         selection = content.get('selection', {})
-        
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -140,7 +139,7 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     async def handle_typing_indicator(self, content):
         """Handle typing indicator"""
         is_typing = content.get('is_typing', False)
-        
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -154,7 +153,7 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     async def handle_comment_added(self, content):
         """Handle new comment notification"""
         comment = content.get('comment', {})
-        
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -232,16 +231,17 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     # Database operations
     @database_sync_to_async
     def create_editing_session(self):
-        from .models import EditingSession, CollaborativeDocument
         import random
-        
+
+        from .models import CollaborativeDocument, EditingSession
+
         try:
             doc = CollaborativeDocument.objects.get(id=self.document_id)
         except CollaborativeDocument.DoesNotExist:
             return None
-        
+
         colors = ['#4F46E5', '#DC2626', '#059669', '#D97706', '#7C3AED', '#DB2777']
-        
+
         session, _ = EditingSession.objects.update_or_create(
             document=doc,
             user=self.user,
@@ -256,7 +256,7 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def end_editing_session(self):
         from .models import EditingSession
-        
+
         EditingSession.objects.filter(
             document_id=self.document_id,
             user=self.user
@@ -268,12 +268,12 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def get_active_users(self):
         from .models import EditingSession
-        
+
         sessions = EditingSession.objects.filter(
             document_id=self.document_id,
             is_active=True
         ).select_related('user')
-        
+
         return [
             {
                 'user_id': str(s.user.id),
@@ -288,7 +288,7 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def update_cursor_position(self, position):
         from .models import EditingSession
-        
+
         EditingSession.objects.filter(
             document_id=self.document_id,
             user=self.user
@@ -296,13 +296,13 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def save_operation(self, operation):
-        from .models import DocumentOperation, CollaborativeDocument
-        
+        from .models import CollaborativeDocument, DocumentOperation
+
         try:
             doc = CollaborativeDocument.objects.get(id=self.document_id)
         except CollaborativeDocument.DoesNotExist:
             return None
-        
+
         op = DocumentOperation.objects.create(
             document=doc,
             user=self.user,
@@ -313,9 +313,9 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
             attributes=operation.get('attributes', {}),
             base_version=doc.version
         )
-        
+
         doc.version += 1
         doc.last_edited_by = self.user
         doc.save()
-        
+
         return {'id': str(op.id), 'version': doc.version}

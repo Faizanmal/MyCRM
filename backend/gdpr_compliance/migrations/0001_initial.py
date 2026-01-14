@@ -149,10 +149,10 @@ class Migration(migrations.Migration):
                 ("authority_notified", models.BooleanField(default=False)),
                 (
                     "authority_notification_date",
-                    models.DateTimeField(blank=True, null=True),
+                    models.DateTimeField(blank=True),
                 ),
                 ("users_notified", models.BooleanField(default=False)),
-                ("user_notification_date", models.DateTimeField(blank=True, null=True)),
+                ("user_notification_date", models.DateTimeField(blank=True)),
                 (
                     "notification_required",
                     models.BooleanField(
@@ -162,7 +162,7 @@ class Migration(migrations.Migration):
                 ),
                 ("risk_assessment", models.TextField(blank=True)),
                 ("lessons_learned", models.TextField(blank=True)),
-                ("closed_at", models.DateTimeField(blank=True, null=True)),
+                ("closed_at", models.DateTimeField(blank=True)),
                 (
                     "affected_users",
                     models.ManyToManyField(
@@ -243,8 +243,8 @@ class Migration(migrations.Migration):
                 ),
                 ("reason", models.TextField(blank=True)),
                 ("requested_at", models.DateTimeField(auto_now_add=True)),
-                ("reviewed_at", models.DateTimeField(blank=True, null=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("reviewed_at", models.DateTimeField(blank=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 ("rejection_reason", models.TextField(blank=True)),
                 ("backup_created", models.BooleanField(default=False)),
                 ("backup_location", models.CharField(blank=True, max_length=500)),
@@ -341,10 +341,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("file_url", models.URLField(blank=True)),
-                ("file_size_bytes", models.BigIntegerField(blank=True, null=True)),
-                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("file_size_bytes", models.BigIntegerField(blank=True)),
+                ("expires_at", models.DateTimeField(blank=True)),
                 ("requested_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 ("error_message", models.TextField(blank=True)),
                 ("notes", models.TextField(blank=True)),
                 (
@@ -446,7 +446,7 @@ class Migration(migrations.Migration):
                 ("is_active", models.BooleanField(default=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("last_reviewed", models.DateField(blank=True, null=True)),
+                ("last_reviewed", models.DateField(blank=True)),
                 (
                     "organization",
                     models.ForeignKey(
@@ -614,7 +614,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("purpose", models.CharField(blank=True, max_length=200)),
-                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True)),
                 ("user_agent", models.TextField(blank=True)),
                 ("accessed_at", models.DateTimeField(auto_now_add=True)),
                 ("metadata", models.JSONField(blank=True, default=dict)),
@@ -683,8 +683,8 @@ class Migration(migrations.Migration):
                 ),
                 ("is_granted", models.BooleanField(default=False)),
                 ("consent_date", models.DateTimeField(auto_now_add=True)),
-                ("expiry_date", models.DateTimeField(blank=True, null=True)),
-                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
+                ("expiry_date", models.DateTimeField(blank=True)),
+                ("ip_address", models.GenericIPAddressField(blank=True)),
                 ("user_agent", models.TextField(blank=True)),
                 (
                     "consent_method",
@@ -699,7 +699,7 @@ class Migration(migrations.Migration):
                         max_length=50,
                     ),
                 ),
-                ("withdrawn_at", models.DateTimeField(blank=True, null=True)),
+                ("withdrawn_at", models.DateTimeField(blank=True)),
                 ("withdrawal_reason", models.TextField(blank=True)),
                 ("version", models.IntegerField(default=1)),
                 ("metadata", models.JSONField(blank=True, default=dict)),

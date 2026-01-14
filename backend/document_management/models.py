@@ -166,13 +166,13 @@ class Document(models.Model):
     tags = models.JSONField(default=list, blank=True)
 
     # Metadata
-    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     # Tracking
     download_count = models.IntegerField(default=0)
-    last_accessed = models.DateTimeField(null=True, blank=True)
+    last_accessed = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_documents'
@@ -254,11 +254,11 @@ class DocumentTemplate(models.Model):
     )
 
     # Preview
-    thumbnail = models.ImageField(upload_to='template_thumbnails/', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='template_thumbnails/', blank=True)
 
     is_active = models.BooleanField(default=True)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='document_management_templates')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='document_management_templates')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -288,15 +288,15 @@ class DocumentShare(models.Model):
     can_view = models.BooleanField(default=True)
 
     # Expiration
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     # Tracking
     view_count = models.IntegerField(default=0)
     download_count = models.IntegerField(default=0)
-    last_accessed = models.DateTimeField(null=True, blank=True)
+    last_accessed = models.DateTimeField(blank=True)
 
     # Metadata
-    shared_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    shared_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     shared_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -331,10 +331,10 @@ class DocumentComment(models.Model):
     comment = models.TextField()
 
     # Optional page reference for PDFs
-    page_number = models.IntegerField(null=True, blank=True)
+    page_number = models.IntegerField(blank=True)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -374,7 +374,7 @@ class DocumentApproval(models.Model):
         related_name='approval_requests'
     )
     requested_at = models.DateTimeField(auto_now_add=True)
-    responded_at = models.DateTimeField(null=True, blank=True)
+    responded_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_document_approvals'

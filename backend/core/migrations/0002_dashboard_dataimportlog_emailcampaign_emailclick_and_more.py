@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
             ],
             options={
                 "verbose_name": "Data Import Log",
@@ -120,10 +120,10 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("scheduled_time", models.DateTimeField(blank=True, null=True)),
+                ("scheduled_time", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("started_at", models.DateTimeField(blank=True, null=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("started_at", models.DateTimeField(blank=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
             ],
             options={
                 "verbose_name": "Email Campaign",
@@ -189,10 +189,10 @@ class Migration(migrations.Migration):
                 (
                     "tracking_id",
                     models.CharField(
-                        blank=True, max_length=100, null=True, unique=True
+                        blank=True, max_length=100, unique=True
                     ),
                 ),
-                ("opened_at", models.DateTimeField(blank=True, null=True)),
+                ("opened_at", models.DateTimeField(blank=True)),
                 ("open_count", models.IntegerField(default=0)),
                 ("click_count", models.IntegerField(default=0)),
                 ("sent_at", models.DateTimeField(auto_now_add=True)),
@@ -236,7 +236,7 @@ class Migration(migrations.Migration):
                 ),
                 ("link", models.CharField(blank=True, max_length=500)),
                 ("is_read", models.BooleanField(default=False)),
-                ("read_at", models.DateTimeField(blank=True, null=True)),
+                ("read_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
@@ -367,7 +367,7 @@ class Migration(migrations.Migration):
                 ("recipients", models.JSONField(default=list)),
                 ("export_format", models.CharField(default="pdf", max_length=10)),
                 ("is_active", models.BooleanField(default=True)),
-                ("last_run", models.DateTimeField(blank=True, null=True)),
+                ("last_run", models.DateTimeField(blank=True)),
                 ("next_run", models.DateTimeField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
@@ -464,7 +464,7 @@ class Migration(migrations.Migration):
                 ("is_granted", models.BooleanField(default=True)),
                 ("reason", models.TextField(blank=True)),
                 ("is_active", models.BooleanField(default=True)),
-                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={

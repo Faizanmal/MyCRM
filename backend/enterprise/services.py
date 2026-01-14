@@ -4,14 +4,15 @@ Security Services for Zero-Trust Implementation
 
 import hashlib
 import re
-from django.conf import settings
+
 from django.utils import timezone
-from .models import SecurityAuditLog, ThreatIndicator, AccessPolicy
+
+from .models import SecurityAuditLog, ThreatIndicator
 
 
 class SecurityService:
     """Core security service for zero-trust architecture"""
-    
+
     @staticmethod
     def log_audit_event(
         user,
@@ -31,11 +32,11 @@ class SecurityService:
         """Log a security audit event"""
         ip_address = None
         user_agent = ''
-        
+
         if request:
             ip_address = SecurityService.get_client_ip(request)
             user_agent = request.META.get('HTTP_USER_AGENT', '')
-        
+
         return SecurityAuditLog.objects.create(
             user=user,
             action=action,
@@ -71,17 +72,17 @@ class SecurityService:
             value=value,
             is_active=True
         ).first()
-        
+
         if indicator:
             if indicator.expires_at and indicator.expires_at < timezone.now():
                 return None
-            
+
             indicator.hit_count += 1
             indicator.last_hit = timezone.now()
             indicator.save()
-            
+
             return indicator
-        
+
         return None
 
     @staticmethod
@@ -92,21 +93,21 @@ class SecurityService:
             'matched_rules': [],
             'actions': []
         }
-        
+
         for rule in policy.rules:
             condition = rule.get('condition', {})
             matched = SecurityService._evaluate_condition(condition, context)
-            
+
             if matched:
                 results['matched_rules'].append(rule.get('name', 'Unnamed rule'))
                 action = rule.get('action', 'allow')
                 results['actions'].append(action)
-                
+
                 if action == 'deny':
                     results['allowed'] = False
                 elif action == 'require_mfa':
                     results['require_mfa'] = True
-        
+
         return results
 
     @staticmethod
@@ -115,9 +116,9 @@ class SecurityService:
         operator = condition.get('operator', 'equals')
         field = condition.get('field')
         value = condition.get('value')
-        
+
         context_value = context.get(field)
-        
+
         if operator == 'equals':
             return context_value == value
         elif operator == 'not_equals':
@@ -134,7 +135,7 @@ class SecurityService:
             return float(context_value) < float(value)
         elif operator == 'regex':
             return bool(re.match(value, str(context_value)))
-        
+
         return False
 
     @staticmethod
@@ -142,7 +143,7 @@ class SecurityService:
         """Calculate risk score for a session"""
         score = 0
         factors = []
-        
+
         # Device trust
         if device:
             if device.trust_level == 'blocked':
@@ -157,14 +158,14 @@ class SecurityService:
         else:
             score += 30
             factors.append('no_device_fingerprint')
-        
+
         # Location anomaly
         if device and session:
             if session.country and device.last_country:
                 if session.country != device.last_country:
                     score += 25
                     factors.append('location_change')
-        
+
         # Check threat indicators
         ip = SecurityService.get_client_ip(request)
         if ip:
@@ -177,13 +178,13 @@ class SecurityService:
                 elif threat.threat_level == 'medium':
                     score += 30
                 factors.append(f'threat_ip_{threat.threat_level}')
-        
+
         # Time-based risk
         now = timezone.now()
         if now.hour < 6 or now.hour > 22:
             score += 10
             factors.append('unusual_hours')
-        
+
         return min(score, 100), factors
 
     @staticmethod
@@ -199,23 +200,23 @@ class SecurityService:
             str(components.get('audio_hash', '')),
             str(components.get('font_hash', '')),
         ])
-        
+
         return hashlib.sha256(fingerprint_string.encode()).hexdigest()
 
 
 class DataLossPreventionService:
     """DLP service for data classification and protection"""
-    
+
     @staticmethod
     def classify_content(content, classifications=None):
         """Classify content based on patterns and keywords"""
         from .models import DataClassification
-        
+
         if classifications is None:
             classifications = DataClassification.objects.filter(is_active=True)
-        
+
         matches = []
-        
+
         for classification in classifications:
             # Check patterns
             for pattern in classification.patterns:
@@ -226,7 +227,7 @@ class DataLossPreventionService:
                         'match_type': 'pattern',
                         'pattern': pattern
                     })
-            
+
             # Check keywords
             for keyword in classification.keywords:
                 if keyword.lower() in content.lower():
@@ -236,38 +237,38 @@ class DataLossPreventionService:
                         'match_type': 'keyword',
                         'keyword': keyword
                     })
-        
+
         # Return highest sensitivity match
         sensitivity_order = ['public', 'internal', 'confidential', 'restricted', 'secret']
-        
+
         if matches:
             matches.sort(key=lambda x: sensitivity_order.index(x['sensitivity']), reverse=True)
             return matches[0]
-        
+
         return None
 
     @staticmethod
     def check_export_allowed(content, user, export_type):
         """Check if content can be exported"""
         classification = DataLossPreventionService.classify_content(content)
-        
+
         if not classification:
             return {'allowed': True}
-        
+
         from .models import DataClassification
-        
+
         try:
             data_class = DataClassification.objects.get(
                 name=classification['classification']
             )
         except DataClassification.DoesNotExist:
             return {'allowed': True}
-        
+
         if not data_class.export_allowed:
             return {
                 'allowed': False,
                 'reason': f"Export not allowed for {data_class.get_sensitivity_level_display()} data",
                 'classification': classification
             }
-        
+
         return {'allowed': True, 'classification': classification}

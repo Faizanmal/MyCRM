@@ -4,33 +4,33 @@ Conversation history, intents, and AI-powered sales assistance.
 """
 
 import uuid
+
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils import timezone
 
 User = get_user_model()
 
 
 class ChatSession(models.Model):
     """A chat session with the AI assistant"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_sessions')
-    
+
     title = models.CharField(max_length=255, default='New Chat')
-    
+
     # Context
     context_type = models.CharField(max_length=50, blank=True)  # lead, contact, opportunity
     context_id = models.CharField(max_length=100, blank=True)
-    
+
     # Session data
     is_active = models.BooleanField(default=True)
     message_count = models.IntegerField(default=0)
-    
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_message_at = models.DateTimeField(null=True, blank=True)
+    last_message_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'ai_chatbot_sessions'
@@ -44,13 +44,13 @@ class ChatSession(models.Model):
 
 class ChatMessage(models.Model):
     """Individual message in a chat session"""
-    
+
     ROLE_CHOICES = [
         ('user', 'User'),
         ('assistant', 'Assistant'),
         ('system', 'System'),
     ]
-    
+
     MESSAGE_TYPE_CHOICES = [
         ('text', 'Text'),
         ('query_result', 'Query Result'),
@@ -66,23 +66,23 @@ class ChatMessage(models.Model):
         on_delete=models.CASCADE,
         related_name='messages'
     )
-    
+
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     message_type = models.CharField(max_length=30, choices=MESSAGE_TYPE_CHOICES, default='text')
     content = models.TextField()
-    
+
     # For structured responses
     structured_data = models.JSONField(default=dict, blank=True)
-    
+
     # Metadata
     tokens_used = models.IntegerField(default=0)
     model_used = models.CharField(max_length=50, blank=True)
     processing_time_ms = models.IntegerField(default=0)
-    
+
     # Feedback
-    is_helpful = models.BooleanField(null=True, blank=True)
+    is_helpful = models.BooleanField(blank=True)
     feedback = models.TextField(blank=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -97,7 +97,7 @@ class ChatMessage(models.Model):
 
 class ChatIntent(models.Model):
     """Recognized intents and their handlers"""
-    
+
     CATEGORY_CHOICES = [
         ('query', 'Data Query'),
         ('email', 'Email Generation'),
@@ -108,24 +108,24 @@ class ChatIntent(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
-    
+
     # Example phrases for training
     example_phrases = models.JSONField(default=list)
-    
+
     # Handler configuration
     handler_function = models.CharField(max_length=255)
     required_parameters = models.JSONField(default=list, blank=True)
-    
+
     # Usage stats
     usage_count = models.IntegerField(default=0)
     success_rate = models.FloatField(default=0)
-    
+
     is_active = models.BooleanField(default=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -140,25 +140,25 @@ class ChatIntent(models.Model):
 
 class QuickAction(models.Model):
     """Pre-defined quick actions for the chatbot"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=50, blank=True)
-    
+
     # The prompt to send
     prompt_template = models.TextField()
-    
+
     # Context requirements
     requires_context = models.BooleanField(default=False)
     context_types = models.JSONField(default=list, blank=True)
-    
+
     # Display
     category = models.CharField(max_length=50, blank=True)
     order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -173,7 +173,7 @@ class QuickAction(models.Model):
 
 class EmailTemplate(models.Model):
     """AI-generated email templates"""
-    
+
     TONE_CHOICES = [
         ('professional', 'Professional'),
         ('friendly', 'Friendly'),
@@ -181,7 +181,7 @@ class EmailTemplate(models.Model):
         ('casual', 'Casual'),
         ('persuasive', 'Persuasive'),
     ]
-    
+
     PURPOSE_CHOICES = [
         ('follow_up', 'Follow Up'),
         ('introduction', 'Introduction'),
@@ -193,26 +193,26 @@ class EmailTemplate(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     name = models.CharField(max_length=255)
     purpose = models.CharField(max_length=30, choices=PURPOSE_CHOICES)
     tone = models.CharField(max_length=30, choices=TONE_CHOICES, default='professional')
-    
+
     # Template content
     subject_template = models.CharField(max_length=255)
     body_template = models.TextField()
-    
+
     # Variables
     variables = models.JSONField(default=list, blank=True)
-    
+
     # Usage
     usage_count = models.IntegerField(default=0)
-    avg_open_rate = models.FloatField(null=True, blank=True)
-    avg_response_rate = models.FloatField(null=True, blank=True)
-    
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='ai_chatbot_email_templates')
+    avg_open_rate = models.FloatField(blank=True)
+    avg_response_rate = models.FloatField(blank=True)
+
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='ai_chatbot_email_templates')
     is_active = models.BooleanField(default=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

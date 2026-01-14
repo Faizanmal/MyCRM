@@ -44,16 +44,16 @@ class VoiceRecording(models.Model):
     # File info
     file_url = models.URLField(blank=True)
     file_path = models.CharField(max_length=500, blank=True)
-    file_size_bytes = models.BigIntegerField(null=True, blank=True)
+    file_size_bytes = models.BigIntegerField(blank=True)
     file_format = models.CharField(max_length=20, blank=True)  # mp3, wav, m4a, etc.
 
     # Duration
-    duration_seconds = models.IntegerField(null=True, blank=True)
+    duration_seconds = models.IntegerField(blank=True)
 
     # Audio quality
-    sample_rate = models.IntegerField(null=True, blank=True)
+    sample_rate = models.IntegerField(blank=True)
     channels = models.IntegerField(default=1)
-    bitrate = models.IntegerField(null=True, blank=True)
+    bitrate = models.IntegerField(blank=True)
 
     # Participants
     owner = models.ForeignKey(
@@ -67,25 +67,25 @@ class VoiceRecording(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='voice_recordings'
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='voice_recordings'
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='voice_recordings'
     )
     meeting = models.ForeignKey(
         'smart_scheduling.Meeting',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='voice_recordings'
     )
 
@@ -93,8 +93,8 @@ class VoiceRecording(models.Model):
     recorded_at = models.DateTimeField(default=timezone.now)
 
     # Processing info
-    processing_started_at = models.DateTimeField(null=True, blank=True)
-    processing_completed_at = models.DateTimeField(null=True, blank=True)
+    processing_started_at = models.DateTimeField(blank=True)
+    processing_completed_at = models.DateTimeField(blank=True)
     processing_error = models.TextField(blank=True)
 
     # Language
@@ -149,14 +149,14 @@ class Transcription(models.Model):
     # Speaker diarization
     has_speaker_labels = models.BooleanField(default=False)
     speaker_segments = models.JSONField(default=list, help_text="Segments by speaker")
-    speaker_count = models.IntegerField(null=True, blank=True)
+    speaker_count = models.IntegerField(blank=True)
 
     # Speaker identification
     speaker_mapping = models.JSONField(default=dict, help_text="Speaker ID to name mapping")
 
     # Quality metrics
-    confidence_score = models.FloatField(null=True, blank=True)
-    word_error_rate = models.FloatField(null=True, blank=True)
+    confidence_score = models.FloatField(blank=True)
+    word_error_rate = models.FloatField(blank=True)
 
     # Provider info
     provider = models.CharField(max_length=20, choices=TRANSCRIPTION_PROVIDERS, default='whisper')
@@ -166,16 +166,16 @@ class Transcription(models.Model):
     detected_language = models.CharField(max_length=10, default='en')
 
     # Processing time
-    processing_time_seconds = models.FloatField(null=True, blank=True)
+    processing_time_seconds = models.FloatField(blank=True)
 
     # Edits
     was_edited = models.BooleanField(default=False)
     edited_by = models.ForeignKey(
         User, on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='edited_transcriptions'
     )
-    edited_at = models.DateTimeField(null=True, blank=True)
+    edited_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -279,14 +279,14 @@ class ActionItem(models.Model):
     # Assignment
     assigned_to = models.ForeignKey(
         User, on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='assigned_action_items'
     )
     assigned_to_name = models.CharField(max_length=200, blank=True, help_text="Name from transcript")
 
     # Timing
-    due_date = models.DateField(null=True, blank=True)
-    mentioned_at_timestamp = models.IntegerField(null=True, blank=True, help_text="Seconds into recording")
+    due_date = models.DateField(blank=True)
+    mentioned_at_timestamp = models.IntegerField(blank=True, help_text="Seconds into recording")
 
     # Context
     context_quote = models.TextField(blank=True, help_text="Relevant quote from transcript")
@@ -300,7 +300,7 @@ class ActionItem(models.Model):
     linked_task = models.ForeignKey(
         'task_management.Task',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='source_action_items'
     )
 
@@ -353,15 +353,15 @@ class SentimentAnalysis(models.Model):
     dominant_emotion = models.CharField(max_length=50, blank=True)
 
     # Customer sentiment (if applicable)
-    customer_sentiment = models.FloatField(null=True, blank=True)
-    agent_sentiment = models.FloatField(null=True, blank=True)
+    customer_sentiment = models.FloatField(blank=True)
+    agent_sentiment = models.FloatField(blank=True)
 
     # Key moments
     positive_moments = models.JSONField(default=list, help_text="Timestamps of positive moments")
     negative_moments = models.JSONField(default=list, help_text="Timestamps of negative moments")
 
     # Engagement metrics
-    engagement_score = models.FloatField(null=True, blank=True)
+    engagement_score = models.FloatField(blank=True)
     talk_ratio = models.JSONField(default=dict, help_text="Talk time by participant")
 
     # Tone analysis
@@ -388,7 +388,7 @@ class ConversationCategory(models.Model):
     # Parent category for hierarchy
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='subcategories'
     )
 
@@ -480,7 +480,7 @@ class KeyMoment(models.Model):
     is_ai_detected = models.BooleanField(default=True)
     marked_by = models.ForeignKey(
         User, on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Notes
@@ -518,17 +518,17 @@ class CallScore(models.Model):
     closing_score = models.IntegerField(default=0)
 
     # Talk metrics
-    talk_to_listen_ratio = models.FloatField(null=True, blank=True)
-    longest_monologue_seconds = models.IntegerField(null=True, blank=True)
+    talk_to_listen_ratio = models.FloatField(blank=True)
+    longest_monologue_seconds = models.IntegerField(blank=True)
     question_count = models.IntegerField(default=0)
 
     # Pace and clarity
-    words_per_minute = models.IntegerField(null=True, blank=True)
+    words_per_minute = models.IntegerField(blank=True)
     filler_word_count = models.IntegerField(default=0)
     filler_words_used = models.JSONField(default=list)
 
     # Engagement
-    customer_engagement_score = models.FloatField(null=True, blank=True)
+    customer_engagement_score = models.FloatField(blank=True)
     interruption_count = models.IntegerField(default=0)
 
     # Best practices checklist
@@ -565,7 +565,7 @@ class VoiceNote(models.Model):
     # File info
     audio_url = models.URLField(blank=True)
     audio_path = models.CharField(max_length=500, blank=True)
-    duration_seconds = models.IntegerField(null=True, blank=True)
+    duration_seconds = models.IntegerField(blank=True)
 
     # Transcription
     transcript = models.TextField(blank=True)
@@ -579,19 +579,19 @@ class VoiceNote(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='voice_notes'
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='voice_notes'
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='voice_notes'
     )
 

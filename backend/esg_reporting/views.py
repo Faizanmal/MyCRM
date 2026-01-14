@@ -2,24 +2,33 @@
 ESG Reporting Views
 """
 
-from django.db.models import Sum, Avg, Count, Q
+from django.db.models import Avg, Q, Sum
 from django.utils import timezone
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import (
-    ESGFramework, ESGMetricCategory, ESGMetricDefinition,
-    ESGDataEntry, ESGTarget, ESGReport, CarbonFootprint,
-    SupplierESGAssessment
+    CarbonFootprint,
+    ESGDataEntry,
+    ESGFramework,
+    ESGMetricCategory,
+    ESGMetricDefinition,
+    ESGReport,
+    ESGTarget,
+    SupplierESGAssessment,
 )
 from .serializers import (
-    ESGFrameworkSerializer, ESGMetricCategorySerializer,
-    ESGMetricDefinitionSerializer, ESGDataEntrySerializer,
-    ESGTargetSerializer, ESGReportSerializer, CarbonFootprintSerializer,
-    SupplierESGAssessmentSerializer
+    CarbonFootprintSerializer,
+    ESGDataEntrySerializer,
+    ESGFrameworkSerializer,
+    ESGMetricCategorySerializer,
+    ESGMetricDefinitionSerializer,
+    ESGReportSerializer,
+    ESGTargetSerializer,
+    SupplierESGAssessmentSerializer,
 )
 
 
@@ -57,19 +66,19 @@ class ESGMetricDefinitionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        
+
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category_id=category)
-        
+
         pillar = self.request.query_params.get('pillar')
         if pillar:
             queryset = queryset.filter(category__pillar=pillar)
-        
+
         framework = self.request.query_params.get('framework')
         if framework:
             queryset = queryset.filter(frameworks__id=framework)
-        
+
         return queryset
 
 
@@ -80,24 +89,24 @@ class ESGDataEntryViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = ESGDataEntry.objects.select_related('metric', 'entered_by')
-        
+
         # Filters
         metric = self.request.query_params.get('metric')
         if metric:
             queryset = queryset.filter(metric_id=metric)
-        
+
         fiscal_year = self.request.query_params.get('year')
         if fiscal_year:
             queryset = queryset.filter(fiscal_year=fiscal_year)
-        
+
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-        
+
         pillar = self.request.query_params.get('pillar')
         if pillar:
             queryset = queryset.filter(metric__category__pillar=pillar)
-        
+
         return queryset
 
     def perform_create(self, serializer):
@@ -162,22 +171,22 @@ class ESGTargetViewSet(viewsets.ModelViewSet):
         """Update target progress"""
         target = self.get_object()
         current_value = request.data.get('current_value')
-        
+
         if current_value is not None:
             target.current_value = current_value
-            
+
             # Calculate progress
             total_change_needed = target.target_value - target.baseline_value
             current_change = current_value - target.baseline_value
-            
+
             if total_change_needed != 0:
                 target.progress_percentage = (current_change / total_change_needed) * 100
-            
+
             # Update status based on progress
             years_total = target.target_year - target.baseline_year
             years_elapsed = timezone.now().year - target.baseline_year
             expected_progress = (years_elapsed / years_total) * 100 if years_total > 0 else 0
-            
+
             if target.progress_percentage >= 100:
                 target.status = 'achieved'
             elif target.progress_percentage >= expected_progress * 0.9:
@@ -186,9 +195,9 @@ class ESGTargetViewSet(viewsets.ModelViewSet):
                 target.status = 'at_risk'
             else:
                 target.status = 'behind'
-            
+
             target.save()
-        
+
         return Response(ESGTargetSerializer(target).data)
 
 
@@ -228,15 +237,15 @@ class CarbonFootprintViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = CarbonFootprint.objects.all()
-        
+
         scope = self.request.query_params.get('scope')
         if scope:
             queryset = queryset.filter(scope=scope)
-        
+
         year = self.request.query_params.get('year')
         if year:
             queryset = queryset.filter(period_start__year=year)
-        
+
         return queryset
 
     def perform_create(self, serializer):
@@ -247,24 +256,24 @@ class CarbonFootprintViewSet(viewsets.ModelViewSet):
         """Get carbon footprint summary"""
         year = request.query_params.get('year', timezone.now().year)
         entries = self.get_queryset().filter(period_start__year=year)
-        
+
         total = entries.aggregate(total=Sum('total_co2e'))['total'] or 0
         scope1 = entries.filter(scope='scope1').aggregate(total=Sum('total_co2e'))['total'] or 0
         scope2 = entries.filter(scope='scope2').aggregate(total=Sum('total_co2e'))['total'] or 0
         scope3 = entries.filter(scope='scope3').aggregate(total=Sum('total_co2e'))['total'] or 0
-        
+
         # Previous year for comparison
         prev_year_total = self.get_queryset().filter(
             period_start__year=int(year) - 1
         ).aggregate(total=Sum('total_co2e'))['total'] or 0
-        
+
         yoy_change = ((total - prev_year_total) / prev_year_total * 100) if prev_year_total > 0 else 0
-        
+
         # By category
         by_category = {}
         for entry in entries.values('category').annotate(total=Sum('total_co2e')):
             by_category[entry['category']] = entry['total']
-        
+
         return Response({
             'year': year,
             'total_co2e': round(total, 2),
@@ -285,7 +294,7 @@ class CarbonFootprintViewSet(viewsets.ModelViewSet):
         """Get emissions trends over time"""
         years_back = int(request.query_params.get('years', 5))
         current_year = timezone.now().year
-        
+
         trends = []
         for year in range(current_year - years_back + 1, current_year + 1):
             year_data = self.get_queryset().filter(
@@ -303,7 +312,7 @@ class CarbonFootprintViewSet(viewsets.ModelViewSet):
                 'scope2': year_data['scope2'] or 0,
                 'scope3': year_data['scope3'] or 0,
             })
-        
+
         return Response(trends)
 
 
@@ -314,15 +323,15 @@ class SupplierESGAssessmentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = SupplierESGAssessment.objects.all()
-        
+
         risk = self.request.query_params.get('risk')
         if risk:
             queryset = queryset.filter(risk_level=risk)
-        
+
         rating = self.request.query_params.get('rating')
         if rating:
             queryset = queryset.filter(overall_rating=rating)
-        
+
         return queryset
 
     def perform_create(self, serializer):
@@ -332,7 +341,7 @@ class SupplierESGAssessmentViewSet(viewsets.ModelViewSet):
     def risk_summary(self, request):
         """Get risk summary across suppliers"""
         assessments = self.get_queryset()
-        
+
         return Response({
             'total_suppliers': assessments.count(),
             'by_risk_level': {
@@ -363,20 +372,20 @@ class ESGDashboardView(APIView):
 
     def get(self, request):
         current_year = timezone.now().year
-        
+
         # Carbon summary
         carbon_entries = CarbonFootprint.objects.filter(period_start__year=current_year)
         total_carbon = carbon_entries.aggregate(total=Sum('total_co2e'))['total'] or 0
-        
+
         # Targets
         targets = ESGTarget.objects.all()
-        
+
         # Pending entries
         pending = ESGDataEntry.objects.filter(status='submitted').count()
-        
+
         # Recent reports
         reports = ESGReport.objects.order_by('-created_at')[:5]
-        
+
         # Calculate overall ESG scores (simplified)
         supplier_assessments = SupplierESGAssessment.objects.all()
         avg_scores = supplier_assessments.aggregate(
@@ -385,7 +394,7 @@ class ESGDashboardView(APIView):
             gov=Avg('governance_score'),
             overall=Avg('overall_score')
         )
-        
+
         return Response({
             'overall_score': int(avg_scores['overall'] or 0),
             'environmental_score': int(avg_scores['env'] or 0),

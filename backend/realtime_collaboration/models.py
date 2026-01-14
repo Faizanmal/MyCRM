@@ -4,16 +4,16 @@ Documents, versions, comments, and collaborative editing sessions.
 """
 
 import uuid
+
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils import timezone
 
 User = get_user_model()
 
 
 class CollaborativeDocument(models.Model):
     """Documents that can be collaboratively edited"""
-    
+
     DOCUMENT_TYPE = [
         ('proposal', 'Proposal'),
         ('contract', 'Contract'),
@@ -23,7 +23,7 @@ class CollaborativeDocument(models.Model):
         ('template', 'Template'),
         ('other', 'Other'),
     ]
-    
+
     STATUS = [
         ('draft', 'Draft'),
         ('in_review', 'In Review'),
@@ -31,7 +31,7 @@ class CollaborativeDocument(models.Model):
         ('published', 'Published'),
         ('archived', 'Archived'),
     ]
-    
+
     PERMISSION_LEVEL = [
         ('view', 'View Only'),
         ('comment', 'Can Comment'),
@@ -40,22 +40,22 @@ class CollaborativeDocument(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     # Basic info
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE, default='other')
-    
+
     # Content
     content = models.JSONField(default=dict)  # Rich text JSON structure
     content_text = models.TextField(blank=True)  # Plain text for search
-    
+
     # Versioning
     version = models.IntegerField(default=1)
-    
+
     # Status
     status = models.CharField(max_length=20, choices=STATUS, default='draft')
-    
+
     # Ownership
     owner = models.ForeignKey(
         User,
@@ -69,13 +69,13 @@ class CollaborativeDocument(models.Model):
         blank=True,
         related_name='collaborative_documents'
     )
-    
+
     # Sharing
     is_public = models.BooleanField(default=False)
     public_link_enabled = models.BooleanField(default=False)
     public_link_token = models.CharField(max_length=64, blank=True)
     default_permission = models.CharField(max_length=10, choices=PERMISSION_LEVEL, default='view')
-    
+
     # Related entities
     related_lead = models.ForeignKey(
         'lead_management.Lead',
@@ -98,7 +98,7 @@ class CollaborativeDocument(models.Model):
         blank=True,
         related_name='collaborative_documents'
     )
-    
+
     # Lock
     is_locked = models.BooleanField(default=False)
     locked_by = models.ForeignKey(
@@ -108,8 +108,8 @@ class CollaborativeDocument(models.Model):
         blank=True,
         related_name='realtime_locked_documents'
     )
-    locked_at = models.DateTimeField(null=True, blank=True)
-    
+    locked_at = models.DateTimeField(blank=True)
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -135,21 +135,21 @@ class DocumentVersion(models.Model):
     """Version history for documents"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(
         CollaborativeDocument,
         on_delete=models.CASCADE,
         related_name='versions'
     )
-    
+
     version = models.IntegerField()
     content = models.JSONField(default=dict)
     content_text = models.TextField(blank=True)
-    
+
     # Changes
     changes_summary = models.TextField(blank=True)
     operations = models.JSONField(default=list)  # Operational transform ops
-    
+
     # Metadata
     created_by = models.ForeignKey(
         User,
@@ -157,10 +157,10 @@ class DocumentVersion(models.Model):
         null=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     # Restoration
     is_restored = models.BooleanField(default=False)
-    restored_from = models.IntegerField(null=True, blank=True)
+    restored_from = models.IntegerField(blank=True)
 
     class Meta:
         db_table = 'collab_document_versions'
@@ -175,7 +175,7 @@ class DocumentVersion(models.Model):
 
 class DocumentCollaborator(models.Model):
     """Users who have access to a document"""
-    
+
     PERMISSION_LEVEL = [
         ('view', 'View Only'),
         ('comment', 'Can Comment'),
@@ -184,7 +184,7 @@ class DocumentCollaborator(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(
         CollaborativeDocument,
         on_delete=models.CASCADE,
@@ -195,17 +195,17 @@ class DocumentCollaborator(models.Model):
         on_delete=models.CASCADE,
         related_name='collaborated_documents'
     )
-    
+
     permission = models.CharField(max_length=10, choices=PERMISSION_LEVEL, default='view')
-    
+
     # Notifications
     notify_on_changes = models.BooleanField(default=True)
     notify_on_comments = models.BooleanField(default=True)
-    
+
     # Activity
-    last_viewed_at = models.DateTimeField(null=True, blank=True)
-    last_edited_at = models.DateTimeField(null=True, blank=True)
-    
+    last_viewed_at = models.DateTimeField(blank=True)
+    last_edited_at = models.DateTimeField(blank=True)
+
     added_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -226,7 +226,7 @@ class DocumentCollaborator(models.Model):
 
 class DocumentComment(models.Model):
     """Comments and annotations on documents"""
-    
+
     COMMENT_TYPE = [
         ('comment', 'Comment'),
         ('suggestion', 'Suggestion'),
@@ -235,23 +235,23 @@ class DocumentComment(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(
         CollaborativeDocument,
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    
+
     # Comment details
     comment_type = models.CharField(max_length=20, choices=COMMENT_TYPE, default='comment')
     content = models.TextField()
-    
+
     # Position in document
     anchor_id = models.CharField(max_length=100, blank=True)  # Element ID
-    selection_start = models.IntegerField(null=True, blank=True)
-    selection_end = models.IntegerField(null=True, blank=True)
+    selection_start = models.IntegerField(blank=True)
+    selection_end = models.IntegerField(blank=True)
     selected_text = models.TextField(blank=True)
-    
+
     # Threading
     parent = models.ForeignKey(
         'self',
@@ -260,7 +260,7 @@ class DocumentComment(models.Model):
         blank=True,
         related_name='replies'
     )
-    
+
     # Status
     is_resolved = models.BooleanField(default=False)
     resolved_by = models.ForeignKey(
@@ -270,15 +270,15 @@ class DocumentComment(models.Model):
         blank=True,
         related_name='realtime_resolved_comments'
     )
-    resolved_at = models.DateTimeField(null=True, blank=True)
-    
+    resolved_at = models.DateTimeField(blank=True)
+
     # Author
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='realtime_document_comments'
     )
-    
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -297,7 +297,7 @@ class EditingSession(models.Model):
     """Active editing sessions for real-time collaboration"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(
         CollaborativeDocument,
         on_delete=models.CASCADE,
@@ -308,23 +308,23 @@ class EditingSession(models.Model):
         on_delete=models.CASCADE,
         related_name='editing_sessions'
     )
-    
+
     # Connection
     channel_name = models.CharField(max_length=255)
-    
+
     # Cursor position
     cursor_position = models.JSONField(default=dict, blank=True)
     selection = models.JSONField(default=dict, blank=True)
-    
+
     # Presence
     is_active = models.BooleanField(default=True)
     last_activity = models.DateTimeField(auto_now=True)
-    
+
     # Color for presence indicator
     cursor_color = models.CharField(max_length=7, default='#4F46E5')
-    
+
     connected_at = models.DateTimeField(auto_now_add=True)
-    disconnected_at = models.DateTimeField(null=True, blank=True)
+    disconnected_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'collab_editing_sessions'
@@ -337,7 +337,7 @@ class EditingSession(models.Model):
 
 class DocumentOperation(models.Model):
     """Operational transform operations for conflict resolution"""
-    
+
     OPERATION_TYPE = [
         ('insert', 'Insert'),
         ('delete', 'Delete'),
@@ -346,7 +346,7 @@ class DocumentOperation(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     document = models.ForeignKey(
         CollaborativeDocument,
         on_delete=models.CASCADE,
@@ -362,21 +362,21 @@ class DocumentOperation(models.Model):
         User,
         on_delete=models.CASCADE
     )
-    
+
     # Operation details
     operation_type = models.CharField(max_length=10, choices=OPERATION_TYPE)
     position = models.IntegerField()
     content = models.TextField(blank=True)
     length = models.IntegerField(default=0)
     attributes = models.JSONField(default=dict, blank=True)
-    
+
     # Version tracking
     base_version = models.IntegerField()
-    
+
     # Conflict resolution
     is_transformed = models.BooleanField(default=False)
     original_operation = models.JSONField(default=dict, blank=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -391,7 +391,7 @@ class DocumentOperation(models.Model):
 
 class DocumentTemplate(models.Model):
     """Reusable document templates"""
-    
+
     TEMPLATE_TYPE = [
         ('proposal', 'Proposal'),
         ('contract', 'Contract'),
@@ -402,18 +402,18 @@ class DocumentTemplate(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     template_type = models.CharField(max_length=20, choices=TEMPLATE_TYPE)
-    
+
     # Content
     content = models.JSONField(default=dict)
     thumbnail_url = models.URLField(blank=True)
-    
+
     # Variables
     variables = models.JSONField(default=list)  # [{name, type, default}]
-    
+
     # Ownership
     is_system = models.BooleanField(default=False)
     tenant = models.ForeignKey(
@@ -422,11 +422,11 @@ class DocumentTemplate(models.Model):
         null=True,
         blank=True
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='realtime_document_templates')
-    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='realtime_document_templates')
+
     # Stats
     use_count = models.IntegerField(default=0)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

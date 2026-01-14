@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
                 ("uploaded_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("download_count", models.IntegerField(default=0)),
-                ("last_accessed", models.DateTimeField(blank=True, null=True)),
+                ("last_accessed", models.DateTimeField(blank=True)),
                 (
                     "contact",
                     models.ForeignKey(
@@ -188,7 +188,7 @@ class Migration(migrations.Migration):
                 ),
                 ("comments", models.TextField(blank=True)),
                 ("requested_at", models.DateTimeField(auto_now_add=True)),
-                ("responded_at", models.DateTimeField(blank=True, null=True)),
+                ("responded_at", models.DateTimeField(blank=True)),
                 (
                     "approver",
                     models.ForeignKey(
@@ -235,7 +235,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("comment", models.TextField()),
-                ("page_number", models.IntegerField(blank=True, null=True)),
+                ("page_number", models.IntegerField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -278,10 +278,10 @@ class Migration(migrations.Migration):
                 ("access_token", models.UUIDField(default=uuid.uuid4, unique=True)),
                 ("can_download", models.BooleanField(default=True)),
                 ("can_view", models.BooleanField(default=True)),
-                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField(blank=True)),
                 ("view_count", models.IntegerField(default=0)),
                 ("download_count", models.IntegerField(default=0)),
-                ("last_accessed", models.DateTimeField(blank=True, null=True)),
+                ("last_accessed", models.DateTimeField(blank=True)),
                 ("shared_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "document",
@@ -347,7 +347,7 @@ class Migration(migrations.Migration):
                 (
                     "thumbnail",
                     models.ImageField(
-                        blank=True, null=True, upload_to="template_thumbnails/"
+                        blank=True, upload_to="template_thumbnails/"
                     ),
                 ),
                 ("is_active", models.BooleanField(default=True)),

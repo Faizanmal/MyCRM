@@ -3,16 +3,11 @@ Prediction Services
 ML model training and inference.
 """
 
-import json
-import hashlib
 from datetime import timedelta
-from django.utils import timezone
-from django.db.models import Avg, Sum, Count
 
-from .models import (
-    PredictiveModel, ModelFeature, Prediction, LeadScore,
-    ChurnPrediction, RevenueForecast, DealPrediction
-)
+from django.utils import timezone
+
+from .models import LeadScore, Prediction, RevenueForecast
 
 
 class PredictionService:
@@ -23,7 +18,7 @@ class PredictionService:
         """Train a predictive model"""
         model.status = 'training'
         model.save()
-        
+
         try:
             # In production, this would:
             # 1. Fetch training data from database
@@ -31,24 +26,24 @@ class PredictionService:
             # 3. Train model using sklearn/xgboost/etc.
             # 4. Save model file
             # 5. Calculate metrics
-            
+
             # Simulated training results
             import random
-            
+
             model.accuracy = random.uniform(0.75, 0.95)
             model.precision = random.uniform(0.70, 0.90)
             model.recall = random.uniform(0.70, 0.90)
             model.f1_score = 2 * (model.precision * model.recall) / (model.precision + model.recall)
             model.auc_roc = random.uniform(0.80, 0.95)
-            
+
             model.training_samples = 10000
             model.validation_samples = 2000
             model.training_duration_seconds = random.randint(60, 600)
             model.last_trained_at = timezone.now()
-            
+
             model.status = 'active'
             model.save()
-            
+
             return {
                 'success': True,
                 'metrics': {
@@ -59,7 +54,7 @@ class PredictionService:
                     'auc_roc': model.auc_roc
                 }
             }
-            
+
         except Exception as e:
             model.status = 'failed'
             model.save()
@@ -70,12 +65,12 @@ class PredictionService:
         """Make a single prediction"""
         # Extract features
         features = PredictionService._extract_features(model, entity_type, entity_id)
-        
+
         # Make prediction (simulated)
         import random
         prediction_value = random.uniform(0, 1)
         confidence = random.uniform(0.7, 0.99)
-        
+
         # Determine label based on threshold
         if model.model_type == 'lead_scoring':
             if prediction_value >= 0.7:
@@ -93,11 +88,11 @@ class PredictionService:
                 label = 'low_risk'
         else:
             label = 'positive' if prediction_value >= 0.5 else 'negative'
-        
+
         # Generate explanation
         top_factors = PredictionService._get_top_factors(features)
         explanation = PredictionService._generate_explanation(model.model_type, prediction_value, top_factors)
-        
+
         # Save prediction
         prediction = Prediction.objects.create(
             model=model,
@@ -111,12 +106,12 @@ class PredictionService:
             explanation=explanation,
             top_factors=top_factors
         )
-        
+
         # Update model stats
         model.prediction_count += 1
         model.last_prediction_at = timezone.now()
         model.save()
-        
+
         return prediction
 
     @staticmethod
@@ -132,23 +127,23 @@ class PredictionService:
     def score_all_leads(model):
         """Score all leads"""
         from leads.models import Lead
-        
+
         leads = Lead.objects.filter(status__in=['new', 'contacted', 'qualified'])
         scored = 0
-        
+
         for lead in leads:
             prediction = PredictionService.predict(model, 'lead', lead.id)
-            
+
             # Convert to LeadScore
             score = int(prediction.prediction_value * 100)
-            
+
             if score >= 70:
                 tier = 'hot'
             elif score >= 40:
                 tier = 'warm'
             else:
                 tier = 'cold'
-            
+
             LeadScore.objects.update_or_create(
                 lead=lead,
                 defaults={
@@ -163,36 +158,36 @@ class PredictionService:
                 }
             )
             scored += 1
-        
+
         return {'scored': scored}
 
     @staticmethod
     def generate_revenue_forecast(model, forecast_type, periods):
         """Generate revenue forecasts"""
-        from decimal import Decimal
         import random
-        
+        from decimal import Decimal
+
         forecasts = []
         today = timezone.now().date()
-        
+
         if forecast_type == 'monthly':
             delta = timedelta(days=30)
         elif forecast_type == 'quarterly':
             delta = timedelta(days=90)
         else:  # annual
             delta = timedelta(days=365)
-        
+
         base_revenue = Decimal('100000')
-        
+
         for i in range(periods):
             period_start = today + (delta * i)
             period_end = period_start + delta - timedelta(days=1)
-            
+
             # Simulate forecast with some variance
             growth = Decimal(str(random.uniform(-0.1, 0.2)))
             forecasted = base_revenue * (1 + growth)
             variance = forecasted * Decimal('0.15')
-            
+
             forecast = RevenueForecast.objects.create(
                 model=model,
                 forecast_type=forecast_type,
@@ -205,9 +200,9 @@ class PredictionService:
                 growth_rate=float(growth) * 100
             )
             forecasts.append(forecast)
-            
+
             base_revenue = forecasted
-        
+
         return forecasts
 
     @staticmethod
@@ -215,7 +210,7 @@ class PredictionService:
         """Extract features for an entity"""
         # In production, this would query the database
         # and compute features based on model.features
-        
+
         features = {}
         for feature in model.model_features.filter(is_active=True):
             # Simulated feature values
@@ -225,14 +220,14 @@ class PredictionService:
                 features[feature.name] = 'category_a'
             elif feature.feature_type == 'boolean':
                 features[feature.name] = True
-        
+
         return features
 
     @staticmethod
     def _get_top_factors(features):
         """Get top contributing factors"""
         import random
-        
+
         factor_names = [
             'Email engagement rate',
             'Website visit frequency',
@@ -243,7 +238,7 @@ class PredictionService:
             'Budget indicators',
             'Timing signals'
         ]
-        
+
         return random.sample(factor_names, min(5, len(factor_names)))
 
     @staticmethod
@@ -256,7 +251,7 @@ class PredictionService:
                 return f"This lead shows moderate interest. Key factors: {', '.join(factors[:2])}. Consider nurturing campaigns."
             else:
                 return f"This lead requires more nurturing. Low engagement observed in {factors[0]}."
-        
+
         elif model_type == 'churn_prediction':
             if value >= 0.7:
                 return f"High churn risk detected. Warning signs: {', '.join(factors[:3])}. Immediate intervention recommended."
@@ -264,14 +259,14 @@ class PredictionService:
                 return f"Moderate churn risk. Monitor {', '.join(factors[:2])} closely."
             else:
                 return "Low churn risk. Customer appears engaged and satisfied."
-        
+
         elif model_type == 'deal_probability':
             pct = int(value * 100)
             if value >= 0.7:
                 return f"{pct}% win probability. Strong indicators: {', '.join(factors[:2])}."
             else:
                 return f"{pct}% win probability. Focus on improving {factors[0]} to increase chances."
-        
+
         return f"Prediction score: {value:.2f}. Key factors: {', '.join(factors[:3])}"
 
 

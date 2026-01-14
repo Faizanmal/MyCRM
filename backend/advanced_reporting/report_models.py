@@ -71,7 +71,7 @@ class ReportTemplate(models.Model):
 
     # Usage tracking
     view_count = models.IntegerField(default=0)
-    last_viewed_at = models.DateTimeField(null=True, blank=True)
+    last_viewed_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -183,23 +183,23 @@ class SavedReport(models.Model):
 
     # Execution info
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    execution_time_ms = models.IntegerField(null=True, blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
+    execution_time_ms = models.IntegerField(blank=True)
 
     # Parameters used
     parameters = models.JSONField(default=dict)  # Filter values, date range, etc.
 
     # Results
     result_data = models.JSONField(default=dict)  # Report data
-    row_count = models.IntegerField(null=True, blank=True)
+    row_count = models.IntegerField(blank=True)
 
     # Export
     export_format = models.CharField(
         max_length=20, choices=FORMAT_CHOICES, default='json'
     )
     file_url = models.URLField(blank=True)  # If exported to file
-    file_size = models.IntegerField(null=True, blank=True)
+    file_size = models.IntegerField(blank=True)
 
     # Error handling
     error_message = models.TextField(blank=True)
@@ -251,8 +251,8 @@ class ScheduledReport(models.Model):
     # Schedule configuration
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
     schedule_time = models.TimeField()  # Time to run
-    day_of_week = models.IntegerField(null=True, blank=True)  # 0=Monday, 6=Sunday
-    day_of_month = models.IntegerField(null=True, blank=True)  # 1-31
+    day_of_week = models.IntegerField(blank=True)  # 0=Monday, 6=Sunday
+    day_of_month = models.IntegerField(blank=True)  # 1-31
     timezone = models.CharField(max_length=50, default='UTC')
 
     # Report parameters
@@ -271,8 +271,8 @@ class ScheduledReport(models.Model):
 
     # Status
     is_active = models.BooleanField(default=True)
-    next_run_at = models.DateTimeField(null=True, blank=True)
-    last_run_at = models.DateTimeField(null=True, blank=True)
+    next_run_at = models.DateTimeField(blank=True)
+    last_run_at = models.DateTimeField(blank=True)
     last_status = models.CharField(max_length=20, blank=True)
     run_count = models.IntegerField(default=0)
     failure_count = models.IntegerField(default=0)
@@ -376,6 +376,9 @@ class DashboardWidget(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Widget {self.id} on {self.dashboard}"
 
     class Meta:
         db_table = 'dashboard_widgets'

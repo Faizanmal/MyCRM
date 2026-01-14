@@ -93,7 +93,7 @@ class SSOProvider(models.Model):
 
     # Statistics
     total_logins = models.PositiveIntegerField(default=0)
-    last_used_at = models.DateTimeField(null=True, blank=True)
+    last_used_at = models.DateTimeField(blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -146,14 +146,14 @@ class SSOSession(models.Model):
     name_id = models.CharField(max_length=500, blank=True)  # SAML name ID
     sso_token = models.TextField(blank=True)  # OAuth2 access token
     refresh_token = models.TextField(blank=True)  # OAuth2 refresh token
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
-    ended_at = models.DateTimeField(null=True, blank=True)
+    ended_at = models.DateTimeField(blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -200,7 +200,7 @@ class SSOLoginAttempt(models.Model):
     sso_attributes = models.JSONField(default=dict, blank=True)
 
     # Request metadata
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

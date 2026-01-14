@@ -3,20 +3,25 @@ Customer Portal Serializers
 """
 
 from rest_framework import serializers
+
 from .models import (
-    CustomerAccount, SupportTicket, TicketComment, 
-    CustomerOrder, KnowledgeBaseArticle, PortalNotification
+    CustomerAccount,
+    CustomerOrder,
+    KnowledgeBaseArticle,
+    PortalNotification,
+    SupportTicket,
+    TicketComment,
 )
 
 
 class CustomerAccountSerializer(serializers.ModelSerializer):
     """Serializer for customer account"""
     full_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = CustomerAccount
         fields = [
-            'id', 'email', 'is_active', 'is_verified', 
+            'id', 'email', 'is_active', 'is_verified',
             'notification_preferences', 'timezone', 'language',
             'two_factor_enabled', 'last_login', 'created_at',
             'full_name'
@@ -34,7 +39,7 @@ class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(write_only=True, required=False)
     last_name = serializers.CharField(write_only=True, required=False)
     phone = serializers.CharField(write_only=True, required=False)
-    
+
     class Meta:
         model = CustomerAccount
         fields = [
@@ -47,7 +52,7 @@ class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
         first_name = validated_data.pop('first_name', None)
         last_name = validated_data.pop('last_name', None)
         phone = validated_data.pop('phone', None)
-        
+
         if instance.contact:
             if first_name:
                 instance.contact.first_name = first_name
@@ -56,7 +61,7 @@ class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
             if phone:
                 instance.contact.phone = phone
             instance.contact.save()
-        
+
         return super().update(instance, validated_data)
 
 
@@ -64,7 +69,7 @@ class TicketCommentSerializer(serializers.ModelSerializer):
     """Serializer for ticket comments"""
     author_name = serializers.SerializerMethodField()
     is_customer = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = TicketComment
         fields = [
@@ -86,11 +91,11 @@ class TicketCommentSerializer(serializers.ModelSerializer):
 
 class SupportTicketListSerializer(serializers.ModelSerializer):
     """Serializer for listing support tickets"""
-    
+
     class Meta:
         model = SupportTicket
         fields = [
-            'id', 'ticket_number', 'subject', 'category', 
+            'id', 'ticket_number', 'subject', 'category',
             'priority', 'status', 'created_at', 'updated_at'
         ]
 
@@ -99,11 +104,11 @@ class SupportTicketDetailSerializer(serializers.ModelSerializer):
     """Serializer for ticket details"""
     comments = serializers.SerializerMethodField()
     assigned_to_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = SupportTicket
         fields = [
-            'id', 'ticket_number', 'subject', 'description', 
+            'id', 'ticket_number', 'subject', 'description',
             'category', 'priority', 'status', 'resolution',
             'resolved_at', 'satisfaction_rating', 'satisfaction_feedback',
             'sla_response_due', 'sla_resolution_due', 'first_response_at',
@@ -127,7 +132,7 @@ class SupportTicketDetailSerializer(serializers.ModelSerializer):
 
 class SupportTicketCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating support tickets"""
-    
+
     class Meta:
         model = SupportTicket
         fields = ['subject', 'description', 'category', 'priority']
@@ -139,11 +144,11 @@ class SupportTicketCreateSerializer(serializers.ModelSerializer):
 
 class CustomerOrderSerializer(serializers.ModelSerializer):
     """Serializer for customer orders"""
-    
+
     class Meta:
         model = CustomerOrder
         fields = [
-            'id', 'order_number', 'status', 'items', 
+            'id', 'order_number', 'status', 'items',
             'subtotal', 'tax', 'shipping', 'discount', 'total', 'currency',
             'shipping_address', 'tracking_number', 'tracking_url',
             'ordered_at', 'shipped_at', 'delivered_at', 'invoice_url'
@@ -152,11 +157,11 @@ class CustomerOrderSerializer(serializers.ModelSerializer):
 
 class KnowledgeBaseArticleListSerializer(serializers.ModelSerializer):
     """Serializer for listing KB articles"""
-    
+
     class Meta:
         model = KnowledgeBaseArticle
         fields = [
-            'id', 'slug', 'title', 'excerpt', 'category', 
+            'id', 'slug', 'title', 'excerpt', 'category',
             'tags', 'is_featured', 'published_at'
         ]
 
@@ -164,11 +169,11 @@ class KnowledgeBaseArticleListSerializer(serializers.ModelSerializer):
 class KnowledgeBaseArticleDetailSerializer(serializers.ModelSerializer):
     """Serializer for KB article details"""
     author_name = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = KnowledgeBaseArticle
         fields = [
-            'id', 'slug', 'title', 'content', 'excerpt', 
+            'id', 'slug', 'title', 'content', 'excerpt',
             'category', 'tags', 'is_featured',
             'view_count', 'helpful_count', 'not_helpful_count',
             'author_name', 'published_at', 'updated_at'
@@ -182,7 +187,7 @@ class KnowledgeBaseArticleDetailSerializer(serializers.ModelSerializer):
 
 class PortalNotificationSerializer(serializers.ModelSerializer):
     """Serializer for portal notifications"""
-    
+
     class Meta:
         model = PortalNotification
         fields = [

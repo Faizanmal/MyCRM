@@ -2,25 +2,36 @@
 Zero-Trust Security Views
 """
 
-from django.db.models import Count, Q
-from django.utils import timezone
 from datetime import timedelta
-from rest_framework import status, viewsets
+
+from django.db.models import Count
+from django.utils import timezone
+from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import (
-    DeviceFingerprint, SecuritySession, SecurityAuditLog,
-    AccessPolicy, ThreatIndicator, SecurityIncident, DataClassification
+    AccessPolicy,
+    DataClassification,
+    DeviceFingerprint,
+    SecurityAuditLog,
+    SecurityIncident,
+    SecuritySession,
+    ThreatIndicator,
 )
 from .serializers import (
-    DeviceFingerprintSerializer, RegisterDeviceSerializer,
-    SecuritySessionSerializer, SecurityAuditLogSerializer,
-    SecurityAuditLogDetailSerializer, AccessPolicySerializer,
-    ThreatIndicatorSerializer, SecurityIncidentSerializer,
-    SecurityIncidentDetailSerializer, DataClassificationSerializer
+    AccessPolicySerializer,
+    DataClassificationSerializer,
+    DeviceFingerprintSerializer,
+    RegisterDeviceSerializer,
+    SecurityAuditLogDetailSerializer,
+    SecurityAuditLogSerializer,
+    SecurityIncidentDetailSerializer,
+    SecurityIncidentSerializer,
+    SecuritySessionSerializer,
+    ThreatIndicatorSerializer,
 )
 from .services import SecurityService
 
@@ -39,10 +50,10 @@ class DeviceFingerprintViewSet(viewsets.ModelViewSet):
         """Register a new device"""
         serializer = RegisterDeviceSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         data = serializer.validated_data
         fingerprint_hash = data['fingerprint_hash']
-        
+
         device, created = DeviceFingerprint.objects.update_or_create(
             fingerprint_hash=fingerprint_hash,
             defaults={
@@ -56,11 +67,11 @@ class DeviceFingerprintViewSet(viewsets.ModelViewSet):
                 'webgl_hash': data.get('webgl_hash', ''),
             }
         )
-        
+
         if not created:
             device.login_count += 1
             device.save()
-        
+
         return Response(DeviceFingerprintSerializer(device).data)
 
     @action(detail=True, methods=['post'])
@@ -74,7 +85,7 @@ class DeviceFingerprintViewSet(viewsets.ModelViewSet):
         device.trust_level = 'verified'
         device.trust_score = 80
         device.save()
-        
+
         return Response(DeviceFingerprintSerializer(device).data)
 
     @action(detail=True, methods=['post'])
@@ -84,7 +95,7 @@ class DeviceFingerprintViewSet(viewsets.ModelViewSet):
         device.trust_level = 'trusted'
         device.trust_score = 100
         device.save()
-        
+
         return Response(DeviceFingerprintSerializer(device).data)
 
     @action(detail=True, methods=['post'])
@@ -94,7 +105,7 @@ class DeviceFingerprintViewSet(viewsets.ModelViewSet):
         device.trust_level = 'blocked'
         device.trust_score = 0
         device.save()
-        
+
         # Terminate active sessions
         SecuritySession.objects.filter(
             device=device,
@@ -104,7 +115,7 @@ class DeviceFingerprintViewSet(viewsets.ModelViewSet):
             terminated_at=timezone.now(),
             termination_reason='Device blocked'
         )
-        
+
         return Response(DeviceFingerprintSerializer(device).data)
 
 
@@ -124,14 +135,14 @@ class SecuritySessionViewSet(viewsets.ReadOnlyModelViewSet):
         session.terminated_at = timezone.now()
         session.termination_reason = request.data.get('reason', 'User terminated')
         session.save()
-        
+
         return Response({"message": "Session terminated"})
 
     @action(detail=False, methods=['post'])
     def terminate_all(self, request):
         """Terminate all sessions except current"""
         current_session = request.data.get('current_session_id')
-        
+
         terminated = SecuritySession.objects.filter(
             user=request.user,
             status='active'
@@ -140,7 +151,7 @@ class SecuritySessionViewSet(viewsets.ReadOnlyModelViewSet):
             terminated_at=timezone.now(),
             termination_reason='User terminated all sessions'
         )
-        
+
         return Response({"terminated_count": terminated})
 
 
@@ -150,32 +161,32 @@ class SecurityAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = SecurityAuditLog.objects.all()
-        
+
         # Filter by user for non-admins
         if not self.request.user.is_staff:
             queryset = queryset.filter(user=self.request.user)
-        
+
         # Filters
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category=category)
-        
+
         severity = self.request.query_params.get('severity')
         if severity:
             queryset = queryset.filter(severity=severity)
-        
+
         resource_type = self.request.query_params.get('resource_type')
         if resource_type:
             queryset = queryset.filter(resource_type=resource_type)
-        
+
         start_date = self.request.query_params.get('start_date')
         if start_date:
             queryset = queryset.filter(timestamp__gte=start_date)
-        
+
         end_date = self.request.query_params.get('end_date')
         if end_date:
             queryset = queryset.filter(timestamp__lte=end_date)
-        
+
         return queryset
 
     def get_serializer_class(self):
@@ -188,9 +199,9 @@ class SecurityAuditLogViewSet(viewsets.ReadOnlyModelViewSet):
         """Get audit log summary"""
         today = timezone.now().date()
         week_ago = today - timedelta(days=7)
-        
+
         logs = self.get_queryset()
-        
+
         return Response({
             'total_events': logs.count(),
             'by_category': logs.values('category').annotate(count=Count('id')),
@@ -215,10 +226,10 @@ class AccessPolicyViewSet(viewsets.ModelViewSet):
         policy = self.get_object()
         user_id = request.data.get('user_id')
         context = request.data.get('context', {})
-        
+
         # Evaluate policy
         result = SecurityService.evaluate_policy(policy, user_id, context)
-        
+
         return Response(result)
 
 
@@ -233,23 +244,23 @@ class ThreatIndicatorViewSet(viewsets.ModelViewSet):
         """Check if a value matches any threat indicators"""
         indicator_type = request.data.get('type')
         value = request.data.get('value')
-        
+
         match = ThreatIndicator.objects.filter(
             indicator_type=indicator_type,
             value=value,
             is_active=True
         ).first()
-        
+
         if match:
             match.hit_count += 1
             match.last_hit = timezone.now()
             match.save()
-            
+
             return Response({
                 'match': True,
                 'indicator': ThreatIndicatorSerializer(match).data
             })
-        
+
         return Response({'match': False})
 
 
@@ -259,15 +270,15 @@ class SecurityIncidentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = SecurityIncident.objects.all()
-        
+
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-        
+
         severity = self.request.query_params.get('severity')
         if severity:
             queryset = queryset.filter(severity=severity)
-        
+
         return queryset
 
     def get_serializer_class(self):
@@ -283,10 +294,10 @@ class SecurityIncidentViewSet(viewsets.ModelViewSet):
         """Assign incident to user"""
         incident = self.get_object()
         user_id = request.data.get('user_id')
-        
+
         incident.assigned_to_id = user_id
         incident.save()
-        
+
         return Response(SecurityIncidentSerializer(incident).data)
 
     @action(detail=True, methods=['post'])
@@ -294,16 +305,16 @@ class SecurityIncidentViewSet(viewsets.ModelViewSet):
         """Update incident status"""
         incident = self.get_object()
         new_status = request.data.get('status')
-        
+
         incident.status = new_status
-        
+
         if new_status == 'contained':
             incident.contained_at = timezone.now()
         elif new_status == 'resolved':
             incident.resolved_at = timezone.now()
-        
+
         incident.save()
-        
+
         return Response(SecurityIncidentSerializer(incident).data)
 
 
@@ -320,12 +331,12 @@ class SecurityDashboardView(APIView):
 
     def get(self, request):
         today = timezone.now().date()
-        
+
         sessions = SecuritySession.objects.all()
         devices = DeviceFingerprint.objects.all()
         incidents = SecurityIncident.objects.all()
         logs = SecurityAuditLog.objects.filter(timestamp__date=today)
-        
+
         return Response({
             'active_sessions': sessions.filter(status='active').count(),
             'suspicious_sessions': sessions.filter(status='suspicious').count(),
@@ -352,7 +363,7 @@ class RiskAssessmentView(APIView):
         risk_factors = []
         risk_score = 0
         recommendations = []
-        
+
         # Check device trust
         device_fingerprint = request.headers.get('X-Device-Fingerprint')
         if device_fingerprint:
@@ -360,7 +371,7 @@ class RiskAssessmentView(APIView):
                 fingerprint_hash=device_fingerprint,
                 user=request.user
             ).first()
-            
+
             if not device:
                 risk_factors.append("Unknown device")
                 risk_score += 20
@@ -375,13 +386,13 @@ class RiskAssessmentView(APIView):
         else:
             risk_factors.append("No device fingerprint")
             risk_score += 15
-        
+
         # Check for MFA
         if not request.user.mfa_enabled if hasattr(request.user, 'mfa_enabled') else True:
             risk_factors.append("MFA not enabled")
             risk_score += 25
             recommendations.append("Enable Multi-Factor Authentication")
-        
+
         # Determine risk level
         if risk_score >= 60:
             overall_risk = 'high'
@@ -389,7 +400,7 @@ class RiskAssessmentView(APIView):
             overall_risk = 'medium'
         else:
             overall_risk = 'low'
-        
+
         return Response({
             'overall_risk': overall_risk,
             'risk_score': risk_score,

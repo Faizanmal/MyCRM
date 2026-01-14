@@ -4,6 +4,7 @@ Enables self-service capabilities for customers including tickets, orders, and p
 """
 
 import uuid
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
@@ -22,29 +23,29 @@ class CustomerAccount(models.Model):
         on_delete=models.CASCADE,
         related_name='portal_account'
     )
-    
+
     # Authentication
     email = models.EmailField(unique=True)
     password_hash = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
-    
+
     # Portal settings
     portal_access_enabled = models.BooleanField(default=True)
     notification_preferences = models.JSONField(default=dict, blank=True)
     timezone = models.CharField(max_length=50, default='UTC')
     language = models.CharField(max_length=10, default='en')
-    
+
     # Security
-    last_login = models.DateTimeField(null=True, blank=True)
+    last_login = models.DateTimeField(blank=True)
     login_count = models.IntegerField(default=0)
     failed_login_attempts = models.IntegerField(default=0)
-    locked_until = models.DateTimeField(null=True, blank=True)
-    password_reset_token = models.CharField(max_length=255, null=True, blank=True)
-    password_reset_expires = models.DateTimeField(null=True, blank=True)
+    locked_until = models.DateTimeField(blank=True)
+    password_reset_token = models.CharField(max_length=255, blank=True)
+    password_reset_expires = models.DateTimeField(blank=True)
     two_factor_enabled = models.BooleanField(default=False)
-    two_factor_secret = models.CharField(max_length=32, null=True, blank=True)
-    
+    two_factor_secret = models.CharField(max_length=32, blank=True)
+
     # Branding (for white-label)
     tenant = models.ForeignKey(
         'multi_tenant.Organization',
@@ -53,7 +54,7 @@ class CustomerAccount(models.Model):
         blank=True,
         related_name='customer_accounts'
     )
-    
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -68,9 +69,7 @@ class CustomerAccount(models.Model):
         return f"{self.email} - Portal Account"
 
     def is_locked(self):
-        if self.locked_until and self.locked_until > timezone.now():
-            return True
-        return False
+        return bool(self.locked_until and self.locked_until > timezone.now())
 
     def record_login(self):
         self.last_login = timezone.now()
@@ -81,14 +80,14 @@ class CustomerAccount(models.Model):
 
 class SupportTicket(models.Model):
     """Customer support tickets submitted through the portal"""
-    
+
     PRIORITY_CHOICES = [
         ('low', 'Low'),
         ('medium', 'Medium'),
         ('high', 'High'),
         ('urgent', 'Urgent'),
     ]
-    
+
     STATUS_CHOICES = [
         ('open', 'Open'),
         ('in_progress', 'In Progress'),
@@ -97,7 +96,7 @@ class SupportTicket(models.Model):
         ('resolved', 'Resolved'),
         ('closed', 'Closed'),
     ]
-    
+
     CATEGORY_CHOICES = [
         ('general', 'General Inquiry'),
         ('billing', 'Billing'),
@@ -110,7 +109,7 @@ class SupportTicket(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ticket_number = models.CharField(max_length=20, unique=True)
-    
+
     # Relationships
     customer = models.ForeignKey(
         CustomerAccount,
@@ -124,14 +123,14 @@ class SupportTicket(models.Model):
         blank=True,
         related_name='assigned_portal_tickets'
     )
-    
+
     # Ticket details
     subject = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='open')
-    
+
     # Related entities
     related_opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
@@ -140,10 +139,10 @@ class SupportTicket(models.Model):
         blank=True,
         related_name='support_tickets'
     )
-    
+
     # Resolution
-    resolution = models.TextField(null=True, blank=True)
-    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolution = models.TextField(blank=True)
+    resolved_at = models.DateTimeField(blank=True)
     resolved_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -151,16 +150,16 @@ class SupportTicket(models.Model):
         blank=True,
         related_name='resolved_tickets'
     )
-    
+
     # Satisfaction
-    satisfaction_rating = models.IntegerField(null=True, blank=True, help_text="1-5 rating")
-    satisfaction_feedback = models.TextField(null=True, blank=True)
-    
+    satisfaction_rating = models.IntegerField(blank=True, help_text="1-5 rating")
+    satisfaction_feedback = models.TextField(blank=True)
+
     # SLA tracking
-    sla_response_due = models.DateTimeField(null=True, blank=True)
-    sla_resolution_due = models.DateTimeField(null=True, blank=True)
-    first_response_at = models.DateTimeField(null=True, blank=True)
-    
+    sla_response_due = models.DateTimeField(blank=True)
+    sla_resolution_due = models.DateTimeField(blank=True)
+    first_response_at = models.DateTimeField(blank=True)
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -196,14 +195,14 @@ class SupportTicket(models.Model):
 
 class TicketComment(models.Model):
     """Comments on support tickets"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ticket = models.ForeignKey(
         SupportTicket,
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    
+
     # Author can be customer or internal user
     customer = models.ForeignKey(
         CustomerAccount,
@@ -219,13 +218,13 @@ class TicketComment(models.Model):
         blank=True,
         related_name='ticket_comments'
     )
-    
+
     content = models.TextField()
     is_internal = models.BooleanField(default=False, help_text="Internal note not visible to customer")
-    
+
     # Attachments
     attachments = models.JSONField(default=list, blank=True)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -241,7 +240,7 @@ class TicketComment(models.Model):
 
 class CustomerOrder(models.Model):
     """Customer orders visible in the portal"""
-    
+
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('processing', 'Processing'),
@@ -253,7 +252,7 @@ class CustomerOrder(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order_number = models.CharField(max_length=50, unique=True)
-    
+
     customer = models.ForeignKey(
         CustomerAccount,
         on_delete=models.CASCADE,
@@ -266,7 +265,7 @@ class CustomerOrder(models.Model):
         blank=True,
         related_name='customer_orders'
     )
-    
+
     # Order details
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     items = models.JSONField(default=list)
@@ -276,21 +275,21 @@ class CustomerOrder(models.Model):
     discount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=3, default='USD')
-    
+
     # Shipping
     shipping_address = models.JSONField(default=dict, blank=True)
     billing_address = models.JSONField(default=dict, blank=True)
-    tracking_number = models.CharField(max_length=100, null=True, blank=True)
-    tracking_url = models.URLField(null=True, blank=True)
-    
+    tracking_number = models.CharField(max_length=100, blank=True)
+    tracking_url = models.URLField(blank=True)
+
     # Dates
     ordered_at = models.DateTimeField(auto_now_add=True)
-    shipped_at = models.DateTimeField(null=True, blank=True)
-    delivered_at = models.DateTimeField(null=True, blank=True)
-    
+    shipped_at = models.DateTimeField(blank=True)
+    delivered_at = models.DateTimeField(blank=True)
+
     # Documents
-    invoice_url = models.URLField(null=True, blank=True)
-    
+    invoice_url = models.URLField(blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -306,7 +305,7 @@ class CustomerOrder(models.Model):
 
 class KnowledgeBaseArticle(models.Model):
     """Self-service knowledge base articles"""
-    
+
     STATUS_CHOICES = [
         ('draft', 'Draft'),
         ('published', 'Published'),
@@ -315,26 +314,26 @@ class KnowledgeBaseArticle(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     slug = models.SlugField(max_length=255, unique=True)
-    
+
     title = models.CharField(max_length=255)
     content = models.TextField()
     excerpt = models.TextField(max_length=500, blank=True)
-    
+
     category = models.CharField(max_length=100)
     tags = models.JSONField(default=list, blank=True)
-    
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     is_featured = models.BooleanField(default=False)
-    
+
     # Analytics
     view_count = models.IntegerField(default=0)
     helpful_count = models.IntegerField(default=0)
     not_helpful_count = models.IntegerField(default=0)
-    
+
     # SEO
     meta_title = models.CharField(max_length=70, blank=True)
     meta_description = models.CharField(max_length=160, blank=True)
-    
+
     # Authorship
     author = models.ForeignKey(
         User,
@@ -342,8 +341,8 @@ class KnowledgeBaseArticle(models.Model):
         null=True,
         related_name='kb_articles'
     )
-    
-    published_at = models.DateTimeField(null=True, blank=True)
+
+    published_at = models.DateTimeField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -359,26 +358,26 @@ class KnowledgeBaseArticle(models.Model):
 
 class PortalSession(models.Model):
     """Track customer portal sessions for security"""
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer = models.ForeignKey(
         CustomerAccount,
         on_delete=models.CASCADE,
         related_name='sessions'
     )
-    
+
     session_token = models.CharField(max_length=255, unique=True)
     refresh_token = models.CharField(max_length=255, unique=True)
-    
+
     # Device info
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField()
-    device_fingerprint = models.CharField(max_length=255, null=True, blank=True)
-    
+    device_fingerprint = models.CharField(max_length=255, blank=True)
+
     # Status
     is_active = models.BooleanField(default=True)
     expires_at = models.DateTimeField()
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     last_activity = models.DateTimeField(auto_now=True)
 
@@ -397,7 +396,7 @@ class PortalSession(models.Model):
 
 class PortalNotification(models.Model):
     """Notifications for customer portal users"""
-    
+
     TYPE_CHOICES = [
         ('ticket_update', 'Ticket Update'),
         ('order_update', 'Order Update'),
@@ -412,15 +411,15 @@ class PortalNotification(models.Model):
         on_delete=models.CASCADE,
         related_name='notifications'
     )
-    
+
     notification_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
     title = models.CharField(max_length=255)
     message = models.TextField()
-    action_url = models.URLField(null=True, blank=True)
-    
+    action_url = models.URLField(blank=True)
+
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(null=True, blank=True)
-    
+    read_at = models.DateTimeField(blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -4,6 +4,8 @@ API endpoints for conversational AI assistant
 """
 
 import time
+
+from django.db import models
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -11,14 +13,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ChatSession, ChatMessage, QuickAction, EmailTemplate
+from .models import ChatMessage, ChatSession, EmailTemplate, QuickAction
 from .serializers import (
-    ChatSessionListSerializer, ChatSessionDetailSerializer,
-    ChatMessageSerializer, SendMessageSerializer, QuickActionSerializer,
-    EmailTemplateSerializer, GenerateEmailSerializer, QueryDataSerializer,
-    MessageFeedbackSerializer
+    ChatMessageSerializer,
+    ChatSessionDetailSerializer,
+    ChatSessionListSerializer,
+    EmailTemplateSerializer,
+    GenerateEmailSerializer,
+    MessageFeedbackSerializer,
+    QueryDataSerializer,
+    QuickActionSerializer,
+    SendMessageSerializer,
 )
-from .services import ChatbotService, EmailGenerator, DataQueryEngine
+from .services import ChatbotService, DataQueryEngine, EmailGenerator
 
 
 class ChatSessionViewSet(viewsets.ModelViewSet):
@@ -42,27 +49,27 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         session = self.get_object()
         serializer = SendMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         user_message = serializer.validated_data['message']
-        
+
         # Save user message
         ChatMessage.objects.create(
             session=session,
             role='user',
             content=user_message
         )
-        
+
         # Update context if provided
         if serializer.validated_data.get('context_type'):
             session.context_type = serializer.validated_data['context_type']
             session.context_id = serializer.validated_data.get('context_id', '')
-        
+
         # Get AI response
         start_time = time.time()
         chatbot = ChatbotService(request.user)
         response = chatbot.process_message(session, user_message)
         processing_time = int((time.time() - start_time) * 1000)
-        
+
         # Save assistant message
         assistant_message = ChatMessage.objects.create(
             session=session,
@@ -74,14 +81,14 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
             model_used=response.get('model', ''),
             processing_time_ms=processing_time
         )
-        
+
         # Update session
         session.message_count = session.messages.count()
         session.last_message_at = timezone.now()
         if session.message_count == 2:  # First exchange
             session.title = chatbot.generate_title(user_message)
         session.save()
-        
+
         return Response({
             'message': ChatMessageSerializer(assistant_message).data,
             'session': ChatSessionDetailSerializer(session).data
@@ -105,34 +112,34 @@ class ChatView(APIView):
         """Send a message and get response"""
         serializer = SendMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         message = serializer.validated_data['message']
         context_type = serializer.validated_data.get('context_type', '')
         context_id = serializer.validated_data.get('context_id', '')
-        
+
         # Get or create default session
         session, created = ChatSession.objects.get_or_create(
             user=request.user,
             is_active=True,
             defaults={'title': 'Quick Chat'}
         )
-        
+
         if context_type:
             session.context_type = context_type
             session.context_id = context_id
             session.save()
-        
+
         # Process message
         chatbot = ChatbotService(request.user)
         response = chatbot.process_message(session, message)
-        
+
         # Save messages
         ChatMessage.objects.create(
             session=session,
             role='user',
             content=message
         )
-        
+
         assistant_message = ChatMessage.objects.create(
             session=session,
             role='assistant',
@@ -140,11 +147,11 @@ class ChatView(APIView):
             content=response.get('content', ''),
             structured_data=response.get('data', {})
         )
-        
+
         session.message_count = session.messages.count()
         session.last_message_at = timezone.now()
         session.save()
-        
+
         return Response({
             'response': response.get('content', ''),
             'type': response.get('type', 'text'),
@@ -160,7 +167,7 @@ class GenerateEmailView(APIView):
     def post(self, request):
         serializer = GenerateEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         generator = EmailGenerator()
         result = generator.generate(
             purpose=serializer.validated_data['purpose'],
@@ -170,7 +177,7 @@ class GenerateEmailView(APIView):
             company_name=serializer.validated_data.get('company_name', ''),
             additional_context=serializer.validated_data.get('additional_context', '')
         )
-        
+
         return Response(result)
 
 
@@ -181,13 +188,13 @@ class QueryDataView(APIView):
     def post(self, request):
         serializer = QueryDataSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         engine = DataQueryEngine(request.user)
         result = engine.query(
             query=serializer.validated_data['query'],
             entity_type=serializer.validated_data['entity_type']
         )
-        
+
         return Response(result)
 
 
@@ -198,38 +205,38 @@ class QuickActionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = QuickAction.objects.filter(is_active=True)
-        
+
         context_type = self.request.query_params.get('context_type')
         if context_type:
             queryset = queryset.filter(
                 models.Q(requires_context=False) |
                 models.Q(context_types__contains=[context_type])
             )
-        
+
         return queryset
 
     @action(detail=True, methods=['post'])
     def execute(self, request, pk=None):
         """Execute a quick action"""
         action = self.get_object()
-        
+
         context = request.data.get('context', {})
         prompt = action.prompt_template
-        
+
         # Replace variables in template
         for key, value in context.items():
             prompt = prompt.replace(f'{{{{{key}}}}}', str(value))
-        
+
         # Process with chatbot
         session, _ = ChatSession.objects.get_or_create(
             user=request.user,
             is_active=True,
             defaults={'title': action.name}
         )
-        
+
         chatbot = ChatbotService(request.user)
         response = chatbot.process_message(session, prompt)
-        
+
         return Response({
             'response': response.get('content', ''),
             'type': response.get('type', 'text'),
@@ -256,18 +263,18 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
         """Generate email from template"""
         template = self.get_object()
         context = request.data.get('context', {})
-        
+
         subject = template.subject_template
         body = template.body_template
-        
+
         # Replace variables
         for key, value in context.items():
             subject = subject.replace(f'{{{{{key}}}}}', str(value))
             body = body.replace(f'{{{{{key}}}}}', str(value))
-        
+
         template.usage_count += 1
         template.save()
-        
+
         return Response({
             'subject': subject,
             'body': body
@@ -281,7 +288,7 @@ class MessageFeedbackView(APIView):
     def post(self, request, message_id):
         serializer = MessageFeedbackSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         try:
             message = ChatMessage.objects.get(
                 id=message_id,
@@ -292,11 +299,11 @@ class MessageFeedbackView(APIView):
                 {"error": "Message not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         message.is_helpful = serializer.validated_data['is_helpful']
         message.feedback = serializer.validated_data.get('feedback', '')
         message.save()
-        
+
         return Response({"message": "Feedback recorded"})
 
 
@@ -307,16 +314,16 @@ class SuggestNextActionsView(APIView):
     def get(self, request):
         entity_type = request.query_params.get('entity_type')
         entity_id = request.query_params.get('entity_id')
-        
+
         if not entity_type or not entity_id:
             return Response(
                 {"error": "entity_type and entity_id required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         chatbot = ChatbotService(request.user)
         suggestions = chatbot.suggest_next_actions(entity_type, entity_id)
-        
+
         return Response({
             'suggestions': suggestions
         })

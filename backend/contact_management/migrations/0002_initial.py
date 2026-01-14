@@ -18,12 +18,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contact',
             name='assigned_to',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assigned_contacts', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assigned_contacts', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='contact',
             name='created_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_contacts', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, related_name='created_contacts', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='contactgroup',

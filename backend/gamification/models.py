@@ -147,7 +147,7 @@ class UserPoints(models.Model):
     # Streaks
     current_streak = models.IntegerField(default=0, help_text="Days of consecutive activity")
     longest_streak = models.IntegerField(default=0)
-    last_activity_date = models.DateField(null=True, blank=True)
+    last_activity_date = models.DateField(blank=True)
 
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -239,7 +239,7 @@ class PointTransaction(models.Model):
     # Context
     reason = models.CharField(max_length=255)
     reference_type = models.CharField(max_length=50, blank=True, help_text="e.g., 'lead', 'opportunity'")
-    reference_id = models.IntegerField(null=True, blank=True)
+    reference_id = models.IntegerField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -313,10 +313,10 @@ class ChallengeProgress(models.Model):
 
     current_value = models.FloatField(default=0)
     is_completed = models.BooleanField(default=False)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     # Ranking
-    rank = models.IntegerField(null=True, blank=True)
+    rank = models.IntegerField(blank=True)
 
     class Meta:
         ordering = ['-current_value']

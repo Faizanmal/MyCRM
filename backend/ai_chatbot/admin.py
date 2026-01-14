@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import ChatSession, ChatMessage, ChatIntent, QuickAction, EmailTemplate
+
+from .models import ChatMessage, ChatSession, EmailTemplate, QuickAction
 
 
 @admin.register(ChatSession)

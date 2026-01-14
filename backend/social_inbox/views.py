@@ -3,7 +3,7 @@ Social Inbox Views
 API endpoints for omnichannel social media management
 """
 
-from django.db.models import Q, Count, Avg
+from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -12,17 +12,25 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import (
-    SocialAccount, SocialConversation, SocialMessage,
-    SocialMonitoringRule, SocialPost, SocialAnalytics
+    SocialAccount,
+    SocialAnalytics,
+    SocialConversation,
+    SocialMessage,
+    SocialMonitoringRule,
+    SocialPost,
 )
 from .serializers import (
-    SocialAccountSerializer, SocialConversationListSerializer,
-    SocialConversationDetailSerializer, SocialMessageSerializer,
-    SendMessageSerializer, SocialMonitoringRuleSerializer,
-    SocialPostSerializer, SocialAnalyticsSerializer,
-    BulkConversationActionSerializer
+    BulkConversationActionSerializer,
+    SendMessageSerializer,
+    SocialAccountSerializer,
+    SocialAnalyticsSerializer,
+    SocialConversationDetailSerializer,
+    SocialConversationListSerializer,
+    SocialMessageSerializer,
+    SocialMonitoringRuleSerializer,
+    SocialPostSerializer,
 )
-from .services import SocialPlatformService, SentimentAnalyzer
+from .services import SentimentAnalyzer, SocialPlatformService
 
 
 class SocialAccountViewSet(viewsets.ModelViewSet):
@@ -40,15 +48,15 @@ class SocialAccountViewSet(viewsets.ModelViewSet):
     def sync(self, request, pk=None):
         """Manually sync messages from this account"""
         account = self.get_object()
-        
+
         try:
             service = SocialPlatformService(account)
             result = service.sync_messages()
-            
+
             account.last_sync_at = timezone.now()
             account.sync_error = ''
             account.save()
-            
+
             return Response({
                 "message": "Sync completed",
                 "new_conversations": result.get('new_conversations', 0),
@@ -66,11 +74,11 @@ class SocialAccountViewSet(viewsets.ModelViewSet):
     def refresh_token(self, request, pk=None):
         """Refresh OAuth token for this account"""
         account = self.get_object()
-        
+
         try:
             service = SocialPlatformService(account)
             new_token = service.refresh_access_token()
-            
+
             account.access_token = new_token['access_token']
             if 'refresh_token' in new_token:
                 account.refresh_token = new_token['refresh_token']
@@ -78,7 +86,7 @@ class SocialAccountViewSet(viewsets.ModelViewSet):
                 account.token_expires_at = new_token['expires_at']
             account.status = 'active'
             account.save()
-            
+
             return Response({"message": "Token refreshed successfully"})
         except Exception as e:
             account.status = 'error'
@@ -92,15 +100,15 @@ class SocialAccountViewSet(viewsets.ModelViewSet):
     def analytics(self, request, pk=None):
         """Get analytics for this account"""
         account = self.get_object()
-        
+
         days = int(request.query_params.get('days', 30))
         start_date = timezone.now().date() - timezone.timedelta(days=days)
-        
+
         analytics = SocialAnalytics.objects.filter(
             social_account=account,
             date__gte=start_date
         ).order_by('date')
-        
+
         return Response(SocialAnalyticsSerializer(analytics, many=True).data)
 
 
@@ -112,30 +120,30 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
         queryset = SocialConversation.objects.select_related(
             'social_account', 'assigned_to', 'linked_contact', 'linked_lead'
         ).filter(social_account__created_by=self.request.user)
-        
+
         # Filters
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-        
+
         platform = self.request.query_params.get('platform')
         if platform:
             queryset = queryset.filter(social_account__platform=platform)
-        
+
         assigned = self.request.query_params.get('assigned_to_me')
         if assigned == 'true':
             queryset = queryset.filter(assigned_to=self.request.user)
         elif assigned == 'unassigned':
             queryset = queryset.filter(assigned_to__isnull=True)
-        
+
         priority = self.request.query_params.get('priority')
         if priority:
             queryset = queryset.filter(priority=priority)
-        
+
         sentiment = self.request.query_params.get('sentiment')
         if sentiment:
             queryset = queryset.filter(sentiment_label=sentiment)
-        
+
         # Search
         search = self.request.query_params.get('search')
         if search:
@@ -144,7 +152,7 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
                 Q(participant_handle__icontains=search) |
                 Q(messages__content__icontains=search)
             ).distinct()
-        
+
         return queryset
 
     def get_serializer_class(self):
@@ -158,7 +166,7 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
         conversation = self.get_object()
         serializer = SendMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         try:
             service = SocialPlatformService(conversation.social_account)
             result = service.send_message(
@@ -166,7 +174,7 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
                 serializer.validated_data['content'],
                 serializer.validated_data.get('attachments', [])
             )
-            
+
             # Create local message record
             message = SocialMessage.objects.create(
                 conversation=conversation,
@@ -177,14 +185,14 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
                 sent_by=request.user,
                 platform_created_at=timezone.now()
             )
-            
+
             # Update conversation
             conversation.last_message_at = timezone.now()
             conversation.message_count += 1
             if not conversation.first_response_at:
                 conversation.first_response_at = timezone.now()
             conversation.save()
-            
+
             return Response(SocialMessageSerializer(message).data)
         except Exception as e:
             return Response(
@@ -196,19 +204,19 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
     def analyze_sentiment(self, request, pk=None):
         """Analyze sentiment of conversation"""
         conversation = self.get_object()
-        
+
         # Get all inbound messages
         messages = conversation.messages.filter(direction='inbound')
         content = ' '.join([m.content for m in messages])
-        
+
         analyzer = SentimentAnalyzer()
         result = analyzer.analyze(content)
-        
+
         conversation.sentiment_score = result['score']
         conversation.sentiment_label = result['label']
         conversation.sentiment_analyzed_at = timezone.now()
         conversation.save()
-        
+
         return Response({
             "sentiment_score": result['score'],
             "sentiment_label": result['label']
@@ -218,25 +226,25 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
     def generate_response(self, request, pk=None):
         """Generate AI-suggested response"""
         conversation = self.get_object()
-        
+
         # Get conversation context
         messages = conversation.messages.order_by('platform_created_at')[:10]
         context = [
             {"role": "customer" if m.direction == "inbound" else "agent", "content": m.content}
             for m in messages
         ]
-        
+
         tone = request.data.get('tone', 'professional')
-        
+
         # Use AI to generate response (placeholder - integrate with ai_insights)
         from ai_insights.services import AIService
         ai_service = AIService()
         suggested = ai_service.generate_social_response(context, tone)
-        
+
         conversation.suggested_response = suggested
         conversation.response_tone = tone
         conversation.save()
-        
+
         return Response({
             "suggested_response": suggested,
             "tone": tone
@@ -247,7 +255,7 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
         """Assign conversation to a user"""
         conversation = self.get_object()
         user_id = request.data.get('user_id')
-        
+
         if user_id:
             from django.contrib.auth import get_user_model
             User = get_user_model()
@@ -261,7 +269,7 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
                 )
         else:
             conversation.assigned_to = None
-        
+
         conversation.save()
         return Response({"message": "Conversation assigned"})
 
@@ -270,7 +278,7 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
         """Link conversation to a CRM contact"""
         conversation = self.get_object()
         contact_id = request.data.get('contact_id')
-        
+
         if contact_id:
             from contact_management.models import Contact
             try:
@@ -305,13 +313,13 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
         """Perform bulk actions on conversations"""
         serializer = BulkConversationActionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         conversations = self.get_queryset().filter(
             id__in=serializer.validated_data['conversation_ids']
         )
         action_type = serializer.validated_data['action']
         value = serializer.validated_data.get('value', '')
-        
+
         updated = 0
         for conv in conversations:
             if action_type == 'mark_read':
@@ -341,10 +349,10 @@ class SocialConversationViewSet(viewsets.ModelViewSet):
             elif action_type == 'remove_tag' and value:
                 if value in conv.tags:
                     conv.tags.remove(value)
-            
+
             conv.save()
             updated += 1
-        
+
         return Response({"updated": updated})
 
 
@@ -364,22 +372,22 @@ class SocialMonitoringRuleViewSet(viewsets.ModelViewSet):
         """Test a monitoring rule with sample text"""
         rule = self.get_object()
         sample_text = request.data.get('text', '')
-        
+
         # Check if any keyword matches
         matches = []
         text_lower = sample_text.lower()
-        
+
         for keyword in rule.keywords:
             if keyword.lower() in text_lower:
                 matches.append(keyword)
-        
+
         # Check exclusions
         excluded = False
         for exclude in rule.exclude_keywords:
             if exclude.lower() in text_lower:
                 excluded = True
                 break
-        
+
         return Response({
             "would_match": len(matches) > 0 and not excluded,
             "matched_keywords": matches,
@@ -396,11 +404,11 @@ class SocialPostViewSet(viewsets.ModelViewSet):
         queryset = SocialPost.objects.prefetch_related('social_accounts').filter(
             created_by=self.request.user
         )
-        
+
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
-        
+
         return queryset
 
     def perform_create(self, serializer):
@@ -410,16 +418,16 @@ class SocialPostViewSet(viewsets.ModelViewSet):
     def publish_now(self, request, pk=None):
         """Publish post immediately"""
         post = self.get_object()
-        
+
         if post.status == 'published':
             return Response(
                 {"error": "Post already published"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         post.status = 'publishing'
         post.save()
-        
+
         results = {}
         for account in post.social_accounts.all():
             try:
@@ -435,18 +443,18 @@ class SocialPostViewSet(viewsets.ModelViewSet):
                     'success': False,
                     'error': str(e)
                 }
-        
+
         post.publish_results = results
         post.published_at = timezone.now()
-        
+
         # Check if any succeeded
         if any(r['success'] for r in results.values()):
             post.status = 'published'
         else:
             post.status = 'failed'
-        
+
         post.save()
-        
+
         return Response(SocialPostSerializer(post).data)
 
 
@@ -460,7 +468,7 @@ class UnifiedInboxDashboardView(APIView):
         conversations = SocialConversation.objects.filter(
             social_account__in=accounts
         )
-        
+
         # Summary stats
         stats = {
             'total_accounts': accounts.count(),
@@ -475,7 +483,7 @@ class UnifiedInboxDashboardView(APIView):
                 status__in=['new', 'open', 'pending']
             ).count(),
         }
-        
+
         # By platform
         by_platform = conversations.values(
             'social_account__platform'
@@ -483,20 +491,20 @@ class UnifiedInboxDashboardView(APIView):
             count=Count('id'),
             open_count=Count('id', filter=Q(status__in=['new', 'open']))
         )
-        
+
         # Recent conversations
         recent = SocialConversationListSerializer(
             conversations.order_by('-last_message_at')[:10],
             many=True
         ).data
-        
+
         # Sentiment breakdown
         sentiment_breakdown = {
             'positive': conversations.filter(sentiment_label='positive').count(),
             'neutral': conversations.filter(sentiment_label='neutral').count(),
             'negative': conversations.filter(sentiment_label='negative').count(),
         }
-        
+
         return Response({
             'stats': stats,
             'by_platform': list(by_platform),

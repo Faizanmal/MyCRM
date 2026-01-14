@@ -45,8 +45,8 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("last_used", models.DateTimeField(blank=True, null=True)),
-                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("last_used", models.DateTimeField(blank=True)),
+                ("expires_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "user",
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("file_path", models.CharField(max_length=500)),
-                ("file_size", models.BigIntegerField(blank=True, null=True)),
+                ("file_size", models.BigIntegerField(blank=True)),
                 (
                     "status",
                     models.CharField(
@@ -100,9 +100,9 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("error_message", models.TextField(blank=True, null=True)),
+                ("error_message", models.TextField(blank=True)),
                 ("started_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "created_by",
                     models.ForeignKey(
@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("last_sync", models.DateTimeField(blank=True, null=True)),
+                ("last_sync", models.DateTimeField(blank=True)),
                 ("sync_frequency", models.IntegerField(default=60)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
@@ -311,8 +311,8 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("response_time", models.FloatField(blank=True, null=True)),
-                ("error_message", models.TextField(blank=True, null=True)),
+                ("response_time", models.FloatField(blank=True)),
+                ("error_message", models.TextField(blank=True)),
                 ("metrics", models.JSONField(default=dict)),
                 ("checked_at", models.DateTimeField(auto_now_add=True)),
             ],
@@ -418,10 +418,10 @@ class Migration(migrations.Migration):
                 ),
                 ("steps_completed", models.IntegerField(default=0)),
                 ("total_steps", models.IntegerField(default=0)),
-                ("error_message", models.TextField(blank=True, null=True)),
+                ("error_message", models.TextField(blank=True)),
                 ("execution_log", models.JSONField(default=list)),
                 ("started_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "workflow",
                     models.ForeignKey(
@@ -451,9 +451,9 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("action", models.CharField(max_length=100)),
-                ("resource", models.CharField(blank=True, max_length=200, null=True)),
-                ("ip_address", models.GenericIPAddressField(blank=True, null=True)),
-                ("user_agent", models.TextField(blank=True, null=True)),
+                ("resource", models.CharField(blank=True, max_length=200)),
+                ("ip_address", models.GenericIPAddressField(blank=True)),
+                ("user_agent", models.TextField(blank=True)),
                 ("metadata", models.JSONField(blank=True, default=dict)),
                 (
                     "risk_level",

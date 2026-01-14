@@ -135,7 +135,7 @@ class Migration(migrations.Migration):
                 ),
                 ("access_token", models.TextField(blank=True)),
                 ("refresh_token", models.TextField(blank=True)),
-                ("token_expires_at", models.DateTimeField(blank=True, null=True)),
+                ("token_expires_at", models.DateTimeField(blank=True)),
                 ("api_key", models.CharField(blank=True, max_length=255)),
                 ("api_secret", models.CharField(blank=True, max_length=255)),
                 (
@@ -158,7 +158,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("is_active", models.BooleanField(default=True)),
-                ("last_sync_at", models.DateTimeField(blank=True, null=True)),
+                ("last_sync_at", models.DateTimeField(blank=True)),
                 ("error_message", models.TextField(blank=True)),
                 ("error_count", models.IntegerField(default=0)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -242,7 +242,7 @@ class Migration(migrations.Migration):
                 ("total_deliveries", models.IntegerField(default=0)),
                 ("successful_deliveries", models.IntegerField(default=0)),
                 ("failed_deliveries", models.IntegerField(default=0)),
-                ("last_delivery_at", models.DateTimeField(blank=True, null=True)),
+                ("last_delivery_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -288,8 +288,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("description", models.TextField()),
-                ("request_data", models.JSONField(blank=True, null=True)),
-                ("response_data", models.JSONField(blank=True, null=True)),
+                ("request_data", models.JSONField(blank=True)),
+                ("response_data", models.JSONField(blank=True)),
                 ("success", models.BooleanField(default=True)),
                 ("error_message", models.TextField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -346,17 +346,17 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("status_code", models.IntegerField(blank=True, null=True)),
+                ("status_code", models.IntegerField(blank=True)),
                 ("response_body", models.TextField(blank=True)),
                 ("error_message", models.TextField(blank=True)),
                 ("attempts", models.IntegerField(default=0)),
-                ("next_retry_at", models.DateTimeField(blank=True, null=True)),
+                ("next_retry_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("delivered_at", models.DateTimeField(blank=True, null=True)),
+                ("delivered_at", models.DateTimeField(blank=True)),
                 (
                     "duration_ms",
                     models.IntegerField(
-                        blank=True, help_text="Response time in milliseconds", null=True
+                        blank=True, help_text="Response time in milliseconds"
                     ),
                 ),
                 (

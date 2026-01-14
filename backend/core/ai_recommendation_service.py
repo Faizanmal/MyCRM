@@ -81,7 +81,6 @@ class RecommendationEngine:
     def _generate_follow_up_recommendations(self):
         """Generate recommendations for leads/contacts needing follow-up"""
         try:
-            from activity_feed.models import Activity
             from lead_management.models import Lead
 
             # Find leads with high scores but no recent activity

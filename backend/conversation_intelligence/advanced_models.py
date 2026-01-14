@@ -43,7 +43,7 @@ class RealTimeCoachingSession(models.Model):
     engagement_level = models.CharField(max_length=20, default='medium')
 
     started_at = models.DateTimeField(auto_now_add=True)
-    ended_at = models.DateTimeField(null=True, blank=True)
+    ended_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'realtime_coaching_sessions'
@@ -241,7 +241,7 @@ class MeetingSummary(models.Model):
 
     # Next steps
     next_steps = models.TextField(blank=True)
-    suggested_follow_up_date = models.DateField(null=True, blank=True)
+    suggested_follow_up_date = models.DateField(blank=True)
 
     # Quality
     confidence_score = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -254,7 +254,7 @@ class MeetingSummary(models.Model):
         related_name='shared_meeting_summaries'
     )
     email_sent = models.BooleanField(default=False)
-    email_sent_at = models.DateTimeField(null=True, blank=True)
+    email_sent_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -299,18 +299,18 @@ class MeetingActionItem(models.Model):
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='meeting_action_items'
     )
     mentioned_assignee = models.CharField(max_length=200, blank=True)
 
     # Timing
-    due_date = models.DateField(null=True, blank=True)
+    due_date = models.DateField(blank=True)
     mentioned_deadline = models.CharField(max_length=200, blank=True)
 
     # Context
     context_quote = models.TextField(blank=True)
-    timestamp_seconds = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    timestamp_seconds = models.DecimalField(max_digits=10, decimal_places=2)
 
     # Status
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
@@ -320,12 +320,12 @@ class MeetingActionItem(models.Model):
     linked_task = models.ForeignKey(
         'task_management.Task',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='from_meeting_action'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'meeting_action_items'

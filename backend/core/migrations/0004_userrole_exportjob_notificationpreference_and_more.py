@@ -109,13 +109,13 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                ("file_path", models.CharField(blank=True, max_length=500, null=True)),
-                ("file_size", models.BigIntegerField(blank=True, null=True)),
-                ("error_message", models.TextField(blank=True, null=True)),
+                ("file_path", models.CharField(blank=True, max_length=500)),
+                ("file_size", models.BigIntegerField(blank=True)),
+                ("error_message", models.TextField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("started_at", models.DateTimeField(blank=True, null=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
-                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("started_at", models.DateTimeField(blank=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
+                ("expires_at", models.DateTimeField(blank=True)),
                 (
                     "user",
                     models.ForeignKey(
@@ -199,10 +199,10 @@ class Migration(migrations.Migration):
                 ),
                 ("tour_completed", models.BooleanField(default=False)),
                 ("tour_dismissed", models.BooleanField(default=False)),
-                ("tour_completed_at", models.DateTimeField(blank=True, null=True)),
+                ("tour_completed_at", models.DateTimeField(blank=True)),
                 ("onboarding_xp", models.IntegerField(default=0)),
                 ("started_at", models.DateTimeField(auto_now_add=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "user",
                     models.OneToOneField(
@@ -299,7 +299,7 @@ class Migration(migrations.Migration):
                 ("icon", models.CharField(blank=True, max_length=50)),
                 ("color", models.CharField(blank=True, max_length=20)),
                 ("use_count", models.IntegerField(default=0)),
-                ("last_used_at", models.DateTimeField(blank=True, null=True)),
+                ("last_used_at", models.DateTimeField(blank=True)),
                 ("is_shared", models.BooleanField(default=False)),
                 ("is_default", models.BooleanField(default=False)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -516,7 +516,7 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("object_id", models.CharField(blank=True, max_length=255, null=True)),
+                ("object_id", models.CharField(blank=True, max_length=255)),
                 ("action_label", models.CharField(blank=True, max_length=100)),
                 ("action_url", models.CharField(blank=True, max_length=500)),
                 (
@@ -542,9 +542,9 @@ class Migration(migrations.Migration):
                 ),
                 ("model_version", models.CharField(blank=True, max_length=50)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
-                ("expires_at", models.DateTimeField(blank=True, null=True)),
-                ("dismissed_at", models.DateTimeField(blank=True, null=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField(blank=True)),
+                ("dismissed_at", models.DateTimeField(blank=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "content_type",
                     models.ForeignKey(
@@ -710,10 +710,10 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("team_id", models.CharField(blank=True, max_length=100, null=True)),
+                ("team_id", models.CharField(blank=True, max_length=100)),
                 (
                     "organization_id",
-                    models.CharField(blank=True, max_length=100, null=True),
+                    models.CharField(blank=True, max_length=100),
                 ),
                 ("assigned_at", models.DateTimeField(auto_now_add=True)),
                 (

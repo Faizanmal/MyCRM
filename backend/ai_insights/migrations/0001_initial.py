@@ -177,14 +177,14 @@ class Migration(migrations.Migration):
                 ("body", models.TextField()),
                 ("tone", models.CharField(default="professional", max_length=50)),
                 ("language", models.CharField(default="en", max_length=10)),
-                ("quality_score", models.FloatField(blank=True, null=True)),
-                ("readability_score", models.FloatField(blank=True, null=True)),
+                ("quality_score", models.FloatField(blank=True)),
+                ("readability_score", models.FloatField(blank=True)),
                 ("was_used", models.BooleanField(default=False)),
                 ("was_edited", models.BooleanField(default=False)),
                 (
                     "user_rating",
                     models.IntegerField(
-                        blank=True, help_text="1-5 star rating", null=True
+                        blank=True, help_text="1-5 star rating"
                     ),
                 ),
                 (
@@ -350,7 +350,7 @@ class Migration(migrations.Migration):
                         max_length=20,
                     ),
                 ),
-                ("suggested_timing", models.DateTimeField(blank=True, null=True)),
+                ("suggested_timing", models.DateTimeField(blank=True)),
                 (
                     "status",
                     models.CharField(
@@ -367,7 +367,7 @@ class Migration(migrations.Migration):
                 ("model_version", models.CharField(max_length=50)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True)),
                 (
                     "user",
                     models.ForeignKey(

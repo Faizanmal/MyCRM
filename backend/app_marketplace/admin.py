@@ -1,7 +1,12 @@
 from django.contrib import admin
+
 from .models import (
-    AppCategory, AppDeveloper, MarketplaceApp, AppVersion,
-    AppInstallation, AppReview
+    AppCategory,
+    AppDeveloper,
+    AppInstallation,
+    AppReview,
+    AppVersion,
+    MarketplaceApp,
 )
 
 

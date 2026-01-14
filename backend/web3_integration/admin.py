@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import DataWallet, DataAccessGrant, NFTLoyaltyReward, SmartContract, BlockchainTransaction
+
+from .models import (
+    BlockchainTransaction,
+    DataAccessGrant,
+    DataWallet,
+    NFTLoyaltyReward,
+    SmartContract,
+)
 
 admin.site.register(DataWallet)
 admin.site.register(DataAccessGrant)

@@ -6,9 +6,14 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    ChatSessionViewSet, ChatView, GenerateEmailView, QueryDataView,
-    QuickActionViewSet, EmailTemplateViewSet, MessageFeedbackView,
-    SuggestNextActionsView
+    ChatSessionViewSet,
+    ChatView,
+    EmailTemplateViewSet,
+    GenerateEmailView,
+    MessageFeedbackView,
+    QueryDataView,
+    QuickActionViewSet,
+    SuggestNextActionsView,
 )
 
 app_name = 'ai_chatbot'

@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
                 ),
                 ("audio_url", models.URLField(blank=True)),
                 ("audio_path", models.CharField(blank=True, max_length=500)),
-                ("duration_seconds", models.IntegerField(blank=True, null=True)),
+                ("duration_seconds", models.IntegerField(blank=True)),
                 ("transcript", models.TextField(blank=True)),
                 ("is_transcribed", models.BooleanField(default=False)),
                 ("ai_title", models.CharField(blank=True, max_length=200)),
@@ -219,12 +219,12 @@ class Migration(migrations.Migration):
                 ),
                 ("file_url", models.URLField(blank=True)),
                 ("file_path", models.CharField(blank=True, max_length=500)),
-                ("file_size_bytes", models.BigIntegerField(blank=True, null=True)),
+                ("file_size_bytes", models.BigIntegerField(blank=True)),
                 ("file_format", models.CharField(blank=True, max_length=20)),
-                ("duration_seconds", models.IntegerField(blank=True, null=True)),
-                ("sample_rate", models.IntegerField(blank=True, null=True)),
+                ("duration_seconds", models.IntegerField(blank=True)),
+                ("sample_rate", models.IntegerField(blank=True)),
                 ("channels", models.IntegerField(default=1)),
-                ("bitrate", models.IntegerField(blank=True, null=True)),
+                ("bitrate", models.IntegerField(blank=True)),
                 (
                     "participants",
                     models.JSONField(default=list, help_text="List of participants"),
@@ -234,10 +234,10 @@ class Migration(migrations.Migration):
                     "recorded_at",
                     models.DateTimeField(default=django.utils.timezone.now),
                 ),
-                ("processing_started_at", models.DateTimeField(blank=True, null=True)),
+                ("processing_started_at", models.DateTimeField(blank=True)),
                 (
                     "processing_completed_at",
-                    models.DateTimeField(blank=True, null=True),
+                    models.DateTimeField(blank=True),
                 ),
                 ("processing_error", models.TextField(blank=True)),
                 ("detected_language", models.CharField(default="en", max_length=10)),
@@ -321,15 +321,15 @@ class Migration(migrations.Migration):
                     "speaker_segments",
                     models.JSONField(default=list, help_text="Segments by speaker"),
                 ),
-                ("speaker_count", models.IntegerField(blank=True, null=True)),
+                ("speaker_count", models.IntegerField(blank=True)),
                 (
                     "speaker_mapping",
                     models.JSONField(
                         default=dict, help_text="Speaker ID to name mapping"
                     ),
                 ),
-                ("confidence_score", models.FloatField(blank=True, null=True)),
-                ("word_error_rate", models.FloatField(blank=True, null=True)),
+                ("confidence_score", models.FloatField(blank=True)),
+                ("word_error_rate", models.FloatField(blank=True)),
                 (
                     "provider",
                     models.CharField(
@@ -348,9 +348,9 @@ class Migration(migrations.Migration):
                 ),
                 ("provider_job_id", models.CharField(blank=True, max_length=200)),
                 ("detected_language", models.CharField(default="en", max_length=10)),
-                ("processing_time_seconds", models.FloatField(blank=True, null=True)),
+                ("processing_time_seconds", models.FloatField(blank=True)),
                 ("was_edited", models.BooleanField(default=False)),
-                ("edited_at", models.DateTimeField(blank=True, null=True)),
+                ("edited_at", models.DateTimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
@@ -420,8 +420,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("dominant_emotion", models.CharField(blank=True, max_length=50)),
-                ("customer_sentiment", models.FloatField(blank=True, null=True)),
-                ("agent_sentiment", models.FloatField(blank=True, null=True)),
+                ("customer_sentiment", models.FloatField(blank=True)),
+                ("agent_sentiment", models.FloatField(blank=True)),
                 (
                     "positive_moments",
                     models.JSONField(
@@ -434,7 +434,7 @@ class Migration(migrations.Migration):
                         default=list, help_text="Timestamps of negative moments"
                     ),
                 ),
-                ("engagement_score", models.FloatField(blank=True, null=True)),
+                ("engagement_score", models.FloatField(blank=True)),
                 (
                     "talk_ratio",
                     models.JSONField(
@@ -602,16 +602,16 @@ class Migration(migrations.Migration):
                 ("presentation_score", models.IntegerField(default=0)),
                 ("objection_handling_score", models.IntegerField(default=0)),
                 ("closing_score", models.IntegerField(default=0)),
-                ("talk_to_listen_ratio", models.FloatField(blank=True, null=True)),
+                ("talk_to_listen_ratio", models.FloatField(blank=True)),
                 (
                     "longest_monologue_seconds",
-                    models.IntegerField(blank=True, null=True),
+                    models.IntegerField(blank=True),
                 ),
                 ("question_count", models.IntegerField(default=0)),
-                ("words_per_minute", models.IntegerField(blank=True, null=True)),
+                ("words_per_minute", models.IntegerField(blank=True)),
                 ("filler_word_count", models.IntegerField(default=0)),
                 ("filler_words_used", models.JSONField(default=list)),
-                ("customer_engagement_score", models.FloatField(blank=True, null=True)),
+                ("customer_engagement_score", models.FloatField(blank=True)),
                 ("interruption_count", models.IntegerField(default=0)),
                 ("mentioned_value_prop", models.BooleanField(default=False)),
                 ("asked_discovery_questions", models.BooleanField(default=False)),
@@ -655,11 +655,11 @@ class Migration(migrations.Migration):
                         blank=True, help_text="Name from transcript", max_length=200
                     ),
                 ),
-                ("due_date", models.DateField(blank=True, null=True)),
+                ("due_date", models.DateField(blank=True)),
                 (
                     "mentioned_at_timestamp",
                     models.IntegerField(
-                        blank=True, help_text="Seconds into recording", null=True
+                        blank=True, help_text="Seconds into recording"
                     ),
                 ),
                 (

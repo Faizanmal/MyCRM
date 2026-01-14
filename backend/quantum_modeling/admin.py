@@ -1,10 +1,11 @@
 from django.contrib import admin
+
 from .models import (
-    QuantumSimulation,
     InteractionPath,
-    WhatIfScenario,
+    IoTDataFeed,
     QuantumModelRegistry,
-    IoTDataFeed
+    QuantumSimulation,
+    WhatIfScenario,
 )
 
 

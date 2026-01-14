@@ -43,13 +43,13 @@ class Migration(migrations.Migration):
                 (
                     "logo",
                     models.ImageField(
-                        blank=True, null=True, upload_to="organization_logos/"
+                        blank=True, upload_to="organization_logos/"
                     ),
                 ),
-                ("website", models.URLField(blank=True, max_length=500, null=True)),
+                ("website", models.URLField(blank=True, max_length=500)),
                 ("email", models.EmailField(max_length=254)),
-                ("phone", models.CharField(blank=True, max_length=20, null=True)),
-                ("address", models.TextField(blank=True, null=True)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("address", models.TextField(blank=True)),
                 (
                     "status",
                     models.CharField(
@@ -81,15 +81,15 @@ class Migration(migrations.Migration):
                 ("max_storage_mb", models.PositiveIntegerField(default=500)),
                 (
                     "billing_email",
-                    models.EmailField(blank=True, max_length=254, null=True),
+                    models.EmailField(blank=True, max_length=254),
                 ),
                 (
                     "stripe_customer_id",
-                    models.CharField(blank=True, max_length=100, null=True),
+                    models.CharField(blank=True, max_length=100),
                 ),
-                ("subscription_start", models.DateField(blank=True, null=True)),
-                ("subscription_end", models.DateField(blank=True, null=True)),
-                ("trial_ends_at", models.DateField(blank=True, null=True)),
+                ("subscription_start", models.DateField(blank=True)),
+                ("subscription_end", models.DateField(blank=True)),
+                ("trial_ends_at", models.DateField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("settings", models.JSONField(blank=True, default=dict)),
@@ -153,7 +153,7 @@ class Migration(migrations.Migration):
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("expires_at", models.DateTimeField()),
-                ("accepted_at", models.DateTimeField(blank=True, null=True)),
+                ("accepted_at", models.DateTimeField(blank=True)),
                 (
                     "invited_by",
                     models.ForeignKey(

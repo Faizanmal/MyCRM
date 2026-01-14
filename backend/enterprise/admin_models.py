@@ -227,17 +227,17 @@ class CustomField(models.Model):
 
     # Field options
     options = models.JSONField(default=list)  # For select/multiselect
-    default_value = models.JSONField(null=True, blank=True)
+    default_value = models.JSONField(blank=True)
     placeholder = models.CharField(max_length=200, blank=True)
     help_text = models.TextField(blank=True)
 
     # Validation
     is_required = models.BooleanField(default=False)
     is_unique = models.BooleanField(default=False)
-    min_value = models.FloatField(null=True, blank=True)
-    max_value = models.FloatField(null=True, blank=True)
-    min_length = models.PositiveIntegerField(null=True, blank=True)
-    max_length = models.PositiveIntegerField(null=True, blank=True)
+    min_value = models.FloatField(blank=True)
+    max_value = models.FloatField(blank=True)
+    min_length = models.PositiveIntegerField(blank=True)
+    max_length = models.PositiveIntegerField(blank=True)
     regex_pattern = models.CharField(max_length=500, blank=True)
 
     # Lookup configuration (for lookup type)
@@ -291,11 +291,11 @@ class CustomFieldValue(models.Model):
 
     # Value storage (use appropriate field based on type)
     value_text = models.TextField(blank=True)
-    value_number = models.FloatField(null=True, blank=True)
+    value_number = models.FloatField(blank=True)
     value_boolean = models.BooleanField(null=True)
-    value_date = models.DateField(null=True, blank=True)
-    value_datetime = models.DateTimeField(null=True, blank=True)
-    value_json = models.JSONField(null=True, blank=True)  # For multiselect, lookup
+    value_date = models.DateField(blank=True)
+    value_datetime = models.DateTimeField(blank=True)
+    value_json = models.JSONField(blank=True)  # For multiselect, lookup
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -333,7 +333,7 @@ class SystemConfiguration(models.Model):
     )
 
     # Validation
-    allowed_values = models.JSONField(null=True, blank=True)  # For enum-like settings
+    allowed_values = models.JSONField(blank=True)  # For enum-like settings
 
     # Access control
     is_public = models.BooleanField(default=False)  # Whether exposed to frontend
@@ -429,8 +429,8 @@ class ScheduledTask(models.Model):
         ]
     )
     cron_expression = models.CharField(max_length=100, blank=True)
-    interval_seconds = models.PositiveIntegerField(null=True, blank=True)
-    run_at = models.DateTimeField(null=True, blank=True)  # For one-time
+    interval_seconds = models.PositiveIntegerField(blank=True)
+    run_at = models.DateTimeField(blank=True)  # For one-time
 
     # Status
     is_active = models.BooleanField(default=True)
@@ -489,7 +489,7 @@ class TaskExecution(models.Model):
     duration_seconds = models.FloatField(null=True)
 
     # Results
-    result = models.JSONField(null=True, blank=True)
+    result = models.JSONField(blank=True)
     error_message = models.TextField(blank=True)
     error_traceback = models.TextField(blank=True)
 

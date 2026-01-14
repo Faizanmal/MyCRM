@@ -421,7 +421,7 @@ class CollaborationSessionService:
         entity_id: UUID,
         user_id: UUID,
         **options
-    ) -> 'CollaborationSession':
+    ) -> str:
         """Create a new collaboration session."""
         from .realtime_models import CollaborationSession, SessionParticipant
 
@@ -447,7 +447,7 @@ class CollaborationSessionService:
         entity_type: str,
         entity_id: UUID,
         user_id: UUID
-    ) -> tuple['CollaborationSession', bool]:
+    ) -> tuple[str, bool]:
         """Get existing active session or create new one."""
         from .realtime_models import CollaborationSession
 
@@ -467,7 +467,7 @@ class CollaborationSessionService:
 
     @staticmethod
     @transaction.atomic
-    def join_session(session_id: UUID, user_id: UUID, role: str = 'editor') -> 'SessionParticipant':
+    def join_session(session_id: UUID, user_id: UUID, role: str = 'editor') -> str:
         """Join an existing session."""
         from .realtime_models import CollaborationSession, SessionParticipant
 
@@ -581,7 +581,7 @@ class LockService:
         lock_type: str = 'exclusive',
         duration: timedelta | None = None,
         session_id: UUID | None = None
-    ) -> tuple[Optional['EntityLock'], str]:
+    ) -> tuple[str | None, str]:
         """
         Attempt to acquire a lock.
         Returns (lock, error_message) - lock is None if failed.

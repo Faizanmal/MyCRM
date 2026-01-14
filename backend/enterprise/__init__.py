@@ -27,7 +27,6 @@ def __getattr__(name):
 
     # Vault Manager - Secrets Management
     if name in ('VaultClient', 'VaultConfig', 'SecretNotFoundError', 'VaultManager'):
-        from .vault_manager import SecretNotFoundError, VaultClient, VaultConfig
         if name == 'VaultManager':
             return VaultClient
         return locals()[name]
@@ -36,11 +35,7 @@ def __getattr__(name):
     if name in ('ZeroTrustMiddleware', 'DeviceTrustManager', 'ContinuousAuthenticator',
                 'TrustLevel', 'zero_trust_required', 'ZeroTrustPolicy'):
         from .zero_trust import (
-            ContinuousAuthenticator,
-            DeviceTrustManager,
             TrustLevel,
-            ZeroTrustMiddleware,
-            zero_trust_required,
         )
         if name == 'ZeroTrustPolicy':
             return TrustLevel
@@ -51,12 +46,8 @@ def __getattr__(name):
                 'setup_observability', 'trace', 'track_metric',
                 'MetricsCollector', 'TracingManager'):
         from .observability import (
-            BusinessMetrics,
             DistributedTracer,
             PrometheusMetrics,
-            setup_observability,
-            trace,
-            track_metric,
         )
         if name == 'MetricsCollector':
             return PrometheusMetrics
@@ -67,7 +58,6 @@ def __getattr__(name):
     # MLOps
     if name in ('ModelRegistry', 'FeatureStore', 'ABTestManager',
                 'ModelVersion', 'Experiment', 'MLOpsManager'):
-        from .mlops import ABTestManager, Experiment, FeatureStore, ModelRegistry, ModelVersion
         if name == 'MLOpsManager':
             return ModelRegistry
         return locals()[name]
@@ -78,9 +68,6 @@ def __getattr__(name):
                 'ComplianceEngine', 'AuditAutomation'):
         from .compliance import (
             ComplianceChecker,
-            ComplianceFramework,
-            ComplianceReporter,
-            ComplianceStatus,
             EvidenceCollector,
         )
         if name == 'ComplianceEngine':
@@ -91,7 +78,6 @@ def __getattr__(name):
 
     # AI Services
     if name in ('AIAssistant', 'AIConfig', 'ConversationContext'):
-        from .ai_services import AIAssistant, AIConfig, ConversationContext
         return locals()[name]
 
     # Caching
@@ -99,15 +85,6 @@ def __getattr__(name):
                 'CacheStampedeProtection', 'CircuitBreaker', 'cached',
                 'cache_invalidate', 'CachedModelMixin'):
         from .caching import (
-            CachedModelMixin,
-            CacheManager,
-            CacheStampedeProtection,
-            CircuitBreaker,
-            InMemoryCache,
-            MultiTierCache,
-            RedisCache,
-            cache_invalidate,
-            cached,
         )
         return locals()[name]
 
@@ -125,17 +102,6 @@ def __getattr__(name):
                 'DatabaseHealthMonitor', 'QueryOptimizer', 'use_primary',
                 'log_slow_queries', 'query_timer'):
         from .database import (
-            ConnectionPoolManager,
-            DatabaseHealthMonitor,
-            PartitionManager,
-            QueryAnalyzer,
-            QueryOptimizer,
-            ReadReplicaRouter,
-            ReplicaContext,
-            SlowQueryLogger,
-            log_slow_queries,
-            query_timer,
-            use_primary,
         )
         return locals()[name]
 
@@ -164,7 +130,6 @@ def __getattr__(name):
         return locals()[name]
 
     raise AttributeError(f"module 'enterprise' has no attribute '{name}'")
-
 
 __all__ = [
     # Version
@@ -262,7 +227,6 @@ __all__ = [
     'StartupView',
 ]
 
-
 def setup_enterprise(settings_module=None):
     """
     Initialize all enterprise features.
@@ -281,7 +245,6 @@ def setup_enterprise(settings_module=None):
 
     try:
         # Setup observability
-        from .observability import setup_observability
         setup_observability()
         logger.info("Enterprise observability initialized")
 

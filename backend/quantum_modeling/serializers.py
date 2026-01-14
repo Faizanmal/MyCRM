@@ -1,10 +1,11 @@
 from rest_framework import serializers
+
 from .models import (
-    QuantumSimulation, 
-    InteractionPath, 
-    WhatIfScenario, 
+    InteractionPath,
+    IoTDataFeed,
     QuantumModelRegistry,
-    IoTDataFeed
+    QuantumSimulation,
+    WhatIfScenario,
 )
 
 
@@ -24,7 +25,7 @@ class QuantumSimulationSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     simulation_type_display = serializers.CharField(source='get_simulation_type_display', read_only=True)
-    
+
     class Meta:
         model = QuantumSimulation
         fields = [
@@ -52,12 +53,12 @@ class QuantumSimulationCreateSerializer(serializers.ModelSerializer):
             'input_parameters', 'data_sources', 'qubits_requested',
             'entanglement_depth', 'shot_count'
         ]
-    
+
     def validate_qubits_requested(self, value):
         if value < 5 or value > 50:
             raise serializers.ValidationError("Qubits must be between 5 and 50")
         return value
-    
+
     def validate_shot_count(self, value):
         if value < 100 or value > 10000:
             raise serializers.ValidationError("Shot count must be between 100 and 10000")
@@ -66,7 +67,7 @@ class QuantumSimulationCreateSerializer(serializers.ModelSerializer):
 
 class WhatIfScenarioSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
-    
+
     class Meta:
         model = WhatIfScenario
         fields = [
@@ -97,7 +98,7 @@ class QuantumModelRegistrySerializer(serializers.ModelSerializer):
 
 class IoTDataFeedSerializer(serializers.ModelSerializer):
     feed_type_display = serializers.CharField(source='get_feed_type_display', read_only=True)
-    
+
     class Meta:
         model = IoTDataFeed
         fields = [

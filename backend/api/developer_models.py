@@ -48,7 +48,7 @@ class APIKey(models.Model):
 
     # Validity
     is_active = models.BooleanField(default=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
     last_used_at = models.DateTimeField(null=True)
 
     # Usage tracking
@@ -526,7 +526,7 @@ class AppInstallation(models.Model):
     # OAuth tokens would be stored separately in a secure token store
 
     installed_at = models.DateTimeField(auto_now_add=True)
-    uninstalled_at = models.DateTimeField(null=True, blank=True)
+    uninstalled_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'api_app_installation'

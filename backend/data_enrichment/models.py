@@ -92,13 +92,13 @@ class EnrichmentProfile(models.Model):
     contact = models.OneToOneField(
         'contact_management.Contact',
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='enrichment_profile'
     )
     lead = models.OneToOneField(
         'lead_management.Lead',
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='enrichment_profile'
     )
 
@@ -142,7 +142,7 @@ class EnrichmentProfile(models.Model):
     skills = models.JSONField(default=list)
 
     # Enrichment metadata
-    last_enriched_at = models.DateTimeField(null=True, blank=True)
+    last_enriched_at = models.DateTimeField(blank=True)
     enrichment_sources = models.JSONField(default=list)
     data_freshness_score = models.FloatField(default=1.0)
 
@@ -183,7 +183,7 @@ class CompanyEnrichment(models.Model):
     name = models.CharField(max_length=300, blank=True)
     legal_name = models.CharField(max_length=300, blank=True)
     description = models.TextField(blank=True)
-    founded_year = models.IntegerField(null=True, blank=True)
+    founded_year = models.IntegerField(blank=True)
 
     # Classification
     industry = models.CharField(max_length=200, blank=True)
@@ -192,11 +192,11 @@ class CompanyEnrichment(models.Model):
     sector = models.CharField(max_length=100, blank=True)
 
     # Size and financials
-    employee_count = models.IntegerField(null=True, blank=True)
+    employee_count = models.IntegerField(blank=True)
     employee_range = models.CharField(max_length=20, choices=COMPANY_SIZE_CHOICES, blank=True)
-    annual_revenue = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    annual_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
     revenue_range = models.CharField(max_length=100, blank=True)
-    funding_total = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    funding_total = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
     funding_rounds = models.JSONField(default=list)
 
     # Location
@@ -231,13 +231,13 @@ class CompanyEnrichment(models.Model):
     tech_categories = models.JSONField(default=dict)
 
     # Metrics
-    alexa_rank = models.IntegerField(null=True, blank=True)
-    monthly_visits = models.BigIntegerField(null=True, blank=True)
-    traffic_rank = models.IntegerField(null=True, blank=True)
+    alexa_rank = models.IntegerField(blank=True)
+    monthly_visits = models.BigIntegerField(blank=True)
+    traffic_rank = models.IntegerField(blank=True)
 
     # Enrichment metadata
     enrichment_score = models.IntegerField(default=0)
-    last_enriched_at = models.DateTimeField(null=True, blank=True)
+    last_enriched_at = models.DateTimeField(blank=True)
     enrichment_sources = models.JSONField(default=list)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -330,13 +330,13 @@ class IntentSignal(models.Model):
     company = models.ForeignKey(
         CompanyEnrichment,
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='intent_signals'
     )
     enrichment_profile = models.ForeignKey(
         EnrichmentProfile,
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='intent_signals'
     )
 
@@ -355,15 +355,15 @@ class IntentSignal(models.Model):
 
     # Timing
     detected_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     # Action taken
     was_actioned = models.BooleanField(default=False)
     actioned_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User, on_delete=models.SET_NULL, blank=True,
         related_name='actioned_intent_signals'
     )
-    actioned_at = models.DateTimeField(null=True, blank=True)
+    actioned_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'intent_signals'
@@ -415,7 +415,7 @@ class NewsAlert(models.Model):
     # Source
     source_name = models.CharField(max_length=200, blank=True)
     source_url = models.URLField(blank=True)
-    published_at = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(blank=True)
 
     # Analysis
     sentiment = models.CharField(max_length=20, choices=SENTIMENT_CHOICES, default='neutral')
@@ -434,10 +434,10 @@ class NewsAlert(models.Model):
     # Status
     is_read = models.BooleanField(default=False)
     read_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User, on_delete=models.SET_NULL, blank=True,
         related_name='read_news_alerts'
     )
-    read_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -524,12 +524,12 @@ class EnrichmentJob(models.Model):
     failed_records = models.IntegerField(default=0)
 
     # Timing
-    started_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     # User who initiated
     initiated_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User, on_delete=models.SET_NULL, blank=True,
         related_name='enrichment_jobs'
     )
 
@@ -590,10 +590,10 @@ class EnrichmentRule(models.Model):
 
     # Stats
     times_triggered = models.IntegerField(default=0)
-    last_triggered_at = models.DateTimeField(null=True, blank=True)
+    last_triggered_at = models.DateTimeField(blank=True)
 
     created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True,
+        User, on_delete=models.SET_NULL,
         related_name='enrichment_rules'
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -640,18 +640,18 @@ class SocialProfile(models.Model):
     avatar_url = models.URLField(blank=True)
 
     # Metrics
-    followers_count = models.IntegerField(null=True, blank=True)
-    following_count = models.IntegerField(null=True, blank=True)
-    connections_count = models.IntegerField(null=True, blank=True)
-    posts_count = models.IntegerField(null=True, blank=True)
+    followers_count = models.IntegerField(blank=True)
+    following_count = models.IntegerField(blank=True)
+    connections_count = models.IntegerField(blank=True)
+    posts_count = models.IntegerField(blank=True)
 
     # Activity
-    last_active = models.DateTimeField(null=True, blank=True)
+    last_active = models.DateTimeField(blank=True)
     recent_posts = models.JSONField(default=list)
     interests = models.JSONField(default=list)
 
     # Engagement
-    engagement_rate = models.FloatField(null=True, blank=True)
+    engagement_rate = models.FloatField(blank=True)
 
     last_synced_at = models.DateTimeField(auto_now=True)
 
@@ -675,30 +675,30 @@ class FinancialData(models.Model):
     )
 
     # Revenue
-    annual_revenue = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    annual_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
     revenue_currency = models.CharField(max_length=3, default='USD')
-    revenue_year = models.IntegerField(null=True, blank=True)
-    revenue_growth_rate = models.FloatField(null=True, blank=True)
+    revenue_year = models.IntegerField(blank=True)
+    revenue_growth_rate = models.FloatField(blank=True)
 
     # Funding
-    total_funding = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    total_funding = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
     last_funding_round = models.CharField(max_length=50, blank=True)
-    last_funding_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    last_funding_date = models.DateField(null=True, blank=True)
+    last_funding_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
+    last_funding_date = models.DateField(blank=True)
     investors = models.JSONField(default=list)
 
     # Valuation
-    estimated_valuation = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    valuation_date = models.DateField(null=True, blank=True)
+    estimated_valuation = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
+    valuation_date = models.DateField(blank=True)
 
     # Market
-    market_cap = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    market_cap = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
     stock_symbol = models.CharField(max_length=10, blank=True)
     stock_exchange = models.CharField(max_length=20, blank=True)
 
     # Credit and risk
     credit_rating = models.CharField(max_length=20, blank=True)
-    risk_score = models.IntegerField(null=True, blank=True)
+    risk_score = models.IntegerField(blank=True)
 
     last_updated_at = models.DateTimeField(auto_now=True)
     data_source = models.CharField(max_length=100, blank=True)
@@ -732,13 +732,13 @@ class EnrichmentActivity(models.Model):
     enrichment_profile = models.ForeignKey(
         EnrichmentProfile,
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='activities'
     )
     company = models.ForeignKey(
         CompanyEnrichment,
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='activities'
     )
 
@@ -746,7 +746,7 @@ class EnrichmentActivity(models.Model):
     provider = models.ForeignKey(
         EnrichmentProvider,
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Status
@@ -758,7 +758,7 @@ class EnrichmentActivity(models.Model):
     data_returned = models.JSONField(default=dict)
 
     # Performance
-    response_time_ms = models.IntegerField(null=True, blank=True)
+    response_time_ms = models.IntegerField(blank=True)
     api_credits_used = models.IntegerField(default=1)
 
     created_at = models.DateTimeField(auto_now_add=True)

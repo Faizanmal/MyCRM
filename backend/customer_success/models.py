@@ -38,8 +38,8 @@ class CustomerAccount(models.Model):
     # Revenue
     arr = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # Annual Recurring Revenue
     mrr = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # Monthly
-    contract_start = models.DateField(null=True, blank=True)
-    contract_end = models.DateField(null=True, blank=True)
+    contract_start = models.DateField(blank=True)
+    contract_end = models.DateField(blank=True)
 
     # Ownership
     customer_success_manager = models.ForeignKey(
@@ -55,7 +55,7 @@ class CustomerAccount(models.Model):
 
     # Onboarding
     onboarding_complete = models.BooleanField(default=False)
-    onboarding_completed_at = models.DateTimeField(null=True, blank=True)
+    onboarding_completed_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -166,8 +166,8 @@ class CustomerMilestone(models.Model):
     name = models.CharField(max_length=200, blank=True)
     description = models.TextField(blank=True)
 
-    target_date = models.DateField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    target_date = models.DateField(blank=True)
+    completed_at = models.DateTimeField(blank=True)
     is_completed = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -284,10 +284,10 @@ class PlaybookExecution(models.Model):
     )
 
     current_step = models.IntegerField(default=0)
-    next_step_at = models.DateTimeField(null=True, blank=True)
+    next_step_at = models.DateTimeField(blank=True)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     triggered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -386,7 +386,7 @@ class RenewalOpportunity(models.Model):
     risk_factors = models.JSONField(default=list)
 
     # Outcome
-    final_arr = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    final_arr = models.DecimalField(max_digits=12, decimal_places=2, blank=True)
     outcome_notes = models.TextField(blank=True)
 
     owner = models.ForeignKey(
@@ -457,7 +457,7 @@ class ExpansionOpportunity(models.Model):
     )
 
     probability = models.IntegerField(default=50)  # 0-100
-    target_close_date = models.DateField(null=True, blank=True)
+    target_close_date = models.DateField(blank=True)
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -492,7 +492,7 @@ class NPSSurvey(models.Model):
     )
 
     # Score
-    score = models.IntegerField(null=True, blank=True)  # 0-10
+    score = models.IntegerField(blank=True)  # 0-10
     feedback = models.TextField(blank=True)
 
     # Classification
@@ -507,8 +507,8 @@ class NPSSurvey(models.Model):
     )
 
     # Status
-    sent_at = models.DateTimeField(null=True, blank=True)
-    responded_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
+    responded_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -545,13 +545,13 @@ class CustomerSuccessAnalytics(models.Model):
     critical_accounts = models.IntegerField(default=0)
 
     # NPS
-    nps_score = models.IntegerField(null=True, blank=True)
+    nps_score = models.IntegerField(blank=True)
     nps_responses = models.IntegerField(default=0)
 
     # Churn/Retention
     churned_accounts = models.IntegerField(default=0)
     churned_arr = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    retention_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    retention_rate = models.DecimalField(max_digits=5, decimal_places=2)
 
     # Expansion
     expansion_arr = models.DecimalField(max_digits=12, decimal_places=2, default=0)

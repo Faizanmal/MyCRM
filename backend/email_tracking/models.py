@@ -42,7 +42,7 @@ class TrackedEmail(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='tracked_emails'
     )
 
@@ -50,7 +50,7 @@ class TrackedEmail(models.Model):
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='emails'
     )
 
@@ -63,7 +63,7 @@ class TrackedEmail(models.Model):
     template = models.ForeignKey(
         'EmailTemplate',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Tracking
@@ -71,15 +71,15 @@ class TrackedEmail(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Scheduling
-    scheduled_at = models.DateTimeField(null=True, blank=True)
+    scheduled_at = models.DateTimeField(blank=True)
 
     # Timestamps
-    sent_at = models.DateTimeField(null=True, blank=True)
-    delivered_at = models.DateTimeField(null=True, blank=True)
-    first_opened_at = models.DateTimeField(null=True, blank=True)
-    last_opened_at = models.DateTimeField(null=True, blank=True)
-    first_clicked_at = models.DateTimeField(null=True, blank=True)
-    replied_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
+    delivered_at = models.DateTimeField(blank=True)
+    first_opened_at = models.DateTimeField(blank=True)
+    last_opened_at = models.DateTimeField(blank=True)
+    first_clicked_at = models.DateTimeField(blank=True)
+    replied_at = models.DateTimeField(blank=True)
 
     # Counts
     open_count = models.IntegerField(default=0)
@@ -90,7 +90,7 @@ class TrackedEmail(models.Model):
     in_reply_to = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='replies'
     )
 
@@ -170,7 +170,7 @@ class EmailEvent(models.Model):
     clicked_url = models.URLField(blank=True)
 
     # Client info
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
     device_type = models.CharField(max_length=50, blank=True)  # desktop, mobile, tablet
     email_client = models.CharField(max_length=100, blank=True)  # Gmail, Outlook, etc.
@@ -310,7 +310,7 @@ class SequenceStep(models.Model):
     step_type = models.CharField(max_length=20, choices=STEP_TYPES, default='email')
 
     # For email steps
-    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL, blank=True)
     subject_override = models.CharField(max_length=500, blank=True)
     body_override = models.TextField(blank=True)
 
@@ -373,17 +373,17 @@ class SequenceEnrollment(models.Model):
         related_name='tracking_sequence_enrollments'
     )
 
-    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
 
     # Progress
     current_step = models.IntegerField(default=1)
-    next_action_at = models.DateTimeField(null=True, blank=True)
+    next_action_at = models.DateTimeField(blank=True)
 
     # Timestamps
     enrolled_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    exited_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
+    exited_at = models.DateTimeField(blank=True)
     exit_reason = models.CharField(max_length=200, blank=True)
 
     class Meta:
@@ -423,7 +423,7 @@ class EmailAnalytics(models.Model):
 
     # Best performing
     best_subject = models.CharField(max_length=500, blank=True)
-    best_send_time = models.TimeField(null=True, blank=True)
+    best_send_time = models.TimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

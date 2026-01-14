@@ -78,10 +78,10 @@ class Webhook(models.Model):
     total_deliveries = models.IntegerField(default=0)
     successful_deliveries = models.IntegerField(default=0)
     failed_deliveries = models.IntegerField(default=0)
-    last_delivery_at = models.DateTimeField(null=True, blank=True)
+    last_delivery_at = models.DateTimeField(blank=True)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -122,18 +122,18 @@ class WebhookDelivery(models.Model):
 
     # Delivery status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    status_code = models.IntegerField(null=True, blank=True)
+    status_code = models.IntegerField(blank=True)
     response_body = models.TextField(blank=True)
     error_message = models.TextField(blank=True)
 
     # Retry info
     attempts = models.IntegerField(default=0)
-    next_retry_at = models.DateTimeField(null=True, blank=True)
+    next_retry_at = models.DateTimeField(blank=True)
 
     # Timing
     created_at = models.DateTimeField(auto_now_add=True)
-    delivered_at = models.DateTimeField(null=True, blank=True)
-    duration_ms = models.IntegerField(null=True, blank=True, help_text="Response time in milliseconds")
+    delivered_at = models.DateTimeField(blank=True)
+    duration_ms = models.IntegerField(blank=True, help_text="Response time in milliseconds")
 
     class Meta:
         db_table = 'crm_webhook_deliveries'
@@ -179,7 +179,7 @@ class ThirdPartyIntegration(models.Model):
     # OAuth credentials
     access_token = models.TextField(blank=True)
     refresh_token = models.TextField(blank=True)
-    token_expires_at = models.DateTimeField(null=True, blank=True)
+    token_expires_at = models.DateTimeField(blank=True)
 
     # API credentials
     api_key = models.CharField(max_length=255, blank=True)
@@ -194,14 +194,14 @@ class ThirdPartyIntegration(models.Model):
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     is_active = models.BooleanField(default=True)
-    last_sync_at = models.DateTimeField(null=True, blank=True)
+    last_sync_at = models.DateTimeField(blank=True)
 
     # Error tracking
     error_message = models.TextField(blank=True)
     error_count = models.IntegerField(default=0)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='hub_integrations')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='hub_integrations')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -246,8 +246,8 @@ class IntegrationLog(models.Model):
     description = models.TextField()
 
     # Request/Response data
-    request_data = models.JSONField(null=True, blank=True)
-    response_data = models.JSONField(null=True, blank=True)
+    request_data = models.JSONField(blank=True)
+    response_data = models.JSONField(blank=True)
 
     # Status
     success = models.BooleanField(default=True)
@@ -320,7 +320,7 @@ class APIEndpoint(models.Model):
     failed_calls = models.IntegerField(default=0)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

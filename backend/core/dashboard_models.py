@@ -72,7 +72,7 @@ class DashboardWidget(models.Model):
 
     # Refresh settings
     refresh_interval = models.IntegerField(choices=REFRESH_INTERVALS, default=300)
-    last_refreshed_at = models.DateTimeField(null=True, blank=True)
+    last_refreshed_at = models.DateTimeField(blank=True)
 
     # Permissions
     is_public = models.BooleanField(default=False, help_text="Available to all users")
@@ -166,7 +166,7 @@ class WidgetDataCache(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     widget = models.ForeignKey(DashboardWidget, on_delete=models.CASCADE, related_name='cached_data')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, help_text="User-specific cache")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, help_text="User-specific cache")
 
     # Cached data
     data = models.JSONField()

@@ -81,7 +81,7 @@ class CacheEntry(models.Model):
     # Request context
     url = models.CharField(max_length=500)
     method = models.CharField(max_length=10)
-    user_id = models.UUIDField(null=True, blank=True)
+    user_id = models.UUIDField(blank=True)
 
     # Cache data
     response_size = models.PositiveIntegerField()

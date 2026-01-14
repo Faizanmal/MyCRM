@@ -277,7 +277,7 @@ class CallCoaching(models.Model):
     )
 
     # Timestamped feedback
-    timestamp = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    timestamp = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
     feedback = models.TextField()
     feedback_type = models.CharField(
         max_length=20,

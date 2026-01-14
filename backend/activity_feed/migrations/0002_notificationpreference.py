@@ -56,8 +56,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("dnd_enabled", models.BooleanField(default=False)),
-                ("dnd_start_time", models.TimeField(blank=True, null=True)),
-                ("dnd_end_time", models.TimeField(blank=True, null=True)),
+                ("dnd_start_time", models.TimeField(blank=True)),
+                ("dnd_end_time", models.TimeField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (

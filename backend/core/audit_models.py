@@ -30,7 +30,7 @@ class AuditTrail(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     # Actor
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='audit_trails')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='audit_trails')
     user_email = models.EmailField(help_text="Store email in case user is deleted")
 
     # Target object
@@ -49,7 +49,7 @@ class AuditTrail(models.Model):
     new_values = models.JSONField(default=dict, help_text="New values")
 
     # Request metadata
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(blank=True)
     user_agent = models.TextField(blank=True)
     request_id = models.UUIDField(default=uuid.uuid4, help_text="Group related changes")
 
@@ -89,13 +89,13 @@ class FieldHistory(models.Model):
     field_label = models.CharField(max_length=100, blank=True)
 
     # Values
-    old_value = models.TextField(blank=True, null=True)
-    new_value = models.TextField(blank=True, null=True)
+    old_value = models.TextField(blank=True)
+    new_value = models.TextField(blank=True)
     old_value_display = models.TextField(blank=True, help_text="Human-readable old value")
     new_value_display = models.TextField(blank=True, help_text="Human-readable new value")
 
     # Change metadata
-    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     changed_at = models.DateTimeField(default=timezone.now)
     audit_trail = models.ForeignKey(AuditTrail, on_delete=models.CASCADE, related_name='field_changes')
 
@@ -127,7 +127,7 @@ class DataSnapshot(models.Model):
     version = models.IntegerField(default=1, help_text="Version number")
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(default=timezone.now)
     note = models.TextField(blank=True, help_text="Optional note about this snapshot")
 

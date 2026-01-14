@@ -40,7 +40,7 @@ class ScoringRule(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='scoring_rules_created')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='scoring_rules_created')
 
     class Meta:
         db_table = 'lead_scoring_rule'
@@ -68,7 +68,7 @@ class QualificationCriteria(models.Model):
     minimum_score = models.IntegerField(validators=[MinValueValidator(0)])
     required_fields = models.JSONField(default=list, help_text="List of required field names")
     required_actions = models.JSONField(default=list, help_text="List of required actions (e.g., ['email_opened', 'form_submitted'])")
-    time_constraint_days = models.IntegerField(null=True, blank=True, help_text="Days since lead creation")
+    time_constraint_days = models.IntegerField(blank=True, help_text="Days since lead creation")
     is_active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -90,7 +90,7 @@ class LeadScore(models.Model):
 
     lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, related_name='scores')
     score = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
-    previous_score = models.IntegerField(null=True, blank=True)
+    previous_score = models.IntegerField(blank=True)
     score_breakdown = models.JSONField(default=dict, help_text="Points by category")
     qualification_stage = models.CharField(max_length=50, blank=True)
 
@@ -149,11 +149,11 @@ class QualificationWorkflow(models.Model):
     priority = models.IntegerField(default=0)
 
     execution_count = models.IntegerField(default=0)
-    last_executed_at = models.DateTimeField(null=True, blank=True)
+    last_executed_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='workflows_created')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='workflows_created')
 
     class Meta:
         db_table = 'lead_qualification_workflow'
@@ -187,7 +187,7 @@ class WorkflowExecution(models.Model):
     error_message = models.TextField(blank=True)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'lead_workflow_execution'
@@ -230,7 +230,7 @@ class LeadEnrichmentData(models.Model):
 
     enriched_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
-    confidence_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    confidence_score = models.DecimalField(max_digits=5, decimal_places=2, blank=True)
 
     class Meta:
         db_table = 'lead_enrichment_data'

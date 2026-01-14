@@ -1,7 +1,13 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import (DataWalletViewSet, DataAccessGrantViewSet, NFTLoyaltyRewardViewSet,
-                    SmartContractViewSet, BlockchainTransactionViewSet)
+
+from .views import (
+                    BlockchainTransactionViewSet,
+                    DataAccessGrantViewSet,
+                    DataWalletViewSet,
+                    NFTLoyaltyRewardViewSet,
+                    SmartContractViewSet,
+)
 
 router = DefaultRouter()
 router.register(r'wallets', DataWalletViewSet, basename='data-wallet')

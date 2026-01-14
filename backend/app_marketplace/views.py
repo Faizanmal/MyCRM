@@ -2,23 +2,29 @@
 App Marketplace Views
 """
 
-from django.db.models import Q, Avg
-from django.utils import timezone
+from django.db.models import Avg, Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import (
-    AppCategory, AppDeveloper, MarketplaceApp, AppVersion,
-    AppInstallation, AppReview
+    AppCategory,
+    AppInstallation,
+    AppReview,
+    AppVersion,
+    MarketplaceApp,
 )
 from .serializers import (
-    AppCategorySerializer, AppDeveloperSerializer,
-    MarketplaceAppListSerializer, MarketplaceAppDetailSerializer,
-    AppVersionSerializer, AppInstallationSerializer, AppInstallSerializer,
-    AppReviewSerializer, CreateReviewSerializer
+    AppCategorySerializer,
+    AppInstallationSerializer,
+    AppInstallSerializer,
+    AppReviewSerializer,
+    AppVersionSerializer,
+    CreateReviewSerializer,
+    MarketplaceAppDetailSerializer,
+    MarketplaceAppListSerializer,
 )
 
 
@@ -37,24 +43,24 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = MarketplaceApp.objects.filter(status='approved')
-        
+
         # Filters
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category__slug=category)
-        
+
         app_type = self.request.query_params.get('type')
         if app_type:
             queryset = queryset.filter(app_type=app_type)
-        
+
         pricing = self.request.query_params.get('pricing')
         if pricing:
             queryset = queryset.filter(pricing_type=pricing)
-        
+
         featured = self.request.query_params.get('featured')
         if featured == 'true':
             queryset = queryset.filter(is_featured=True)
-        
+
         # Search
         search = self.request.query_params.get('search')
         if search:
@@ -63,7 +69,7 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
                 Q(description__icontains=search) |
                 Q(tags__contains=[search])
             )
-        
+
         # Sort
         sort = self.request.query_params.get('sort', 'popular')
         if sort == 'popular':
@@ -74,7 +80,7 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.order_by('-published_at')
         elif sort == 'name':
             queryset = queryset.order_by('name')
-        
+
         return queryset
 
     def get_serializer_class(self):
@@ -94,7 +100,7 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
         """Get reviews for an app"""
         app = self.get_object()
         reviews = AppReview.objects.filter(app=app, is_approved=True)
-        
+
         sort = request.query_params.get('sort', 'recent')
         if sort == 'helpful':
             reviews = reviews.order_by('-helpful_count')
@@ -102,7 +108,7 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
             reviews = reviews.order_by('-rating')
         elif sort == 'rating_low':
             reviews = reviews.order_by('rating')
-        
+
         return Response(AppReviewSerializer(reviews, many=True).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
@@ -111,19 +117,19 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
         app = self.get_object()
         serializer = AppInstallSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         # Check if already installed
         existing = AppInstallation.objects.filter(
             app=app,
             installed_by=request.user
         ).first()
-        
+
         if existing and existing.status == 'active':
             return Response(
                 {"error": "App is already installed"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Create or update installation
         installation, created = AppInstallation.objects.update_or_create(
             app=app,
@@ -134,20 +140,20 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
                 'status': 'active'
             }
         )
-        
+
         # Update app install count
         app.install_count = AppInstallation.objects.filter(
             app=app, status='active'
         ).count()
         app.save()
-        
+
         return Response(AppInstallationSerializer(installation).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def uninstall(self, request, slug=None):
         """Uninstall an app"""
         app = self.get_object()
-        
+
         try:
             installation = AppInstallation.objects.get(
                 app=app,
@@ -155,13 +161,13 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
             )
             installation.status = 'inactive'
             installation.save()
-            
+
             # Update app install count
             app.install_count = AppInstallation.objects.filter(
                 app=app, status='active'
             ).count()
             app.save()
-            
+
             return Response({"message": "App uninstalled successfully"})
         except AppInstallation.DoesNotExist:
             return Response(
@@ -173,19 +179,19 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
     def review(self, request, slug=None):
         """Submit a review for an app"""
         app = self.get_object()
-        
+
         # Check if user has installed the app
         installation = AppInstallation.objects.filter(
             app=app,
             installed_by=request.user
         ).first()
-        
+
         if not installation:
             return Response(
                 {"error": "You must install the app before reviewing"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Check for existing review
         existing = AppReview.objects.filter(app=app, user=request.user).first()
         if existing:
@@ -193,23 +199,23 @@ class MarketplaceAppViewSet(viewsets.ReadOnlyModelViewSet):
                 {"error": "You have already reviewed this app"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         serializer = CreateReviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         review = AppReview.objects.create(
             app=app,
             user=request.user,
             installation=installation,
             **serializer.validated_data
         )
-        
+
         # Update app rating
         ratings = AppReview.objects.filter(app=app, is_approved=True)
         app.rating_count = ratings.count()
         app.rating_average = ratings.aggregate(avg=Avg('rating'))['avg'] or 0
         app.save()
-        
+
         return Response(AppReviewSerializer(review).data)
 
 
@@ -262,7 +268,7 @@ class DeveloperPortalViewSet(viewsets.ModelViewSet):
                 {"error": "App cannot be submitted in current status"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         app.status = 'pending_review'
         app.save()
         return Response({"message": "App submitted for review"})
@@ -271,22 +277,22 @@ class DeveloperPortalViewSet(viewsets.ModelViewSet):
     def publish_version(self, request, pk=None):
         """Publish a new version"""
         app = self.get_object()
-        
+
         version = request.data.get('version')
         changelog = request.data.get('changelog', '')
-        
+
         if not version:
             return Response(
                 {"error": "Version is required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         app_version = AppVersion.objects.create(
             app=app,
             version=version,
             changelog=changelog
         )
-        
+
         return Response(AppVersionSerializer(app_version).data)
 
 
@@ -297,7 +303,7 @@ class MarketplaceDashboardView(APIView):
     def get(self, request):
         """Get marketplace overview"""
         apps = MarketplaceApp.objects.filter(status='approved')
-        
+
         return Response({
             'total_apps': apps.count(),
             'categories': AppCategorySerializer(

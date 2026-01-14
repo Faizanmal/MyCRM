@@ -43,12 +43,12 @@ class AIEmailDraft(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True
+        blank=True
     )
 
     # Generation parameters
@@ -66,7 +66,7 @@ class AIEmailDraft(models.Model):
 
     # Feedback
     was_used = models.BooleanField(default=False)
-    user_rating = models.IntegerField(null=True, blank=True)  # 1-5 stars
+    user_rating = models.IntegerField(blank=True)  # 1-5 stars
     user_feedback = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -108,13 +108,13 @@ class SalesCoachAdvice(models.Model):
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.CASCADE,
-        null=True, blank=True,
+        blank=True,
         related_name='ai_advice'
     )
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.CASCADE,
-        null=True, blank=True
+        blank=True
     )
 
     # Advice
@@ -136,10 +136,10 @@ class SalesCoachAdvice(models.Model):
     # Status
     is_dismissed = models.BooleanField(default=False)
     is_completed = models.BooleanField(default=False)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'sales_coach_advice'
@@ -184,7 +184,7 @@ class ObjectionResponse(models.Model):
 
     # Ownership
     is_system = models.BooleanField(default=False)  # Built-in vs user-created
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -284,7 +284,7 @@ class DealInsight(models.Model):
     is_actioned = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'deal_insights'
@@ -381,7 +381,7 @@ class PersonaProfile(models.Model):
     deals_lost = models.IntegerField(default=0)
     avg_deal_size = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
     is_system = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

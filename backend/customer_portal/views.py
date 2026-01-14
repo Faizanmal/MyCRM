@@ -15,22 +15,33 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .authentication import CustomerTokenAuthentication
 from .models import (
-    CustomerAccount, SupportTicket, TicketComment,
-    CustomerOrder, KnowledgeBaseArticle, PortalNotification,
-    PortalSession
-)
-from .serializers import (
-    CustomerAccountSerializer, CustomerProfileUpdateSerializer,
-    SupportTicketListSerializer, SupportTicketDetailSerializer,
-    SupportTicketCreateSerializer, TicketCommentSerializer,
-    CustomerOrderSerializer, KnowledgeBaseArticleListSerializer,
-    KnowledgeBaseArticleDetailSerializer, PortalNotificationSerializer,
-    PortalLoginSerializer, PortalPasswordResetRequestSerializer,
-    PortalPasswordResetSerializer, TicketFeedbackSerializer
+    CustomerAccount,
+    CustomerOrder,
+    KnowledgeBaseArticle,
+    PortalNotification,
+    PortalSession,
+    SupportTicket,
+    TicketComment,
 )
 from .permissions import IsCustomerAuthenticated
-from .authentication import CustomerTokenAuthentication
+from .serializers import (
+    CustomerAccountSerializer,
+    CustomerOrderSerializer,
+    CustomerProfileUpdateSerializer,
+    KnowledgeBaseArticleDetailSerializer,
+    KnowledgeBaseArticleListSerializer,
+    PortalLoginSerializer,
+    PortalNotificationSerializer,
+    PortalPasswordResetRequestSerializer,
+    PortalPasswordResetSerializer,
+    SupportTicketCreateSerializer,
+    SupportTicketDetailSerializer,
+    SupportTicketListSerializer,
+    TicketCommentSerializer,
+    TicketFeedbackSerializer,
+)
 
 
 class PortalAuthView(APIView):
@@ -41,10 +52,10 @@ class PortalAuthView(APIView):
         """Login to customer portal"""
         serializer = PortalLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
-        
+
         try:
             customer = CustomerAccount.objects.get(email=email)
         except CustomerAccount.DoesNotExist:
@@ -52,13 +63,13 @@ class PortalAuthView(APIView):
                 {"error": "Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
+
         if customer.is_locked():
             return Response(
                 {"error": "Account is locked. Please try again later."},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Verify password (simplified - use proper password hashing in production)
         password_hash = hashlib.sha256(password.encode()).hexdigest()
         if customer.password_hash != password_hash:
@@ -70,13 +81,13 @@ class PortalAuthView(APIView):
                 {"error": "Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
+
         if not customer.is_active or not customer.portal_access_enabled:
             return Response(
                 {"error": "Account is not active"},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Create session
         session = PortalSession.objects.create(
             customer=customer,
@@ -86,9 +97,9 @@ class PortalAuthView(APIView):
             user_agent=request.META.get('HTTP_USER_AGENT', ''),
             expires_at=timezone.now() + timedelta(hours=24)
         )
-        
+
         customer.record_login()
-        
+
         return Response({
             "access_token": session.session_token,
             "refresh_token": session.refresh_token,
@@ -118,22 +129,22 @@ class PortalPasswordResetView(APIView):
         """Request password reset"""
         serializer = PortalPasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         email = serializer.validated_data['email']
-        
+
         try:
             customer = CustomerAccount.objects.get(email=email)
             # Generate reset token
             customer.password_reset_token = secrets.token_urlsafe(32)
             customer.password_reset_expires = timezone.now() + timedelta(hours=1)
             customer.save()
-            
+
             # TODO: Send email with reset link
             # send_password_reset_email(customer)
-            
+
         except CustomerAccount.DoesNotExist:
             pass  # Don't reveal if email exists
-        
+
         return Response({
             "message": "If an account exists with this email, you will receive a password reset link."
         })
@@ -142,10 +153,10 @@ class PortalPasswordResetView(APIView):
         """Reset password with token"""
         serializer = PortalPasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         token = serializer.validated_data['token']
         password = serializer.validated_data['password']
-        
+
         try:
             customer = CustomerAccount.objects.get(
                 password_reset_token=token,
@@ -156,17 +167,17 @@ class PortalPasswordResetView(APIView):
                 {"error": "Invalid or expired token"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         customer.password_hash = hashlib.sha256(password.encode()).hexdigest()
         customer.password_reset_token = None
         customer.password_reset_expires = None
         customer.failed_login_attempts = 0
         customer.locked_until = None
         customer.save()
-        
+
         # Invalidate all sessions
         PortalSession.objects.filter(customer=customer).update(is_active=False)
-        
+
         return Response({"message": "Password reset successfully"})
 
 
@@ -216,46 +227,46 @@ class SupportTicketViewSet(viewsets.ModelViewSet):
     def add_comment(self, request, pk=None):
         """Add a comment to a ticket"""
         ticket = self.get_object()
-        
+
         content = request.data.get('content')
         if not content:
             return Response(
                 {"error": "Content is required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         comment = TicketComment.objects.create(
             ticket=ticket,
             customer=request.customer,
             content=content,
             attachments=request.data.get('attachments', [])
         )
-        
+
         # Reopen ticket if it was resolved
         if ticket.status in ['resolved', 'closed']:
             ticket.status = 'open'
             ticket.save()
-        
+
         return Response(TicketCommentSerializer(comment).data)
 
     @action(detail=True, methods=['post'])
     def feedback(self, request, pk=None):
         """Submit satisfaction feedback for resolved ticket"""
         ticket = self.get_object()
-        
+
         if ticket.status not in ['resolved', 'closed']:
             return Response(
                 {"error": "Ticket must be resolved to submit feedback"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         serializer = TicketFeedbackSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         ticket.satisfaction_rating = serializer.validated_data['rating']
         ticket.satisfaction_feedback = serializer.validated_data.get('feedback', '')
         ticket.save()
-        
+
         return Response({"message": "Feedback submitted successfully"})
 
 
@@ -276,7 +287,7 @@ class KnowledgeBaseViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         queryset = KnowledgeBaseArticle.objects.filter(status='published')
-        
+
         # Search
         search = self.request.query_params.get('search')
         if search:
@@ -285,17 +296,17 @@ class KnowledgeBaseViewSet(viewsets.ReadOnlyModelViewSet):
                 Q(content__icontains=search) |
                 Q(tags__contains=[search])
             )
-        
+
         # Category filter
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category=category)
-        
+
         # Featured filter
         featured = self.request.query_params.get('featured')
         if featured == 'true':
             queryset = queryset.filter(is_featured=True)
-        
+
         return queryset
 
     def get_serializer_class(self):
@@ -315,12 +326,12 @@ class KnowledgeBaseViewSet(viewsets.ReadOnlyModelViewSet):
         """Mark article as helpful"""
         article = self.get_object()
         helpful = request.data.get('helpful', True)
-        
+
         if helpful:
             article.helpful_count += 1
         else:
             article.not_helpful_count += 1
-        
+
         article.save(update_fields=['helpful_count', 'not_helpful_count'])
         return Response({"message": "Feedback recorded"})
 
@@ -367,26 +378,26 @@ class PortalDashboardView(APIView):
     def get(self, request):
         """Get dashboard summary"""
         customer = request.customer
-        
+
         # Get summary data
         open_tickets = SupportTicket.objects.filter(
             customer=customer,
             status__in=['open', 'in_progress', 'waiting_customer']
         ).count()
-        
+
         recent_orders = CustomerOrder.objects.filter(
             customer=customer
         ).order_by('-ordered_at')[:5]
-        
+
         unread_notifications = PortalNotification.objects.filter(
             customer=customer,
             is_read=False
         ).count()
-        
+
         recent_tickets = SupportTicket.objects.filter(
             customer=customer
         ).order_by('-updated_at')[:5]
-        
+
         return Response({
             "open_tickets": open_tickets,
             "unread_notifications": unread_notifications,

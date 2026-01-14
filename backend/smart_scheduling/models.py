@@ -101,7 +101,7 @@ class MeetingType(models.Model):
     max_future_days = models.IntegerField(default=60, help_text="Max days in future")
 
     # Slots per day
-    max_per_day = models.IntegerField(null=True, blank=True, help_text="Max bookings per day")
+    max_per_day = models.IntegerField(blank=True, help_text="Max bookings per day")
 
     # Customization
     color = models.CharField(max_length=7, default='#3B82F6')
@@ -218,7 +218,7 @@ class Meeting(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='meetings'
     )
 
@@ -226,7 +226,7 @@ class Meeting(models.Model):
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
-        null=True, blank=True,
+        blank=True,
         related_name='meetings'
     )
 
@@ -257,7 +257,7 @@ class Meeting(models.Model):
     # Tracking
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    cancelled_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(blank=True)
     cancellation_reason = models.TextField(blank=True)
 
     class Meta:
@@ -317,7 +317,7 @@ class MeetingReminder(models.Model):
 
     # Delivery
     scheduled_at = models.DateTimeField()
-    sent_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(blank=True)
     is_sent = models.BooleanField(default=False)
 
     # For guest or host

@@ -75,7 +75,7 @@ urlpatterns = [
     path('api/v1/data-enrichment/', include('data_enrichment.urls')),
     path('api/v1/voice-intelligence/', include('voice_intelligence.urls')),
     path('api/v1/scheduling/ai/', include('smart_scheduling.ai_urls')),
-    
+
     # Enterprise Features (New)
     path('api/v1/ai-chatbot/', include('ai_chatbot.urls')),
     path('api/v1/marketplace/', include('app_marketplace.urls')),
@@ -84,7 +84,7 @@ urlpatterns = [
     path('api/v1/security/', include('enterprise.urls')),
     path('api/v1/customer-portal/', include('customer_portal.urls')),
     path('api/v1/social-inbox/', include('social_inbox.urls')),
-    
+
     # Futuristic Next-Gen Features
     path('api/v1/quantum/', include('quantum_modeling.urls')),
     path('api/v1/web3/', include('web3_integration.urls')),

@@ -7,7 +7,7 @@ User = get_user_model()
 class Dashboard(models.Model):
     """User dashboard configurations"""
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reporting_dashboards')
     is_default = models.BooleanField(default=False)
     layout = models.JSONField(default=dict)  # Dashboard layout configuration
@@ -44,7 +44,7 @@ class Report(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     report_type = models.CharField(max_length=20, choices=REPORT_TYPE_CHOICES)
     format = models.CharField(max_length=20, choices=FORMAT_CHOICES, default='table')
 
@@ -87,8 +87,8 @@ class ReportSchedule(models.Model):
 
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='schedules')
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
-    day_of_week = models.IntegerField(null=True, blank=True)  # 0-6 (Monday-Sunday)
-    day_of_month = models.IntegerField(null=True, blank=True)  # 1-31
+    day_of_week = models.IntegerField(blank=True)  # 0-6 (Monday-Sunday)
+    day_of_month = models.IntegerField(blank=True)  # 1-31
     time = models.TimeField(default='09:00')
 
     # Recipients
@@ -96,8 +96,8 @@ class ReportSchedule(models.Model):
 
     # Status
     is_active = models.BooleanField(default=True)
-    last_run = models.DateTimeField(null=True, blank=True)
-    next_run = models.DateTimeField(null=True, blank=True)
+    last_run = models.DateTimeField(blank=True)
+    next_run = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -122,21 +122,21 @@ class Analytics(models.Model):
     ]
 
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     metric_type = models.CharField(max_length=20, choices=METRIC_TYPE_CHOICES)
 
     # Data source
     model_name = models.CharField(max_length=100)  # Django model name
-    field_name = models.CharField(max_length=100, blank=True, null=True)
+    field_name = models.CharField(max_length=100, blank=True)
     filters = models.JSONField(default=dict, blank=True)
 
     # Calculation
-    calculation = models.TextField(blank=True, null=True)  # Custom calculation logic
+    calculation = models.TextField(blank=True)  # Custom calculation logic
 
     # Time period
     period_start = models.DateTimeField()
     period_end = models.DateTimeField()
-    value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    value = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
 
     # Metadata
     metadata = models.JSONField(default=dict, blank=True)
@@ -157,14 +157,14 @@ class Analytics(models.Model):
 class KPIMetric(models.Model):
     """Key Performance Indicators"""
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True, null=True)
-    target_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    current_value = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    unit = models.CharField(max_length=50, blank=True, null=True)
+    description = models.TextField(blank=True)
+    target_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
+    current_value = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
+    unit = models.CharField(max_length=50, blank=True)
 
     # Calculation
-    calculation_method = models.TextField(blank=True, null=True)
-    data_source = models.CharField(max_length=100, blank=True, null=True)
+    calculation_method = models.TextField(blank=True)
+    data_source = models.CharField(max_length=100, blank=True)
 
     # Display
     display_order = models.IntegerField(default=0)
@@ -220,17 +220,17 @@ class DataExport(models.Model):
 
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    file_path = models.CharField(max_length=500, blank=True, null=True)
-    file_size = models.BigIntegerField(null=True, blank=True)
+    file_path = models.CharField(max_length=500, blank=True)
+    file_size = models.BigIntegerField(blank=True)
     record_count = models.IntegerField(default=0)
 
     # Error handling
-    error_message = models.TextField(blank=True, null=True)
+    error_message = models.TextField(blank=True)
 
     # Ownership
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'crm_data_exports'

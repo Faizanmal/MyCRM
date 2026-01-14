@@ -6,9 +6,15 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    ESGFrameworkViewSet, ESGMetricCategoryViewSet, ESGMetricDefinitionViewSet,
-    ESGDataEntryViewSet, ESGTargetViewSet, ESGReportViewSet,
-    CarbonFootprintViewSet, SupplierESGAssessmentViewSet, ESGDashboardView
+    CarbonFootprintViewSet,
+    ESGDashboardView,
+    ESGDataEntryViewSet,
+    ESGFrameworkViewSet,
+    ESGMetricCategoryViewSet,
+    ESGMetricDefinitionViewSet,
+    ESGReportViewSet,
+    ESGTargetViewSet,
+    SupplierESGAssessmentViewSet,
 )
 
 app_name = 'esg_reporting'

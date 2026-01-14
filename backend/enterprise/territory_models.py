@@ -32,7 +32,7 @@ class Territory(models.Model):
 
     # Hierarchy
     parent = models.ForeignKey(
-        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        'self', on_delete=models.SET_NULL, blank=True,
         related_name='sub_territories'
     )
     level = models.IntegerField(default=0)  # 0 = top level
@@ -46,22 +46,22 @@ class Territory(models.Model):
     industries = models.JSONField(default=list)
 
     # Company size criteria
-    min_employees = models.IntegerField(null=True, blank=True)
-    max_employees = models.IntegerField(null=True, blank=True)
-    min_revenue = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    max_revenue = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    min_employees = models.IntegerField(blank=True)
+    max_employees = models.IntegerField(blank=True)
+    min_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
+    max_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
 
     # Assignment
     owner = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User, on_delete=models.SET_NULL, blank=True,
         related_name='owned_territories'
     )
     team_members = models.ManyToManyField(User, blank=True, related_name='territories')
 
     # Capacity
-    max_accounts = models.IntegerField(null=True, blank=True)
+    max_accounts = models.IntegerField(blank=True)
     current_accounts = models.IntegerField(default=0)
-    max_opportunities = models.IntegerField(null=True, blank=True)
+    max_opportunities = models.IntegerField(blank=True)
     current_opportunities = models.IntegerField(default=0)
 
     # Status
@@ -116,7 +116,7 @@ class TerritoryAssignmentRule(models.Model):
 
     # Stats
     matches_count = models.IntegerField(default=0)
-    last_matched_at = models.DateTimeField(null=True, blank=True)
+    last_matched_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -142,7 +142,7 @@ class TerritoryRebalanceRequest(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='rebalance_requests')
+    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='rebalance_requests')
 
     # Scope
     territories = models.ManyToManyField(Territory, related_name='rebalance_requests')
@@ -161,14 +161,14 @@ class TerritoryRebalanceRequest(models.Model):
 
     # Approval
     reviewed_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User, on_delete=models.SET_NULL, blank=True,
         related_name='reviewed_rebalance_requests'
     )
-    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(blank=True)
     review_notes = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    applied_at = models.DateTimeField(null=True, blank=True)
+    applied_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'territory_rebalance_requests'
@@ -226,11 +226,11 @@ class Quota(models.Model):
 
     # Assignment (can be user, territory, or team)
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=True, blank=True,
+        User, on_delete=models.CASCADE, blank=True,
         related_name='quotas'
     )
     territory = models.ForeignKey(
-        Territory, on_delete=models.CASCADE, null=True, blank=True,
+        Territory, on_delete=models.CASCADE, blank=True,
         related_name='quotas'
     )
 
@@ -238,7 +238,7 @@ class Quota(models.Model):
 
     # Quota values
     target = models.DecimalField(max_digits=15, decimal_places=2)
-    stretch_target = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    stretch_target = models.DecimalField(max_digits=15, decimal_places=2, blank=True)
 
     # Achievement
     achieved = models.DecimalField(max_digits=15, decimal_places=2, default=0)
@@ -249,11 +249,11 @@ class Quota(models.Model):
     forecast_attainment = models.FloatField(default=0)
 
     # Historical context
-    previous_period_achieved = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    previous_period_achieved = models.DecimalField(max_digits=15, decimal_places=2)
     yoy_growth_target = models.FloatField(null=True)
 
     # AI recommendations
-    ai_recommended_target = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    ai_recommended_target = models.DecimalField(max_digits=15, decimal_places=2)
     ai_confidence = models.FloatField(null=True)
     ai_factors = models.JSONField(default=list)
 
@@ -295,17 +295,17 @@ class QuotaAdjustment(models.Model):
 
     # Approval
     requested_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True,
+        User, on_delete=models.SET_NULL,
         related_name='quota_adjustment_requests'
     )
     approved_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
+        User, on_delete=models.SET_NULL, blank=True,
         related_name='approved_quota_adjustments'
     )
     is_approved = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_at = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'quota_adjustments'

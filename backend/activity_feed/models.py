@@ -132,7 +132,7 @@ class Mention(models.Model):
 
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -181,7 +181,7 @@ class Notification(models.Model):
     message = models.TextField()
 
     # Related object (generic relation)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True)
     object_id = models.CharField(max_length=255, blank=True, default="")
     target = GenericForeignKey('content_type', 'object_id')
 
@@ -196,7 +196,7 @@ class Notification(models.Model):
 
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(blank=True)
 
     # Link
     action_url = models.CharField(max_length=500, blank=True)
@@ -294,8 +294,8 @@ class NotificationPreference(models.Model):
 
     # Do Not Disturb
     dnd_enabled = models.BooleanField(default=False)
-    dnd_start_time = models.TimeField(null=True, blank=True)
-    dnd_end_time = models.TimeField(null=True, blank=True)
+    dnd_start_time = models.TimeField(blank=True)
+    dnd_end_time = models.TimeField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

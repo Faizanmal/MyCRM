@@ -3,9 +3,15 @@ Customer Portal Admin Configuration
 """
 
 from django.contrib import admin
+
 from .models import (
-    CustomerAccount, SupportTicket, TicketComment,
-    CustomerOrder, KnowledgeBaseArticle, PortalNotification, PortalSession
+    CustomerAccount,
+    CustomerOrder,
+    KnowledgeBaseArticle,
+    PortalNotification,
+    PortalSession,
+    SupportTicket,
+    TicketComment,
 )
 
 
@@ -32,7 +38,7 @@ class SupportTicketAdmin(admin.ModelAdmin):
     readonly_fields = ['ticket_number', 'first_response_at', 'created_at', 'updated_at']
     date_hierarchy = 'created_at'
     inlines = [TicketCommentInline]
-    
+
     fieldsets = (
         (None, {
             'fields': ('ticket_number', 'customer', 'subject', 'description')

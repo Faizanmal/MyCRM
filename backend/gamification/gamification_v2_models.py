@@ -90,7 +90,7 @@ class UserAchievement(models.Model):
 
     # Completion
     is_completed = models.BooleanField(default=False)
-    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(blank=True)
 
     # Showcase
     is_showcased = models.BooleanField(default=False)  # Display on profile
@@ -150,7 +150,7 @@ class Challenge(models.Model):
 
     # Participation
     min_participants = models.IntegerField(default=1)
-    max_participants = models.IntegerField(null=True, blank=True)
+    max_participants = models.IntegerField(blank=True)
 
     # Status
     STATUS_CHOICES = [
@@ -205,7 +205,7 @@ class ChallengeParticipant(models.Model):
     progress_percentage = models.FloatField(default=0)
 
     # Ranking
-    rank = models.IntegerField(null=True, blank=True)
+    rank = models.IntegerField(blank=True)
 
     # Status
     is_winner = models.BooleanField(default=False)
@@ -301,7 +301,7 @@ class LeaderboardEntry(models.Model):
         null=True,
         blank=True
     )
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, blank=True)
 
     # Metrics
     METRIC_CHOICES = [
@@ -316,7 +316,7 @@ class LeaderboardEntry(models.Model):
 
     # Ranking
     rank = models.IntegerField()
-    previous_rank = models.IntegerField(null=True, blank=True)
+    previous_rank = models.IntegerField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -464,7 +464,7 @@ class Reward(models.Model):
     reward_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
 
     # Availability
-    quantity_available = models.IntegerField(null=True, blank=True)  # None = unlimited
+    quantity_available = models.IntegerField(blank=True)  # None = unlimited
 
     is_active = models.BooleanField(default=True)
 
@@ -498,7 +498,7 @@ class RewardRedemption(models.Model):
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
-    fulfilled_at = models.DateTimeField(null=True, blank=True)
+    fulfilled_at = models.DateTimeField(blank=True)
     notes = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
