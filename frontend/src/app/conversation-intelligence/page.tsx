@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { stableKey } from '@/lib/stableKey';
+
 
 interface CallRecording {
   id: number;
@@ -317,8 +319,8 @@ export default function ConversationIntelligencePage() {
                     </div>
                     
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {recording.keywords.map((keyword, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
+                      {recording.keywords.map((keyword, _idx) => (
+                        <Badge key={stableKey(keyword)} variant="secondary" className="text-xs">
                           {keyword}
                         </Badge>
                       ))}
@@ -331,8 +333,8 @@ export default function ConversationIntelligencePage() {
                           AI Action Items
                         </p>
                         <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
-                          {recording.action_items.map((item, idx) => (
-                            <li key={idx}>• {item}</li>
+                          {recording.action_items.map((item, _idx) => (
+                            <li key={stableKey(item)}>• {item}</li>
                           ))}
                         </ul>
                       </div>
@@ -406,7 +408,7 @@ export default function ConversationIntelligencePage() {
                     { keyword: "support", count: 12, trend: "down" },
                     { keyword: "competitor", count: 8, trend: "up" },
                   ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
+                    <div key={stableKey(item)} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className="text-lg font-mono text-muted-foreground">#{idx + 1}</span>
                         <span className="font-medium">{item.keyword}</span>
@@ -433,8 +435,8 @@ export default function ConversationIntelligencePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {teamMetrics.map((metric, idx) => (
-                  <div key={idx} className="p-4 rounded-lg border bg-card">
+                {teamMetrics.map((metric, _idx) => (
+                  <div key={stableKey(metric)} className="p-4 rounded-lg border bg-card">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <Avatar>
@@ -496,8 +498,8 @@ export default function ConversationIntelligencePage() {
                   { rep: "James Wilson", issue: "High talk ratio (55%)", suggestion: "Practice active listening techniques", priority: "high" },
                   { rep: "Alex Johnson", issue: "Missed closing signals", suggestion: "Review closing call recordings", priority: "medium" },
                   { rep: "Maria Garcia", issue: "Long discovery calls", suggestion: "Use BANT framework", priority: "low" },
-                ].map((item, idx) => (
-                  <div key={idx} className="p-4 rounded-lg border">
+                ].map((item, _idx) => (
+                  <div key={stableKey(item)} className="p-4 rounded-lg border">
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-medium">{item.rep}</p>
                       <Badge variant={item.priority === "high" ? "destructive" : item.priority === "medium" ? "default" : "secondary"}>
@@ -525,8 +527,8 @@ export default function ConversationIntelligencePage() {
                   { title: "Perfect Discovery Call", rep: "Lisa Chen", sentiment: 95, duration: "18:32" },
                   { title: "Objection Handling Master", rep: "Maria Garcia", sentiment: 88, duration: "12:45" },
                   { title: "Smooth Closing Technique", rep: "David Park", sentiment: 92, duration: "15:20" },
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors">
+                ].map((item, _idx) => (
+                  <div key={stableKey(item)} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors">
                     <div className="flex items-center gap-3">
                       <PlayCircle className="w-8 h-8 text-violet-500" />
                       <div>

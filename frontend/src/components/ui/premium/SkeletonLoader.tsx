@@ -10,6 +10,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface SkeletonProps {
   className?: string;
@@ -81,12 +83,12 @@ export function SkeletonText({
 }: SkeletonTextProps) {
   return (
     <div className={cn('space-y-3', className)}>
-      {Array.from({ length: lines }).map((_, i) => (
+      {Array.from({ length: lines }).map((_, _i) => (
         <Skeleton
-          key={i}
+          key={stableKey(_)}
           className={cn(
             'h-4',
-            i === lines - 1 ? `w-[${lastLineWidth}]` : 'w-full'
+            _i === lines - 1 ? `w-[${lastLineWidth}]` : 'w-full'
           )}
           rounded="sm"
         />
@@ -189,20 +191,20 @@ export function SkeletonTable({
     <div className={cn('rounded-xl border border-border overflow-hidden', className)}>
       {/* Header */}
       <div className="flex items-center gap-4 p-4 bg-muted/50 border-b border-border">
-        {Array.from({ length: columns }).map((_, i) => (
-          <Skeleton key={i} className="h-4 flex-1" />
+        {Array.from({ length: columns }).map((_, _i) => (
+          <Skeleton key={stableKey(_)} className="h-4 flex-1" />
         ))}
       </div>
       
       {/* Rows */}
-      {Array.from({ length: rows }).map((_, rowIndex) => (
+      {Array.from({ length: rows }).map((_, _rowIndex) => (
         <div 
-          key={rowIndex} 
+          key={stableKey(_)} 
           className="flex items-center gap-4 p-4 border-b border-border last:border-0"
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
             <Skeleton 
-              key={colIndex} 
+              key={stableKey(_)} 
               className={cn(
                 'h-4 flex-1',
                 colIndex === 0 && 'w-40',
@@ -232,8 +234,8 @@ export function SkeletonList({
 }: SkeletonListProps) {
   return (
     <div className={cn('space-y-4', className)}>
-      {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
+      {Array.from({ length: items }).map((_, _i) => (
+        <div key={stableKey(_)} className="flex items-center gap-4">
           {showAvatar && <SkeletonAvatar />}
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-3/4" />
@@ -259,9 +261,9 @@ export function SkeletonChart({ className }: { className?: string }) {
         <Skeleton className="h-8 w-24" rounded="lg" />
       </div>
       <div className="flex items-end justify-between gap-2 h-48">
-        {barHeights.map((height, i) => (
+        {barHeights.map((height, _i) => (
           <div 
-            key={i} 
+            key={stableKey(height)} 
             className="flex-1"
             style={{ height: `${height}%` }}
           >
@@ -290,8 +292,8 @@ export function PageSkeleton() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <SkeletonStatCard key={i} />
+        {Array.from({ length: 4 }).map((_, _i) => (
+          <SkeletonStatCard key={stableKey(_)} />
         ))}
       </div>
 

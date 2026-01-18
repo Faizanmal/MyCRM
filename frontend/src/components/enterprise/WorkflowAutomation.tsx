@@ -28,6 +28,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { enterpriseAPI } from '@/lib/enterprise-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface WorkflowAction {
   type: string;
@@ -108,8 +110,8 @@ const WorkflowAutomation = () => {
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-48 bg-gray-200 rounded"></div>
+            {[...Array(4)].map((_, _i) => (
+              <div key={stableKey(_)} className="h-48 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -346,7 +348,7 @@ const WorkflowCreator = ({
           </div>
           
           {formData.actions.map((action, index) => (
-            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+            <div key={stableKey(action)} className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center space-x-2">
                 {getActionIcon(action.type)}
                 <span className="font-medium capitalize">{action.type}</span>
@@ -496,7 +498,7 @@ const WorkflowTemplates = ({ onUseTemplate }: { onUseTemplate: () => void }) => 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {templates.map((template, index) => (
-        <Card key={index}>
+        <Card key={stableKey(template)}>
           <CardHeader>
             <CardTitle className="text-lg">{template.name}</CardTitle>
             <CardDescription>{template.description}</CardDescription>
@@ -510,8 +512,8 @@ const WorkflowTemplates = ({ onUseTemplate }: { onUseTemplate: () => void }) => 
               <div className="text-sm">
                 <span className="text-muted-foreground">Actions:</span>
                 <ul className="mt-1 space-y-1">
-                  {template.actions.map((action, i) => (
-                    <li key={i} className="flex items-center space-x-2">
+                  {template.actions.map((action, _i) => (
+                    <li key={stableKey(action)} className="flex items-center space-x-2">
                       <CheckCircle className="h-3 w-3 text-green-600" />
                       <span>{action}</span>
                     </li>
@@ -568,8 +570,8 @@ const WorkflowDetails = ({
         <div>
           <Label>Actions ({workflow.actions?.length || 0})</Label>
           <div className="mt-2 space-y-2">
-            {workflow.actions?.map((action: WorkflowAction, index: number) => (
-              <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg">
+            {workflow.actions?.map((action: WorkflowAction, _index: number) => (
+              <div key={action.type} className="flex items-center space-x-3 p-3 border rounded-lg">
                 {getActionIcon(action.type)}
                 <span className="font-medium capitalize">{action.type}</span>
                 {action.delay && (

@@ -13,6 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 // import { Button } from '@/components/ui/button';
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { stableKey } from '@/lib/stableKey';
+
 
 // Types
 interface DataPoint {
@@ -66,7 +68,7 @@ export function BarChart({ data, height = 200, showLabels = true, animated = tru
                     const barHeight = (item.value / maxValue) * 100;
 
                     return (
-                        <div key={index} className="flex flex-col items-center flex-1">
+                        <div key={stableKey(item)} className="flex flex-col items-center flex-1">
                             <div
                                 className="relative w-full flex items-end justify-center"
                                 style={{ height: height - 30 }}
@@ -118,7 +120,7 @@ export function HorizontalBarChart({ data, height = 200 }: ChartProps) {
                 const barWidth = (item.value / maxValue) * 100;
 
                 return (
-                    <div key={index} className="flex items-center gap-3">
+                    <div key={stableKey(item)} className="flex items-center gap-3">
                         <span className="text-sm text-gray-600 w-24 truncate">{item.label}</span>
                         <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden" style={{ height: barHeight }}>
                             <motion.div
@@ -166,7 +168,7 @@ export function DonutChart({ data, height = 200 }: ChartProps) {
 
                         return (
                             <motion.circle
-                                key={index}
+                                key={stableKey(item)}
                                 cx={100}
                                 cy={100}
                                 r={radius}
@@ -194,7 +196,7 @@ export function DonutChart({ data, height = 200 }: ChartProps) {
             {/* Legend */}
             <div className="space-y-2">
                 {data.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={stableKey(item)} className="flex items-center gap-2">
                         <div
                             className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: item.color || `hsl(${index * 60}, 70%, 50%)` }}
@@ -275,7 +277,7 @@ export function LineChart({ data, height = 200, showSecondary = false, primaryCo
                 {/* Data points */}
                 {points.map((p, i) => (
                     <motion.circle
-                        key={i}
+                        key={stableKey(p)}
                         cx={p.x}
                         cy={p.y}
                         r="1"
@@ -290,8 +292,8 @@ export function LineChart({ data, height = 200, showSecondary = false, primaryCo
 
             {/* X-axis labels */}
             <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500 transform translate-y-4">
-                {data.filter((_, i) => i % Math.ceil(data.length / 6) === 0).map((d, i) => (
-                    <span key={i}>{d.date}</span>
+                {data.filter((_, _i) => _i % Math.ceil(data.length / 6) === 0).map((d, _i) => (
+                    <span key={stableKey(d)}>{d.date}</span>
                 ))}
             </div>
         </div>
@@ -447,7 +449,7 @@ export function FunnelChart({ data }: { data: DataPoint[] }) {
                 const conversionRate = index > 0 ? ((item.value / data[index - 1].value) * 100).toFixed(1) : '100';
 
                 return (
-                    <div key={index} className="flex items-center gap-3">
+                    <div key={stableKey(item)} className="flex items-center gap-3">
                         <div className="w-24 text-right">
                             <span className="text-sm font-medium">{item.label}</span>
                         </div>
@@ -509,9 +511,9 @@ export function HeatMap({
                 {/* Header row */}
                 <div className="flex">
                     <div style={{ width: 80 }} />
-                    {cols.map((col, i) => (
+                    {cols.map((col, _i) => (
                         <div
-                            key={i}
+                            key={stableKey(col)}
                             className="text-xs text-gray-500 text-center"
                             style={{ width: cellSize }}
                         >
@@ -522,11 +524,11 @@ export function HeatMap({
 
                 {/* Data rows */}
                 {data.map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex items-center">
+                    <div key={stableKey(row)} className="flex items-center">
                         <div className="text-xs text-gray-500 w-20 truncate">{rows[rowIndex]}</div>
                         {row.map((value, colIndex) => (
                             <motion.div
-                                key={colIndex}
+                                key={stableKey(value)}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: (rowIndex * cols.length + colIndex) * 0.02 }}

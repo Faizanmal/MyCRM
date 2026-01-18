@@ -35,10 +35,17 @@ def __getattr__(name):
     if name in ('ZeroTrustMiddleware', 'DeviceTrustManager', 'ContinuousAuthenticator',
                 'TrustLevel', 'zero_trust_required', 'ZeroTrustPolicy'):
         from .zero_trust import (
-            TrustLevel,
+            ZeroTrustMiddleware,
+            DeviceTrustManager,
+            ZeroTrustPolicy,
+            require_zero_trust,
         )
+        if name == 'TrustLevel':
+            return ZeroTrustPolicy
+        if name == 'zero_trust_required':
+            return require_zero_trust
         if name == 'ZeroTrustPolicy':
-            return TrustLevel
+            return ZeroTrustPolicy
         return locals()[name]
 
     # Observability
@@ -48,6 +55,7 @@ def __getattr__(name):
         from .observability import (
             DistributedTracer,
             PrometheusMetrics,
+            trace,
         )
         if name == 'MetricsCollector':
             return PrometheusMetrics
@@ -58,6 +66,11 @@ def __getattr__(name):
     # MLOps
     if name in ('ModelRegistry', 'FeatureStore', 'ABTestManager',
                 'ModelVersion', 'Experiment', 'MLOpsManager'):
+        from .mlops import (
+            ModelRegistry,
+            FeatureStore,
+            ModelVersion,
+        )
         if name == 'MLOpsManager':
             return ModelRegistry
         return locals()[name]
@@ -85,6 +98,15 @@ def __getattr__(name):
                 'CacheStampedeProtection', 'CircuitBreaker', 'cached',
                 'cache_invalidate', 'CachedModelMixin'):
         from .caching import (
+            CacheManager,
+            MultiTierCache,
+            InMemoryCache,
+            RedisCache,
+            CacheStampedeProtection,
+            CircuitBreaker,
+            cached,
+            cache_invalidate,
+            CachedModelMixin,
         )
         return locals()[name]
 
@@ -102,6 +124,17 @@ def __getattr__(name):
                 'DatabaseHealthMonitor', 'QueryOptimizer', 'use_primary',
                 'log_slow_queries', 'query_timer'):
         from .database import (
+            ReadReplicaRouter,
+            ReplicaContext,
+            ConnectionPoolManager,
+            QueryAnalyzer,
+            SlowQueryLogger,
+            PartitionManager,
+            DatabaseHealthMonitor,
+            QueryOptimizer,
+            use_primary,
+            log_slow_queries,
+            query_timer,
         )
         return locals()[name]
 

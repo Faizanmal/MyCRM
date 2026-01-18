@@ -6,6 +6,8 @@ import { Keyboard, Search, User, Calendar, Moon, ArrowUp, CornerDownLeft, X as X
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 // import { Badge } from '@/components/ui/badge';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface ShortcutGroup {
     title: string;
@@ -105,7 +107,7 @@ export default function KeyboardShortcutsModal() {
                             <div className="space-y-2">
                                 {group.shortcuts.map((shortcut, index) => (
                                     <motion.div
-                                        key={index}
+                                        key={stableKey(shortcut)}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: groupIndex * 0.1 + index * 0.05 }}
@@ -117,7 +119,7 @@ export default function KeyboardShortcutsModal() {
                                         </span>
                                         <div className="flex items-center gap-1">
                                             {shortcut.keys.map((key, keyIndex) => (
-                                                <span key={keyIndex}>
+                                                <span key={stableKey(key)}>
                                                     <kbd className="min-w-[24px] h-6 px-1.5 inline-flex items-center justify-center rounded border border-border bg-muted text-xs font-medium">
                                                         {key}
                                                     </kbd>

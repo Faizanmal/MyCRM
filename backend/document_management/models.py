@@ -166,7 +166,7 @@ class Document(models.Model):
     tags = models.JSONField(default=list, blank=True)
 
     # Metadata
-    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -258,7 +258,7 @@ class DocumentTemplate(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='document_management_templates')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='document_management_templates')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -296,7 +296,7 @@ class DocumentShare(models.Model):
     last_accessed = models.DateTimeField(blank=True)
 
     # Metadata
-    shared_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    shared_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     shared_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -334,7 +334,7 @@ class DocumentComment(models.Model):
     page_number = models.IntegerField(blank=True)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

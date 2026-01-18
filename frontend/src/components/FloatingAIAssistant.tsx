@@ -25,6 +25,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface Message {
     id: string;
@@ -266,9 +268,9 @@ export default function FloatingAIAssistant() {
 
                                                 {/* Quick Prompts */}
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    {quickPrompts.map((item, index) => (
+                                                    {quickPrompts.map((item, _index) => (
                                                         <button
-                                                            key={index}
+                                                            key={stableKey(item)}
                                                             onClick={() => handleQuickPrompt(item.prompt)}
                                                             className="flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:bg-accent/50 transition-colors text-left"
                                                         >
@@ -331,9 +333,9 @@ export default function FloatingAIAssistant() {
                                                                     {/* Suggestions */}
                                                                     {message.suggestions && message.suggestions.length > 0 && (
                                                                         <div className="flex flex-wrap gap-1.5 mt-3">
-                                                                            {message.suggestions.map((suggestion, idx) => (
+                                                                            {message.suggestions.map((suggestion, _idx) => (
                                                                                 <Badge
-                                                                                    key={idx}
+                                                                                    key={stableKey(suggestion)}
                                                                                     variant="secondary"
                                                                                     className="cursor-pointer hover:bg-secondary/80 text-xs"
                                                                                     onClick={() => handleSend(suggestion)}

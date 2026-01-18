@@ -20,6 +20,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 interface WorkflowAction {
@@ -453,7 +455,7 @@ function WorkflowEditor({
             <div className="space-y-3">
               {editedWorkflow.actions.map((action, index) => (
                 <ActionEditor
-                  key={index}
+                  key={stableKey(action)}
                   action={action}
                   index={index}
                   onUpdate={(params) => updateAction(index, params)}

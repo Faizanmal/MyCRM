@@ -10,6 +10,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface GradientOrbsProps {
   variant?: 'default' | 'subtle' | 'vibrant';
@@ -46,9 +48,9 @@ export function GradientOrbs({ variant = 'default', className }: GradientOrbsPro
 
   return (
     <div className={cn('absolute inset-0 overflow-hidden pointer-events-none', className)}>
-      {orbs.map((orb, index) => (
+      {orbs.map((orb, _index) => (
         <motion.div
-          key={index}
+          key={stableKey(orb)}
           initial={{ opacity: 0 }}
           animate={{
             opacity: opacityMap[variant],

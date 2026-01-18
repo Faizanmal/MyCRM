@@ -9,6 +9,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { stableKey } from '@/lib/stableKey';
+
 
 export default function BillingSettingsPage() {
   const [currentPlan, setCurrentPlan] = useState('pro');
@@ -188,8 +190,8 @@ export default function BillingSettingsPage() {
                   { date: 'Jan 15, 2025', amount: '$99.00', status: 'Paid' },
                   { date: 'Dec 15, 2024', amount: '$99.00', status: 'Paid' },
                   { date: 'Nov 15, 2024', amount: '$99.00', status: 'Paid' },
-                ].map((invoice, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                ].map((invoice, _i) => (
+                  <div key={stableKey(invoice)} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{invoice.date}</p>
                       <p className="text-sm text-gray-500">{invoice.amount}</p>

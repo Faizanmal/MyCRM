@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 import Image, { ImageProps } from 'next/image';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { stableKey } from '@/lib/stableKey';
+
 
 /**
  * Lazy Loading Utilities
@@ -68,16 +70,16 @@ export function TableLoadingFallback() {
             <div className="border rounded-lg">
                 <div className="p-4 border-b">
                     <div className="flex gap-4">
-                        {[...Array(5)].map((_, i) => (
-                            <Skeleton key={i} className="h-4 flex-1" />
+                        {[...Array(5)].map((_, _i) => (
+                            <Skeleton key={stableKey(_)} className="h-4 flex-1" />
                         ))}
                     </div>
                 </div>
-                {[...Array(5)].map((_, i) => (
-                    <div key={i} className="p-4 border-b last:border-b-0">
+                {[...Array(5)].map((_, _i) => (
+                    <div key={stableKey(_)} className="p-4 border-b last:border-b-0">
                         <div className="flex gap-4">
-                            {[...Array(5)].map((_, j) => (
-                                <Skeleton key={j} className="h-4 flex-1" />
+                            {[...Array(5)].map((_, _j) => (
+                                <Skeleton key={stableKey(_)} className="h-4 flex-1" />
                             ))}
                         </div>
                     </div>
@@ -93,8 +95,8 @@ export function TableLoadingFallback() {
 export function FormLoadingFallback() {
     return (
         <div className="space-y-6 p-6">
-            {[...Array(4)].map((_, i) => (
-                <div key={i} className="space-y-2">
+            {[...Array(4)].map((_, _i) => (
+                <div key={stableKey(_)} className="space-y-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-10 w-full" />
                 </div>
@@ -110,8 +112,8 @@ export function FormLoadingFallback() {
 export function CardGridLoadingFallback({ count = 6 }: { count?: number }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(count)].map((_, i) => (
-                <div key={i} className="border rounded-lg p-4">
+            {[...Array(count)].map((_, _i) => (
+                <div key={stableKey(_)} className="border rounded-lg p-4">
                     <div className="flex items-center gap-3 mb-4">
                         <Skeleton className="h-12 w-12 rounded-full" />
                         <div className="space-y-2 flex-1">

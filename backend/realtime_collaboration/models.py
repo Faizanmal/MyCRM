@@ -422,7 +422,7 @@ class DocumentTemplate(models.Model):
         null=True,
         blank=True
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='realtime_document_templates')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='realtime_document_templates')
 
     # Stats
     use_count = models.IntegerField(default=0)

@@ -53,6 +53,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { opportunitiesAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 interface Opportunity {
@@ -407,8 +409,8 @@ export default function OpportunitiesPage() {
           {/* Opportunities List */}
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Card key={i}>
+              {[...Array(5)].map((_, _i) => (
+                <Card key={stableKey(_)}>
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       <div className="flex-1 space-y-3">

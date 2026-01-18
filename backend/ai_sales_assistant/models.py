@@ -43,11 +43,13 @@ class AIEmailDraft(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True
     )
 
@@ -184,7 +186,7 @@ class ObjectionResponse(models.Model):
 
     # Ownership
     is_system = models.BooleanField(default=False)  # Built-in vs user-created
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -381,7 +383,7 @@ class PersonaProfile(models.Model):
     deals_lost = models.IntegerField(default=0)
     avg_deal_size = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     is_system = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)

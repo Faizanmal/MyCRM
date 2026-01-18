@@ -28,6 +28,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { dashboardAPI, contactsAPI, leadsAPI, opportunitiesAPI, tasksAPI } from '@/lib/api';
 import AIRecommendations from '@/components/AIRecommendations';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface DashboardMetrics {
   contacts: {
@@ -373,8 +375,8 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {isLoading ? (
-                  [...Array(4)].map((_, i) => (
-                    <div key={i} className="space-y-2">
+                  [...Array(4)].map((_, _i) => (
+                    <div key={stableKey(_)} className="space-y-2">
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-2 w-full" />
                     </div>
@@ -416,8 +418,8 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoading ? (
-                  [...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-start space-x-3">
+                  [...Array(3)].map((_, _i) => (
+                    <div key={stableKey(_)} className="flex items-start space-x-3">
                       <Skeleton className="w-10 h-10 rounded-full" />
                       <div className="flex-1">
                         <Skeleton className="h-4 w-3/4 mb-2" />
@@ -457,8 +459,8 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoading ? (
-                  [...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center space-x-4">
+                  [...Array(5)].map((_, _i) => (
+                    <div key={stableKey(_)} className="flex items-center space-x-4">
                       <Skeleton className="w-2 h-2 rounded-full" />
                       <div className="flex-1">
                         <Skeleton className="h-4 w-3/4 mb-1" />
@@ -505,8 +507,8 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoading ? (
-                  [...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center justify-between">
+                  [...Array(5)].map((_, _i) => (
+                    <div key={stableKey(_)} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 flex-1">
                         <Skeleton className="w-2 h-2 rounded-full" />
                         <div className="flex-1">

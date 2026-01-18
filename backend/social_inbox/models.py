@@ -66,7 +66,7 @@ class SocialAccount(models.Model):
         blank=True,
         related_name='social_accounts'
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -315,7 +315,7 @@ class SocialMonitoringRule(models.Model):
         blank=True,
         related_name='social_monitoring_rules'
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -367,7 +367,7 @@ class SocialPost(models.Model):
     total_reach = models.IntegerField(default=0)
 
     # Organization
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

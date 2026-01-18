@@ -35,6 +35,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { smartSchedulingAIAPI } from '@/lib/ai-workflow-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface AIPreference {
   id: number;
@@ -635,8 +637,8 @@ export default function SmartSchedulingAIPage() {
                           <div>
                             <h4 className="text-sm font-medium text-gray-700 mb-2">Risk Factors</h4>
                             <ul className="space-y-1">
-                              {prediction.risk_factors.map((factor, idx) => (
-                                <li key={idx} className="flex items-center gap-2 text-sm text-red-600">
+                              {prediction.risk_factors.map((factor, _idx) => (
+                                <li key={stableKey(factor)} className="flex items-center gap-2 text-sm text-red-600">
                                   <AlertTriangle className="h-3 w-3" />
                                   {factor}
                                 </li>
@@ -646,8 +648,8 @@ export default function SmartSchedulingAIPage() {
                           <div>
                             <h4 className="text-sm font-medium text-gray-700 mb-2">Recommended Actions</h4>
                             <ul className="space-y-1">
-                              {prediction.recommended_actions.map((action, idx) => (
-                                <li key={idx} className="flex items-center gap-2 text-sm text-green-600">
+                              {prediction.recommended_actions.map((action, _idx) => (
+                                <li key={stableKey(action)} className="flex items-center gap-2 text-sm text-green-600">
                                   <CheckCircle2 className="h-3 w-3" />
                                   {action}
                                 </li>
@@ -713,8 +715,8 @@ export default function SmartSchedulingAIPage() {
                         <div>
                           <h4 className="font-medium mb-2">Talking Points</h4>
                           <ul className="space-y-2">
-                            {prep.talking_points.map((point, idx) => (
-                              <li key={idx} className="flex items-start gap-2 text-sm">
+                            {prep.talking_points.map((point, _idx) => (
+                              <li key={stableKey(point)} className="flex items-start gap-2 text-sm">
                                 <Sparkles className="h-4 w-4 text-indigo-500 mt-0.5" />
                                 {point}
                               </li>
@@ -729,8 +731,8 @@ export default function SmartSchedulingAIPage() {
                               Risk Alerts
                             </h4>
                             <ul className="space-y-1">
-                              {prep.risk_alerts.map((alert, idx) => (
-                                <li key={idx} className="text-sm text-red-700">{alert}</li>
+                              {prep.risk_alerts.map((alert, _idx) => (
+                                <li key={stableKey(alert)} className="text-sm text-red-700">{alert}</li>
                               ))}
                             </ul>
                           </div>
@@ -743,7 +745,7 @@ export default function SmartSchedulingAIPage() {
                           <h4 className="font-medium mb-2">Suggested Agenda</h4>
                           <ol className="space-y-2">
                             {prep.suggested_agenda.map((item, idx) => (
-                              <li key={idx} className="flex items-start gap-3 text-sm">
+                              <li key={stableKey(item)} className="flex items-start gap-3 text-sm">
                                 <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 text-xs font-medium">
                                   {idx + 1}
                                 </span>
@@ -756,8 +758,8 @@ export default function SmartSchedulingAIPage() {
                         <div>
                           <h4 className="font-medium mb-2">Recent Interactions</h4>
                           <div className="space-y-2">
-                            {prep.recent_interactions.map((interaction, idx) => (
-                              <div key={idx} className="flex items-center gap-3 text-sm p-2 bg-gray-50 rounded">
+                            {prep.recent_interactions.map((interaction, _idx) => (
+                              <div key={stableKey(interaction)} className="flex items-center gap-3 text-sm p-2 bg-gray-50 rounded">
                                 <Badge variant="outline">{interaction.type}</Badge>
                                 <span className="text-gray-500">{interaction.date}</span>
                                 <span className="text-gray-700">{interaction.summary}</span>
@@ -770,8 +772,8 @@ export default function SmartSchedulingAIPage() {
                           <div>
                             <h4 className="font-medium mb-2">Open Opportunities</h4>
                             <div className="space-y-2">
-                              {prep.open_opportunities.map((opp, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-2 bg-green-50 rounded">
+                              {prep.open_opportunities.map((opp, _idx) => (
+                                <div key={stableKey(opp)} className="flex items-center justify-between p-2 bg-green-50 rounded">
                                   <span className="text-sm font-medium text-green-800">{opp.name}</span>
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm text-green-600">${opp.value.toLocaleString()}</span>
@@ -806,8 +808,8 @@ export default function SmartSchedulingAIPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {optimalSlots.map((slot, idx) => (
-                      <div key={idx} className="border rounded-lg p-4">
+                    {optimalSlots.map((slot, _idx) => (
+                      <div key={stableKey(slot)} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-indigo-100 rounded-lg">
@@ -834,8 +836,8 @@ export default function SmartSchedulingAIPage() {
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {slot.factors.map((factor, fidx) => (
-                            <Badge key={fidx} variant="secondary" className="text-xs">
+                          {slot.factors.map((factor, _fidx) => (
+                            <Badge key={stableKey(factor)} variant="secondary" className="text-xs">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
                               {factor}
                             </Badge>

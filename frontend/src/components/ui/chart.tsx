@@ -199,7 +199,7 @@ const ChartTooltipContent = React.forwardRef<
 
           return (
             <div
-              key={`${key}-${index}`}
+              key={key}
               className={cn(
                 "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                 indicator === "dot" && "items-center"
@@ -293,13 +293,13 @@ const ChartLegendContent = React.forwardRef<
           className
         )}
       >
-        {payload.map((item: Record<string, unknown>, index: number) => {
+        {payload.map((item: Record<string, unknown>, _index: number) => {
           const key = `${nameKey || (item.dataKey as string) || "value"}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
 
           return (
             <div
-              key={`${key}-${index}`}
+              key={key}
               className={cn(
                 "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
               )}

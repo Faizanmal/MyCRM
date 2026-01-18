@@ -42,6 +42,7 @@ class TrackedEmail(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='tracked_emails'
     )
@@ -50,6 +51,7 @@ class TrackedEmail(models.Model):
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='emails'
     )
@@ -63,6 +65,7 @@ class TrackedEmail(models.Model):
     template = models.ForeignKey(
         'EmailTemplate',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True
     )
 
@@ -90,6 +93,7 @@ class TrackedEmail(models.Model):
     in_reply_to = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='replies'
     )
@@ -170,7 +174,7 @@ class EmailEvent(models.Model):
     clicked_url = models.URLField(blank=True)
 
     # Client info
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     device_type = models.CharField(max_length=50, blank=True)  # desktop, mobile, tablet
     email_client = models.CharField(max_length=100, blank=True)  # Gmail, Outlook, etc.
@@ -310,7 +314,7 @@ class SequenceStep(models.Model):
     step_type = models.CharField(max_length=20, choices=STEP_TYPES, default='email')
 
     # For email steps
-    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL, blank=True)
+    template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL, null=True, blank=True)
     subject_override = models.CharField(max_length=500, blank=True)
     body_override = models.TextField(blank=True)
 
@@ -373,7 +377,7 @@ class SequenceEnrollment(models.Model):
         related_name='tracking_sequence_enrollments'
     )
 
-    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
 
     # Progress

@@ -81,7 +81,7 @@ class Webhook(models.Model):
     last_delivery_at = models.DateTimeField(blank=True)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -201,7 +201,7 @@ class ThirdPartyIntegration(models.Model):
     error_count = models.IntegerField(default=0)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='hub_integrations')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='hub_integrations')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -320,7 +320,7 @@ class APIEndpoint(models.Model):
     failed_calls = models.IntegerField(default=0)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

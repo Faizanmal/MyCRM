@@ -39,6 +39,8 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { aiSalesAssistantAPI } from '@/lib/premium-features-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface EmailDraft {
   id: string;
@@ -502,8 +504,8 @@ export default function AISalesAssistantPage() {
                             <div>
                               <h5 className="text-sm font-semibold mb-2">Action Items:</h5>
                               <ul className="space-y-1">
-                                {advice.action_items.map((item, i) => (
-                                  <li key={i} className="flex items-center gap-2 text-sm">
+                                {advice.action_items.map((item, _i) => (
+                                  <li key={stableKey(item)} className="flex items-center gap-2 text-sm">
                                     <CheckCircle2 className="w-4 h-4 text-green-500" />
                                     {item}
                                   </li>
@@ -607,8 +609,8 @@ export default function AISalesAssistantPage() {
                                   ALTERNATIVE RESPONSES:
                                 </h5>
                                 <ul className="space-y-1">
-                                  {obj.alternative_responses.map((alt, i) => (
-                                    <li key={i} className="text-sm text-muted-foreground">
+                                  {obj.alternative_responses.map((alt, _i) => (
+                                    <li key={stableKey(alt)} className="text-sm text-muted-foreground">
                                       • {alt}
                                     </li>
                                   ))}
@@ -616,8 +618,8 @@ export default function AISalesAssistantPage() {
                               </div>
                             )}
                             <div className="flex flex-wrap gap-2">
-                              {obj.tips.map((tip, i) => (
-                                <Badge key={i} variant="secondary" className="text-xs">
+                              {obj.tips.map((tip, _i) => (
+                                <Badge key={stableKey(tip)} variant="secondary" className="text-xs">
                                   💡 {tip}
                                 </Badge>
                               ))}

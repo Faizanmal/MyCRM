@@ -15,6 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { stableKey } from '@/lib/stableKey';
+
 
 export default function UIShowcasePage() {
   return (
@@ -64,8 +66,8 @@ export default function UIShowcasePage() {
             { title: 'Revenue', value: '$45.2K', icon: DollarSign, color: 'from-green-500 to-green-600' },
             { title: 'Growth', value: '+23%', icon: TrendingUp, color: 'from-purple-500 to-purple-600' },
             { title: 'Goals', value: '95%', icon: Target, color: 'from-pink-500 to-pink-600' },
-          ].map((stat, i) => (
-            <Card key={i} className="modern-card hover:scale-105 transition-transform duration-300 group">
+          ].map((stat, _i) => (
+            <Card key={stableKey(stat)} className="modern-card hover:scale-105 transition-transform duration-300 group">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}

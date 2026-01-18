@@ -26,6 +26,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface SearchResult {
     id: string;
@@ -275,9 +277,9 @@ export default function SmartSearch() {
                                                 AI SUGGESTIONS
                                             </div>
                                             <div className="grid grid-cols-2 gap-2">
-                                                {aiSuggestions.map((suggestion, index) => (
+                                                {aiSuggestions.map((suggestion, _index) => (
                                                     <motion.button
-                                                        key={index}
+                                                        key={stableKey(suggestion)}
                                                         whileHover={{ scale: 1.02 }}
                                                         whileTap={{ scale: 0.98 }}
                                                         onClick={() => setQuery(suggestion.query)}
@@ -298,9 +300,9 @@ export default function SmartSearch() {
                                                     RECENT SEARCHES
                                                 </div>
                                                 <div className="space-y-1">
-                                                    {recentSearches.map((search, index) => (
+                                                    {recentSearches.map((search, _index) => (
                                                         <button
-                                                            key={index}
+                                                            key={stableKey(search)}
                                                             onClick={() => setQuery(search.query)}
                                                             className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
                                                         >

@@ -22,6 +22,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { onboardingAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface TourStep {
     id: string;
@@ -363,7 +365,7 @@ export default function ProductTour() {
                                 <div className="flex items-center gap-1">
                                     {tourSteps.map((_, index) => (
                                         <motion.div
-                                            key={index}
+                                            key={stableKey(_)}
                                             className={`w-2 h-2 rounded-full transition-colors ${index === currentStep
                                                 ? 'bg-blue-600'
                                                 : index < currentStep

@@ -39,7 +39,7 @@ class AIWorkflowProposal(models.Model):
     confidence_score = models.FloatField()
     reasoning = models.TextField()
     status = models.CharField(max_length=20, default='pending')
-    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

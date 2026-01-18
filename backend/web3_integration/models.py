@@ -136,7 +136,7 @@ class SmartContract(models.Model):
 class BlockchainTransaction(models.Model):
     """Record of blockchain transactions"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='blockchain_transactions')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='blockchain_transactions')
 
     transaction_hash = models.CharField(max_length=255, unique=True)
     blockchain_network = models.CharField(max_length=50)

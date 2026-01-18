@@ -23,6 +23,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { enterpriseAPI } from '@/lib/enterprise-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface CustomerSegmentInsight {
   count?: number;
@@ -113,7 +115,7 @@ const AIAnalyticsDashboard = () => {
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 bg-gray-200 rounded"></div>
+              <div key={stableKey(_)} className="h-48 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -257,7 +259,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: AIInsights }) => (
           <div className="space-y-3">
             <h4 className="font-medium">Sales Forecast</h4>
             {((aiInsights?.sales_forecast?.recommendations as string[]) || [])?.slice(0, 3).map((rec: string, index: number) => (
-              <div key={index} className="flex items-start space-x-2">
+              <div key={rec} className="flex items-start space-x-2">
                 <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                 <span className="text-sm">{rec}</span>
               </div>
@@ -266,7 +268,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: AIInsights }) => (
           <div className="space-y-3">
             <h4 className="font-medium">Customer Retention</h4>
             {aiInsights?.churn_risk?.recommendations?.slice(0, 3).map((rec: string, index: number) => (
-              <div key={index} className="flex items-start space-x-2">
+              <div key={rec} className="flex items-start space-x-2">
                 <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
                 <span className="text-sm">{rec}</span>
               </div>
@@ -365,7 +367,7 @@ const SalesForecastView = ({
               <h4 className="font-medium mb-3">Recommendations</h4>
               <div className="space-y-2">
                 {salesForecast?.recommendations?.map((rec: string, index: number) => (
-                  <div key={index} className="flex items-start space-x-2">
+                  <div key={rec} className="flex items-start space-x-2">
                     <Lightbulb className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
                     <span className="text-sm">{rec}</span>
                   </div>
@@ -412,7 +414,7 @@ const CustomerSegmentationView = ({ aiInsights }: { aiInsights: AIInsights }) =>
                     <h5 className="text-sm font-medium mb-2">Recommendations:</h5>
                     <ul className="text-xs space-y-1">
                       {data.recommendations?.slice(0, 2).map((rec: string, index: number) => (
-                        <li key={index} className="flex items-start space-x-1">
+                        <li key={rec} className="flex items-start space-x-1">
                           <span>•</span>
                           <span>{rec}</span>
                         </li>
@@ -510,7 +512,7 @@ const LeadScoringView = ({
                 <h4 className="font-medium mb-3">Recommendations</h4>
                 <div className="space-y-2">
                   {leadScore.recommendations?.map((rec: string, index: number) => (
-                    <div key={index} className="flex items-start space-x-2">
+                    <div key={rec} className="flex items-start space-x-2">
                       <Target className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                       <span className="text-sm">{rec}</span>
                     </div>
@@ -553,7 +555,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: AIInsights }) => (
             <h4 className="font-medium mb-3">High-Risk Customers</h4>
             <div className="space-y-2">
               {aiInsights?.churn_risk?.high_risk_customers?.slice(0, 5).map((customer: ChurnRiskCustomer, index: number) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={customer.id || customer.contact_name} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <div className="font-medium">{customer.contact_name}</div>
                     <div className="text-sm text-muted-foreground">
@@ -572,7 +574,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: AIInsights }) => (
             <h4 className="font-medium mb-3">Action Plan</h4>
             <div className="space-y-2">
               {aiInsights?.churn_risk?.recommendations?.map((rec: string, index: number) => (
-                <div key={index} className="flex items-start space-x-2">
+                <div key={rec} className="flex items-start space-x-2">
                   <Clock className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
                   <span className="text-sm">{rec}</span>
                 </div>

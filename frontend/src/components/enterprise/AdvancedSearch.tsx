@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 interface SearchFilter {
@@ -195,7 +197,7 @@ export default function AdvancedSearch() {
                 </div>
 
                 {filters.map((filter, index) => (
-                  <div key={index} className="flex gap-2 items-end">
+                  <div key={stableKey(filter)} className="flex gap-2 items-end">
                     <div className="flex-1">
                       <Select
                         value={filter.field}
@@ -272,8 +274,8 @@ export default function AdvancedSearch() {
             <CardContent>
               {results.length > 0 ? (
                 <div className="space-y-2">
-                  {results.slice(0, 20).map((result, index) => (
-                    <Card key={index} className="p-4">
+                  {results.slice(0, 20).map((result, _index) => (
+                    <Card key={stableKey(result)} className="p-4">
                       <div className="space-y-1">
                         <p className="font-medium">{result.name || result.title || 'Untitled'}</p>
                         <div className="flex gap-2 flex-wrap">

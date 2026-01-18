@@ -197,7 +197,7 @@ class ReportSchedule(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='report_schedules')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='report_schedules')
 
     class Meta:
         db_table = 'crm_report_schedule'
@@ -222,7 +222,7 @@ class ReportExecution(models.Model):
     ]
 
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='executions')
-    schedule = models.ForeignKey(ReportSchedule, on_delete=models.SET_NULL, blank=True, related_name='executions')
+    schedule = models.ForeignKey(ReportSchedule, on_delete=models.SET_NULL, blank=True, null=True, related_name='executions')
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='queued')
     filters_used = models.JSONField(default=dict)
@@ -233,7 +233,7 @@ class ReportExecution(models.Model):
 
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(blank=True)
-    executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='report_executions')
+    executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='report_executions')
 
     class Meta:
         db_table = 'crm_report_execution'

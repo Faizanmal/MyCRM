@@ -67,24 +67,28 @@ class VoiceRecording(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='voice_recordings'
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='voice_recordings'
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='voice_recordings'
     )
     meeting = models.ForeignKey(
         'smart_scheduling.Meeting',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='voice_recordings'
     )
@@ -171,7 +175,7 @@ class Transcription(models.Model):
     # Edits
     was_edited = models.BooleanField(default=False)
     edited_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL,
+        User, on_delete=models.SET_NULL, null=True,
         blank=True,
         related_name='edited_transcriptions'
     )
@@ -278,7 +282,7 @@ class ActionItem(models.Model):
 
     # Assignment
     assigned_to = models.ForeignKey(
-        User, on_delete=models.SET_NULL,
+        User, on_delete=models.SET_NULL, null=True,
         blank=True,
         related_name='assigned_action_items'
     )
@@ -300,6 +304,7 @@ class ActionItem(models.Model):
     linked_task = models.ForeignKey(
         'task_management.Task',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='source_action_items'
     )
@@ -479,7 +484,7 @@ class KeyMoment(models.Model):
     # Was this marked by AI or user?
     is_ai_detected = models.BooleanField(default=True)
     marked_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL,
+        User, on_delete=models.SET_NULL, null=True,
         blank=True
     )
 
@@ -579,18 +584,21 @@ class VoiceNote(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='voice_notes'
     )
     lead = models.ForeignKey(
         'lead_management.Lead',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='voice_notes'
     )
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='voice_notes'
     )

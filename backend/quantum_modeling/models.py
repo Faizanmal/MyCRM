@@ -105,7 +105,7 @@ class WhatIfScenario(models.Model):
 
     # Base simulation
     base_simulation = models.ForeignKey(QuantumSimulation, on_delete=models.SET_NULL,
-        related_name='whatif_scenarios')
+        null=True, related_name='whatif_scenarios')
 
     # Scenario modifications
     variable_changes = models.JSONField(default=dict, help_text="Variables modified in this scenario")

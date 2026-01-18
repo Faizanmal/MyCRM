@@ -64,6 +64,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { customFieldsAPI, CustomField } from '@/lib/enterprise-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 const FIELD_TYPES = [
   { value: 'text', label: 'Text', icon: Type, description: 'Single line text input' },
@@ -652,7 +654,7 @@ export default function CustomFieldsPage() {
                     <Label>Options *</Label>
                     <div className="space-y-2">
                       {formData.options.map((option, index) => (
-                        <div key={index} className="flex items-center gap-2">
+                        <div key={stableKey(option)} className="flex items-center gap-2">
                           <Input
                             value={option.label}
                             disabled

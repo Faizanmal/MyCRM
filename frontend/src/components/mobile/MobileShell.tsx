@@ -11,6 +11,8 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { MobileNav, FloatingActionButton } from '@/components/mobile/MobileNav';
 import { PWAInstallPrompt, IOSInstallPrompt, OfflineIndicator, UpdatePrompt } from '@/components/mobile/PWAInstallPrompt';
 import { useDevice, useOnlineStatus } from '@/hooks/useMobile';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface MobileShellProps {
   children: React.ReactNode;
@@ -245,7 +247,7 @@ export function ActionSheet({ isOpen, onClose, actions }: ActionSheetProps) {
         <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden">
           {actions.map((action, index) => (
             <button
-              key={index}
+              key={stableKey(action)}
               onClick={() => {
                 action.onClick();
                 onClose();
@@ -295,8 +297,8 @@ export function MobileSkeleton({ type = 'list', count = 3 }: MobileSkeletonProps
   if (type === 'card') {
     return (
       <div className="p-4 space-y-4">
-        {items.map((_, i) => (
-          <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-4 animate-pulse">
+        {items.map((_, _i) => (
+          <div key={stableKey(_)} className="bg-white dark:bg-gray-800 rounded-xl p-4 animate-pulse">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div className="flex-1">
@@ -314,8 +316,8 @@ export function MobileSkeleton({ type = 'list', count = 3 }: MobileSkeletonProps
 
   return (
     <div className="divide-y divide-gray-100 dark:divide-gray-700">
-      {items.map((_, i) => (
-        <div key={i} className="px-4 py-3 flex items-center gap-3 animate-pulse">
+      {items.map((_, _i) => (
+        <div key={stableKey(_)} className="px-4 py-3 flex items-center gap-3 animate-pulse">
           <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full" />
           <div className="flex-1">
             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-1" />

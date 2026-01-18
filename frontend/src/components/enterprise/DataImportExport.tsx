@@ -408,7 +408,7 @@ function ImportWizard() {
                     <div className="space-y-2">
                       {importResult.errors.map((error: any, index: number) => (
                         <div
-                          key={index}
+                          key={`error-${error.row}`}
                           className="text-sm p-2 bg-destructive/10 rounded"
                         >
                           Row {error.row}: {error.errors.join(', ')}

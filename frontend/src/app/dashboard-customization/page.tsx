@@ -57,6 +57,8 @@ import {
 //   DropdownMenuTrigger,
 // } from '@/components/ui/dropdown-menu';
 import { dashboardWidgetsAPI, DashboardWidget, UserDashboard, DashboardWidgetPlacement } from '@/lib/enterprise-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 const WIDGET_TYPES = [
   { value: 'metric', label: 'Metric Card', icon: TrendingUp, description: 'Single value with trend' },
@@ -376,9 +378,9 @@ export default function DashboardCustomizationPage() {
         <div className="h-full flex flex-col">
           <span className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{widget.name}</span>
           <div className="flex-1 flex items-end gap-1">
-            {(data?.data || [65, 45, 75, 55, 85, 70, 90]).map((value, i) => (
+            {(data?.data || [65, 45, 75, 55, 85, 70, 90]).map((value, _i) => (
               <div
-                key={i}
+                key={stableKey(value)}
                 className={`flex-1 rounded-t bg-linear-to-t ${gradientClass} opacity-80`}
                 style={{ height: `${value}%` }}
               />

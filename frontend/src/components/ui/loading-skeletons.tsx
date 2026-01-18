@@ -5,6 +5,8 @@ import { useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface SkeletonProps {
     className?: string;
@@ -31,8 +33,8 @@ export function PageSkeleton({ className }: SkeletonProps) {
 
             {/* Stats cards skeleton */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                    <Card key={i}>
+                {[...Array(4)].map((_, _i) => (
+                    <Card key={stableKey(_)}>
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-2">
@@ -54,8 +56,8 @@ export function PageSkeleton({ className }: SkeletonProps) {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {[...Array(5)].map((_, i) => (
-                            <div key={i} className="flex items-center gap-4">
+                        {[...Array(5)].map((_, _i) => (
+                            <div key={stableKey(_)} className="flex items-center gap-4">
                                 <Skeleton className="h-12 w-12 rounded-full" />
                                 <div className="flex-1 space-y-2">
                                     <Skeleton className="h-4 w-full max-w-md" />
@@ -84,17 +86,17 @@ export function TableSkeleton({
         <div className={cn('space-y-4', className)}>
             {/* Table header */}
             <div className="flex gap-4 pb-3 border-b">
-                {[...Array(columns)].map((_, i) => (
-                    <Skeleton key={i} className="h-4 flex-1" />
+                {[...Array(columns)].map((_, _i) => (
+                    <Skeleton key={stableKey(_)} className="h-4 flex-1" />
                 ))}
             </div>
 
             {/* Table rows */}
-            {[...Array(rows)].map((_, rowIndex) => (
-                <div key={rowIndex} className="flex gap-4 py-3 border-b border-gray-100">
+            {[...Array(rows)].map((_, _rowIndex) => (
+                <div key={stableKey(_)} className="flex gap-4 py-3 border-b border-gray-100">
                     {[...Array(columns)].map((_, colIndex) => (
                         <Skeleton
-                            key={colIndex}
+                            key={stableKey(_)}
                             className={cn(
                                 'h-4 flex-1',
                                 colIndex === 0 && 'max-w-[200px]'
@@ -117,8 +119,8 @@ export function CardGridSkeleton({
 }: SkeletonProps & { count?: number }) {
     return (
         <div className={cn('grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4', className)}>
-            {[...Array(count)].map((_, i) => (
-                <Card key={i}>
+            {[...Array(count)].map((_, _i) => (
+                <Card key={stableKey(_)}>
                     <CardContent className="pt-6">
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
@@ -180,8 +182,8 @@ export function FormSkeleton({
 }: SkeletonProps & { fields?: number }) {
     return (
         <div className={cn('space-y-6', className)}>
-            {[...Array(fields)].map((_, i) => (
-                <div key={i} className="space-y-2">
+            {[...Array(fields)].map((_, _i) => (
+                <div key={stableKey(_)} className="space-y-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-10 w-full" />
                 </div>
@@ -210,8 +212,8 @@ export function ProfileSkeleton({ className }: SkeletonProps) {
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-                {[...Array(4)].map((_, i) => (
-                    <div key={i} className="space-y-2">
+                {[...Array(4)].map((_, _i) => (
+                    <div key={stableKey(_)} className="space-y-2">
                         <Skeleton className="h-4 w-20" />
                         <Skeleton className="h-5 w-32" />
                     </div>
@@ -239,9 +241,9 @@ export function ChartSkeleton({ className }: SkeletonProps) {
             </CardHeader>
             <CardContent>
                 <div className="flex items-end justify-between h-48 gap-2">
-                    {barHeights.map((height, i) => (
+                    {barHeights.map((height, _i) => (
                         <Skeleton
-                            key={i}
+                            key={stableKey(height)}
                             className="flex-1"
                             style={{ height }}
                         />
@@ -267,8 +269,8 @@ export function ListSkeleton({
 }: SkeletonProps & { items?: number }) {
     return (
         <div className={cn('space-y-3', className)}>
-            {[...Array(items)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 border rounded-lg">
+            {[...Array(items)].map((_, _i) => (
+                <div key={stableKey(_)} className="flex items-center gap-3 p-3 border rounded-lg">
                     <Skeleton className="h-10 w-10 rounded-lg" />
                     <div className="flex-1 space-y-1">
                         <Skeleton className="h-4 w-48" />

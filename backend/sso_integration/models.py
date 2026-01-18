@@ -150,7 +150,7 @@ class SSOSession(models.Model):
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     ended_at = models.DateTimeField(blank=True)
@@ -200,7 +200,7 @@ class SSOLoginAttempt(models.Model):
     sso_attributes = models.JSONField(default=dict, blank=True)
 
     # Request metadata
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -9,6 +9,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 // import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface CarbonFootprint {
   id: string;
@@ -111,8 +113,8 @@ export default function CarbonFootprintPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {footprints.map((fp, idx) => (
-                    <div key={idx} className="flex items-center justify-between border-b pb-3">
+                  {footprints.map((fp, _idx) => (
+                    <div key={stableKey(fp)} className="flex items-center justify-between border-b pb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                           <BoltIcon className="w-5 h-5 text-green-600" />

@@ -23,7 +23,7 @@ const eslintConfig = defineConfig([
         "caughtErrorsIgnorePattern": "^_"
       }],
       "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "warn",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-empty-function": "warn",
 
       // React specific rules
@@ -37,6 +37,7 @@ const eslintConfig = defineConfig([
       "react/jsx-no-undef": "error",
       "react/jsx-pascal-case": "error",
       "react/jsx-uses-vars": "error",
+      "react/no-array-index-key": "error",
 
       // Accessibility rules
       "jsx-a11y/alt-text": "error",
@@ -59,7 +60,7 @@ const eslintConfig = defineConfig([
       "prefer-template": "error",
 
       // Import rules
-      "import/no-unresolved": "off", // Handled by TypeScript
+      "import/no-unresolved": "warn", // Handled by TypeScript
       "import/order": ["error", {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
         "newlines-between": "always"

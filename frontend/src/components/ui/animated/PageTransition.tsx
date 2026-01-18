@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { pageTransition, pageTransitionFade } from '@/lib/animations';
+import { useScrollAnimation } from '@/hooks/useAnimations';
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -102,7 +103,6 @@ export function StaggerChildren({
 /**
  * Fade In When Visible - Fades in when element enters viewport
  */
-import { useScrollAnimation } from '@/hooks/useAnimations';
 
 interface FadeInWhenVisibleProps {
   children: ReactNode;

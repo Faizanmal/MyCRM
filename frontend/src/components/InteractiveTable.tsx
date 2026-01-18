@@ -31,6 +31,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // import { toast } from 'sonner';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface Column<T> {
     key: keyof T | string;
@@ -409,8 +411,8 @@ export default function InteractiveTable<T extends { id: string | number }>({
                         </thead>
                         <tbody className="divide-y dark:divide-gray-800">
                             {isLoading ? (
-                                [...Array(pageSize)].map((_, i) => (
-                                    <tr key={i} className="animate-pulse">
+                                [...Array(pageSize)].map((_, _i) => (
+                                    <tr key={stableKey(_)} className="animate-pulse">
                                         {showBulkActions && (
                                             <td className="px-4 py-4">
                                                 <div className="w-4 h-4 bg-gray-200 rounded" />

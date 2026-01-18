@@ -36,6 +36,8 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 // ============================================================================
 // Types
@@ -76,11 +78,11 @@ interface DataTableProps<TData, TValue> {
 function TableSkeleton({ columns }: { columns: number }) {
   return (
     <div className="space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex space-x-4">
-          {Array.from({ length: columns }).map((_, j) => (
+      {Array.from({ length: 5 }).map((_, _i) => (
+        <div key={stableKey(_)} className="flex space-x-4">
+          {Array.from({ length: columns }).map((_, _j) => (
             <div
-              key={j}
+              key={stableKey(_)}
               className="h-10 flex-1 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
             />
           ))}

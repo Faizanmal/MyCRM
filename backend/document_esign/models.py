@@ -185,8 +185,8 @@ class DocumentRecipient(models.Model):
     decline_reason = models.TextField(blank=True)
 
     # IP tracking
-    viewed_from_ip = models.GenericIPAddressField(blank=True)
-    signed_from_ip = models.GenericIPAddressField(blank=True)
+    viewed_from_ip = models.GenericIPAddressField(blank=True, null=True)
+    signed_from_ip = models.GenericIPAddressField(blank=True, null=True)
 
     # Reminders
     last_reminder_sent = models.DateTimeField(blank=True)
@@ -323,7 +323,7 @@ class DocumentAuditLog(models.Model):
     action = models.CharField(max_length=20, choices=ACTION_TYPES)
     details = models.TextField(blank=True)
 
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
     user_agent = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { stableKey } from '@/lib/stableKey';
+
 
 interface Subscription {
   id: number;
@@ -309,8 +311,8 @@ export default function WhiteLabelBillingPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-sm">
+                    {plan.features.map((feature, _idx) => (
+                      <li key={stableKey(feature)} className="flex items-center gap-2 text-sm">
                         <CheckCircle className="w-4 h-4 text-green-500" />
                         {feature}
                       </li>
@@ -347,8 +349,8 @@ export default function WhiteLabelBillingPage() {
         {/* Usage & Limits Tab */}
         <TabsContent value="usage" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            {usageMetrics.map((metric, idx) => (
-              <Card key={idx}>
+            {usageMetrics.map((metric, _idx) => (
+              <Card key={stableKey(metric)}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold">{metric.metric}</h3>
@@ -376,8 +378,8 @@ export default function WhiteLabelBillingPage() {
                 { threshold: 80, enabled: true },
                 { threshold: 90, enabled: true },
                 { threshold: 100, enabled: true },
-              ].map((alert, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              ].map((alert, _idx) => (
+                <div key={stableKey(alert)} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                   <div className="flex items-center gap-2">
                     <AlertCircle className={`w-4 h-4 ${alert.threshold === 100 ? "text-red-500" : "text-yellow-500"}`} />
                     <span>Alert at {alert.threshold}% usage</span>

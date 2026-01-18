@@ -53,6 +53,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { tasksAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 interface Task {
@@ -385,8 +387,8 @@ export default function TasksPage() {
           {/* Tasks List */}
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Card key={i}>
+              {[...Array(5)].map((_, _i) => (
+                <Card key={stableKey(_)}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
                       <Skeleton className="w-5 h-5 rounded-full" />

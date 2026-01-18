@@ -41,6 +41,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
+import { stableKey } from '@/lib/stableKey';
+
 
 // Types
 interface HealthMetric {
@@ -621,8 +623,8 @@ const AuditLogTab: React.FC = () => (
             { action: 'Started bulk import: contacts', user: 'ops@company.com', category: 'bulk_operations', time: '2 hours ago' },
             { action: 'Acknowledged alert: Disk Usage Warning', user: 'admin@company.com', category: 'alerts', time: '3 hours ago' },
             { action: 'Modified user permissions', user: 'admin@company.com', category: 'security', time: '4 hours ago' },
-          ].map((log, i) => (
-            <div key={i} className="p-4 flex items-center justify-between">
+          ].map((log, _i) => (
+            <div key={stableKey(log)} className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
                   <FileText className="h-5 w-5 text-muted-foreground" />

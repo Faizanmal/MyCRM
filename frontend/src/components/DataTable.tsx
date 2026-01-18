@@ -50,6 +50,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 /**
  * Enhanced Data Table Component
@@ -336,10 +338,10 @@ export function DataTable<TData>({
                         <tbody className="bg-white divide-y divide-gray-200">
                             {isLoading ? (
                                 // Loading skeleton
-                                [...Array(5)].map((_, i) => (
-                                    <tr key={i}>
-                                        {tableColumns.map((_, j) => (
-                                            <td key={j} className="px-4 py-4">
+                                [...Array(5)].map((_, _i) => (
+                                    <tr key={stableKey(_)}>
+                                        {tableColumns.map((_, _j) => (
+                                            <td key={stableKey(_)} className="px-4 py-4">
                                                 <div className="h-4 bg-gray-200 rounded animate-pulse" />
                                             </td>
                                         ))}
@@ -493,9 +495,9 @@ export function RowActions({
                 {onEdit && (
                     <DropdownMenuItem onClick={onEdit}>Edit</DropdownMenuItem>
                 )}
-                {customActions?.map((action, i) => (
+                {customActions?.map((action, _i) => (
                     <DropdownMenuItem
-                        key={i}
+                        key={stableKey(action)}
                         onClick={action.onClick}
                         className={action.variant === 'destructive' ? 'text-red-600' : ''}
                     >

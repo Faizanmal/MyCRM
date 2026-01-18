@@ -59,7 +59,7 @@ class UserConsent(TenantAwareModel):
     is_granted = models.BooleanField(default=False)
     consent_date = models.DateTimeField(auto_now_add=True)
     expiry_date = models.DateTimeField(blank=True)
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     consent_method = models.CharField(
         max_length=50,
@@ -275,7 +275,7 @@ class DataBreachIncident(TenantAwareModel):
     )
     discovered_at = models.DateTimeField()
     reported_at = models.DateTimeField(auto_now_add=True)
-    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='reported_breaches')
+    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='reported_breaches')
     affected_users_count = models.IntegerField(default=0)
     affected_users = models.ManyToManyField(User, related_name='data_breaches', blank=True)
     data_categories_affected = models.JSONField(default=list)
@@ -336,7 +336,7 @@ class DataAccessLog(TenantAwareModel):
         help_text='Specific fields accessed'
     )
     purpose = models.CharField(max_length=200, blank=True)
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     accessed_at = models.DateTimeField(auto_now_add=True)
     metadata = models.JSONField(default=dict, blank=True)
@@ -374,7 +374,7 @@ class PrivacyNotice(TenantAwareModel):
     is_current = models.BooleanField(default=True)
     requires_acceptance = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         db_table = 'gdpr_privacy_notices'

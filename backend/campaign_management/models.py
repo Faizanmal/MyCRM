@@ -46,7 +46,7 @@ class Campaign(models.Model):
     completed_at = models.DateTimeField(blank=True)
 
     # Targeting
-    segment = models.ForeignKey('CampaignSegment', on_delete=models.SET_NULL, blank=True)
+    segment = models.ForeignKey('CampaignSegment', on_delete=models.SET_NULL, null=True, blank=True)
 
     # A/B Testing
     enable_ab_test = models.BooleanField(default=False)
@@ -62,7 +62,7 @@ class Campaign(models.Model):
     unsubscribed_count = models.IntegerField(default=0)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='created_campaigns')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_campaigns')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -117,7 +117,7 @@ class CampaignSegment(models.Model):
     # Cached count
     contact_count = models.IntegerField(default=0)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -148,8 +148,8 @@ class CampaignRecipient(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='recipients')
 
     # Recipient info
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, blank=True)
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, blank=True)
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, null=True, blank=True)
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField()
 
     # Status
@@ -202,7 +202,7 @@ class CampaignClick(models.Model):
     clicked_at = models.DateTimeField(default=timezone.now)
 
     # Tracking details
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
 
     class Meta:
@@ -253,7 +253,7 @@ class EmailTemplate(models.Model):
 
     is_active = models.BooleanField(default=True)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='campaign_email_templates')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='campaign_email_templates')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

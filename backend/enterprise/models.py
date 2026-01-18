@@ -72,7 +72,7 @@ class DeviceFingerprint(models.Model):
     verification_method = models.CharField(max_length=50, blank=True)
 
     # Geolocation
-    last_ip = models.GenericIPAddressField(blank=True)
+    last_ip = models.GenericIPAddressField(null=True, blank=True)
     last_country = models.CharField(max_length=100, blank=True)
     last_city = models.CharField(max_length=100, blank=True)
 
@@ -129,7 +129,7 @@ class SecuritySession(models.Model):
     mfa_method = models.CharField(max_length=50, blank=True)
 
     # Location
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     country = models.CharField(max_length=100, blank=True)
     city = models.CharField(max_length=100, blank=True)
 
@@ -219,7 +219,7 @@ class SecurityAuditLog(models.Model):
     metadata = models.JSONField(default=dict, blank=True)
 
     # Where
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
 
     # Result

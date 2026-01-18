@@ -24,6 +24,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import WorkflowBuilder from '@/components/enterprise/WorkflowBuilder';
 import { leadQualificationAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 interface WorkflowData {
@@ -292,16 +294,16 @@ export default function WorkflowsPage() {
           {/* Workflows List */}
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i}>
+              {[...Array(3)].map((_, _i) => (
+                <Card key={stableKey(_)}>
                   <CardHeader>
                     <Skeleton className="h-6 w-1/2" />
                     <Skeleton className="h-4 w-3/4" />
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-4 gap-4">
-                      {[...Array(4)].map((_, j) => (
-                        <Skeleton key={j} className="h-12" />
+                      {[...Array(4)].map((_, _j) => (
+                        <Skeleton key={stableKey(_)} className="h-12" />
                       ))}
                     </div>
                   </CardContent>

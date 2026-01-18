@@ -9,6 +9,9 @@ import {
   Shield, Unlock, Reply
 } from 'lucide-react';
 
+import { stableKey } from '@/lib/stableKey';
+
+
 // Deal Room Types
 interface DealRoom {
   id: number;
@@ -517,8 +520,8 @@ export default function CollaborationPage() {
                             <p className="text-gray-700 mb-2">{message.content}</p>
                             {message.attachments && message.attachments.length > 0 && (
                               <div className="flex items-center space-x-2 mb-2">
-                                {message.attachments.map((attachment, idx) => (
-                                  <div key={idx} className="flex items-center bg-gray-100 rounded px-2 py-1 text-sm">
+                                {message.attachments.map((attachment, _idx) => (
+                                  <div key={stableKey(attachment)} className="flex items-center bg-gray-100 rounded px-2 py-1 text-sm">
                                     <FileText className="w-4 h-4 mr-1 text-gray-600" />
                                     {attachment}
                                   </div>
@@ -725,8 +728,8 @@ export default function CollaborationPage() {
                       <div className="mb-4">
                         <p className="text-sm font-medium text-gray-700 mb-2">Pending Approvers:</p>
                         <div className="flex flex-wrap gap-2">
-                          {approval.pending_approvers.map((approver, idx) => (
-                            <span key={idx} className="bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">
+                          {approval.pending_approvers.map((approver, _idx) => (
+                            <span key={stableKey(approver)} className="bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">
                               {approver}
                             </span>
                           ))}

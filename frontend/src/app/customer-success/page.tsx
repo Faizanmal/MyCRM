@@ -33,6 +33,8 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { customerSuccessAPI } from '@/lib/premium-features-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface CustomerAccount {
   id: string;
@@ -537,8 +539,8 @@ export default function CustomerSuccessPage() {
                             <div>
                               <h5 className="text-sm font-semibold mb-2">Risk Factors:</h5>
                               <ul className="space-y-1">
-                                {risk.risk_factors.map((factor, i) => (
-                                  <li key={i} className="flex items-center gap-2 text-sm">
+                                {risk.risk_factors.map((factor, _i) => (
+                                  <li key={stableKey(factor)} className="flex items-center gap-2 text-sm">
                                     <XCircle className="w-3 h-3 text-red-500" />
                                     {factor}
                                   </li>
@@ -548,8 +550,8 @@ export default function CustomerSuccessPage() {
                             <div>
                               <h5 className="text-sm font-semibold mb-2">Recommended Actions:</h5>
                               <ul className="space-y-1">
-                                {risk.recommended_actions.map((action, i) => (
-                                  <li key={i} className="flex items-center gap-2 text-sm">
+                                {risk.recommended_actions.map((action, _i) => (
+                                  <li key={stableKey(action)} className="flex items-center gap-2 text-sm">
                                     <Zap className="w-3 h-3 text-blue-500" />
                                     {action}
                                   </li>
@@ -632,8 +634,8 @@ export default function CustomerSuccessPage() {
                           <div>
                             <h5 className="text-sm font-semibold mb-2">Expansion Triggers:</h5>
                             <div className="flex flex-wrap gap-2">
-                              {expansion.triggers.map((trigger, i) => (
-                                <Badge key={i} variant="secondary" className="text-xs">
+                              {expansion.triggers.map((trigger, _i) => (
+                                <Badge key={stableKey(trigger)} variant="secondary" className="text-xs">
                                   <Sparkles className="w-3 h-3 mr-1" />
                                   {trigger}
                                 </Badge>

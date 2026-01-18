@@ -29,6 +29,8 @@ import { Switch } from '@/components/ui/switch';
 // import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { stableKey } from '@/lib/stableKey';
+
 
 // Types
 interface DataClassification {
@@ -556,8 +558,8 @@ const ContentScanner: React.FC = () => {
               <div>
                 <span className="text-sm text-muted-foreground">Detected:</span>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {result.matches.map((match, i) => (
-                    <Badge key={i} variant="outline">
+                  {result.matches.map((match, _i) => (
+                    <Badge key={stableKey(match)} variant="outline">
                       {match.classification}
                     </Badge>
                   ))}

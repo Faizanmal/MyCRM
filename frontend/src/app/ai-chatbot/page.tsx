@@ -27,6 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { aiChatbotAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface ChatMessage {
   id: string;
@@ -440,9 +442,9 @@ export default function AIChatbotPage() {
                 {/* Suggestions */}
                 {suggestions.length > 0 && messages.length === 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {suggestions.map((suggestion, index) => (
+                    {suggestions.map((suggestion, _index) => (
                       <Button
-                        key={index}
+                        key={stableKey(suggestion)}
                         variant="outline"
                         size="sm"
                         className="text-xs"

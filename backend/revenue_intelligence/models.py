@@ -182,7 +182,7 @@ class DealVelocity(models.Model):
     is_on_track = models.BooleanField(default=True)
 
     # Context
-    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     notes = models.TextField(blank=True)
 
     class Meta:
@@ -272,7 +272,7 @@ class Competitor(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         db_table = 'competitors'
@@ -422,7 +422,7 @@ class DealRiskAlert(models.Model):
     # Status
     is_active = models.BooleanField(default=True)
     is_acknowledged = models.BooleanField(default=False)
-    acknowledged_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    acknowledged_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     acknowledged_at = models.DateTimeField(blank=True)
 
     # Resolution

@@ -23,6 +23,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { stableKey } from '@/lib/stableKey';
+
 
 export interface ChurnStatistics {
   total_predictions: number;
@@ -355,8 +357,8 @@ export default function Page() {
                               <div>
                                 <p className="text-sm font-medium mb-2">Recommended Actions:</p>
                                 <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                                  {prediction.recommended_actions.slice(0, 3).map((action, idx) => (
-                                    <li key={idx}>{action}</li>
+                                  {prediction.recommended_actions.slice(0, 3).map((action, _idx) => (
+                                    <li key={stableKey(action)}>{action}</li>
                                   ))}
                                 </ul>
                               </div>

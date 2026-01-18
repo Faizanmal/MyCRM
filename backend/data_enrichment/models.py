@@ -360,7 +360,7 @@ class IntentSignal(models.Model):
     # Action taken
     was_actioned = models.BooleanField(default=False)
     actioned_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True,
+        User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='actioned_intent_signals'
     )
     actioned_at = models.DateTimeField(blank=True)
@@ -434,7 +434,7 @@ class NewsAlert(models.Model):
     # Status
     is_read = models.BooleanField(default=False)
     read_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True,
+        User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='read_news_alerts'
     )
     read_at = models.DateTimeField(blank=True)
@@ -529,7 +529,7 @@ class EnrichmentJob(models.Model):
 
     # User who initiated
     initiated_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=True,
+        User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='enrichment_jobs'
     )
 
@@ -593,7 +593,7 @@ class EnrichmentRule(models.Model):
     last_triggered_at = models.DateTimeField(blank=True)
 
     created_by = models.ForeignKey(
-        User, on_delete=models.SET_NULL,
+        User, on_delete=models.SET_NULL, null=True,
         related_name='enrichment_rules'
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -746,6 +746,7 @@ class EnrichmentActivity(models.Model):
     provider = models.ForeignKey(
         EnrichmentProvider,
         on_delete=models.SET_NULL,
+        null=True,
         blank=True
     )
 

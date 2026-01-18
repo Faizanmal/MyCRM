@@ -288,8 +288,8 @@ export function FormErrors({
                     <div className="mt-2 text-sm text-red-700">
                         <ul className="list-disc pl-5 space-y-1">
                             {Object.entries(errors).map(([field, messages]) =>
-                                messages.map((message, index) => (
-                                    <li key={`${field}-${index}`}>
+                                messages.map((message) => (
+                                    <li key={`${field}-${message}`}>
                                         <strong>{field}:</strong> {message}
                                     </li>
                                 ))

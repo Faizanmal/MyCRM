@@ -37,6 +37,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 // import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
+import { stableKey } from '@/lib/stableKey';
+
 
 // Types
 interface APIKey {
@@ -466,7 +468,7 @@ const AnalyticsTab: React.FC = () => (
       <CardContent>
         <div className="space-y-4">
           {mockAnalytics.topEndpoints.map((endpoint, i) => (
-            <div key={i} className="flex items-center justify-between">
+            <div key={stableKey(endpoint)} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground w-6">{i + 1}.</span>
                 <code className="text-sm font-medium">{endpoint.endpoint}</code>

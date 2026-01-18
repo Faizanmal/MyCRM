@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { enterpriseAPI } from '@/lib/enterprise-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface HealthComponent {
   status: string;
@@ -116,8 +118,8 @@ const SecurityDashboard = () => {
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            {[...Array(4)].map((_, _i) => (
+              <div key={stableKey(_)} className="h-32 bg-gray-200 rounded"></div>
             ))}
           </div>
         </div>
@@ -355,7 +357,7 @@ const AuditLogsView = ({ auditSummary, getRiskLevelColor }: { auditSummary: Audi
       <CardContent>
         <div className="space-y-2">
           {auditSummary?.top_actions?.map((action: AuditAction, index: number) => (
-            <div key={index} className="flex justify-between items-center">
+            <div key={action.action} className="flex justify-between items-center">
               <span className="text-sm">{action.action}</span>
               <Badge variant="outline">{action.count}</Badge>
             </div>

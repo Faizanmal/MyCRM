@@ -47,7 +47,7 @@ class Lead(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
 
     # Assignment and Ownership
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='assigned_leads')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_leads')
 
     # Lead Scoring and Qualification

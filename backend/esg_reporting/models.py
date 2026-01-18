@@ -444,7 +444,7 @@ class CarbonFootprint(models.Model):
 
     notes = models.TextField(blank=True)
 
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -523,7 +523,7 @@ class SupplierESGAssessment(models.Model):
 
     notes = models.TextField(blank=True)
 
-    assessed_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    assessed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

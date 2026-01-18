@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 // import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface TourStep {
     id: string;
@@ -251,7 +253,7 @@ export function OnboardingTourProvider({
                                     <div className="flex items-center justify-center gap-1">
                                         {steps.map((_, index) => (
                                             <button
-                                                key={index}
+                                                key={stableKey(_)}
                                                 onClick={() => goToStep(index)}
                                                 className="p-0.5"
                                             >

@@ -137,9 +137,9 @@ export function StaggerContainer({
       variants={containerVariants}
       className={className}
     >
-      {React.Children.map(children, (child, index) => (
+      {React.Children.toArray(children).map((child) => (
         <motion.div
-          key={index}
+          key={(child as React.ReactElement)?.key ?? undefined}
           variants={animationVariants[animation]}
           transition={{
             duration: 0.5,

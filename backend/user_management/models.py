@@ -19,7 +19,7 @@ class User(AbstractUser):
     department = models.CharField(max_length=100, blank=True)
     # is_active is already in AbstractUser, but we can keep it explicit if needed.
     # AbstractUser already has is_active, calling it out again is fine
-    last_login_ip = models.GenericIPAddressField(blank=True)
+    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     two_factor_enabled = models.BooleanField(default=False)
     two_factor_secret = models.CharField(max_length=32, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -115,7 +115,7 @@ class AuditLog(models.Model):
     ]
 
     # Use settings.AUTH_USER_MODEL here too
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, related_name='user_audit_logs')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_audit_logs')
     action = models.CharField(max_length=20, choices=ACTION_CHOICES)
     model_name = models.CharField(max_length=100)
     object_id = models.CharField(max_length=100, blank=True)

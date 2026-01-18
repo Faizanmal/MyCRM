@@ -202,7 +202,7 @@ export default function PipelineAnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value: number | string) => `$${Number(value).toLocaleString()}`} />
+                  <Tooltip formatter={(value?: number | string) => (value == null ? '' : `$${Number(value).toLocaleString()}`)} />
                   <Legend />
                   <Line
                     type="monotone"
@@ -260,8 +260,8 @@ export default function PipelineAnalyticsPage() {
               <div className="mt-4">
                 <p className="text-sm text-gray-600 mb-2">Stage Conversion Rates</p>
                 <div className="space-y-2">
-                  {analytics?.conversion_funnel?.stage_metrics?.map((stage: Record<string, unknown>, index: number) => (
-                    <div key={index} className="flex items-center justify-between">
+                  {analytics?.conversion_funnel?.stage_metrics?.map((stage: Record<string, unknown>, _index: number) => (
+                    <div key={stage.stage as string} className="flex items-center justify-between">
                       <span className="text-sm text-gray-700">{stage.stage as string}</span>
                       <span className="text-sm font-medium text-gray-900">
                         {(stage.conversion_rate as number)?.toFixed(1)}%
@@ -290,10 +290,10 @@ export default function PipelineAnalyticsPage() {
                     dataKey="value"
                   >
                     {analytics?.pipeline_health?.by_stage?.map((entry: Record<string, unknown>, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${entry.stage as string || index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number | string) => `$${Number(value).toLocaleString()}`} />
+                  <Tooltip formatter={(value?: number | string) => (value == null ? '' : `$${Number(value).toLocaleString()}`)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -306,7 +306,7 @@ export default function PipelineAnalyticsPage() {
               </h3>
               <div className="space-y-4">
                 {aiInsights?.insights?.slice(0, 5).map((insight: Record<string, unknown>, index: number) => (
-                  <div key={index} className="flex items-start space-x-3">
+                  <div key={insight.id as string || index} className="flex items-start space-x-3">
                     <div className={`shrink-0 w-2 h-2 mt-2 rounded-full ${
                       (insight.priority as string) === 'high' ? 'bg-red-500' :
                       (insight.priority as string) === 'medium' ? 'bg-yellow-500' :

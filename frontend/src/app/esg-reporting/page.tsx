@@ -27,6 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { esgReportingAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface ESGMetric {
   id: string;
@@ -534,8 +536,8 @@ export default function ESGReportingPage() {
                       <div>
                         <p className="font-medium">{supplier.supplier_name}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          {supplier.categories.map((cat, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">{cat}</Badge>
+                          {supplier.categories.map((cat, _idx) => (
+                            <Badge key={stableKey(cat)} variant="outline" className="text-xs">{cat}</Badge>
                           ))}
                         </div>
                       </div>

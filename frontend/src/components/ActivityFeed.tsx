@@ -10,6 +10,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 import { activityAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface Activity {
   id: string;
@@ -130,10 +132,10 @@ export default function ActivityFeed({
   const parseCommentContent = (content: string) => {
     // Simple mention parsing - replace @username with styled spans
     const parts = content.split(/(@\w+)/g);
-    return parts.map((part, index) => {
+    return parts.map((part, _index) => {
       if (part.startsWith('@')) {
         return (
-          <span key={index} className="text-blue-600 font-medium">
+          <span key={stableKey(part)} className="text-blue-600 font-medium">
             {part}
           </span>
         );

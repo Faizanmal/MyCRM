@@ -128,7 +128,7 @@ class RoutingRule(models.Model):
     target_teams = models.JSONField(default=list, help_text="Team IDs to route to")
 
     # Fallback
-    fallback_rep = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='fallback_rules')
+    fallback_rep = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='fallback_rules')
 
     # Settings
     is_active = models.BooleanField(default=True)
@@ -178,12 +178,12 @@ class LeadAssignment(models.Model):
 
     # Assignment details
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lead_assignments')
-    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='made_assignments')
-    previous_assignee = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='previous_assignments')
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='made_assignments')
+    previous_assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='previous_assignments')
 
     # Method and rule
     assignment_method = models.CharField(max_length=20, choices=ASSIGNMENT_METHODS)
-    routing_rule = models.ForeignKey(RoutingRule, on_delete=models.SET_NULL, blank=True)
+    routing_rule = models.ForeignKey(RoutingRule, on_delete=models.SET_NULL, null=True, blank=True)
 
     # AI Routing scores
     match_score = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="AI match score 0-100")
@@ -283,7 +283,7 @@ class RebalancingEvent(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     trigger_reason = models.CharField(max_length=20, choices=TRIGGER_REASONS)
-    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    triggered_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     # Scope
     affected_reps = models.ManyToManyField(User, related_name='rebalancing_events')
@@ -392,7 +392,7 @@ class RepSkillAssignment(models.Model):
 
     # Verification
     verified = models.BooleanField(default=False)
-    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -425,7 +425,7 @@ class TerritoryDefinition(models.Model):
     postal_codes = models.JSONField(default=list)
 
     # Assignment
-    primary_rep = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='primary_territories')
+    primary_rep = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='primary_territories')
     backup_reps = models.ManyToManyField(User, blank=True, related_name='backup_territories')
 
     is_active = models.BooleanField(default=True)

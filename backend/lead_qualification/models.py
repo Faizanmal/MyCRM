@@ -40,7 +40,7 @@ class ScoringRule(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='scoring_rules_created')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='scoring_rules_created')
 
     class Meta:
         db_table = 'lead_scoring_rule'
@@ -153,7 +153,7 @@ class QualificationWorkflow(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='workflows_created')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='workflows_created')
 
     class Meta:
         db_table = 'lead_qualification_workflow'

@@ -141,8 +141,8 @@ export default function EthicalAIPage() {
                         <div className="mt-3 p-3 bg-orange-50 rounded">
                           <div className="text-sm font-medium mb-1">Affected Groups:</div>
                           <div className="flex flex-wrap gap-2">
-                            {detection.affected_groups.map((group: string, idx: number) => (
-                              <Badge key={idx} variant="secondary">{group}</Badge>
+                            {detection.affected_groups.map((group: string, _idx: number) => (
+                              <Badge key={group} variant="secondary">{group}</Badge>
                             ))}
                           </div>
                         </div>
@@ -152,8 +152,8 @@ export default function EthicalAIPage() {
                         <div className="mt-3">
                           <div className="text-sm font-medium mb-2">Recommendations:</div>
                           <ul className="text-sm text-gray-600 space-y-1">
-                            {detection.mitigation_recommendations.map((rec: string, idx: number) => (
-                              <li key={idx}>• {rec}</li>
+                            {detection.mitigation_recommendations.map((rec: string, _idx: number) => (
+                              <li key={rec}>• {rec}</li>
                             ))}
                           </ul>
                         </div>

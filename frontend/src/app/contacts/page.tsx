@@ -46,6 +46,8 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { contactsAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 interface Contact {
@@ -382,8 +384,8 @@ export default function ContactsPage() {
           {/* Contacts List */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i}>
+              {[...Array(6)].map((_, _i) => (
+                <Card key={stableKey(_)}>
                   <CardContent className="p-6">
                     <div className="flex items-start space-x-3 mb-4">
                       <Skeleton className="w-12 h-12 rounded-full" />

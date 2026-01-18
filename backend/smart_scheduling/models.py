@@ -218,6 +218,7 @@ class Meeting(models.Model):
     contact = models.ForeignKey(
         'contact_management.Contact',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='meetings'
     )
@@ -226,6 +227,7 @@ class Meeting(models.Model):
     opportunity = models.ForeignKey(
         'opportunity_management.Opportunity',
         on_delete=models.SET_NULL,
+        null=True,
         blank=True,
         related_name='meetings'
     )

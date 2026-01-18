@@ -68,6 +68,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { globalSearchAPI, SearchResult, SavedSearch } from '@/lib/enterprise-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 const ENTITY_TYPES = [
@@ -665,9 +667,9 @@ export default function GlobalSearchPage() {
                   <CardDescription>Your recent search history</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  {recentSearches.map((search, index) => (
+                  {recentSearches.map((search, _index) => (
                     <button
-                      key={index}
+                      key={stableKey(search)}
                       onClick={() => setQuery(search)}
                       className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm text-left"
                     >
@@ -688,9 +690,9 @@ export default function GlobalSearchPage() {
                   <CardDescription>Popular searches this week</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  {MOCK_TRENDING_SEARCHES.map((search, index) => (
+                  {MOCK_TRENDING_SEARCHES.map((search, _index) => (
                     <button
-                      key={index}
+                      key={stableKey(search)}
                       onClick={() => setQuery(search)}
                       className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm text-left"
                     >

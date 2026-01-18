@@ -39,6 +39,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 // =============================================================================
 // Types
@@ -278,7 +280,7 @@ export function AIAssistantChat({
           <div className="flex flex-wrap gap-2">
             {suggestions.map((suggestion, index) => (
               <Button
-                key={index}
+                key={stableKey(suggestion)}
                 variant="outline"
                 size="sm"
                 className="text-xs"

@@ -54,6 +54,8 @@ import {
 //   DialogTrigger,
 // } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 // =============================================================================
 // Types
@@ -201,8 +203,8 @@ export function ComplianceDashboard({ className }: { className?: string }) {
         <div className="animate-pulse space-y-4">
           <div className="h-32 bg-muted rounded-lg" />
           <div className="grid grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-muted rounded-lg" />
+            {[...Array(4)].map((_, _i) => (
+              <div key={stableKey(_)} className="h-24 bg-muted rounded-lg" />
             ))}
           </div>
         </div>

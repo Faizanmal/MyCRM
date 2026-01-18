@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, KeyboardEvent, ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 /**
  * Accessibility utilities and components for MyCRM
@@ -352,7 +354,7 @@ export function AccessibleTable({
                 <tbody className="bg-white divide-y divide-gray-200">
                     {data.map((row, index) => (
                         <tr
-                            key={index}
+                            key={stableKey(row)}
                             onClick={onRowClick ? () => onRowClick(row, index) : undefined}
                             className={cn(
                                 onRowClick && 'cursor-pointer hover:bg-gray-50'

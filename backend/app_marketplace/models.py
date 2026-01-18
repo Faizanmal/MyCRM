@@ -65,7 +65,7 @@ class AppDeveloper(models.Model):
     total_installs = models.IntegerField(default=0)
 
     # Linked user
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, blank=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -117,7 +117,7 @@ class MarketplaceApp(models.Model):
 
     # Classification
     app_type = models.CharField(max_length=20, choices=APP_TYPE)
-    category = models.ForeignKey(AppCategory, on_delete=models.SET_NULL, related_name='apps')
+    category = models.ForeignKey(AppCategory, on_delete=models.SET_NULL, null=True, related_name='apps')
     tags = models.JSONField(default=list, blank=True)
 
     # Developer
@@ -199,7 +199,7 @@ class AppVersion(models.Model):
     # Review
     is_approved = models.BooleanField(default=False)
     reviewed_at = models.DateTimeField(blank=True)
-    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     released_at = models.DateTimeField(auto_now_add=True)
 
@@ -237,7 +237,7 @@ class AppInstallation(models.Model):
         blank=True,
         related_name='installed_apps'
     )
-    installed_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    installed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     # Configuration
     config = models.JSONField(default=dict, blank=True)
@@ -275,7 +275,7 @@ class AppReview(models.Model):
 
     app = models.ForeignKey(MarketplaceApp, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='app_reviews')
-    installation = models.ForeignKey(AppInstallation, on_delete=models.SET_NULL)
+    installation = models.ForeignKey(AppInstallation, on_delete=models.SET_NULL, null=True)
 
     rating = models.IntegerField()  # 1-5
     title = models.CharField(max_length=200)

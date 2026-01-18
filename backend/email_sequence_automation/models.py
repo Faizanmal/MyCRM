@@ -132,8 +132,8 @@ class SequenceStep(models.Model):
     # Conditional logic
     condition_type = models.CharField(max_length=30, choices=CONDITION_TYPES, blank=True)
     condition_config = models.JSONField(default=dict)
-    branch_yes_step = models.ForeignKey('self', blank=True, on_delete=models.SET_NULL, related_name='yes_branches')
-    branch_no_step = models.ForeignKey('self', blank=True, on_delete=models.SET_NULL, related_name='no_branches')
+    branch_yes_step = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='yes_branches')
+    branch_no_step = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='no_branches')
 
     # Step-specific configuration
     config = models.JSONField(default=dict, help_text="Type-specific configuration")
@@ -246,14 +246,14 @@ class SequenceEnrollment(models.Model):
     lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, blank=True, related_name='sequence_enrollments')
 
     # Current position
-    current_step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, blank=True, related_name='current_enrollments')
+    current_step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_enrollments')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
 
     # Scheduling
     next_action_at = models.DateTimeField(blank=True)
 
     # Enrollment source
-    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='sequence_enrollments')
+    enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sequence_enrollments')
     enrollment_trigger = models.CharField(max_length=100, blank=True)
 
     # Exit tracking
@@ -314,7 +314,7 @@ class SequenceActivity(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     enrollment = models.ForeignKey(SequenceEnrollment, on_delete=models.CASCADE, related_name='activities')
-    step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, blank=True)
+    step = models.ForeignKey(SequenceStep, on_delete=models.SET_NULL, null=True, blank=True)
 
     activity_type = models.CharField(max_length=30, choices=ACTIVITY_TYPES)
     description = models.TextField(blank=True)
@@ -323,7 +323,7 @@ class SequenceActivity(models.Model):
     metadata = models.JSONField(default=dict)
 
     # Tracking
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
     user_agent = models.TextField(blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -370,7 +370,7 @@ class ABTest(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Winner
-    winning_variant = models.ForeignKey(SequenceEmail, blank=True, on_delete=models.SET_NULL, related_name='won_tests')
+    winning_variant = models.ForeignKey(SequenceEmail, null=True, blank=True, on_delete=models.SET_NULL, related_name='won_tests')
     winner_selected_at = models.DateTimeField(blank=True)
     auto_select_winner = models.BooleanField(default=True)
 

@@ -47,6 +47,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { stableKey } from '@/lib/stableKey';
+
 
 // Types
 interface Territory {
@@ -602,7 +604,7 @@ const RecommendationsTab: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             {recommendations?.map((rec, index) => (
-              <div key={index} className="border rounded-lg p-4">
+              <div key={stableKey(rec)} className="border rounded-lg p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     {rec.priority === 'high' ? (

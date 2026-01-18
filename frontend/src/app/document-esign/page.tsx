@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { stableKey } from '@/lib/stableKey';
+
 
 interface Document {
   id: number;
@@ -392,8 +394,8 @@ export default function DocumentEsignPage() {
                   { action: "Document sent", doc: "Partnership Agreement", user: "You", time: "Yesterday", icon: <Send className="w-4 h-4 text-blue-500" /> },
                   { action: "Reminder sent", doc: "NDA - Startup XYZ", user: "System", time: "Yesterday", icon: <Mail className="w-4 h-4 text-yellow-500" /> },
                   { action: "Document created", doc: "Service Level Agreement", user: "You", time: "Today", icon: <FilePlus className="w-4 h-4 text-gray-500" /> },
-                ].map((activity, index) => (
-                  <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                ].map((activity, _index) => (
+                  <div key={stableKey(activity)} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="p-2 rounded-full bg-muted">
                       {activity.icon}
                     </div>

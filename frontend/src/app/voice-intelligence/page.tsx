@@ -46,6 +46,8 @@ import { Input } from '@/components/ui/input';
 // import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { voiceIntelligenceAPI } from '@/lib/ai-workflow-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface VoiceRecording {
   id: number;
@@ -658,8 +660,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                               <div className="p-4 border rounded-lg">
                                 <h4 className="font-medium mb-2">Key Points</h4>
                                 <ul className="space-y-2">
-                                  {summary.key_points.map((point, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-sm">
+                                  {summary.key_points.map((point, _idx) => (
+                                    <li key={stableKey(point)} className="flex items-start gap-2 text-sm">
                                       <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5" />
                                       {point}
                                     </li>
@@ -713,8 +715,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                             <div className="p-4 border rounded-lg">
                               <h4 className="font-medium mb-2">Topics Discussed</h4>
                               <div className="flex flex-wrap gap-2">
-                                {summary.topics_discussed.map((topic, idx) => (
-                                  <Badge key={idx} variant="secondary">{topic}</Badge>
+                                {summary.topics_discussed.map((topic, _idx) => (
+                                  <Badge key={stableKey(topic)} variant="secondary">{topic}</Badge>
                                 ))}
                               </div>
                             </div>
@@ -725,8 +727,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                                 Recommendations
                               </h4>
                               <ul className="space-y-2">
-                                {summary.recommendations.map((rec, idx) => (
-                                  <li key={idx} className="flex items-start gap-2 text-sm text-violet-800">
+                                {summary.recommendations.map((rec, _idx) => (
+                                  <li key={stableKey(rec)} className="flex items-start gap-2 text-sm text-violet-800">
                                     <Sparkles className="h-4 w-4 text-violet-500 mt-0.5" />
                                     {rec}
                                   </li>
@@ -762,8 +764,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                               <div className="p-4 border rounded-lg">
                                 <h4 className="font-medium mb-2">Key Phrases</h4>
                                 <div className="flex flex-wrap gap-1">
-                                  {transcription.key_phrases.map((phrase, idx) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">{phrase}</Badge>
+                                  {transcription.key_phrases.map((phrase, _idx) => (
+                                    <Badge key={stableKey(phrase)} variant="outline" className="text-xs">{phrase}</Badge>
                                   ))}
                                 </div>
                               </div>
@@ -771,8 +773,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                               <div className="p-4 border rounded-lg">
                                 <h4 className="font-medium mb-2">Objections Raised</h4>
                                 <ul className="space-y-1">
-                                  {transcription.objections_raised.map((obj, idx) => (
-                                    <li key={idx} className="flex items-center gap-2 text-sm text-yellow-700">
+                                  {transcription.objections_raised.map((obj, _idx) => (
+                                    <li key={stableKey(obj)} className="flex items-center gap-2 text-sm text-yellow-700">
                                       <AlertTriangle className="h-3 w-3" />
                                       {obj}
                                     </li>
@@ -858,8 +860,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                                 { label: 'Presentation', score: callScore.presentation_score },
                                 { label: 'Objections', score: callScore.objection_handling_score },
                                 { label: 'Closing', score: callScore.closing_score }
-                              ].map((item, idx) => (
-                                <div key={idx} className="text-center p-3 border rounded-lg">
+                              ].map((item, _idx) => (
+                                <div key={stableKey(item)} className="text-center p-3 border rounded-lg">
                                   <p className={`text-2xl font-semibold ${getScoreColor(item.score)}`}>
                                     {item.score}
                                   </p>
@@ -875,8 +877,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                                   Strengths
                                 </h4>
                                 <ul className="space-y-2">
-                                  {callScore.strengths.map((strength, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-sm text-green-700">
+                                  {callScore.strengths.map((strength, _idx) => (
+                                    <li key={stableKey(strength)} className="flex items-start gap-2 text-sm text-green-700">
                                       <CheckCircle2 className="h-4 w-4 mt-0.5" />
                                       {strength}
                                     </li>
@@ -890,8 +892,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                                   Areas for Improvement
                                 </h4>
                                 <ul className="space-y-2">
-                                  {callScore.areas_for_improvement.map((area, idx) => (
-                                    <li key={idx} className="flex items-start gap-2 text-sm text-yellow-700">
+                                  {callScore.areas_for_improvement.map((area, _idx) => (
+                                    <li key={stableKey(area)} className="flex items-start gap-2 text-sm text-yellow-700">
                                       <AlertTriangle className="h-4 w-4 mt-0.5" />
                                       {area}
                                     </li>
@@ -914,7 +916,7 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                               </h4>
                               <ul className="space-y-3">
                                 {callScore.coaching_tips.map((tip, idx) => (
-                                  <li key={idx} className="flex items-start gap-3 p-3 bg-white rounded-lg">
+                                  <li key={stableKey(tip)} className="flex items-start gap-3 p-3 bg-white rounded-lg">
                                     <div className="flex items-center justify-center w-6 h-6 rounded-full bg-violet-100 text-violet-600 text-sm font-medium">
                                       {idx + 1}
                                     </div>
@@ -1014,8 +1016,8 @@ Sarah: Absolutely, I'll cover pricing as well. Let me share my screen and show y
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {analytics.top_topics.slice(0, 5).map((topic, idx) => (
-                      <div key={idx} className="flex items-center justify-between">
+                    {analytics.top_topics.slice(0, 5).map((topic, _idx) => (
+                      <div key={stableKey(topic)} className="flex items-center justify-between">
                         <span className="text-sm">{topic.topic}</span>
                         <Badge variant="secondary">{topic.count}</Badge>
                       </div>

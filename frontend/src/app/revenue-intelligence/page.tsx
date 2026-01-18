@@ -25,6 +25,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { revenueIntelligenceAPI } from '@/lib/premium-features-api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface DealScore {
   id: string;
@@ -346,8 +348,8 @@ export default function RevenueIntelligencePage() {
                               </Badge>
                             </div>
                             <div className="flex flex-wrap gap-2 mt-2">
-                              {deal.key_factors.slice(0, 3).map((factor, i) => (
-                                <Badge key={i} variant="outline" className="text-xs">
+                              {deal.key_factors.slice(0, 3).map((factor, _i) => (
+                                <Badge key={stableKey(factor)} variant="outline" className="text-xs">
                                   {factor}
                                 </Badge>
                               ))}

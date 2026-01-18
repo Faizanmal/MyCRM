@@ -40,6 +40,8 @@ import { Label } from '@/components/ui/label';
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { socialInboxAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface SocialAccount {
   id: string;
@@ -740,8 +742,8 @@ export default function SocialInboxPage() {
                         <p className="font-medium">{rule.name}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex gap-1">
-                            {rule.keywords.slice(0, 3).map((kw, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">{kw}</Badge>
+                            {rule.keywords.slice(0, 3).map((kw, _idx) => (
+                              <Badge key={stableKey(kw)} variant="outline" className="text-xs">{kw}</Badge>
                             ))}
                             {rule.keywords.length > 3 && (
                               <Badge variant="outline" className="text-xs">+{rule.keywords.length - 3}</Badge>

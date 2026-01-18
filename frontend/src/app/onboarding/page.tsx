@@ -20,6 +20,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface OrganizationData {
   name: string;
@@ -261,7 +263,7 @@ export default function OnboardingPage() {
                 </p>
 
                 {teamMembers.map((member, index) => (
-                  <div key={index} className="flex gap-2">
+                  <div key={stableKey(member)} className="flex gap-2">
                     <div className="flex-1">
                       <Input
                         type="email"

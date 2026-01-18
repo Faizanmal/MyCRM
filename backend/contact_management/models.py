@@ -45,7 +45,7 @@ class Contact(models.Model):
     # CRM Information
     contact_type = models.CharField(max_length=20, choices=CONTACT_TYPE_CHOICES, default='prospect')
     source = models.CharField(max_length=100, blank=True)  # How they found us
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='assigned_contacts')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_contacts')
     status = models.CharField(max_length=50, default='active')
 
     # Social Media
@@ -61,7 +61,7 @@ class Contact(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='created_contacts')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_contacts')
 
     class Meta:
         db_table = 'crm_contacts'

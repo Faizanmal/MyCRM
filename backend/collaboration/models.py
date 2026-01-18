@@ -660,7 +660,7 @@ class ApprovalAction(TenantAwareModel):
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
 
     class Meta:
         ordering = ['created_at']

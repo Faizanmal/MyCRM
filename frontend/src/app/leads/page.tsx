@@ -50,6 +50,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { leadsAPI } from '@/lib/api';
+import { stableKey } from '@/lib/stableKey';
+
 
 
 interface Lead {
@@ -479,8 +481,8 @@ export default function LeadsPage() {
             isLoading ? (
               <Card>
                 <CardContent className="p-6">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 py-4 border-b last:border-0">
+                  {[...Array(5)].map((_, _i) => (
+                    <div key={stableKey(_)} className="flex items-center gap-4 py-4 border-b last:border-0">
                       <Skeleton className="h-10 w-10 rounded-full" />
                       <div className="flex-1">
                         <Skeleton className="h-4 w-32 mb-2" />

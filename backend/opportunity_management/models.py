@@ -39,7 +39,7 @@ class Opportunity(models.Model):
     currency = models.CharField(max_length=3, default='USD')
 
     # Assignment and Ownership
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='assigned_opportunities')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_opportunities')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_opportunities')
 
     # Dates

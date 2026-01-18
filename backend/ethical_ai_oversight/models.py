@@ -34,7 +34,7 @@ class AIDecisionAudit(models.Model):
     explanation = models.TextField()
     confidence_score = models.FloatField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     flagged_for_review = models.BooleanField(default=False)
 
     class Meta:

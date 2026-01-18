@@ -13,6 +13,8 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { stableKey } from '@/lib/stableKey';
+
 
 interface NavItem {
   label: string;
@@ -248,7 +250,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
     <nav className={cn('flex items-center gap-2 text-sm', className)}>
       {items.map((item, index) => (
         <motion.div
-          key={index}
+          key={stableKey(item)}
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.1 }}

@@ -23,10 +23,10 @@ class AuditLog(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, related_name='core_audit_logs')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='core_audit_logs')
     action = models.CharField(max_length=100)
     resource = models.CharField(max_length=200, blank=True)
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
     user_agent = models.TextField(blank=True)
     metadata = models.JSONField(default=dict, blank=True)
     risk_level = models.CharField(max_length=20, choices=RISK_LEVELS, default='low')
@@ -64,7 +64,7 @@ class SystemConfiguration(models.Model):
     config_type = models.CharField(max_length=20, choices=CONFIG_TYPES)
     description = models.TextField(blank=True)
     is_encrypted = models.BooleanField(default=False)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -127,7 +127,7 @@ class DataBackup(models.Model):
     file_size = models.BigIntegerField(blank=True)  # Size in bytes
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='running')
     error_message = models.TextField(blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(blank=True)
 
@@ -327,7 +327,7 @@ class UserPermission(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='custom_permissions')
     permission = models.CharField(max_length=100)
     is_granted = models.BooleanField(default=True)  # True = grant, False = revoke
-    granted_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='granted_permissions')
+    granted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='granted_permissions')
     reason = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     expires_at = models.DateTimeField(blank=True)
@@ -353,7 +353,7 @@ class PermissionGroup(models.Model):
     description = models.TextField(blank=True)
     permissions = models.JSONField(default=list)  # List of permission codes
     is_active = models.BooleanField(default=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -370,7 +370,7 @@ class UserPermissionGroup(models.Model):
     """Many-to-many relationship between users and permission groups"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='permission_groups')
     group = models.ForeignKey(PermissionGroup, on_delete=models.CASCADE, related_name='user_assignments')
-    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='group_assignments')
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='group_assignments')
     assigned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -387,7 +387,7 @@ class Team(models.Model):
     """Teams for collaborative access control"""
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    manager = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='managed_teams')
+    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='managed_teams')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -438,7 +438,7 @@ class DataImportLog(models.Model):
     errors = models.JSONField(default=list)
     field_mapping = models.JSONField(default=dict)
     validate_only = models.BooleanField(default=False)
-    imported_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    imported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(blank=True)
@@ -604,7 +604,7 @@ class ScheduledReport(models.Model):
 class SearchLog(models.Model):
     """Log search queries for analytics"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     model_name = models.CharField(max_length=100)
     query = models.TextField()
     filters = models.JSONField(default=dict)
@@ -648,7 +648,7 @@ class EmailLog(models.Model):
     opened_at = models.DateTimeField(blank=True)
     open_count = models.IntegerField(default=0)
     click_count = models.IntegerField(default=0)
-    sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True)
+    sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     sent_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -694,7 +694,7 @@ class EmailCampaign(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
-    template = models.ForeignKey(NotificationTemplate, on_delete=models.SET_NULL)
+    template = models.ForeignKey(NotificationTemplate, on_delete=models.SET_NULL, null=True)
     recipients = models.JSONField(default=list)
     recipient_count = models.IntegerField(default=0)
     sent_count = models.IntegerField(default=0)
