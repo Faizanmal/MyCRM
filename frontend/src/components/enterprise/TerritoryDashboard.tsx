@@ -603,7 +603,7 @@ const RecommendationsTab: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recommendations?.map((rec, index) => (
+            {recommendations?.map((rec, _index) => (
               <div key={stableKey(rec)} className="border rounded-lg p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">

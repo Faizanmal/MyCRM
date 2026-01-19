@@ -406,7 +406,7 @@ function ImportWizard() {
                 <CardContent>
                   <ScrollArea className="h-40">
                     <div className="space-y-2">
-                      {importResult.errors.map((error: any, index: number) => (
+                      {importResult.errors.map((error: any, _index: number) => (
                         <div
                           key={`error-${error.row}`}
                           className="text-sm p-2 bg-destructive/10 rounded"

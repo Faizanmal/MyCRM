@@ -194,7 +194,7 @@ export function AnalyticsDashboard({ className }: { className?: string }) {
         <div className="animate-pulse space-y-4">
           <div className="h-10 w-48 bg-muted rounded" />
           <div className="grid grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
+            {[...Array(4)].map((_, _i) => (
               <div key={stableKey(_)} className="h-32 bg-muted rounded-lg" />
             ))}
           </div>

@@ -497,7 +497,7 @@ const WorkflowTemplates = ({ onUseTemplate }: { onUseTemplate: () => void }) => 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {templates.map((template, index) => (
+      {templates.map((template, _index) => (
         <Card key={stableKey(template)}>
           <CardHeader>
             <CardTitle className="text-lg">{template.name}</CardTitle>

@@ -7,6 +7,7 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
+from django.db import models
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -367,7 +368,3 @@ def flag_high_risk_meetings():
 
     logger.info(f"Created {extra_reminders_created} extra reminders for high-risk meetings")
     return {'extra_reminders_created': extra_reminders_created}
-
-
-# Import models at task level to avoid circular imports
-from django.db import models

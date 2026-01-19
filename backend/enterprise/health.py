@@ -17,6 +17,7 @@ import logging
 import socket
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -553,9 +554,6 @@ class HealthCheckRegistry:
             return checker.check()
         return None
 
-
-# Import for parallel execution
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # =============================================================================
 # Default Health Check Setup

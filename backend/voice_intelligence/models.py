@@ -432,15 +432,14 @@ class RecordingCategory(models.Model):
     # Classification info
     is_auto_classified = models.BooleanField(default=False)
     confidence = models.FloatField(default=1.0)
-
-    def __str__(self):
-        return f"{self.recording} - {self.category}"
-
     classified_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'recording_categories'
         unique_together = ['recording', 'category']
+
+    def __str__(self):
+        return f"{self.recording} - {self.category}"
 
 
 class KeyMoment(models.Model):

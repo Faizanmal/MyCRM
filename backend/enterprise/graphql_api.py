@@ -835,6 +835,8 @@ class Query:
         sort: SortInput | None = None
     ) -> Connection[Lead]:
         """Get paginated list of leads."""
+        from django.db.models import Q
+
         from lead_management.models import Lead as LeadModel
 
         pagination = pagination or PaginationInput()

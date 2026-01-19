@@ -114,7 +114,7 @@ const AIAnalyticsDashboard = () => {
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(6)].map((_, _i) => (
               <div key={stableKey(_)} className="h-48 bg-gray-200 rounded"></div>
             ))}
           </div>
@@ -258,7 +258,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: AIInsights }) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
             <h4 className="font-medium">Sales Forecast</h4>
-            {((aiInsights?.sales_forecast?.recommendations as string[]) || [])?.slice(0, 3).map((rec: string, index: number) => (
+            {((aiInsights?.sales_forecast?.recommendations as string[]) || [])?.slice(0, 3).map((rec: string, _index: number) => (
               <div key={rec} className="flex items-start space-x-2">
                 <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                 <span className="text-sm">{rec}</span>
@@ -267,7 +267,7 @@ const AIOverview = ({ aiInsights }: { aiInsights: AIInsights }) => (
           </div>
           <div className="space-y-3">
             <h4 className="font-medium">Customer Retention</h4>
-            {aiInsights?.churn_risk?.recommendations?.slice(0, 3).map((rec: string, index: number) => (
+            {aiInsights?.churn_risk?.recommendations?.slice(0, 3).map((rec: string, _index: number) => (
               <div key={rec} className="flex items-start space-x-2">
                 <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
                 <span className="text-sm">{rec}</span>
@@ -366,7 +366,7 @@ const SalesForecastView = ({
             <div>
               <h4 className="font-medium mb-3">Recommendations</h4>
               <div className="space-y-2">
-                {salesForecast?.recommendations?.map((rec: string, index: number) => (
+                {salesForecast?.recommendations?.map((rec: string, _index: number) => (
                   <div key={rec} className="flex items-start space-x-2">
                     <Lightbulb className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
                     <span className="text-sm">{rec}</span>
@@ -413,7 +413,7 @@ const CustomerSegmentationView = ({ aiInsights }: { aiInsights: AIInsights }) =>
                   <div>
                     <h5 className="text-sm font-medium mb-2">Recommendations:</h5>
                     <ul className="text-xs space-y-1">
-                      {data.recommendations?.slice(0, 2).map((rec: string, index: number) => (
+                      {data.recommendations?.slice(0, 2).map((rec: string, _index: number) => (
                         <li key={rec} className="flex items-start space-x-1">
                           <span>•</span>
                           <span>{rec}</span>
@@ -511,7 +511,7 @@ const LeadScoringView = ({
               <div>
                 <h4 className="font-medium mb-3">Recommendations</h4>
                 <div className="space-y-2">
-                  {leadScore.recommendations?.map((rec: string, index: number) => (
+                  {leadScore.recommendations?.map((rec: string, _index: number) => (
                     <div key={rec} className="flex items-start space-x-2">
                       <Target className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                       <span className="text-sm">{rec}</span>
@@ -554,7 +554,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: AIInsights }) => (
           <div>
             <h4 className="font-medium mb-3">High-Risk Customers</h4>
             <div className="space-y-2">
-              {aiInsights?.churn_risk?.high_risk_customers?.slice(0, 5).map((customer: ChurnRiskCustomer, index: number) => (
+              {aiInsights?.churn_risk?.high_risk_customers?.slice(0, 5).map((customer: ChurnRiskCustomer, _index: number) => (
                 <div key={customer.id || customer.contact_name} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
                     <div className="font-medium">{customer.contact_name}</div>
@@ -573,7 +573,7 @@ const ChurnPredictionView = ({ aiInsights }: { aiInsights: AIInsights }) => (
           <div>
             <h4 className="font-medium mb-3">Action Plan</h4>
             <div className="space-y-2">
-              {aiInsights?.churn_risk?.recommendations?.map((rec: string, index: number) => (
+              {aiInsights?.churn_risk?.recommendations?.map((rec: string, _index: number) => (
                 <div key={rec} className="flex items-start space-x-2">
                   <Clock className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
                   <span className="text-sm">{rec}</span>

@@ -16,6 +16,27 @@ import '../campaigns/campaigns_screen.dart';
 import '../revenue/revenue_intelligence_screen.dart';
 import '../ai_assistant/ai_assistant_screen.dart';
 import '../social_selling/social_selling_screen.dart';
+// Enterprise screens
+import '../customer_success/customer_success_screen.dart';
+import '../ai_chatbot/ai_chatbot_screen.dart';
+import '../marketplace/marketplace_screen.dart';
+import '../gdpr/gdpr_compliance_screen.dart';
+import '../email_sequences/email_sequences_screen.dart';
+import '../social_inbox/social_inbox_screen.dart';
+import '../esg/esg_reporting_screen.dart';
+import '../data_enrichment/data_enrichment_screen.dart';
+import '../lead_routing/lead_routing_screen.dart';
+import '../voice_intelligence/voice_intelligence_screen.dart';
+import '../white_label/white_label_screen.dart';
+import '../conversation_intelligence/conversation_intelligence_screen.dart';
+import '../settings/settings_screen.dart';
+import '../documents/documents_screen.dart';
+import '../esign/esign_screen.dart';
+import '../reports/reports_screen.dart';
+import '../scheduling/scheduling_screen.dart';
+import '../email_tracking/email_tracking_screen.dart';
+import '../security/security_screen.dart';
+import '../help/help_support_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -182,6 +203,21 @@ class _HomeScreenState extends State<HomeScreen> {
             'Gamification',
             () => _navigateTo(const GamificationScreen()),
           ),
+          _buildNavigationItem(
+            Icons.support_agent,
+            'Customer Success',
+            () => _navigateTo(const CustomerSuccessScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.smart_toy,
+            'AI Chatbot',
+            () => _navigateTo(const AIChatbotScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.store,
+            'App Marketplace',
+            () => _navigateTo(const MarketplaceScreen()),
+          ),
           
           const Divider(),
           
@@ -199,13 +235,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           _buildNavigationItem(
             Icons.email,
-            'Email Tracking',
-            () => _showComingSoon('Email Tracking'),
+            'Email Sequences',
+            () => _navigateTo(const EmailSequencesScreen()),
           ),
           _buildNavigationItem(
-            Icons.calendar_today,
-            'Scheduling',
-            () => _showComingSoon('Smart Scheduling'),
+            Icons.inbox,
+            'Social Inbox',
+            () => _navigateTo(const SocialInboxScreen()),
           ),
           _buildNavigationItem(
             Icons.auto_awesome,
@@ -217,6 +253,16 @@ class _HomeScreenState extends State<HomeScreen> {
             'Social Selling',
             () => _navigateTo(const SocialSellingScreen()),
           ),
+          _buildNavigationItem(
+            Icons.route,
+            'Lead Routing',
+            () => _navigateTo(const LeadRoutingScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.auto_fix_high,
+            'Data Enrichment',
+            () => _navigateTo(const DataEnrichmentScreen()),
+          ),
           
           const Divider(),
           
@@ -225,22 +271,57 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildNavigationItem(
             Icons.description,
             'Documents',
-            () => _showComingSoon('Documents'),
+            () => _navigateTo(const DocumentsScreen()),
           ),
           _buildNavigationItem(
             Icons.draw,
             'E-Sign',
-            () => _showComingSoon('Document E-Sign'),
+            () => _navigateTo(const EsignScreen()),
           ),
           _buildNavigationItem(
             Icons.analytics,
             'Reports',
-            () => _showComingSoon('Advanced Reports'),
+            () => _navigateTo(const ReportsScreen()),
           ),
           _buildNavigationItem(
             Icons.headset_mic,
             'Conversation AI',
-            () => _showComingSoon('Conversation Intelligence'),
+            () => _navigateTo(const ConversationIntelligenceScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.mic,
+            'Voice Intelligence',
+            () => _navigateTo(const VoiceIntelligenceScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.email_outlined,
+            'Email Tracking',
+            () => _navigateTo(const EmailTrackingScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.calendar_month,
+            'Scheduling',
+            () => _navigateTo(const SchedulingScreen()),
+          ),
+          
+          const Divider(),
+          
+          // Compliance & Enterprise
+          _buildSectionHeader('🏢 Enterprise'),
+          _buildNavigationItem(
+            Icons.privacy_tip,
+            'GDPR Compliance',
+            () => _navigateTo(const GDPRComplianceScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.eco,
+            'ESG Reporting',
+            () => _navigateTo(const ESGReportingScreen()),
+          ),
+          _buildNavigationItem(
+            Icons.palette,
+            'White Label',
+            () => _navigateTo(const WhiteLabelScreen()),
           ),
           
           const Divider(),
@@ -250,17 +331,17 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildNavigationItem(
             Icons.settings,
             'Settings',
-            () => _showComingSoon('Settings'),
+            () => _navigateTo(const SettingsScreen()),
           ),
           _buildNavigationItem(
             Icons.security,
             'Security',
-            () => _showComingSoon('Security Settings'),
+            () => _navigateTo(const SecurityScreen()),
           ),
           _buildNavigationItem(
             Icons.help_outline,
             'Help & Support',
-            () => _showComingSoon('Help & Support'),
+            () => _navigateTo(const HelpSupportScreen()),
           ),
           
           const Divider(),

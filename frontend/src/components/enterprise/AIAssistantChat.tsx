@@ -278,7 +278,7 @@ export function AIAssistantChat({
       {suggestions.length > 0 && !isLoading && (
         <div className="px-4 py-2 border-t">
           <div className="flex flex-wrap gap-2">
-            {suggestions.map((suggestion, index) => (
+            {suggestions.map((suggestion, _index) => (
               <Button
                 key={stableKey(suggestion)}
                 variant="outline"

@@ -27,12 +27,12 @@ class DataWallet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"DataWallet {self.wallet_address}"
-
     class Meta:
         verbose_name = 'Data Wallet'
         verbose_name_plural = 'Data Wallets'
+
+    def __str__(self):
+        return f"DataWallet {self.wallet_address}"
 
 
 class DataAccessGrant(models.Model):

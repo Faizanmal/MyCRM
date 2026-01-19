@@ -173,13 +173,16 @@ class LinkedInIntegration(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"LinkedIn: {self.user.email}"
+
+    class Meta:
+        ordering = ['-created_at']
+
     def is_token_valid(self):
         if not self.token_expires_at:
             return False
         return timezone.now() < self.token_expires_at
-
-    def __str__(self):
-        return f"LinkedIn: {self.user.email}"
 
 
 class SocialSellingSequence(models.Model):

@@ -356,7 +356,7 @@ const AuditLogsView = ({ auditSummary, getRiskLevelColor }: { auditSummary: Audi
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {auditSummary?.top_actions?.map((action: AuditAction, index: number) => (
+          {auditSummary?.top_actions?.map((action: AuditAction, _index: number) => (
             <div key={action.action} className="flex justify-between items-center">
               <span className="text-sm">{action.action}</span>
               <Badge variant="outline">{action.count}</Badge>

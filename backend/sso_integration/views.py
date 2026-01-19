@@ -302,7 +302,7 @@ class SSOCallbackView(viewsets.ViewSet):
         """
         Handle OAuth2 callback after user authorization.
         """
-        provider = get_object_or_404(SSOProvider, id=pk)
+        provider = get_object_or_404(SSOProvider, id=_pk)
 
         if not provider.is_oauth2:
             return Response({

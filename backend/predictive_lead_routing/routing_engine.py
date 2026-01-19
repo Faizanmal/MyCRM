@@ -6,9 +6,14 @@ Intelligent matching algorithm for optimal lead-to-rep assignment
 import logging
 import random
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 
+from django.contrib.auth import get_user_model
 from django.utils import timezone
+
+from .models import EscalationRule, RoutingRule, SalesRepProfile
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +38,7 @@ class AILeadRouter:
         self,
         lead_data: dict[str, Any],
         available_reps: list,
-        routing_rule: Optional['RoutingRule'] = None
+        routing_rule: RoutingRule | None = None
     ) -> tuple[Any | None, dict[str, Any]]:
         """
         Find the best rep for a lead using AI scoring
@@ -76,7 +81,7 @@ class AILeadRouter:
     def _calculate_match_score(
         self,
         lead_data: dict[str, Any],
-        rep: 'SalesRepProfile'
+        rep: SalesRepProfile
     ) -> tuple[float, dict[str, float]]:
         """Calculate match score between lead and rep"""
         factors = {}
@@ -108,7 +113,7 @@ class AILeadRouter:
 
         return round(total_score, 2), factors
 
-    def _score_skill_match(self, lead_data: dict, rep: 'SalesRepProfile') -> float:
+    def _score_skill_match(self, lead_data: dict, rep: SalesRepProfile) -> float:
         """Score based on skill/certification match"""
         score = 50.0  # Base score
 
@@ -129,7 +134,7 @@ class AILeadRouter:
 
         return min(score, 100)
 
-    def _score_industry_match(self, lead_data: dict, rep: 'SalesRepProfile') -> float:
+    def _score_industry_match(self, lead_data: dict, rep: SalesRepProfile) -> float:
         """Score based on industry expertise"""
         score = 40.0  # Base score
 
@@ -144,7 +149,7 @@ class AILeadRouter:
 
         return score
 
-    def _score_performance(self, rep: 'SalesRepProfile') -> float:
+    def _score_performance(self, rep: SalesRepProfile) -> float:
         """Score based on historical performance"""
         # Weighted combination of metrics
         win_rate_score = float(rep.win_rate) * 100 if rep.win_rate else 50
@@ -167,7 +172,7 @@ class AILeadRouter:
 
         return min(max(score, 0), 100)
 
-    def _score_capacity(self, rep: 'SalesRepProfile') -> float:
+    def _score_capacity(self, rep: SalesRepProfile) -> float:
         """Score based on current capacity"""
         if rep.is_at_capacity:
             return 0
@@ -189,7 +194,7 @@ class AILeadRouter:
         else:
             return 20
 
-    def _score_territory_match(self, lead_data: dict, rep: 'SalesRepProfile') -> float:
+    def _score_territory_match(self, lead_data: dict, rep: SalesRepProfile) -> float:
         """Score based on geographic territory match"""
         score = 50.0  # Base score
 
@@ -212,7 +217,7 @@ class AILeadRouter:
 
         return min(score, 100)
 
-    def _score_deal_size_fit(self, lead_data: dict, rep: 'SalesRepProfile') -> float:
+    def _score_deal_size_fit(self, lead_data: dict, rep: SalesRepProfile) -> float:
         """Score based on deal size fit"""
         estimated_value = lead_data.get('estimated_value', 0)
 
@@ -306,7 +311,7 @@ class AILeadRouter:
         self,
         lead_data: dict,
         assignment_data: dict,
-        rule: 'EscalationRule'
+        rule: EscalationRule
     ) -> bool:
         """Check if escalation rule applies"""
         config = rule.trigger_config
@@ -343,10 +348,10 @@ class RoundRobinRouter:
 
     def get_next_rep(
         self,
-        available_reps: list['SalesRepProfile'],
+        available_reps: list[SalesRepProfile],
         lead_data: dict | None = None,
         consider_weights: bool = True
-    ) -> tuple[Optional['SalesRepProfile'], dict[str, Any]]:
+    ) -> tuple[SalesRepProfile | None, dict[str, Any]]:
         """Get next rep in round-robin rotation"""
         if not available_reps:
             return None, {'error': 'No available reps'}
@@ -381,7 +386,7 @@ class RoundRobinRouter:
             'factors': match_details
         }
 
-    def _weighted_selection(self, reps: list['SalesRepProfile']) -> 'SalesRepProfile':
+    def _weighted_selection(self, reps: list[SalesRepProfile]) -> SalesRepProfile:
         """Select rep based on weights and last assignment"""
         # Calculate effective weights
         now = timezone.now()
@@ -424,7 +429,7 @@ class LeadRebalancer:
 
     def analyze_distribution(
         self,
-        reps: list['SalesRepProfile']
+        reps: list[SalesRepProfile]
     ) -> dict[str, Any]:
         """Analyze current lead distribution"""
         if not reps:
@@ -477,7 +482,7 @@ class LeadRebalancer:
 
     def calculate_rebalancing_plan(
         self,
-        reps: list['SalesRepProfile'],
+        reps: list[SalesRepProfile],
         leads: list
     ) -> dict[str, Any]:
         """Calculate optimal rebalancing plan"""
@@ -548,7 +553,7 @@ class LeadRebalancer:
     def execute_rebalancing(
         self,
         plan: dict[str, Any],
-        triggered_by: Optional['User'] = None,
+        triggered_by: User | None = None,
         reason: str = 'manual'
     ) -> dict[str, Any]:
         """Execute a rebalancing plan"""

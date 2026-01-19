@@ -811,3 +811,11 @@ def count(metric_name: str, labels: dict[str, str] | None = None):
 
         return wrapper
     return decorator
+
+
+def setup_observability():
+    """Setup observability stack"""
+    # Initialize metrics and tracing
+    PrometheusMetrics()
+    DistributedTracer()
+    logger.info("Observability stack initialized")

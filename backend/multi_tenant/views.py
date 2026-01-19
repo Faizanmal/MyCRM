@@ -58,13 +58,13 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     def switch(self, request, _pk=None):
         """Switch the current user's active organization."""
         serializer = SwitchOrganizationSerializer(
-            data={'organization_id': pk},
+            data={'organization_id': _pk},
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
 
-        request.session['organization_id'] = str(pk)
-        organization = Organization.objects.get(id=pk)
+        request.session['organization_id'] = str(_pk)
+        organization = Organization.objects.get(id=_pk)
 
         return Response({
             'message': f'Switched to organization: {organization.name}',

@@ -58,11 +58,11 @@ class UserProfile(models.Model):
     language = models.CharField(max_length=10, default='en')
     notification_preferences = models.JSONField(default=dict)
     dashboard_preferences = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Profile for {self.user.username}"
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'crm_user_profiles'
@@ -78,13 +78,13 @@ class Permission(models.Model):
     module = models.CharField(max_length=50)  # contacts, leads, opportunities, etc.
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         db_table = 'crm_permissions'
         verbose_name = 'Permission'
         verbose_name_plural = 'Permissions'
+
+    def __str__(self):
+        return self.name
 
 
 class RolePermission(models.Model):
@@ -93,14 +93,14 @@ class RolePermission(models.Model):
     permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.role} - {self.permission.name}"
-
     class Meta:
         db_table = 'crm_role_permissions'
         unique_together = ['role', 'permission']
         verbose_name = 'Role Permission'
         verbose_name_plural = 'Role Permissions'
+
+    def __str__(self):
+        return f"{self.role} - {self.permission.name}"
 
 
 class AuditLog(models.Model):
@@ -124,11 +124,11 @@ class AuditLog(models.Model):
     user_agent = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.user.username if self.user else 'Anonymous'} - {self.action} - {self.model_name}"
-
     class Meta:
         db_table = 'crm_user_audit_logs'
         verbose_name = 'Audit Log'
         verbose_name_plural = 'Audit Logs'
         ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.user.username if self.user else 'Anonymous'} - {self.action} - {self.model_name}"

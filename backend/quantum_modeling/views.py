@@ -1,3 +1,4 @@
+from django.db import models
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -334,7 +335,3 @@ class IoTDataFeedViewSet(viewsets.ModelViewSet):
             'records_synced': 10000,
             'total_records': feed.records_received,
         })
-
-
-# Import models for aggregation
-from django.db import models

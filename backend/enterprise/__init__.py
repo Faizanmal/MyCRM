@@ -35,8 +35,8 @@ def __getattr__(name):
     if name in ('ZeroTrustMiddleware', 'DeviceTrustManager', 'ContinuousAuthenticator',
                 'TrustLevel', 'zero_trust_required', 'ZeroTrustPolicy'):
         from .zero_trust import (
-            ZeroTrustMiddleware,
             DeviceTrustManager,
+            ZeroTrustMiddleware,
             ZeroTrustPolicy,
             require_zero_trust,
         )
@@ -55,6 +55,7 @@ def __getattr__(name):
         from .observability import (
             DistributedTracer,
             PrometheusMetrics,
+            setup_observability,
             trace,
         )
         if name == 'MetricsCollector':
@@ -67,8 +68,8 @@ def __getattr__(name):
     if name in ('ModelRegistry', 'FeatureStore', 'ABTestManager',
                 'ModelVersion', 'Experiment', 'MLOpsManager'):
         from .mlops import (
-            ModelRegistry,
             FeatureStore,
+            ModelRegistry,
             ModelVersion,
         )
         if name == 'MLOpsManager':
@@ -98,15 +99,15 @@ def __getattr__(name):
                 'CacheStampedeProtection', 'CircuitBreaker', 'cached',
                 'cache_invalidate', 'CachedModelMixin'):
         from .caching import (
+            CachedModelMixin,
             CacheManager,
-            MultiTierCache,
-            InMemoryCache,
-            RedisCache,
             CacheStampedeProtection,
             CircuitBreaker,
-            cached,
+            InMemoryCache,
+            MultiTierCache,
+            RedisCache,
             cache_invalidate,
-            CachedModelMixin,
+            cached,
         )
         return locals()[name]
 
@@ -124,17 +125,17 @@ def __getattr__(name):
                 'DatabaseHealthMonitor', 'QueryOptimizer', 'use_primary',
                 'log_slow_queries', 'query_timer'):
         from .database import (
+            ConnectionPoolManager,
+            DatabaseHealthMonitor,
+            PartitionManager,
+            QueryAnalyzer,
+            QueryOptimizer,
             ReadReplicaRouter,
             ReplicaContext,
-            ConnectionPoolManager,
-            QueryAnalyzer,
             SlowQueryLogger,
-            PartitionManager,
-            DatabaseHealthMonitor,
-            QueryOptimizer,
-            use_primary,
             log_slow_queries,
             query_timer,
+            use_primary,
         )
         return locals()[name]
 

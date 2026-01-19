@@ -10,7 +10,7 @@ from datetime import timedelta
 from typing import Any
 
 import requests
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Q
 from django.template import Context, Template
 from django.utils import timezone
 
@@ -28,9 +28,9 @@ class MarketplaceService:
 
         if query:
             apps = apps.filter(
-                models.Q(name__icontains=query) |
-                models.Q(tagline__icontains=query) |
-                models.Q(description__icontains=query)
+                Q(name__icontains=query) |
+                Q(tagline__icontains=query) |
+                Q(description__icontains=query)
             )
 
         if category:
