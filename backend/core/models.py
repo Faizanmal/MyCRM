@@ -694,7 +694,7 @@ class EmailCampaign(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
-    template = models.ForeignKey(NotificationTemplate, on_delete=models.SET_NULL, null=True)
+    template = models.ForeignKey(NotificationTemplate, on_delete=models.CASCADE, default=1)
     recipients = models.JSONField(default=list)
     recipient_count = models.IntegerField(default=0)
     sent_count = models.IntegerField(default=0)

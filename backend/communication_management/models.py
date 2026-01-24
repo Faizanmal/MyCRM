@@ -129,7 +129,7 @@ class EmailCampaign(models.Model):
 
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE)
+    template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE, default=1)
 
     # Scheduling
     scheduled_date = models.DateTimeField(blank=True)

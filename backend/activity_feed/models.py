@@ -181,7 +181,7 @@ class Notification(models.Model):
     message = models.TextField()
 
     # Related object (generic relation)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, default=1)
     object_id = models.CharField(max_length=255, blank=True, default="")
     target = GenericForeignKey('content_type', 'object_id')
 
