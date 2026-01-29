@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom';
 
 // =============================================================================
@@ -452,13 +451,13 @@ describe('useToggle Hook', () => {
 describe('usePrevious Hook', () => {
     const createUsePrevious = () => {
         const usePrevious = <T,>(value: T) => {
-            const ref = React.useRef<T>();
+            const [prev, setPrev] = React.useState<T>();
 
             React.useEffect(() => {
-                ref.current = value;
+                setPrev(value);
             }, [value]);
 
-            return ref.current;
+            return prev;
         };
 
         return usePrevious;

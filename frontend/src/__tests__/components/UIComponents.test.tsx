@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -188,14 +188,12 @@ describe('Checkbox Component', () => {
         checked = false, 
         onChange, 
         label,
-        disabled,
-        indeterminate
+        disabled
     }: {
         checked?: boolean;
         onChange?: (checked: boolean) => void;
         label?: string;
         disabled?: boolean;
-        indeterminate?: boolean;
     }) => (
         <label>
             <input 
@@ -415,12 +413,12 @@ describe('Dialog Component', () => {
     };
 
     it('renders when open', () => {
-        render(<MockDialog open onClose={() => {}} title="Test Dialog" />);
+        render(<MockDialog open onClose={jest.fn()} title="Test Dialog" />);
         expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
     it('does not render when closed', () => {
-        render(<MockDialog open={false} onClose={() => {}} title="Test Dialog" />);
+        render(<MockDialog open={false} onClose={jest.fn()} title="Test Dialog" />);
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
@@ -428,7 +426,7 @@ describe('Dialog Component', () => {
         render(
             <MockDialog 
                 open 
-                onClose={() => {}} 
+                onClose={jest.fn()} 
                 title="Confirm Action" 
                 description="Are you sure?" 
             />
@@ -450,7 +448,7 @@ describe('Dialog Component', () => {
         render(
             <MockDialog 
                 open 
-                onClose={() => {}} 
+                onClose={jest.fn()} 
                 actions={<button>Confirm</button>}
             />
         );
@@ -602,13 +600,13 @@ describe('Tabs Component', () => {
     ];
 
     it('renders all tabs', () => {
-        render(<MockTabs tabs={tabs} activeTab="tab1" onTabChange={() => {}} />);
+        render(<MockTabs tabs={tabs} activeTab="tab1" onTabChange={jest.fn()} />);
         expect(screen.getByRole('tablist')).toBeInTheDocument();
         expect(screen.getAllByRole('tab')).toHaveLength(3);
     });
 
     it('shows active tab content', () => {
-        render(<MockTabs tabs={tabs} activeTab="tab1" onTabChange={() => {}} />);
+        render(<MockTabs tabs={tabs} activeTab="tab1" onTabChange={jest.fn()} />);
         expect(screen.getByText('Tab 1 content')).toBeInTheDocument();
     });
 
@@ -622,7 +620,7 @@ describe('Tabs Component', () => {
     });
 
     it('marks active tab as selected', () => {
-        render(<MockTabs tabs={tabs} activeTab="tab2" onTabChange={() => {}} />);
+        render(<MockTabs tabs={tabs} activeTab="tab2" onTabChange={jest.fn()} />);
         expect(screen.getByRole('tab', { name: 'Tab 2' })).toHaveAttribute('aria-selected', 'true');
     });
 });
@@ -676,7 +674,14 @@ describe('Dropdown Menu Component', () => {
             {open && (
                 <ul role="menu">
                     {items.map((item, index) => (
-                        <li key={index} role="menuitem" onClick={item.onClick}>
+                         
+                        <li 
+                            key={`menu-${index}`} 
+                            role="menuitem" 
+                            onClick={item.onClick}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') item.onClick(); }}
+                            tabIndex={0}
+                        >
                             {item.label}
                         </li>
                     ))}
@@ -692,17 +697,17 @@ describe('Dropdown Menu Component', () => {
     ];
 
     it('renders trigger', () => {
-        render(<MockDropdown trigger="Menu" items={items} open={false} onOpenChange={() => {}} />);
+        render(<MockDropdown trigger="Menu" items={items} open={false} onOpenChange={jest.fn()} />);
         expect(screen.getByRole('button', { name: 'Menu' })).toBeInTheDocument();
     });
 
     it('shows menu when open', () => {
-        render(<MockDropdown trigger="Menu" items={items} open={true} onOpenChange={() => {}} />);
+        render(<MockDropdown trigger="Menu" items={items} open={true} onOpenChange={jest.fn()} />);
         expect(screen.getByRole('menu')).toBeInTheDocument();
     });
 
     it('renders all menu items', () => {
-        render(<MockDropdown trigger="Menu" items={items} open={true} onOpenChange={() => {}} />);
+        render(<MockDropdown trigger="Menu" items={items} open={true} onOpenChange={jest.fn()} />);
         expect(screen.getAllByRole('menuitem')).toHaveLength(3);
     });
 
@@ -710,7 +715,7 @@ describe('Dropdown Menu Component', () => {
         const handleEdit = jest.fn();
         const testItems = [{ label: 'Edit', onClick: handleEdit }];
         
-        render(<MockDropdown trigger="Menu" items={testItems} open={true} onOpenChange={() => {}} />);
+        render(<MockDropdown trigger="Menu" items={testItems} open={true} onOpenChange={jest.fn()} />);
         await userEvent.click(screen.getByText('Edit'));
         
         expect(handleEdit).toHaveBeenCalled();

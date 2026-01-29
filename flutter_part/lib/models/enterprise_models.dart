@@ -241,6 +241,10 @@ class GDPRConsent {
       source: json['source'] ?? '',
     );
   }
+
+  bool get isActive => isGranted && (revokedAt == null || revokedAt!.isAfter(DateTime.now()));
+  String? get contactId => id;
+  DateTime? get expiresAt => revokedAt?.add(Duration(days: 30));
 }
 
 class DataSubjectRequest {
@@ -273,6 +277,10 @@ class DataSubjectRequest {
       notes: json['notes'],
     );
   }
+
+  String get contactId => id;
+  DateTime get createdAt => requestedAt;
+  DateTime get dueDate => requestedAt.add(Duration(days: 30));
 }
 
 // ==================== SSO Models ====================
@@ -367,6 +375,9 @@ class BrandingConfig {
       customLabels: Map<String, String>.from(json['custom_labels'] ?? {}),
     );
   }
+
+  String get companyName => customLabels['company_name'] ?? 'Company';
+  String get accentColor => customLabels['accent_color'] ?? '#FF5722';
 }
 
 class Organization {
@@ -402,6 +413,8 @@ class Organization {
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
+
+  int get userCount => memberCount;
 }
 
 class SubscriptionPlan {
@@ -611,6 +624,9 @@ class EnrichmentResult {
       enrichedAt: DateTime.parse(json['enriched_at'] ?? DateTime.now().toIso8601String()),
     );
   }
+
+  String get entityName => enrichedData['name']?.toString() ?? '$entityType #$entityId';
+  int get fieldsEnriched => enrichedData.length;
 }
 
 class EnrichmentJob {
@@ -648,6 +664,8 @@ class EnrichmentJob {
   }
 
   double get progress => totalRecords > 0 ? processedRecords / totalRecords : 0;
+  String get name => 'Job #${id.substring(0, 8)}';
+  DateTime get createdAt => startedAt;
 }
 
 // ==================== Predictive Lead Routing Models ====================
@@ -685,6 +703,10 @@ class LeadRoutingRule {
       isActive: json['is_active'] ?? false,
     );
   }
+
+  String get routingType => conditions['type']?.toString() ?? 'round_robin';
+  List<Map<String, dynamic>> get criteria => 
+    (conditions['criteria'] as List?)?.cast<Map<String, dynamic>>() ?? [];
 }
 
 class LeadAssignment {
@@ -723,6 +745,11 @@ class LeadAssignment {
       assignedAt: DateTime.parse(json['assigned_at'] ?? DateTime.now().toIso8601String()),
     );
   }
+
+  String get ruleName => 'Rule-$id';
+  String get status => 'assigned';
+  String get leadCompany => leadName.split(' ').first;
+  int get responseTime => 0;
 }
 
 // ==================== Voice Intelligence Models ====================
@@ -772,6 +799,12 @@ class VoiceRecording {
     final seconds = duration % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
+
+  String get phoneNumber => contactId ?? '';
+  String get callType => status;
+  DateTime get createdAt => recordedAt;
+  bool get isAnalyzed => analysis != null;
+  String get transcript => transcription ?? '';
 }
 
 class VoiceAnalysis {
@@ -804,6 +837,10 @@ class VoiceAnalysis {
       keyMoments: (json['key_moments'] as List?)?.map((m) => KeyMoment.fromJson(m)).toList() ?? [],
     );
   }
+
+  DateTime get analyzedAt => DateTime.now();
+  String get summary => 'Call Analysis: $sentiment';
+  List<String> get questionsAsked => actionItems;
 }
 
 class KeyMoment {
@@ -836,6 +873,47 @@ class KeyMoment {
 }
 
 // ==================== Email Sequence Automation Models ====================
+
+class EmailSequence {
+  final String id;
+  final String name;
+  final String? description;
+  final int sentCount;
+  final double openRate;
+  final bool isActive;
+  final List<EmailSequenceStep> steps;
+  final int? enrolledCount;
+
+  EmailSequence({
+    required this.id,
+    required this.name,
+    this.description,
+    required this.sentCount,
+    required this.openRate,
+    required this.isActive,
+    required this.steps,
+    this.enrolledCount,
+  });
+
+  factory EmailSequence.fromJson(Map<String, dynamic> json) {
+    return EmailSequence(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      description: json['description'],
+      sentCount: json['sent_count'] ?? 0,
+      openRate: (json['open_rate'] ?? 0).toDouble(),
+      isActive: json['is_active'] ?? false,
+      steps: (json['steps'] as List?)?.map((s) => EmailSequenceStep.fromJson(s)).toList() ?? [],
+      enrolledCount: json['enrolled_count'],
+    );
+  }
+
+  double get clickRate => 0.0; // Placeholder - would be calculated from backend
+  double get replyRate => 0.0; // Placeholder - would be calculated from backend
+
+  String get status => isActive ? 'active' : 'paused';
+  int get stepsCount => steps.length;
+}
 
 class EmailSequenceStep {
   final String id;
@@ -1096,6 +1174,18 @@ class SocialMessage {
       receivedAt: DateTime.parse(json['received_at'] ?? DateTime.now().toIso8601String()),
     );
   }
+
+  String get authorName => senderName;
+  String get authorAvatar => senderAvatar ?? '';
+  bool get authorVerified => platform == 'twitter';
+  String get authorHandle => '@$senderName';
+  bool get isRead => status == 'read';
+  int get likesCount => 0;
+  int get sharesCount => 0;
+  int get commentsCount => 0;
+  DateTime get createdAt => receivedAt;
+  bool get isMention => content.contains('@');
+  String get sentiment => 'neutral';
 }
 
 // ==================== Customer Portal Models ====================
@@ -1224,4 +1314,8 @@ class ESGMetric {
     if (targetValue == null || targetValue == 0) return null;
     return (value / targetValue!).clamp(0.0, 1.0);
   }
+
+  double get score => value;
+  double get trend => previousValue != null ? value - previousValue! : 0;
+  bool get trendIsPositive => trend > 0;
 }

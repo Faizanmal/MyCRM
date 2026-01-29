@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -66,7 +66,7 @@ class NextBestAction(models.Model):
         ('opportunity', 'Opportunity'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recommended_actions')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='recommended_actions')
     entity_type = models.CharField(max_length=20, choices=ENTITY_TYPES)
     entity_id = models.IntegerField()
 
@@ -125,7 +125,7 @@ class AIGeneratedContent(models.Model):
         ('proposal', 'Proposal'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ai_content')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ai_content')
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPES)
 
     # Input context

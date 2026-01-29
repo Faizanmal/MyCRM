@@ -174,7 +174,12 @@ export function IOSInstallPrompt() {
 
 // Offline indicator
 export function OfflineIndicator() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return navigator.onLine;
+    }
+    return true;
+  });
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);

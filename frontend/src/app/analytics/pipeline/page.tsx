@@ -202,7 +202,7 @@ export default function PipelineAnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value?: number | string) => (value == null ? '' : `$${Number(value).toLocaleString()}`)} />
+                  <Tooltip formatter={(value: unknown) => value == null ? '' : `$${Number(value).toLocaleString()}`} />
                   <Legend />
                   <Line
                     type="monotone"
@@ -293,7 +293,7 @@ export default function PipelineAnalyticsPage() {
                       <Cell key={`cell-${entry.stage as string || index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value?: number | string) => (value == null ? '' : `$${Number(value).toLocaleString()}`)} />
+                  <Tooltip formatter={(value: unknown) => value == null ? '' : `$${Number(value).toLocaleString()}`} />
                 </PieChart>
               </ResponsiveContainer>
             </div>

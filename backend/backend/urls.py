@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/documents/', include('document_management.urls')),
     path('api/integrations/', include('integration_hub.urls')),
     path('api/activity/', include('activity_feed.urls')),
+    path('api/activity-feed/', include('activity_feed.urls')),
     path('api/lead-qualification/', include('lead_qualification.urls')),
     path('api/advanced-reporting/', include('advanced_reporting.urls')),
     path('api/reports/', include('reporting.urls')),

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -17,10 +17,9 @@ describe('Form Component', () => {
     interface FormProps {
         onSubmit: (data: Record<string, unknown>) => void;
         children: React.ReactNode;
-        defaultValues?: Record<string, unknown>;
     }
 
-    const MockForm = ({ onSubmit, children, defaultValues }: FormProps) => {
+    const MockForm = ({ onSubmit, children }: FormProps) => {
         const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
@@ -40,7 +39,7 @@ describe('Form Component', () => {
 
     it('renders form with children', () => {
         render(
-            <MockForm onSubmit={() => {}}>
+            <MockForm onSubmit={jest.fn()}>
                 <input name="email" placeholder="Email" />
                 <button type="submit">Submit</button>
             </MockForm>
@@ -309,12 +308,12 @@ describe('Slider Component', () => {
     );
 
     it('renders slider', () => {
-        render(<MockSlider value={50} onChange={() => {}} label="Volume" />);
+        render(<MockSlider value={50} onChange={jest.fn()} label="Volume" />);
         expect(screen.getByRole('slider')).toBeInTheDocument();
     });
 
     it('displays current value', () => {
-        render(<MockSlider value={75} onChange={() => {}} />);
+        render(<MockSlider value={75} onChange={jest.fn()} />);
         expect(screen.getByTestId('slider-value')).toHaveTextContent('75');
     });
 
@@ -328,12 +327,12 @@ describe('Slider Component', () => {
     });
 
     it('can be disabled', () => {
-        render(<MockSlider value={50} onChange={() => {}} disabled />);
+        render(<MockSlider value={50} onChange={jest.fn()} disabled />);
         expect(screen.getByRole('slider')).toBeDisabled();
     });
 
     it('respects min and max', () => {
-        render(<MockSlider value={50} onChange={() => {}} min={10} max={90} />);
+        render(<MockSlider value={50} onChange={jest.fn()} min={10} max={90} />);
         const slider = screen.getByRole('slider');
         expect(slider).toHaveAttribute('min', '10');
         expect(slider).toHaveAttribute('max', '90');
@@ -562,7 +561,8 @@ describe('OTP Input Component', () => {
             <div data-testid="otp-inputs">
                 {Array.from({ length }).map((_, i) => (
                     <input
-                        key={i}
+                        // eslint-disable-next-line react/no-array-index-key
+                        key={`otp-input-${i}`}
                         type="text"
                         maxLength={1}
                         value={value?.[i] || ''}
@@ -574,6 +574,7 @@ describe('OTP Input Component', () => {
                         aria-label={`Digit ${i + 1}`}
                     />
                 ))}
+                { }
             </div>
             {error && <span role="alert">{error}</span>}
         </div>

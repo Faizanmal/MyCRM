@@ -187,12 +187,8 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: message.authorAvatar != null 
-                        ? NetworkImage(message.authorAvatar!)
-                        : null,
-                    child: message.authorAvatar == null 
-                        ? Text(message.authorName.substring(0, 1).toUpperCase())
-                        : null,
+                    backgroundImage: NetworkImage(message.authorAvatar!),
+                    child: null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -386,7 +382,7 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -484,7 +480,7 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
         ),
         Text(
           label,
-          style: TextStyle(color: color.withOpacity(0.8), fontSize: 12),
+          style: TextStyle(color: color.withValues(alpha: 0.8), fontSize: 12),
         ),
       ],
     );
@@ -533,7 +529,7 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
                     const SizedBox(height: 4),
                     LinearProgressIndicator(
                       value: percentage,
-                      backgroundColor: (platform['color'] as Color).withOpacity(0.2),
+                      backgroundColor: (platform['color'] as Color).withValues(alpha: 0.2),
                       valueColor: AlwaysStoppedAnimation(platform['color'] as Color),
                     ),
                   ],
@@ -580,7 +576,7 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
     return Column(
       children: [
         CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
+          backgroundColor: color.withValues(alpha: 0.2),
           radius: 28,
           child: Icon(icon, color: color, size: 28),
         ),
@@ -781,7 +777,7 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: selectedPlatform,
+                initialValue: selectedPlatform,
                 decoration: const InputDecoration(
                   labelText: 'Platform',
                   border: OutlineInputBorder(),
@@ -821,10 +817,7 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
             ),
             ElevatedButton.icon(
               onPressed: () {
-                _provider.sendMessage(
-                  platform: selectedPlatform,
-                  content: contentController.text,
-                );
+                _provider.sendMessage(selectedPlatform, contentController.text);
                 Navigator.pop(context);
               },
               icon: const Icon(Icons.send),

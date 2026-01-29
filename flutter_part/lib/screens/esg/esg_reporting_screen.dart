@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../../core/utils/api_client.dart';
 import '../../providers/enterprise_providers.dart';
 import '../../models/enterprise_models.dart';
-import '../../widgets/loading_indicator.dart';
-import '../../widgets/empty_state.dart';
 
 class ESGReportingScreen extends StatefulWidget {
   const ESGReportingScreen({super.key});
@@ -305,7 +303,7 @@ class _ESGReportingScreenState extends State<ESGReportingScreen>
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.2),
+        backgroundColor: color.withValues(alpha: 0.2),
         child: Icon(_getCategoryIcon(metric.category), color: color, size: 20),
       ),
       title: Text(metric.name),
@@ -482,9 +480,9 @@ class _ESGReportingScreenState extends State<ESGReportingScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -914,7 +912,7 @@ class _ESGReportingScreenState extends State<ESGReportingScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     border: OutlineInputBorder(),

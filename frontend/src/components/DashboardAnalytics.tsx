@@ -146,7 +146,7 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
                                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `$${v / 1000}k`} />
                                 <Tooltip
-                                    formatter={(value?: number) => [value == null ? '' : `$${value.toLocaleString()}`, 'Revenue']}
+                                    formatter={(value: unknown) => [value == null ? '' : `$${Number(value).toLocaleString()}`, 'Revenue']}
                                     contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                 />
                                 <Legend />
@@ -174,7 +174,7 @@ export function RevenueChart({ data, className }: RevenueChartProps) {
                                 <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `$${v / 1000}k`} />
                                 <Tooltip
-                                    formatter={(value?: number) => [value == null ? '' : `$${value.toLocaleString()}`, 'Revenue']}
+                                    formatter={(value: unknown) => [value == null ? '' : `$${Number(value).toLocaleString()}`, 'Revenue']}
                                     contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                 />
                                 <Legend />
@@ -237,7 +237,7 @@ export function PipelineChart({ data, className }: PipelineChartProps) {
                                 <XAxis type="number" tickFormatter={(v) => `$${v / 1000}k`} />
                                 <YAxis dataKey="stage" type="category" width={100} tick={{ fontSize: 11 }} />
                                 <Tooltip
-                                    formatter={(value?: number) => [value == null ? '' : `$${value.toLocaleString()}`, 'Value']}
+                                    formatter={(value: unknown) => [value == null ? '' : `$${Number(value).toLocaleString()}`, 'Value']}
                                     contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                 />
                                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
@@ -263,7 +263,7 @@ export function PipelineChart({ data, className }: PipelineChartProps) {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={(value?: number) => [value == null ? '' : `$${value.toLocaleString()}`, 'Value']}
+                                    formatter={(value: unknown) => [value == null ? '' : `$${Number(value).toLocaleString()}`, 'Value']}
                                     contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
                                 />
                             </PieChart>

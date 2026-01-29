@@ -215,7 +215,7 @@ class _VoiceIntelligenceScreenState extends State<VoiceIntelligenceScreen>
     return Column(
       children: [
         CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
+          backgroundColor: color.withValues(alpha: 0.2),
           radius: 24,
           child: Icon(icon, color: color),
         ),
@@ -259,11 +259,11 @@ class _VoiceIntelligenceScreenState extends State<VoiceIntelligenceScreen>
                 spacing: 8,
                 runSpacing: 8,
                 children: keywords.take(15).map((kw) => Chip(
-                  label: Text(kw['word'] as String),
+                  label: Text(kw['word']),
                   avatar: CircleAvatar(
                     backgroundColor: Colors.deepPurple.shade100,
                     child: Text(
-                      (kw['count'] as int).toString(),
+                      (int.tryParse(kw['count']) ?? 0).toString(),
                       style: const TextStyle(fontSize: 11),
                     ),
                   ),
@@ -485,7 +485,7 @@ class _VoiceIntelligenceScreenState extends State<VoiceIntelligenceScreen>
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: _getSentimentColor(analysis.sentiment).withOpacity(0.2),
+                  backgroundColor: _getSentimentColor(analysis.sentiment).withValues(alpha: 0.2),
                   child: Icon(
                     _getSentimentIcon(analysis.sentiment),
                     color: _getSentimentColor(analysis.sentiment),
@@ -510,7 +510,7 @@ class _VoiceIntelligenceScreenState extends State<VoiceIntelligenceScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getSentimentColor(analysis.sentiment).withOpacity(0.1),
+                    color: _getSentimentColor(analysis.sentiment).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -524,18 +524,18 @@ class _VoiceIntelligenceScreenState extends State<VoiceIntelligenceScreen>
                 ),
               ],
             ),
-            if (analysis.summary != null) ...[
-              const SizedBox(height: 16),
-              const Text(
-                'Summary',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                analysis.summary!,
-                style: TextStyle(color: Colors.grey.shade700),
-              ),
-            ],
+            ...[
+            const SizedBox(height: 16),
+            const Text(
+              'Summary',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              analysis.summary!,
+              style: TextStyle(color: Colors.grey.shade700),
+            ),
+          ],
             if (analysis.keyMoments.isNotEmpty) ...[
               const Divider(height: 24),
               const Text(
@@ -644,18 +644,14 @@ class _VoiceIntelligenceScreenState extends State<VoiceIntelligenceScreen>
   }
 
   void _showRecordingDetails(VoiceRecording recording, VoiceIntelligenceProvider provider) {
-    final analysis = provider.analyses.firstWhere(
-      (a) => a.recordingId == recording.id,
-      orElse: () => VoiceAnalysis(
-        id: 0,
-        recordingId: recording.id,
-        sentiment: 'neutral',
-        talkRatio: 50,
-        questionsAsked: 0,
-        keyMoments: [],
-        actionItems: [],
-        analyzedAt: DateTime.now(),
-      ),
+    final analysis = recording.analysis ?? VoiceAnalysis(
+      sentiment: 'neutral',
+      sentimentScore: 0.5,
+      keywords: [],
+      topics: [],
+      talkRatio: 50,
+      actionItems: [],
+      keyMoments: [],
     );
 
     showModalBottomSheet(
@@ -754,26 +750,26 @@ class _VoiceIntelligenceScreenState extends State<VoiceIntelligenceScreen>
                 ],
               ),
             ),
-            if (recording.transcript != null) ...[
-              const SizedBox(height: 24),
-              const Text(
-                'Transcript',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ...[
+            const SizedBox(height: 24),
+            const Text(
+              'Transcript',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade200),
               ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Text(
-                  recording.transcript!,
-                  style: const TextStyle(height: 1.5),
-                ),
+              child: Text(
+                recording.transcript!,
+                style: const TextStyle(height: 1.5),
               ),
-            ],
+            ),
+          ],
             if (recording.isAnalyzed) ...[
               const SizedBox(height: 24),
               _buildAnalysisCard(analysis),

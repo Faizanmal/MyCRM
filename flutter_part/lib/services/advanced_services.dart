@@ -2,6 +2,7 @@
 import '../core/constants/api_constants.dart';
 import '../core/utils/api_client.dart';
 import '../models/advanced_models.dart';
+import '../models/enterprise_models.dart';
 
 /// Service for Integration Hub features
 class IntegrationHubService {

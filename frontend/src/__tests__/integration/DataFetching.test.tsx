@@ -24,12 +24,11 @@ const createTestQueryClient = () =>
         },
     });
 
-const createWrapper = () => {
-    const queryClient = createTestQueryClient();
-    return ({ children }: { children: React.ReactNode }) => (
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-};
+    Wrapper.displayName = 'TestWrapper';
+    return Wrapper;
 
 // Mock fetch globally
 const mockFetch = (data: unknown, options: { ok?: boolean; status?: number } = {}) => {
@@ -77,7 +76,12 @@ describe('Contact List Data Fetching', () => {
             <div>
                 <ul data-testid="contact-list">
                     {contacts.map((c) => (
-                        <li key={c.id} onClick={() => onContactClick?.(c.id)}>
+                        <li 
+                            key={c.id} 
+                            onClick={() => onContactClick?.(c.id)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onContactClick?.(c.id); }}
+                            tabIndex={0}
+                        >
                             {c.name} - {c.email}
                         </li>
                     ))}

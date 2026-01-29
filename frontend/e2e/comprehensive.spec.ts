@@ -99,7 +99,7 @@ test.describe('Authentication Flows', () => {
                 await toggleButton.first().click();
                 
                 // Password should now be visible (type="text")
-                await expect(page.locator('input[value="testpassword"]')).toHaveAttribute('type', 'text').catch(() => {});
+                await expect(page.locator('input[value="testpassword"]')).toHaveAttribute('type', 'text').catch(jest.fn());
             }
         }
     });
@@ -183,7 +183,7 @@ test.describe('Contact Management', () => {
 
 test.describe('Lead Management', () => {
     test.beforeEach(async ({ page }) => {
-        await login(page).catch(() => {});
+        await login(page).catch(jest.fn());
     });
 
     test('leads list page loads', async ({ page }) => {
@@ -236,7 +236,7 @@ test.describe('Lead Management', () => {
 
 test.describe('Opportunity Pipeline', () => {
     test.beforeEach(async ({ page }) => {
-        await login(page).catch(() => {});
+        await login(page).catch(jest.fn());
     });
 
     test('pipeline page loads', async ({ page }) => {
@@ -275,7 +275,7 @@ test.describe('Opportunity Pipeline', () => {
 
 test.describe('Task Management', () => {
     test.beforeEach(async ({ page }) => {
-        await login(page).catch(() => {});
+        await login(page).catch(jest.fn());
     });
 
     test('tasks page loads', async ({ page }) => {
@@ -325,7 +325,7 @@ test.describe('Task Management', () => {
 
 test.describe('Dashboard', () => {
     test.beforeEach(async ({ page }) => {
-        await login(page).catch(() => {});
+        await login(page).catch(jest.fn());
     });
 
     test('dashboard loads with statistics', async ({ page }) => {
@@ -343,7 +343,7 @@ test.describe('Dashboard', () => {
         await waitForPageLoad(page);
         
         const activitySection = page.locator('text=/recent|activity|latest/i');
-        await expect(activitySection.first()).toBeVisible({ timeout: 10000 }).catch(() => {});
+        await expect(activitySection.first()).toBeVisible({ timeout: 10000 }).catch(jest.fn());
     });
 
     test('can navigate from dashboard to other sections', async ({ page }) => {
@@ -371,7 +371,7 @@ test.describe('Dashboard', () => {
 
 test.describe('Navigation', () => {
     test.beforeEach(async ({ page }) => {
-        await login(page).catch(() => {});
+        await login(page).catch(jest.fn());
     });
 
     test('main navigation is visible', async ({ page }) => {
@@ -426,7 +426,7 @@ test.describe('Responsive Design', () => {
         
         // Sidebar should be visible on desktop
         const sidebar = page.locator('aside, [class*="sidebar"], nav:not([role="navigation"])');
-        await expect(sidebar.first()).toBeVisible({ timeout: 10000 }).catch(() => {});
+        await expect(sidebar.first()).toBeVisible({ timeout: 10000 }).catch(jest.fn());
     });
 
     test('tablet layout renders correctly', async ({ page }) => {
@@ -574,7 +574,7 @@ test.describe('Performance', () => {
         
         for (const img of images) {
             // Check for loading attribute (lazy loading)
-            const loading = await img.getAttribute('loading');
+            const _loading = await img.getAttribute('loading');
             const src = await img.getAttribute('src');
             
             // Skip small icons or data URLs
@@ -616,7 +616,7 @@ test.describe('Form Validation', () => {
             
             // Should show required field errors
             const errors = page.locator('[role="alert"], .error, [class*="error"], :invalid');
-            await expect(errors.first()).toBeVisible({ timeout: 5000 }).catch(() => {});
+            await expect(errors.first()).toBeVisible({ timeout: 5000 }).catch(jest.fn());
         }
     });
 });
@@ -654,7 +654,7 @@ test.describe('Keyboard Navigation', () => {
             
             // Modal should close
             const modal = page.locator('[role="dialog"], .modal');
-            await expect(modal).not.toBeVisible({ timeout: 3000 }).catch(() => {});
+            await expect(modal).not.toBeVisible({ timeout: 3000 }).catch(jest.fn());
         }
     });
 

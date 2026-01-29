@@ -36,8 +36,10 @@ class PushNotificationService {
     );
 
     await _localNotifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
+      settings: initSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        // Handle notification tap
+      },
     );
 
     // Create notification channels for Android
@@ -134,10 +136,10 @@ class PushNotificationService {
     );
 
     await _localNotifications.show(
-      id,
-      title,
-      body,
-      details,
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: details,
       payload: payload != null ? jsonEncode(payload) : null,
     );
   }
@@ -167,9 +169,8 @@ class PushNotificationService {
     });
   }
 
-  /// Cancel a specific notification
   Future<void> cancelNotification(int id) async {
-    await _localNotifications.cancel(id);
+    await _localNotifications.cancel(id: id);
   }
 
   /// Cancel all notifications

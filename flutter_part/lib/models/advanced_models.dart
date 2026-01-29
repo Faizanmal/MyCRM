@@ -808,38 +808,6 @@ class TrackedEmail {
   }
 }
 
-class EmailSequence {
-  final String id;
-  final String name;
-  final String description;
-  final String status;
-  final int stepsCount;
-  final int enrolledCount;
-  final DateTime createdAt;
-
-  EmailSequence({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.status,
-    required this.stepsCount,
-    required this.enrolledCount,
-    required this.createdAt,
-  });
-
-  factory EmailSequence.fromJson(Map<String, dynamic> json) {
-    return EmailSequence(
-      id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      status: json['status'] ?? 'draft',
-      stepsCount: json['steps_count'] ?? 0,
-      enrolledCount: json['enrolled_count'] ?? 0,
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-    );
-  }
-}
-
 // ==================== Scheduling Models ====================
 
 class SchedulingPage {

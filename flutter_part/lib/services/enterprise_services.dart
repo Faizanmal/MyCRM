@@ -5,7 +5,7 @@
 import '../core/constants/api_constants.dart';
 import '../core/utils/api_client.dart';
 import '../models/enterprise_models.dart';
-import '../models/advanced_models.dart';
+import '../models/advanced_models.dart' as advanced;
 
 /// Service for Customer Success features
 class CustomerSuccessService {
@@ -13,19 +13,19 @@ class CustomerSuccessService {
 
   CustomerSuccessService(this._apiClient);
 
-  Future<List<CustomerAccount>> getAccounts() async {
+  Future<List<advanced.CustomerAccount>> getAccounts() async {
     final response = await _apiClient.get(ApiConstants.csAccounts);
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data is List ? response.data : response.data['results'] ?? [];
-      return data.map((json) => CustomerAccount.fromJson(json)).toList();
+      return data.map((json) => advanced.CustomerAccount.fromJson(json)).toList();
     }
     throw Exception('Failed to load accounts');
   }
 
-  Future<CustomerAccount> getAccount(String id) async {
+  Future<advanced.CustomerAccount> getAccount(String id) async {
     final response = await _apiClient.get('${ApiConstants.csAccounts}$id/');
     if (response.statusCode == 200) {
-      return CustomerAccount.fromJson(response.data);
+      return advanced.CustomerAccount.fromJson(response.data);
     }
     throw Exception('Failed to load account');
   }
@@ -705,6 +705,13 @@ class EmailSequenceService {
       throw Exception('Failed to unenroll contact');
     }
   }
+
+  Future<void> addStep(String sequenceId, Map<String, dynamic> stepData) async {
+    final response = await _apiClient.post('${_sequenceEndpoint}sequences/$sequenceId/steps/', data: stepData);
+    if (response.statusCode != 201) {
+      throw Exception('Failed to add step');
+    }
+  }
 }
 
 /// Service for App Marketplace
@@ -862,6 +869,17 @@ class SocialInboxService {
     });
     if (response.statusCode != 200) {
       throw Exception('Failed to link message to contact');
+    }
+  }
+
+  Future<void> sendMessage(String platform, String content, [String? recipientId]) async {
+    final response = await _apiClient.post('${_inboxEndpoint}messages/', data: {
+      'platform': platform,
+      'recipient_id': recipientId ?? '',
+      'content': content,
+    });
+    if (response.statusCode != 201) {
+      throw Exception('Failed to send message');
     }
   }
 }

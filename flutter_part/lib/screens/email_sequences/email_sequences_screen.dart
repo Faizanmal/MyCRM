@@ -165,7 +165,7 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
                     onChanged: (value) {
                       provider.toggleSequence(sequence.id, value);
                     },
-                    activeColor: Colors.green,
+                    activeThumbColor: Colors.green,
                   ),
                 ],
               ),
@@ -247,7 +247,7 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getStatusColor(enrollment.status).withOpacity(0.2),
+          backgroundColor: _getStatusColor(enrollment.status).withValues(alpha: 0.2),
           child: Text(
             enrollment.contactName.substring(0, 1).toUpperCase(),
             style: TextStyle(
@@ -271,7 +271,7 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(enrollment.status).withOpacity(0.1),
+                    color: _getStatusColor(enrollment.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -327,7 +327,7 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
 
   Widget _buildOverviewStats(EmailSequenceProvider provider) {
     final totalEnrolled = provider.sequences.fold<int>(
-      0, (sum, s) => sum + s.enrolledCount,
+      0, (sum, s) => sum + (s.enrolledCount ?? 0),
     );
     final totalSent = provider.sequences.fold<int>(
       0, (sum, s) => sum + s.sentCount,
@@ -424,7 +424,7 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
           const SizedBox(height: 4),
           LinearProgressIndicator(
             value: value,
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withValues(alpha: 0.2),
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ],
@@ -531,7 +531,7 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
                     provider.toggleSequence(sequence.id, value);
                     Navigator.pop(context);
                   },
-                  activeColor: Colors.green,
+                  activeThumbColor: Colors.green,
                 ),
               ],
             ),
@@ -727,10 +727,12 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
             ElevatedButton(
               onPressed: () {
                 _provider.addStep(
-                  sequenceId: sequence.id,
-                  subject: subjectController.text,
-                  body: bodyController.text,
-                  delayDays: delayDays,
+                  sequence.id,
+                  {
+                    'subject': subjectController.text,
+                    'body': bodyController.text,
+                    'delay_days': delayDays,
+                  },
                 );
                 Navigator.pop(context);
               },

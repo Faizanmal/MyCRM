@@ -4,7 +4,6 @@ import '../../core/utils/api_client.dart';
 import '../../providers/enterprise_providers.dart';
 import '../../models/enterprise_models.dart';
 import '../../widgets/loading_indicator.dart';
-import '../../widgets/empty_state.dart';
 
 class AIChatbotScreen extends StatefulWidget {
   const AIChatbotScreen({super.key});

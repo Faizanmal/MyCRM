@@ -148,9 +148,10 @@ interface WrapperOptions {
 export const createWrapper = (options: WrapperOptions = {}) => {
     const queryClient = options.queryClient || createTestQueryClient();
 
-    return ({ children }: { children: React.ReactNode }) => (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        React.createElement(QueryClientProvider, { client: queryClient }, children)
     );
+    return Wrapper;
 };
 
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {

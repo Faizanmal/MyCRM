@@ -143,7 +143,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
                 ],
               ),
             ),
-            Container(
+            SizedBox(
               width: 100,
               height: 100,
               child: Stack(
@@ -254,7 +254,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
             else
               ...provider.requests.take(5).map((request) => ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: _getStatusColor(request.status).withOpacity(0.2),
+                  backgroundColor: _getStatusColor(request.status).withValues(alpha: 0.2),
                   child: Icon(
                     _getRequestIcon(request.requestType),
                     color: _getStatusColor(request.status),
@@ -364,7 +364,8 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
               children: [
                 _buildDetailRow('Source', consent.source),
                 _buildDetailRow('IP Address', consent.ipAddress ?? 'N/A'),
-                _buildDetailRow('Granted At', _formatDate(consent.grantedAt)),
+                if (consent.grantedAt != null)
+                  _buildDetailRow('Granted At', _formatDate(consent.grantedAt!)),
                 if (consent.expiresAt != null)
                   _buildDetailRow('Expires At', _formatDate(consent.expiresAt!)),
                 const SizedBox(height: 12),
@@ -428,7 +429,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: _getStatusColor(request.status).withOpacity(0.2),
+                  backgroundColor: _getStatusColor(request.status).withValues(alpha: 0.2),
                   child: Icon(
                     _getRequestIcon(request.requestType),
                     color: _getStatusColor(request.status),
@@ -453,7 +454,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(request.status).withOpacity(0.1),
+                    color: _getStatusColor(request.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -469,8 +470,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
             ),
             const Divider(height: 24),
             _buildDetailRow('Created', _formatDate(request.createdAt)),
-            if (request.dueDate != null)
-              _buildDetailRow('Due Date', _formatDate(request.dueDate!)),
+            _buildDetailRow('Due Date', _formatDate(request.dueDate!)),
             if (request.completedAt != null)
               _buildDetailRow('Completed', _formatDate(request.completedAt!)),
             if (request.status == 'pending') ...[
@@ -549,7 +549,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
 
   void _showNewRequestDialog() {
     String selectedType = 'access';
-    final contactIdController = TextEditingController();
+    final contactEmailController = TextEditingController();
 
     showDialog(
       context: context,
@@ -559,7 +559,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              value: selectedType,
+              initialValue: selectedType,
               decoration: const InputDecoration(
                 labelText: 'Request Type',
                 border: OutlineInputBorder(),
@@ -577,9 +577,9 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: contactIdController,
+              controller: contactEmailController,
               decoration: const InputDecoration(
-                labelText: 'Contact ID or Email',
+                labelText: 'Contact Email',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -594,7 +594,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
             onPressed: () {
               _provider.createRequest(
                 requestType: selectedType,
-                contactId: int.tryParse(contactIdController.text) ?? 0,
+                contactEmail: contactEmailController.text,
               );
               Navigator.pop(context);
             },

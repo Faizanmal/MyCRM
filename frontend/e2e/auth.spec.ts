@@ -4,7 +4,7 @@
  * Comprehensive authentication flow testing with Playwright
  */
 
-import { test, expect, Page, BrowserContext } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 const BASE_URL = process.env.PLAYWRIGHT_TEST_URL || 'http://localhost:3000';
 
@@ -162,7 +162,7 @@ test.describe('Registration Flow', () => {
             await page.waitForTimeout(2000);
 
             // May show error about existing email
-            const errorMessage = page.locator('text=/already|exists|taken/i');
+            const _errorMessage = page.locator('text=/already|exists|taken/i');
             // This is a soft check as we may not have a real backend
         }
     });
@@ -175,7 +175,7 @@ test.describe('Registration Flow', () => {
             await passwordInput.focus();
 
             // Look for password requirements text
-            const requirements = page.locator('text=/characters|uppercase|number|special/i');
+            const _requirements = page.locator('text=/characters|uppercase|number|special/i');
             // Requirements may or may not be visible
         }
     });
@@ -192,7 +192,7 @@ test.describe('Registration Flow', () => {
             await page.keyboard.press('Tab');
 
             // Should show mismatch error
-            const errorMessage = page.locator('text=/match|same/i');
+            const _errorMessage = page.locator('text=/match|same/i');
             // This is a conditional check
         }
     });
@@ -237,7 +237,7 @@ test.describe('Password Reset Flow', () => {
             await page.waitForTimeout(2000);
 
             // Should show success message or redirect
-            const successMessage = page.locator('text=/sent|email|check|inbox/i');
+            const _successMessage = page.locator('text=/sent|email|check|inbox/i');
             // This is a soft check
         }
     });
@@ -279,7 +279,7 @@ test.describe('Logout Flow', () => {
         }
 
         // Check for logout option
-        const hasLogout = await logoutButton.first().isVisible().catch(() => false);
+        const _hasLogout = await logoutButton.first().isVisible().catch(() => false);
         // This is a conditional check based on auth state
     });
 
@@ -397,7 +397,7 @@ test.describe('OAuth/SSO Integration', () => {
     test('Microsoft sign-in button is visible', async ({ page }) => {
         await page.goto(`${BASE_URL}/login`);
 
-        const microsoftButton = page.locator('button:has-text("Microsoft"), a:has-text("Microsoft"), [class*="microsoft" i]');
+        const _microsoftButton = page.locator('button:has-text("Microsoft"), a:has-text("Microsoft"), [class*="microsoft" i]');
         // Microsoft sign-in may or may not be implemented
     });
 
@@ -432,7 +432,7 @@ test.describe('Multi-Factor Authentication', () => {
         await page.waitForLoadState('networkidle');
 
         // Look for MFA option
-        const mfaOption = page.locator('text=/two-factor|2fa|mfa|authenticator/i');
+        const _mfaOption = page.locator('text=/two-factor|2fa|mfa|authenticator/i');
         // MFA may or may not be implemented
     });
 
@@ -441,7 +441,7 @@ test.describe('Multi-Factor Authentication', () => {
         await page.waitForLoadState('networkidle');
 
         // May redirect if not in MFA flow
-        const mfaInput = page.locator('input[name*="code" i], input[type="text"][maxlength="6"]');
+        const _mfaInput = page.locator('input[name*="code" i], input[type="text"][maxlength="6"]');
         // Conditional based on app state
     });
 
@@ -459,7 +459,7 @@ test.describe('Multi-Factor Authentication', () => {
         await page.goto(`${BASE_URL}/settings/security`);
         await page.waitForLoadState('networkidle');
 
-        const backupOption = page.locator('text=/backup|recovery/i');
+        const _backupOption = page.locator('text=/backup|recovery/i');
         // Conditional check
     });
 });
@@ -480,8 +480,8 @@ test.describe('Authentication Security', () => {
         await page.goto(`${BASE_URL}/login`);
 
         // Look for CSRF token (may be hidden input or meta tag)
-        const csrfInput = page.locator('input[name*="csrf" i], input[name="_token"]');
-        const csrfMeta = page.locator('meta[name*="csrf" i]');
+        const _csrfInput = page.locator('input[name*="csrf" i], input[name="_token"]');
+        const _csrfMeta = page.locator('meta[name*="csrf" i]');
 
         // CSRF protection may be implemented differently
     });
@@ -498,7 +498,7 @@ test.describe('Authentication Security', () => {
         }
 
         // May show rate limit message
-        const rateLimitMessage = page.locator('text=/too many|rate limit|try again later/i');
+        const _rateLimitMessage = page.locator('text=/too many|rate limit|try again later/i');
         // Conditional based on implementation
     });
 
@@ -517,7 +517,7 @@ test.describe('Authentication Security', () => {
         if (sessionCookie) {
             // In production, these should be true
             // For local dev, may be false
-            console.log(`Cookie secure: ${sessionCookie.secure}, httpOnly: ${sessionCookie.httpOnly}`);
+            console.warn(`Cookie secure: ${sessionCookie.secure}, httpOnly: ${sessionCookie.httpOnly}`);
         }
     });
 
@@ -542,7 +542,7 @@ test.describe('Account Recovery', () => {
         await page.waitForLoadState('networkidle');
 
         // May redirect if account not actually locked
-        const contactInfo = page.locator('text=/contact|support|help/i');
+        const _contactInfo = page.locator('text=/contact|support|help/i');
         // Conditional check
     });
 
@@ -564,7 +564,7 @@ test.describe('Account Recovery', () => {
             await resendButton.first().click();
 
             // Should show success message
-            const successMessage = page.locator('text=/sent|email/i');
+            const _successMessage = page.locator('text=/sent|email/i');
         }
     });
 });

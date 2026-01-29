@@ -4,7 +4,10 @@
  * Global test configuration and mocks
  */
 
+/* eslint-disable import/order */
+import React from 'react';
 import '@testing-library/jest-dom';
+/* eslint-enable import/order */
 
 // =============================================================================
 // Global Mocks
@@ -27,16 +30,20 @@ jest.mock('next/navigation', () => ({
 
 // Mock Next.js Link
 jest.mock('next/link', () => {
-    return ({ children, href }: { children: React.ReactNode; href: string }) => {
-        return <a href={href}>{children}</a>;
-    };
+    function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
+        return React.createElement('a', { href }, children);
+    }
+    MockLink.displayName = 'MockLink';
+    return MockLink;
 });
 
 // Mock Next.js Image
 jest.mock('next/image', () => {
-    return ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => {
-        return <img src={src} alt={alt} {...props} />;
-    };
+    function MockImage({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) {
+        return React.createElement('img', { src, alt, ...props });
+    }
+    MockImage.displayName = 'MockImage';
+    return MockImage;
 });
 
 // =============================================================================
@@ -187,7 +194,6 @@ afterEach(() => {
 export * from '@testing-library/react';
 
 // Custom render with providers wrapper
-import React from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

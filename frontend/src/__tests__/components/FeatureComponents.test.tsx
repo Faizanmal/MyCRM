@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -35,7 +35,12 @@ describe('ContactCard Component', () => {
         onDelete?: (id: number) => void;
         onClick?: (id: number) => void;
     }) => (
-        <div data-testid="contact-card" onClick={() => onClick?.(contact.id)}>
+        <div 
+            data-testid="contact-card" 
+            onClick={() => onClick?.(contact.id)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(contact.id); }}
+            tabIndex={0}
+        >
             {contact.avatar ? (
                 <img src={contact.avatar} alt={`${contact.firstName} ${contact.lastName}`} />
             ) : (
@@ -163,11 +168,9 @@ describe('PipelineStage Component', () => {
 
     const MockPipelineStage = ({
         stage,
-        onDrop,
         onOpportunityClick
     }: {
         stage: Stage;
-        onDrop?: (oppId: number, stageId: number) => void;
         onOpportunityClick?: (id: number) => void;
     }) => (
         <div data-testid={`stage-${stage.id}`}>
@@ -182,6 +185,8 @@ describe('PipelineStage Component', () => {
                         key={opp.id} 
                         data-testid={`opp-${opp.id}`}
                         onClick={() => onOpportunityClick?.(opp.id)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpportunityClick?.(opp.id); }}
+                        tabIndex={0}
                     >
                         <span>{opp.name}</span>
                         <span>${opp.value.toLocaleString()}</span>
@@ -482,7 +487,7 @@ describe('SearchResults Component', () => {
         }
 
         if (results.length === 0) {
-            return <div data-testid="no-results">No results found for "{query}"</div>;
+            return <div data-testid="no-results">No results found for &quot;{query}&quot;</div>;
         }
 
         return (
@@ -491,6 +496,8 @@ describe('SearchResults Component', () => {
                     <li
                         key={`${result.type}-${result.id}`}
                         onClick={() => onResultClick?.(result)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onResultClick?.(result); }}
+                        tabIndex={0}
                         data-type={result.type}
                     >
                         <span>{result.type}</span>

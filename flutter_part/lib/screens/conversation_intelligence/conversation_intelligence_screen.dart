@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/utils/api_client.dart';
 import '../../providers/enterprise_providers.dart';
-import '../../models/enterprise_models.dart';
 import '../../widgets/loading_indicator.dart';
 import '../../widgets/empty_state.dart';
 
@@ -143,7 +142,7 @@ class _ConversationIntelligenceScreenState extends State<ConversationIntelligenc
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -501,9 +500,9 @@ class _ConversationIntelligenceScreenState extends State<ConversationIntelligenc
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Text(
         score.toString(),
@@ -744,7 +743,7 @@ class _ConversationIntelligenceScreenState extends State<ConversationIntelligenc
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),

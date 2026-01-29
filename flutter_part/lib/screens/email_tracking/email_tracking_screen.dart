@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/utils/api_client.dart';
 import '../../services/advanced_services.dart';
 import '../../models/advanced_models.dart';
+import '../../models/enterprise_models.dart';
 import '../../widgets/loading_indicator.dart';
 import '../../widgets/empty_state.dart';
 
@@ -364,7 +365,7 @@ class _EmailTrackingScreenState extends State<EmailTrackingScreen>
                         ),
                       ),
                       Text(
-                        sequence.description,
+                        sequence.description ?? 'No description',
                         style: TextStyle(color: Colors.grey.shade600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

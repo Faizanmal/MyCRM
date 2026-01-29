@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/utils/api_client.dart';
 import '../../providers/enterprise_providers.dart';
 import '../../models/enterprise_models.dart';
+import '../../models/advanced_models.dart' as advanced;
 import '../../widgets/loading_indicator.dart';
 import '../../widgets/empty_state.dart';
 
@@ -328,7 +329,7 @@ class _CustomerSuccessScreenState extends State<CustomerSuccessScreen>
     );
   }
 
-  Widget _buildAccountCard(CustomerAccount account) {
+  Widget _buildAccountCard(advanced.CustomerAccount account) {
     Color healthColor;
     switch (account.healthColor) {
       case 'green':
@@ -423,8 +424,7 @@ class _CustomerSuccessScreenState extends State<CustomerSuccessScreen>
       );
     }
 
-    final allRenewals = [...provider.upcomingRenewals, ...provider.renewals]
-        .toSet()
+    final allRenewals = <dynamic>{...provider.upcomingRenewals, ...provider.renewals}
         .toList();
 
     return RefreshIndicator(
@@ -477,7 +477,7 @@ class _CustomerSuccessScreenState extends State<CustomerSuccessScreen>
   }
 
   Widget _buildHealthDistribution(CustomerSuccessProvider provider) {
-    final accounts = provider.accounts;
+    final accounts = provider.accounts.where((a) => a != null).toList();
     final healthy = accounts.where((a) => a.healthScore >= 80).length;
     final warning = accounts.where((a) => a.healthScore >= 60 && a.healthScore < 80).length;
     final atRisk = accounts.where((a) => a.healthScore >= 40 && a.healthScore < 60).length;

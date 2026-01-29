@@ -261,7 +261,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: color.withOpacity(0.2),
+                backgroundColor: color.withValues(alpha: 0.2),
                 child: Text(
                   name.substring(0, 1),
                   style: TextStyle(color: color, fontWeight: FontWeight.bold),
@@ -281,7 +281,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
           const SizedBox(height: 4),
           LinearProgressIndicator(
             value: percentage > 1 ? 1 : percentage,
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withValues(alpha: 0.2),
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ],
@@ -431,29 +431,29 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
                   onChanged: (value) {
                     provider.toggleRule(rule.id, value);
                   },
-                  activeColor: Colors.cyan.shade700,
+                  activeThumbColor: Colors.cyan.shade700,
                 ),
               ],
             ),
-            if (rule.description != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                rule.description!,
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-            ],
+            ...[
+            const SizedBox(height: 8),
+            Text(
+              rule.description!,
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ],
             const Divider(height: 24),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 _buildRuleChip('Type: ${rule.routingType}'),
-                if (rule.criteria.containsKey('region'))
-                  _buildRuleChip('Region: ${rule.criteria['region']}'),
-                if (rule.criteria.containsKey('industry'))
-                  _buildRuleChip('Industry: ${rule.criteria['industry']}'),
-                if (rule.criteria.containsKey('lead_score'))
-                  _buildRuleChip('Score ≥ ${rule.criteria['lead_score']}'),
+                if (rule.conditions.containsKey('region'))
+                  _buildRuleChip('Region: ${rule.conditions['region']}'),
+                if (rule.conditions.containsKey('industry'))
+                  _buildRuleChip('Industry: ${rule.conditions['industry']}'),
+                if (rule.conditions.containsKey('lead_score'))
+                  _buildRuleChip('Score ≥ ${rule.conditions['lead_score']}'),
               ],
             ),
             const SizedBox(height: 12),
@@ -523,7 +523,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: _getStatusColor(assignment.status).withOpacity(0.2),
+                  backgroundColor: _getStatusColor(assignment.status).withValues(alpha: 0.2),
                   child: Text(
                     assignment.leadName.substring(0, 1).toUpperCase(),
                     style: TextStyle(
@@ -551,7 +551,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(assignment.status).withOpacity(0.1),
+                    color: _getStatusColor(assignment.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -592,19 +592,19 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
                   _formatDate(assignment.assignedAt),
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
-                if (assignment.responseTime != null) ...[
-                  const Spacer(),
-                  Icon(Icons.timer, size: 16, color: Colors.grey.shade600),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Response: ${assignment.responseTime}m',
-                    style: TextStyle(
-                      color: assignment.responseTime! <= 30 ? Colors.green : Colors.orange,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+                ...[
+                const Spacer(),
+                Icon(Icons.timer, size: 16, color: Colors.grey.shade600),
+                const SizedBox(width: 4),
+                Text(
+                  'Response: ${assignment.responseTime}m',
+                  style: TextStyle(
+                    color: assignment.responseTime! <= 30 ? Colors.green : Colors.orange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
+                ),
+              ],
               ],
             ),
             if (assignment.status == 'pending') ...[
@@ -688,7 +688,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: routingType,
+                  initialValue: routingType,
                   decoration: const InputDecoration(
                     labelText: 'Routing Type',
                     border: OutlineInputBorder(),
@@ -733,10 +733,12 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
             ElevatedButton(
               onPressed: () {
                 _provider.createRule(
-                  name: nameController.text,
-                  description: descriptionController.text,
-                  routingType: routingType,
-                  priority: priority,
+                  {
+                    'name': nameController.text,
+                    'description': descriptionController.text,
+                    'routing_type': routingType,
+                    'priority': priority,
+                  },
                 );
                 Navigator.pop(context);
               },

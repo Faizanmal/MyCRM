@@ -200,7 +200,7 @@ class _DataEnrichmentScreenState extends State<DataEnrichmentScreen>
                   ),
                 ),
                 const SizedBox(width: 20),
-                Container(
+                SizedBox(
                   width: 100,
                   height: 100,
                   child: Stack(
@@ -243,7 +243,7 @@ class _DataEnrichmentScreenState extends State<DataEnrichmentScreen>
             width: 80,
             child: LinearProgressIndicator(
               value: value,
-              backgroundColor: color.withOpacity(0.2),
+              backgroundColor: color.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),
@@ -293,7 +293,7 @@ class _DataEnrichmentScreenState extends State<DataEnrichmentScreen>
             ...sources.map((source) => ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
-                backgroundColor: (source['color'] as Color).withOpacity(0.2),
+                backgroundColor: (source['color'] as Color).withValues(alpha: 0.2),
                 child: Icon(source['icon'] as IconData, color: source['color'] as Color),
               ),
               title: Text(source['name'] as String),
@@ -411,7 +411,7 @@ class _DataEnrichmentScreenState extends State<DataEnrichmentScreen>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(job.status).withOpacity(0.2),
+                    color: _getStatusColor(job.status).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -438,7 +438,7 @@ class _DataEnrichmentScreenState extends State<DataEnrichmentScreen>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(job.status).withOpacity(0.1),
+                    color: _getStatusColor(job.status).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -642,7 +642,7 @@ class _DataEnrichmentScreenState extends State<DataEnrichmentScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 DropdownButtonFormField<String>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   decoration: const InputDecoration(
                     labelText: 'Data Type',
                     border: OutlineInputBorder(),
@@ -700,7 +700,7 @@ class _DataEnrichmentScreenState extends State<DataEnrichmentScreen>
               onPressed: () {
                 _provider.createJob(
                   entityType: selectedType,
-                  sources: [
+                  entityIds: [
                     if (includeLinkedIn) 'linkedin',
                     if (includeEmail) 'email',
                     if (includeCompany) 'company',

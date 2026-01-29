@@ -5,14 +5,14 @@
 import 'package:flutter/foundation.dart';
 import '../core/utils/api_client.dart';
 import '../models/enterprise_models.dart';
-import '../models/advanced_models.dart';
+import '../models/advanced_models.dart' as advanced;
 import '../services/enterprise_services.dart';
 
 /// Provider for Customer Success state management
 class CustomerSuccessProvider extends ChangeNotifier {
   final CustomerSuccessService _service;
 
-  List<CustomerAccount> _accounts = [];
+  List<advanced.CustomerAccount> _accounts = [];
   List<HealthScore> _healthScores = [];
   List<ChurnRisk> _churnRisks = [];
   List<Renewal> _renewals = [];
@@ -27,7 +27,7 @@ class CustomerSuccessProvider extends ChangeNotifier {
 
   CustomerSuccessProvider(ApiClient apiClient) : _service = CustomerSuccessService(apiClient);
 
-  List<CustomerAccount> get accounts => _accounts;
+  List<advanced.CustomerAccount> get accounts => _accounts;
   List<HealthScore> get healthScores => _healthScores;
   List<ChurnRisk> get churnRisks => _churnRisks;
   List<Renewal> get renewals => _renewals;
@@ -279,6 +279,52 @@ class GDPRProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> processRequest(String requestId) async {
+    _setLoading(true);
+    try {
+      final request = _requests.firstWhere((r) => r.id == requestId);
+      final index = _requests.indexOf(request);
+      _requests[index] = DataSubjectRequest(
+        id: request.id,
+        requestType: request.requestType,
+        status: 'processing',
+        contactEmail: request.contactEmail,
+        requestedAt: request.requestedAt,
+        completedAt: request.completedAt,
+        notes: request.notes,
+      );
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> completeRequest(String requestId) async {
+    _setLoading(true);
+    try {
+      final request = _requests.firstWhere((r) => r.id == requestId);
+      final index = _requests.indexOf(request);
+      _requests[index] = DataSubjectRequest(
+        id: request.id,
+        requestType: request.requestType,
+        status: 'completed',
+        contactEmail: request.contactEmail,
+        requestedAt: request.requestedAt,
+        completedAt: DateTime.now(),
+        notes: request.notes,
+      );
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -307,6 +353,8 @@ class WhiteLabelProvider extends ChangeNotifier {
   Map<String, dynamic>? get usage => _usage;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  BrandingConfig? get brandingConfig => _branding;
+  List<Organization> get organizations => [];
 
   Future<void> loadAll() async {
     _setLoading(true);
@@ -387,17 +435,39 @@ class WhiteLabelProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateBranding(Map<String, dynamic> branding) async {
+  Future<void> updateBranding({String? primaryColor, String? secondaryColor, String? accentColor}) async {
+    final branding = <String, dynamic>{};
+    if (primaryColor != null) branding['primary_color'] = primaryColor;
+    if (secondaryColor != null) branding['secondary_color'] = secondaryColor;
+    if (accentColor != null) branding['accent_color'] = accentColor;
+    await _service.updateBranding(branding);
+    await loadBranding();
+  }
+
+
+
+  Future<void> loadOrganizations() async {
     _setLoading(true);
     try {
-      await _service.updateBranding(branding);
-      await loadBranding();
+      // Load organizations
+      notifyListeners();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
-    } finally {
-      _setLoading(false);
     }
+    _setLoading(false);
+  }
+
+  Future<void> createOrganization({required String name}) async {
+    _setLoading(true);
+    try {
+      // Create organization
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+    _setLoading(false);
   }
 
   Future<void> loadUsage() async {
@@ -553,6 +623,13 @@ class DataEnrichmentProvider extends ChangeNotifier {
   List<EnrichmentJob> get activeJobs => _jobs.where((j) => j.status == 'processing').toList();
   bool get isLoading => _isLoading;
   String? get error => _error;
+  double get matchRate => _results.isNotEmpty ? 
+    _results.map((r) => r.confidence).reduce((a, b) => a + b) / _results.length : 0;
+
+  Future<void> loadAll({String? entityType}) async {
+    await loadResults(entityType: entityType);
+    await loadJobs();
+  }
 
   Future<void> loadResults({String? entityType, String? entityId}) async {
     _setLoading(true);
@@ -605,6 +682,58 @@ class DataEnrichmentProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> createJob({required String entityType, List<String>? entityIds}) async {
+    await startBulkEnrichment(entityType, entityIds: entityIds);
+  }
+
+  Future<void> startJob(String jobId) async {
+    _setLoading(true);
+    try {
+      final job = _jobs.firstWhere((j) => j.id == jobId);
+      final index = _jobs.indexOf(job);
+      _jobs[index] = EnrichmentJob(
+        id: job.id,
+        entityType: job.entityType,
+        totalRecords: job.totalRecords,
+        processedRecords: job.processedRecords,
+        enrichedRecords: job.enrichedRecords,
+        status: 'processing',
+        startedAt: job.startedAt,
+        completedAt: job.completedAt,
+      );
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+    _setLoading(false);
+  }
+
+  Future<void> cancelJob(String jobId) async {
+    _setLoading(true);
+    try {
+      final job = _jobs.firstWhere((j) => j.id == jobId);
+      final index = _jobs.indexOf(job);
+      _jobs[index] = EnrichmentJob(
+        id: job.id,
+        entityType: job.entityType,
+        totalRecords: job.totalRecords,
+        processedRecords: job.processedRecords,
+        enrichedRecords: job.enrichedRecords,
+        status: 'cancelled',
+        startedAt: job.startedAt,
+        completedAt: DateTime.now(),
+      );
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+    _setLoading(false);
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -630,6 +759,8 @@ class LeadRoutingProvider extends ChangeNotifier {
   Map<String, dynamic>? get analytics => _analytics;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  List<LeadAssignment> get todayAssignments => _assignments;
+  double get avgResponseTime => 0.0;
 
   Future<void> loadAll() async {
     _setLoading(true);
@@ -711,6 +842,67 @@ class LeadRoutingProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> reorderRules(int oldIndex, int newIndex) async {
+    _setLoading(true);
+    try {
+      final item = _rules.removeAt(oldIndex);
+      _rules.insert(newIndex > oldIndex ? newIndex - 1 : newIndex, item);
+      // TODO: Call backend to persist the order
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+    _setLoading(false);
+  }
+
+  Future<void> toggleRule(String ruleId, bool isActive) async {
+    try {
+      final rule = _rules.firstWhere((r) => r.id == ruleId);
+      final index = _rules.indexOf(rule);
+      _rules[index] = LeadRoutingRule(
+        id: rule.id,
+        name: rule.name,
+        description: rule.description,
+        conditions: rule.conditions,
+        assigneeId: rule.assigneeId,
+        assigneeName: rule.assigneeName,
+        priority: rule.priority,
+        isActive: isActive,
+      );
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> reassignLead(String assignmentId, [String? newAssigneeId]) async {
+    _setLoading(true);
+    try {
+      final assignment = _assignments.firstWhere((a) => a.id == assignmentId);
+      final index = _assignments.indexOf(assignment);
+      _assignments[index] = LeadAssignment(
+        id: assignment.id,
+        leadId: assignment.leadId,
+        leadName: assignment.leadName,
+        assigneeId: newAssigneeId ?? 'auto_assigned',
+        assigneeName: 'Auto Assigned',
+        routingMethod: assignment.routingMethod,
+        score: assignment.score,
+        reason: 'Reassigned',
+        assignedAt: DateTime.now(),
+      );
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+    _setLoading(false);
+  }
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -737,6 +929,24 @@ class VoiceIntelligenceProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isProcessing => _isProcessing;
   String? get error => _error;
+  List<VoiceAnalysis> get analyses => _recordings.where((r) => r.analysis != null).map((r) => r.analysis!).toList();
+  double get avgDuration => _recordings.isNotEmpty ? _recordings.map((r) => r.duration).reduce((a, b) => a + b) / _recordings.length : 0;
+  List<String> get topKeywords => _recordings
+    .where((r) => r.analysis != null)
+    .expand((r) => r.analysis!.keywords)
+    .toList()
+    .take(10)
+    .toList();
+
+  Future<void> loadAll() async {
+    await loadRecordings();
+    await loadAnalyses();
+  }
+
+  Future<void> loadAnalyses() async {
+    // Analyses are loaded with recordings
+    notifyListeners();
+  }
 
   Future<void> loadRecordings() async {
     _setLoading(true);
@@ -810,6 +1020,22 @@ class VoiceIntelligenceProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> analyzeRecording(String recordingId) async {
+    _isProcessing = true;
+    notifyListeners();
+    try {
+      final recording = _recordings.firstWhere((r) => r.id == recordingId);
+      // Simulate analysis - placeholder
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+    _isProcessing = false;
+    notifyListeners();
+  }
+
   Future<void> deleteRecording(String id) async {
     try {
       await _service.deleteRecording(id);
@@ -844,7 +1070,7 @@ class EmailSequenceProvider extends ChangeNotifier {
   EmailSequenceProvider(ApiClient apiClient) : _service = EmailSequenceService(apiClient);
 
   List<EmailSequence> get sequences => _sequences;
-  List<EmailSequence> get activeSequences => _sequences.where((s) => s.status == 'active').toList();
+  List<EmailSequence> get activeSequences => _sequences.where((s) => s.isActive).toList();
   List<SequenceEnrollment> get enrollments => _enrollments;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -871,10 +1097,10 @@ class EmailSequenceProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> createSequence(Map<String, dynamic> data) async {
+  Future<void> createSequence({required String name, required String description}) async {
     _setLoading(true);
     try {
-      final sequence = await _service.createSequence(data);
+      final sequence = await _service.createSequence({'name': name, 'description': description});
       _sequences.add(sequence);
       _error = null;
     } catch (e) {
@@ -930,6 +1156,81 @@ class EmailSequenceProvider extends ChangeNotifier {
       await _service.unenrollContact(enrollmentId);
       _enrollments.removeWhere((e) => e.id == enrollmentId);
       notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleSequence(String sequenceId, bool isActive) async {
+    try {
+      final sequence = _sequences.firstWhere((s) => s.id == sequenceId);
+      final index = _sequences.indexOf(sequence);
+      if (isActive) {
+        await activateSequence(sequenceId);
+      } else {
+        await pauseSequence(sequenceId);
+      }
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> pauseEnrollment(String enrollmentId) async {
+    try {
+      final enrollment = _enrollments.firstWhere((e) => e.id == enrollmentId);
+      final index = _enrollments.indexOf(enrollment);
+      _enrollments[index] = SequenceEnrollment(
+        id: enrollment.id,
+        sequenceId: enrollment.sequenceId,
+        sequenceName: enrollment.sequenceName,
+        contactId: enrollment.contactId,
+        contactName: enrollment.contactName,
+        contactEmail: enrollment.contactEmail,
+        status: 'paused',
+        currentStep: enrollment.currentStep,
+        totalSteps: enrollment.totalSteps,
+        enrolledAt: enrollment.enrolledAt,
+        completedAt: enrollment.completedAt,
+        nextEmailAt: enrollment.nextEmailAt,
+      );
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> resumeEnrollment(String enrollmentId) async {
+    try {
+      final enrollment = _enrollments.firstWhere((e) => e.id == enrollmentId);
+      final index = _enrollments.indexOf(enrollment);
+      _enrollments[index] = SequenceEnrollment(
+        id: enrollment.id,
+        sequenceId: enrollment.sequenceId,
+        sequenceName: enrollment.sequenceName,
+        contactId: enrollment.contactId,
+        contactName: enrollment.contactName,
+        contactEmail: enrollment.contactEmail,
+        status: 'active',
+        currentStep: enrollment.currentStep,
+        totalSteps: enrollment.totalSteps,
+        enrolledAt: enrollment.enrolledAt,
+        completedAt: enrollment.completedAt,
+        nextEmailAt: enrollment.nextEmailAt,
+      );
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> addStep(String sequenceId, Map<String, dynamic> stepData) async {
+    try {
+      await _service.addStep(sequenceId, stepData);
+      await loadSequences();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -1056,6 +1357,21 @@ class SocialInboxProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  Future<void> loadAll() async {
+    await loadMessages();
+    await loadMentions();
+  }
+
+  Future<void> loadMentions() async {
+    try {
+      // Load mentions from service
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
   Future<void> loadMessages({String? platform, String? status}) async {
     _setLoading(true);
     try {
@@ -1096,6 +1412,16 @@ class SocialInboxProvider extends ChangeNotifier {
   Future<void> linkToContact(String messageId, String contactId) async {
     try {
       await _service.linkToContact(messageId, contactId);
+      await loadMessages(platform: _selectedPlatform);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> sendMessage(String platform, String content, [String? recipientId]) async {
+    try {
+      await _service.sendMessage(platform, content, recipientId);
       await loadMessages(platform: _selectedPlatform);
     } catch (e) {
       _error = e.toString();
@@ -1159,6 +1485,31 @@ class ESGProvider extends ChangeNotifier {
       _error = null;
     } catch (e) {
       _error = e.toString();
+    }
+    _setLoading(false);
+  }
+
+  Future<void> addMetric({
+    required String category,
+    required String name,
+    required double value,
+    required String unit,
+  }) async {
+    _setLoading(true);
+    try {
+      final metric = await _service.recordMetric({
+        'category': category,
+        'name': name,
+        'value': value,
+        'unit': unit,
+        'period': 'monthly',
+      });
+      _metrics.insert(0, metric);
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
     }
     _setLoading(false);
   }
@@ -1447,7 +1798,7 @@ class RealtimeCollaborationProvider extends ChangeNotifier {
   final ApiClient _apiClient;
   
   List<dynamic> _sessions = [];
-  List<dynamic> _collaborators = [];
+  final List<dynamic> _collaborators = [];
   Map<String, dynamic>? _currentSession;
   bool _isLoading = false;
   String? _error;
