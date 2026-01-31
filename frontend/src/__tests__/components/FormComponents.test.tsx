@@ -385,7 +385,7 @@ describe('Date Picker Component', () => {
         const handleChange = jest.fn();
         render(<MockDatePicker onChange={handleChange} />);
 
-        fireEvent.change(screen.getByRole('textbox'), { target: { value: '2025-06-15' } });
+        fireEvent.change(screen.getByLabelText('Select date'), { target: { value: '2025-06-15' } });
 
         expect(handleChange).toHaveBeenCalledWith('2025-06-15');
     });
@@ -397,9 +397,9 @@ describe('Date Picker Component', () => {
 
     it('respects min and max dates', () => {
         render(
-            <MockDatePicker 
-                minDate="2025-01-01" 
-                maxDate="2025-12-31" 
+            <MockDatePicker
+                minDate="2025-01-01"
+                maxDate="2025-12-31"
                 placeholder="Date picker"
             />
         );
@@ -561,8 +561,12 @@ describe('OTP Input Component', () => {
             <div data-testid="otp-inputs">
                 {Array.from({ length }).map((_, i) => (
                     <input
+                        // Using index-based key is acceptable here since:
+                        // 1. The list is static and never reordered  
+                        // 2. Items are not filtered or removed
+                        // 3. Each input position represents a specific digit slot
                         // eslint-disable-next-line react/no-array-index-key
-                        key={`otp-input-${i}`}
+                        key={`otp-digit-${i}`}
                         type="text"
                         maxLength={1}
                         value={value?.[i] || ''}
@@ -574,7 +578,6 @@ describe('OTP Input Component', () => {
                         aria-label={`Digit ${i + 1}`}
                     />
                 ))}
-                { }
             </div>
             {error && <span role="alert">{error}</span>}
         </div>

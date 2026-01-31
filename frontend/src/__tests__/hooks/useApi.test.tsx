@@ -5,7 +5,7 @@
  */
 
 // import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach } from 'vitest';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('API Hooks', () => {
     beforeEach(() => {
@@ -42,7 +42,7 @@ describe('API Hooks', () => {
     describe('useFetch Hook', () => {
         it('should handle successful fetch', async () => {
             const mockData = { id: 1, name: 'Test' };
-            global.fetch = jest.fn().mockResolvedValue({
+            (global as unknown as { fetch: unknown }).fetch = jest.fn().mockResolvedValue({
                 ok: true,
                 json: () => Promise.resolve(mockData),
             });
@@ -65,7 +65,7 @@ describe('API Hooks', () => {
     describe('Error Handling', () => {
         it('should handle network errors gracefully', async () => {
             const errorMessage = 'Network error';
-            global.fetch = jest.fn().mockRejectedValue(new Error(errorMessage));
+            (global as unknown as { fetch: unknown }).fetch = jest.fn().mockRejectedValue(new Error(errorMessage));
 
             // Test error handling
             expect(() => {
@@ -74,7 +74,7 @@ describe('API Hooks', () => {
         });
 
         it('should handle 401 unauthorized', async () => {
-            global.fetch = jest.fn().mockResolvedValue({
+            (global as unknown as { fetch: unknown }).fetch = jest.fn().mockResolvedValue({
                 ok: false,
                 status: 401,
                 statusText: 'Unauthorized',
@@ -85,7 +85,7 @@ describe('API Hooks', () => {
         });
 
         it('should handle 404 not found', async () => {
-            global.fetch = jest.fn().mockResolvedValue({
+            (global as unknown as { fetch: unknown }).fetch = jest.fn().mockResolvedValue({
                 ok: false,
                 status: 404,
                 statusText: 'Not Found',
@@ -105,7 +105,7 @@ describe('API Hooks', () => {
                 previous: null,
             };
 
-            global.fetch = jest.fn().mockResolvedValue({
+            (global as unknown as { fetch: unknown }).fetch = jest.fn().mockResolvedValue({
                 ok: true,
                 json: () => Promise.resolve(paginatedData),
             });
@@ -149,7 +149,7 @@ describe('API Utilities', () => {
                 return null;
             };
 
-            global.fetch = jest.fn().mockResolvedValue({
+            (global as unknown as { fetch: unknown }).fetch = jest.fn().mockResolvedValue({
                 ok: false,
                 status: 400,
                 statusText: 'Bad Request',

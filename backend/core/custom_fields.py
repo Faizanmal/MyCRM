@@ -72,7 +72,7 @@ class CustomField(models.Model):
     editable_by_roles = models.JSONField(default=list, blank=True)
 
     # Metadata
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='created_custom_fields')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='created_custom_fields', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)

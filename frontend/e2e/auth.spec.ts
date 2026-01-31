@@ -77,11 +77,11 @@ test.describe('Login Flow', () => {
         // Should redirect away from login
         const currentUrl = page.url();
         const isStillOnLogin = currentUrl.includes('login');
-        
+
         // This test is conditional - if login succeeds, should not be on login page
         // If login fails (no real backend), test passes but logs warning
         if (isStillOnLogin) {
-            console.log('Note: Login may have failed due to no active backend');
+            console.warn('Note: Login may have failed due to no active backend');
         }
     });
 
@@ -272,7 +272,7 @@ test.describe('Logout Flow', () => {
         const logoutButton = page.locator('button:has-text("logout"), a:has-text("logout"), button:has-text("sign out")');
         // May be in dropdown menu
         const userMenu = page.locator('button[aria-label*="user" i], button:has-text("account"), [class*="avatar"]');
-        
+
         if (await userMenu.first().isVisible()) {
             await userMenu.first().click();
             await page.waitForTimeout(500);
@@ -335,7 +335,7 @@ test.describe('Session Management', () => {
 
         // Check if logged in
         const isLoggedIn = !page.url().includes('login');
-        
+
         if (isLoggedIn) {
             // Reload page
             await page.reload();

@@ -376,7 +376,7 @@ export default function DashboardPage() {
                 {isLoading ? (
                   [...Array(4)].map((_, i) => (
                     // eslint-disable-next-line react/no-array-index-key
-                    <div key={`skeleton-${i}`} className="space-y-2">
+                    <div key={`skeleton-pipeline-${i}`} className="space-y-2">
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-2 w-full" />
                     </div>
@@ -420,7 +420,7 @@ export default function DashboardPage() {
                 {isLoading ? (
                   [...Array(3)].map((_, i) => (
                     // eslint-disable-next-line react/no-array-index-key
-                    <div key={`skeleton-${i}`} className="flex items-start space-x-3">
+                    <div key={`skeleton-wins-${i}`} className="flex items-start space-x-3">
                       <Skeleton className="w-10 h-10 rounded-full" />
                       <div className="flex-1">
                         <Skeleton className="h-4 w-3/4 mb-2" />
@@ -462,7 +462,7 @@ export default function DashboardPage() {
                 {isLoading ? (
                   [...Array(5)].map((_, i) => (
                     // eslint-disable-next-line react/no-array-index-key
-                    <div key={`skeleton-${i}`} className="flex items-center space-x-4">
+                    <div key={`skeleton-activities-${i}`} className="flex items-center space-x-4">
                       <Skeleton className="w-2 h-2 rounded-full" />
                       <div className="flex-1">
                         <Skeleton className="h-4 w-3/4 mb-1" />
@@ -511,7 +511,7 @@ export default function DashboardPage() {
                 {isLoading ? (
                   [...Array(5)].map((_, i) => (
                     // eslint-disable-next-line react/no-array-index-key
-                    <div key={`skeleton-${i}`} className="flex items-center justify-between">
+                    <div key={`skeleton-tasks-${i}`} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 flex-1">
                         <Skeleton className="w-2 h-2 rounded-full" />
                         <div className="flex-1">

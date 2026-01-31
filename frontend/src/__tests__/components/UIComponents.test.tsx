@@ -20,16 +20,16 @@ import '@testing-library/jest-dom';
 // =============================================================================
 
 describe('Input Component', () => {
-    const MockInput = ({ 
-        type = 'text', 
-        placeholder, 
-        value, 
-        onChange, 
-        disabled, 
+    const MockInput = ({
+        type = 'text',
+        placeholder,
+        value,
+        onChange,
+        disabled,
         error,
         label,
         required,
-        ...props 
+        ...props
     }: {
         type?: string;
         placeholder?: string;
@@ -42,11 +42,11 @@ describe('Input Component', () => {
     }) => (
         <div>
             {label && <label htmlFor="input">{label}{required && '*'}</label>}
-            <input 
+            <input
                 id="input"
-                type={type} 
-                placeholder={placeholder} 
-                value={value} 
+                type={type}
+                placeholder={placeholder}
+                value={value}
                 onChange={onChange}
                 disabled={disabled}
                 aria-invalid={!!error}
@@ -74,10 +74,10 @@ describe('Input Component', () => {
     it('handles value changes', async () => {
         const handleChange = jest.fn();
         render(<MockInput value="" onChange={handleChange} placeholder="Type here" />);
-        
+
         const input = screen.getByPlaceholderText('Type here');
         await userEvent.type(input, 'Hello');
-        
+
         expect(handleChange).toHaveBeenCalled();
     });
 
@@ -107,10 +107,10 @@ describe('Input Component', () => {
 // =============================================================================
 
 describe('Select Component', () => {
-    const MockSelect = ({ 
-        options = [], 
-        value, 
-        onChange, 
+    const MockSelect = ({
+        options = [],
+        value,
+        onChange,
         placeholder,
         disabled,
         error,
@@ -126,9 +126,9 @@ describe('Select Component', () => {
     }) => (
         <div>
             {label && <label htmlFor="select">{label}</label>}
-            <select 
+            <select
                 id="select"
-                value={value} 
+                value={value}
                 onChange={(e) => onChange?.(e.target.value)}
                 disabled={disabled}
                 aria-invalid={!!error}
@@ -162,9 +162,9 @@ describe('Select Component', () => {
     it('handles selection change', async () => {
         const handleChange = jest.fn();
         render(<MockSelect options={options} onChange={handleChange} />);
-        
+
         await userEvent.selectOptions(screen.getByRole('combobox'), 'option2');
-        
+
         expect(handleChange).toHaveBeenCalledWith('option2');
     });
 
@@ -184,9 +184,9 @@ describe('Select Component', () => {
 // =============================================================================
 
 describe('Checkbox Component', () => {
-    const MockCheckbox = ({ 
-        checked = false, 
-        onChange, 
+    const MockCheckbox = ({
+        checked = false,
+        onChange,
         label,
         disabled
     }: {
@@ -196,9 +196,9 @@ describe('Checkbox Component', () => {
         disabled?: boolean;
     }) => (
         <label>
-            <input 
-                type="checkbox" 
-                checked={checked} 
+            <input
+                type="checkbox"
+                checked={checked}
                 onChange={(e) => onChange?.(e.target.checked)}
                 disabled={disabled}
             />
@@ -219,9 +219,9 @@ describe('Checkbox Component', () => {
     it('handles check change', async () => {
         const handleChange = jest.fn();
         render(<MockCheckbox onChange={handleChange} label="Toggle me" />);
-        
+
         await userEvent.click(screen.getByRole('checkbox'));
-        
+
         expect(handleChange).toHaveBeenCalledWith(true);
     });
 
@@ -241,10 +241,10 @@ describe('Checkbox Component', () => {
 // =============================================================================
 
 describe('Card Component', () => {
-    const MockCard = ({ 
-        title, 
-        description, 
-        children, 
+    const MockCard = ({
+        title,
+        description,
+        children,
         footer,
         variant = 'default'
     }: {
@@ -294,8 +294,8 @@ describe('Card Component', () => {
 // =============================================================================
 
 describe('Badge Component', () => {
-    const MockBadge = ({ 
-        children, 
+    const MockBadge = ({
+        children,
         variant = 'default',
         size = 'default'
     }: {
@@ -339,8 +339,8 @@ describe('Badge Component', () => {
 // =============================================================================
 
 describe('Avatar Component', () => {
-    const MockAvatar = ({ 
-        src, 
+    const MockAvatar = ({
+        src,
         alt = '',
         fallback,
         size = 'default'
@@ -385,10 +385,10 @@ describe('Avatar Component', () => {
 // =============================================================================
 
 describe('Dialog Component', () => {
-    const MockDialog = ({ 
-        open, 
-        onClose, 
-        title, 
+    const MockDialog = ({
+        open,
+        onClose,
+        title,
         description,
         children,
         actions
@@ -424,11 +424,11 @@ describe('Dialog Component', () => {
 
     it('shows title and description', () => {
         render(
-            <MockDialog 
-                open 
-                onClose={jest.fn()} 
-                title="Confirm Action" 
-                description="Are you sure?" 
+            <MockDialog
+                open
+                onClose={jest.fn()}
+                title="Confirm Action"
+                description="Are you sure?"
             />
         );
         expect(screen.getByText('Confirm Action')).toBeInTheDocument();
@@ -438,17 +438,17 @@ describe('Dialog Component', () => {
     it('calls onClose when close button clicked', async () => {
         const handleClose = jest.fn();
         render(<MockDialog open onClose={handleClose} title="Test" />);
-        
+
         await userEvent.click(screen.getByLabelText('Close'));
-        
+
         expect(handleClose).toHaveBeenCalled();
     });
 
     it('renders actions', () => {
         render(
-            <MockDialog 
-                open 
-                onClose={jest.fn()} 
+            <MockDialog
+                open
+                onClose={jest.fn()}
                 actions={<button>Confirm</button>}
             />
         );
@@ -461,9 +461,9 @@ describe('Dialog Component', () => {
 // =============================================================================
 
 describe('Alert Component', () => {
-    const MockAlert = ({ 
-        title, 
-        children, 
+    const MockAlert = ({
+        title,
+        children,
         variant = 'info',
         dismissible,
         onDismiss
@@ -509,9 +509,9 @@ describe('Alert Component', () => {
                 Click to dismiss
             </MockAlert>
         );
-        
+
         await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
-        
+
         expect(handleDismiss).toHaveBeenCalled();
     });
 });
@@ -521,8 +521,8 @@ describe('Alert Component', () => {
 // =============================================================================
 
 describe('Progress Component', () => {
-    const MockProgress = ({ 
-        value, 
+    const MockProgress = ({
+        value,
         max = 100,
         label,
         showValue
@@ -565,10 +565,10 @@ describe('Progress Component', () => {
 // =============================================================================
 
 describe('Tabs Component', () => {
-    const MockTabs = ({ 
-        tabs, 
-        activeTab, 
-        onTabChange 
+    const MockTabs = ({
+        tabs,
+        activeTab,
+        onTabChange
     }: {
         tabs: { id: string; label: string; content: React.ReactNode }[];
         activeTab: string;
@@ -577,7 +577,7 @@ describe('Tabs Component', () => {
         <div>
             <div role="tablist">
                 {tabs.map(tab => (
-                    <button 
+                    <button
                         key={tab.id}
                         role="tab"
                         aria-selected={activeTab === tab.id}
@@ -613,9 +613,9 @@ describe('Tabs Component', () => {
     it('calls onTabChange when tab clicked', async () => {
         const handleChange = jest.fn();
         render(<MockTabs tabs={tabs} activeTab="tab1" onTabChange={handleChange} />);
-        
+
         await userEvent.click(screen.getByRole('tab', { name: 'Tab 2' }));
-        
+
         expect(handleChange).toHaveBeenCalledWith('tab2');
     });
 
@@ -630,9 +630,9 @@ describe('Tabs Component', () => {
 // =============================================================================
 
 describe('Tooltip Component', () => {
-    const MockTooltip = ({ 
-        content, 
-        children 
+    const MockTooltip = ({
+        content,
+        children
     }: {
         content: string;
         children: React.ReactNode;
@@ -658,8 +658,8 @@ describe('Tooltip Component', () => {
 // =============================================================================
 
 describe('Dropdown Menu Component', () => {
-    const MockDropdown = ({ 
-        trigger, 
+    const MockDropdown = ({
+        trigger,
         items,
         open,
         onOpenChange
@@ -673,11 +673,11 @@ describe('Dropdown Menu Component', () => {
             <button onClick={() => onOpenChange(!open)}>{trigger}</button>
             {open && (
                 <ul role="menu">
-                    {items.map((item, index) => (
-                         
-                        <li 
-                            key={`menu-${index}`} 
-                            role="menuitem" 
+                    {items.map((item, _index) => (
+
+                        <li
+                            key={item.label}
+                            role="menuitem"
                             onClick={item.onClick}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') item.onClick(); }}
                             tabIndex={0}
@@ -714,10 +714,10 @@ describe('Dropdown Menu Component', () => {
     it('calls item onClick when clicked', async () => {
         const handleEdit = jest.fn();
         const testItems = [{ label: 'Edit', onClick: handleEdit }];
-        
+
         render(<MockDropdown trigger="Menu" items={testItems} open={true} onOpenChange={jest.fn()} />);
         await userEvent.click(screen.getByText('Edit'));
-        
+
         expect(handleEdit).toHaveBeenCalled();
     });
 });

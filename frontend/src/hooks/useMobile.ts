@@ -129,13 +129,13 @@ export function usePWAInstall() {
 
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
       setInstallPrompt(null);
       setIsInstallable(false);
       return true;
     }
-    
+
     return false;
   }, [installPrompt]);
 
@@ -168,7 +168,7 @@ export function usePushNotifications() {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      
+
       // Get VAPID public key from server
       const response = await fetch('/api/v1/notifications/vapid-key');
       const { publicKey } = await response.json();
@@ -179,7 +179,7 @@ export function usePushNotifications() {
       });
 
       setSubscription(sub);
-      
+
       // Send subscription to server
       await fetch('/api/v1/notifications/subscribe', {
         method: 'POST',
@@ -198,7 +198,7 @@ export function usePushNotifications() {
     if (subscription) {
       await subscription.unsubscribe();
       setSubscription(null);
-      
+
       // Notify server
       await fetch('/api/v1/notifications/unsubscribe', {
         method: 'POST',
@@ -257,13 +257,13 @@ export function useOfflineSync<T>(
       const freshData = await fetchFn();
       setData(freshData);
       setLastSynced(new Date());
-      
+
       // Cache the data
       localStorage.setItem(`offline_${key}`, JSON.stringify({
         data: freshData,
         timestamp: new Date().toISOString(),
       }));
-      
+
       setError(null);
     } catch (e) {
       setError(e as Error);
@@ -275,7 +275,7 @@ export function useOfflineSync<T>(
   // Auto-sync on mount and when coming online
   useEffect(() => {
     sync();
-  }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline, sync]);
 
   // Optional interval sync
   useEffect(() => {
@@ -349,11 +349,11 @@ export function useWakeLock() {
         const lock = await (navigator as Navigator & { wakeLock?: { request: (type: string) => Promise<WakeLockSentinel> } }).wakeLock?.request('screen');
         setWakeLock(lock);
         setIsActive(true);
-        
+
         lock.addEventListener('release', () => {
           setIsActive(false);
         });
-        
+
         return true;
       } catch (e) {
         console.error('Wake lock request failed:', e);

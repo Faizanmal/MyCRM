@@ -41,7 +41,7 @@ class EmailCampaign(models.Model):
     reply_to = models.EmailField(blank=True)
 
     # Template
-    template = models.ForeignKey('EmailTemplate', on_delete=models.SET_NULL, blank=True)
+    template = models.ForeignKey('EmailTemplate', on_delete=models.SET_NULL, blank=True, null=True)
     html_content = models.TextField(help_text="HTML email content")
     text_content = models.TextField(blank=True, help_text="Plain text fallback")
 
@@ -119,8 +119,8 @@ class EmailRecipient(models.Model):
 
     # Recipient info
     email = models.EmailField()
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, blank=True)
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, blank=True)
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, blank=True, null=True)
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, blank=True, null=True)
 
     # Personalization data
     personalization_data = models.JSONField(default=dict)
@@ -189,7 +189,7 @@ class EmailClick(models.Model):
     link = models.ForeignKey(EmailLink, on_delete=models.CASCADE, related_name='clicks')
 
     clicked_at = models.DateTimeField(auto_now_add=True)
-    ip_address = models.GenericIPAddressField(blank=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
     user_agent = models.TextField(blank=True)
 
     class Meta:
@@ -208,10 +208,10 @@ class EmailUnsubscribe(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
 
-    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, blank=True)
-    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, blank=True)
+    contact = models.ForeignKey('contact_management.Contact', on_delete=models.SET_NULL, blank=True, null=True)
+    lead = models.ForeignKey('lead_management.Lead', on_delete=models.SET_NULL, blank=True, null=True)
 
-    campaign = models.ForeignKey(EmailCampaign, on_delete=models.SET_NULL, blank=True)
+    campaign = models.ForeignKey(EmailCampaign, on_delete=models.SET_NULL, blank=True, null=True)
     reason = models.TextField(blank=True)
 
     unsubscribed_at = models.DateTimeField(auto_now_add=True)

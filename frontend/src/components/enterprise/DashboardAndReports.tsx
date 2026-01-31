@@ -331,7 +331,7 @@ export function ReportBuilder() {
   const [reports, setReports] = useState<Report[]>([]);
   const { toast } = useToast();
 
-  const loadReports = async () => {
+  const loadReports = useCallback(async () => {
     try {
       const response = await axios.get('/api/core/reports/');
       setReports(response.data);
@@ -343,19 +343,18 @@ export function ReportBuilder() {
         variant: 'destructive',
       });
     }
-  };
+  }, [toast]);
 
   React.useEffect(() => {
     loadReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadReports]);
 
   const generateReport = async (reportId: string) => {
     try {
       const response = await axios.post(`/api/core/reports/${reportId}/generate/`, {}, {
         responseType: 'blob',
       });
-      
+
       // Download the file
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -454,7 +453,7 @@ function CreateReportDialog({ onCreated }: { onCreated: () => void }) {
   const availableColumns = currentModel?.defaultColumns || [];
 
   const toggleColumn = (column: string) => {
-    setColumns(prev => 
+    setColumns(prev =>
       prev.includes(column)
         ? prev.filter(c => c !== column)
         : [...prev, column]
