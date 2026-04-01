@@ -1,1 +1,0 @@
-default_app_config = 'conversation_intelligence.apps.ConversationIntelligenceConfig'

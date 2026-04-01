@@ -53,7 +53,6 @@ urlpatterns = [
     # New Advanced Features
     path('api/v1/integration-hub/', include('integration_hub.urls')),
     path('api/v1/ai-insights/', include('ai_insights.urls')),
-    path('api/v1/gamification/', include('gamification.urls')),
     path('api/v1/multi-tenant/', include('multi_tenant.urls')),
     path('api/v1/sso/', include('sso_integration.urls')),
     path('api/v1/collaboration/', include('collaboration.urls')),
@@ -65,9 +64,6 @@ urlpatterns = [
     path('api/v1/scheduling/', include('smart_scheduling.urls')),
     path('api/v1/ai-assistant/', include('ai_sales_assistant.urls')),
     path('api/v1/social-selling/', include('social_selling.urls')),
-    path('api/v1/documents/', include('document_esign.urls')),
-    path('api/v1/conversation-intelligence/', include('conversation_intelligence.urls')),
-    path('api/v1/white-label/', include('white_label.urls')),
     path('api/v1/customer-success/', include('customer_success.urls')),
 
     # AI Workflow Automation Features
@@ -78,25 +74,10 @@ urlpatterns = [
     path('api/v1/scheduling/ai/', include('smart_scheduling.ai_urls')),
 
     # Enterprise Features (New)
-    path('api/v1/ai-chatbot/', include('ai_chatbot.urls')),
-    path('api/v1/marketplace/', include('app_marketplace.urls')),
-    path('api/v1/esg/', include('esg_reporting.urls')),
     path('api/v1/realtime-collab/', include('realtime_collaboration.urls')),
     path('api/v1/security/', include('enterprise.urls')),
     path('api/v1/customer-portal/', include('customer_portal.urls')),
     path('api/v1/social-inbox/', include('social_inbox.urls')),
-
-    # Futuristic Next-Gen Features
-    path('api/v1/quantum/', include('quantum_modeling.urls')),
-    path('api/v1/web3/', include('web3_integration.urls')),
-    path('api/v1/metaverse/', include('metaverse_experiences.urls')),
-    path('api/v1/ethical-ai/', include('ethical_ai_oversight.urls')),
-    path('api/v1/carbon/', include('carbon_tracking.urls')),
-    path('api/v1/neurological/', include('neurological_feedback.urls')),
-    path('api/v1/holographic/', include('holographic_collab.urls')),
-    path('api/v1/autonomous-workflow/', include('autonomous_workflow.urls')),
-    path('api/v1/interplanetary/', include('interplanetary_sync.urls')),
-    path('api/v1/biofeedback/', include('biofeedback_personalization.urls')),
 ]
 
 if settings.DEBUG:

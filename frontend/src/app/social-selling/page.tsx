@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { 
-  Share2, Linkedin, Twitter, Users, TrendingUp, MessageSquare, 
+  Share2, Link as Linkedin, Hash as Twitter, Users, TrendingUp, MessageSquare, 
   Heart, Repeat2, Eye, Send, Calendar, Search, UserPlus, Target,
   BarChart3, Clock, Sparkles, Globe, CheckCircle, AlertCircle
 } from "lucide-react";

@@ -11,7 +11,7 @@ import {
   Building2,
   User,
   Mail,
-  Linkedin,
+  Link as Linkedin,
   AlertTriangle,
   TrendingUp,
   Settings,

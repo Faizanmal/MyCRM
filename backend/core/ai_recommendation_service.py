@@ -394,7 +394,7 @@ class RecommendationEngine:
                                f"the momentum! Consider celebrating small wins with your team.",
                     impact='low',
                     action_label='View Stats',
-                    action_url='/gamification',
+                    action_url='/reports',
                     dismissable=True,
                     confidence_score=0.9,
                     reasoning=f"{completed_tasks} tasks completed in 7 days",

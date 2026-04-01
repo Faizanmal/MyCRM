@@ -114,8 +114,8 @@ class OnboardingProgress(models.Model):
     tour_dismissed = models.BooleanField(default=False)
     tour_completed_at = models.DateTimeField(blank=True)
 
-    # XP and gamification
-    onboarding_xp = models.IntegerField(default=0)
+    # XP system
+    onboarding_xp = models.IntegerField(default=0, help_text='Experience points earned during onboarding')
 
     # Timestamps
     started_at = models.DateTimeField(auto_now_add=True)

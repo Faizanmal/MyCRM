@@ -106,7 +106,6 @@ const toolsNavigation = [
   { name: 'Integrations', href: '/integrations', icon: Activity },
   { name: 'Workflows', href: '/workflows', icon: Workflow },
   { name: 'Import/Export', href: '/data', icon: Upload },
-  { name: 'ESG Reporting', href: '/esg-reporting', icon: Leaf },
   { name: 'Security', href: '/security', icon: Shield },
   { name: 'Enterprise Security', href: '/enterprise-security', icon: ShieldCheck },
   { name: 'Settings', href: '/settings', icon: Settings },

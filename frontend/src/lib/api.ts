@@ -1287,17 +1287,6 @@ export const esgReportingAPI = {
     return response.data;
   },
 
-  // Carbon Footprint
-  getCarbonData: async (params?: Record<string, unknown>) => {
-    const response = await apiClient.get('/v1/esg/carbon/', { params });
-    return response.data;
-  },
-
-  createCarbonEntry: async (data: Record<string, unknown>) => {
-    const response = await apiClient.post('/v1/esg/carbon/', data);
-    return response.data;
-  },
-
   // Supplier Assessments
   getSupplierAssessments: async (params?: Record<string, unknown>) => {
     const response = await apiClient.get('/v1/esg/suppliers/', { params });

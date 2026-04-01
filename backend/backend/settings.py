@@ -82,7 +82,6 @@ INSTALLED_APPS = [
     'reporting',
     # New Advanced Features
     'ai_insights',
-    'gamification',
     'multi_tenant',
     'sso_integration',
     'collaboration',
@@ -93,9 +92,6 @@ INSTALLED_APPS = [
     'smart_scheduling',
     'ai_sales_assistant',
     'social_selling',
-    'document_esign',
-    'conversation_intelligence',
-    'white_label',
     'customer_success',
     # AI Workflow Automation Features
     'email_sequence_automation',
@@ -103,24 +99,10 @@ INSTALLED_APPS = [
     'data_enrichment',
     'voice_intelligence',
     # Enterprise Features (New)
-    'ai_chatbot',
-    'app_marketplace',
-    'esg_reporting',
     'realtime_collaboration',
     'enterprise',
     'customer_portal',
     'social_inbox',
-    # Futuristic Next-Gen Features
-    'quantum_modeling',
-    'web3_integration',
-    'metaverse_experiences',
-    'ethical_ai_oversight',
-    'carbon_tracking',
-    'neurological_feedback',
-    'holographic_collab',
-    'autonomous_workflow',
-    'interplanetary_sync',
-    'biofeedback_personalization',
 ]
 
 MIDDLEWARE = [
@@ -216,29 +198,45 @@ else:
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Check if USE_SQLITE is set in environment
+DATABASE_URL = os.getenv('DATABASE_URL')
 
+if DATABASE_URL:
+    from urllib.parse import urlparse
 
-if USE_SQLITE:
+    url = urlparse(DATABASE_URL)
+
+    # URL patterns like postgres://user:password@host:port/dbname
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql' if url.scheme in ('postgres', 'postgresql') else 'django.db.backends.sqlite3',
+            'NAME': url.path[1:] if url.path else '',
+            'USER': url.username or '',
+            'PASSWORD': url.password or '',
+            'HOST': url.hostname or 'localhost',
+            'PORT': str(url.port or '5432'),
         }
     }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('DATABASE_ENGINE', 'django.db.backends.postgresql'),
-            'NAME': os.getenv('DATABASE_NAME', 'mycrm_db'),
-            'USER': os.getenv('DATABASE_USER', 'mycrm_user'),
-            'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
-            # resolve host names so running Django locally with DATABASE_HOST=db
-            # doesn't immediately blow up with getaddrinfo errors
-            'HOST': _resolve_env_host('DATABASE_HOST', 'localhost'),
-            'PORT': os.getenv('DATABASE_PORT', '5432'),
+    if USE_SQLITE:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': os.getenv('DATABASE_ENGINE', 'django.db.backends.postgresql'),
+                'NAME': os.getenv('DATABASE_NAME', 'mycrm_db'),
+                'USER': os.getenv('DATABASE_USER', 'mycrm_user'),
+                'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+                # resolve host names so running Django locally with DATABASE_HOST=db
+                # doesn't immediately blow up with getaddrinfo errors
+                'HOST': _resolve_env_host('DATABASE_HOST', 'localhost'),
+                'PORT': os.getenv('DATABASE_PORT', '5432'),
+            }
+        }
 
 
 # Password validation

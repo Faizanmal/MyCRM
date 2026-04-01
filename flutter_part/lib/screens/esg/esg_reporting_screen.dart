@@ -397,79 +397,9 @@ class _ESGReportingScreenState extends State<ESGReportingScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCarbonFootprint(),
-            const SizedBox(height: 20),
             _buildEnvironmentalMetrics(envMetrics),
             const SizedBox(height: 20),
             _buildEmissionsBreakdown(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCarbonFootprint() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.co2, color: Colors.green.shade700, size: 32),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Carbon Footprint',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Text('Annual CO2 equivalent emissions'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(child: _buildEmissionCard('Scope 1', '245 tCO2e', Colors.red)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildEmissionCard('Scope 2', '1,230 tCO2e', Colors.orange)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildEmissionCard('Scope 3', '4,560 tCO2e', Colors.amber)),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Net Zero Target Progress'),
-                Text(
-                  '42%',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: 0.42,
-              backgroundColor: Colors.green.shade100,
-              valueColor: AlwaysStoppedAnimation(Colors.green.shade700),
-            ),
           ],
         ),
       ),

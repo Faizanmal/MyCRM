@@ -238,43 +238,6 @@ class EmailNotificationService:
         )
 
     @staticmethod
-    def send_achievement_unlocked(user, achievement):
-        """
-        Celebrate user achievements
-        """
-        subject = f"🏆 Achievement Unlocked: {achievement.name}!"
-
-        html_content = f"""
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; text-align: center;">
-            <div style="background: linear-gradient(135deg, #8b5cf6, #6366f1); padding: 40px; border-radius: 16px; color: white;">
-                <div style="font-size: 64px; margin-bottom: 16px;">🏆</div>
-                <h1 style="margin: 0 0 8px 0;">Achievement Unlocked!</h1>
-                <h2 style="margin: 0; font-weight: normal; opacity: 0.9;">{achievement.name}</h2>
-            </div>
-            <div style="padding: 24px;">
-                <p style="font-size: 18px; color: #4b5563;">{achievement.description}</p>
-                <div style="background: #fef3c7; display: inline-block; padding: 8px 24px; border-radius: 20px; margin: 16px 0;">
-                    <strong style="color: #92400e;">+{achievement.xp_reward} XP</strong>
-                </div>
-                <p style="margin-top: 24px;">
-                    <a href="{settings.FRONTEND_URL}/gamification"
-                       style="background: #8b5cf6; color: white; padding: 12px 24px;
-                              text-decoration: none; border-radius: 6px; display: inline-block;">
-                        View All Achievements
-                    </a>
-                </p>
-            </div>
-        </div>
-        """
-
-        return send_crm_email(
-            to_email=user.email,
-            subject=subject,
-            html_content=html_content,
-            text_content=strip_tags(html_content),
-        )
-
-    @staticmethod
     def send_ai_recommendation(user, recommendations):
         """
         Send AI-generated recommendations digest
@@ -771,7 +734,6 @@ def send_weekly_digest_emails():
                     status='completed',
                     completed_at__gte=last_week
                 ).count(),
-                'xp_earned': 0,  # Would come from gamification
             }
 
             # Only send if there's activity
