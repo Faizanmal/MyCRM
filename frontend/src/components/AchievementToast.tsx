@@ -17,10 +17,11 @@ import {
     X,
 } from 'lucide-react';
 
+import Confetti from './Confetti';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-import Confetti from './Confetti';
 
 // Achievement types and icons
 const achievementIcons: Record<string, React.ElementType> = {

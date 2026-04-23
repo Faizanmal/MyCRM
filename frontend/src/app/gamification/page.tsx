@@ -250,7 +250,7 @@ export default function GamificationPage() {
                     <CardDescription className="text-yellow-50">Total Points</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{myPoints.total_points.toLocaleString()}</div>
+                    <div className="text-3xl font-bold">{myPoints.total_points?.toLocaleString() || '0'}</div>
                   </CardContent>
                 </Card>
                 <Card>
@@ -258,9 +258,9 @@ export default function GamificationPage() {
                     <CardDescription>Current Level</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-blue-600">Level {myPoints.current_level}</div>
+                    <div className="text-3xl font-bold text-blue-600">Level {myPoints.current_level ?? 0}</div>
                     <p className="text-xs text-gray-600 mt-1">
-                      {myPoints.points_to_next_level} pts to next level
+                      {myPoints.points_to_next_level ?? 0} pts to next level
                     </p>
                   </CardContent>
                 </Card>
@@ -271,7 +271,7 @@ export default function GamificationPage() {
                   <CardContent>
                     <div className="flex items-center gap-2">
                       <FireIcon className="w-6 h-6 text-orange-500" />
-                      <div className="text-3xl font-bold">{myPoints.streak_days}</div>
+                      <div className="text-3xl font-bold">{myPoints.streak_days ?? 0}</div>
                       <span className="text-sm text-gray-600">days</span>
                     </div>
                   </CardContent>
@@ -283,7 +283,7 @@ export default function GamificationPage() {
                   <CardContent>
                     <div className="flex items-center gap-2">
                       <StarIcon className="w-6 h-6 text-yellow-500" />
-                      <div className="text-3xl font-bold">{myPoints.achievements_count}</div>
+                      <div className="text-3xl font-bold">{myPoints.achievements_count ?? 0}</div>
                       <span className="text-sm text-gray-600">earned</span>
                     </div>
                   </CardContent>
@@ -522,8 +522,8 @@ export default function GamificationPage() {
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Duration:</span>
                             <span className="font-medium">
-                              {new Date(challenge.start_date).toLocaleDateString()} - 
-                              {new Date(challenge.end_date).toLocaleDateString()}
+                              {challenge.start_date ? new Date(challenge.start_date).toLocaleDateString() : 'TBD'} - 
+                              {challenge.end_date ? new Date(challenge.end_date).toLocaleDateString() : 'TBD'}
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">

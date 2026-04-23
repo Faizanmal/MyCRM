@@ -1024,7 +1024,7 @@ class VoiceIntelligenceProvider extends ChangeNotifier {
     _isProcessing = true;
     notifyListeners();
     try {
-      final recording = _recordings.firstWhere((r) => r.id == recordingId);
+      _recordings.firstWhere((r) => r.id == recordingId);
       // Simulate analysis - placeholder
       _error = null;
       notifyListeners();
@@ -1164,8 +1164,7 @@ class EmailSequenceProvider extends ChangeNotifier {
 
   Future<void> toggleSequence(String sequenceId, bool isActive) async {
     try {
-      final sequence = _sequences.firstWhere((s) => s.id == sequenceId);
-      final index = _sequences.indexOf(sequence);
+      _sequences.firstWhere((s) => s.id == sequenceId);
       if (isActive) {
         await activateSequence(sequenceId);
       } else {

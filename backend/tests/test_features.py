@@ -13,12 +13,11 @@ Comprehensive test suite for specific features:
 - Document Management
 """
 
-import pytest
-from rest_framework import status
-from decimal import Decimal
 from datetime import date, timedelta
-from django.utils import timezone
 
+import pytest
+from django.utils import timezone
+from rest_framework import status
 
 # =============================================================================
 # AI Insights Tests

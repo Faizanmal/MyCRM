@@ -192,7 +192,7 @@ export const leadsAPI = {
 // Opportunities API
 export const opportunitiesAPI = {
   getOpportunities: async (params?: Record<string, unknown>) => {
-    const response = await apiClient.get('/opportunities/opportunities/', { params });
+    const response = await apiClient.get('/opportunities/opportunities/', { params, timeout: 30000 });
     return response.data;
   },
 
@@ -654,7 +654,7 @@ export const activityAPI = {
     apiClient.post(`/activity/notifications/${id}/mark_read/`),
   markAllNotificationsRead: () =>
     apiClient.post('/activity/notifications/mark_all_read/'),
-  getUnreadCount: () => apiClient.get('/activity/notifications/unread_count/'),
+  getUnreadCount: () => apiClient.get('/activity/notifications/unread_count/', { timeout: 30000 }),
 
   // Mentions
   getMentions: () => apiClient.get('/activity/mentions/'),
@@ -1057,8 +1057,12 @@ export const aiChatbotAPI = {
     return response.data;
   },
 
-  createSession: async (name?: string) => {
-    const response = await apiClient.post('/v1/ai-chatbot/sessions/', { name });
+  createSession: async (title?: string) => {
+    const payload: Record<string, unknown> = {};
+    if (typeof title !== 'undefined') {
+      payload.title = title;
+    }
+    const response = await apiClient.post('/v1/ai-chatbot/sessions/', payload);
     return response.data;
   },
 
@@ -1086,7 +1090,7 @@ export const aiChatbotAPI = {
 
   // Suggestions
   suggestActions: async (context?: Record<string, unknown>) => {
-    const response = await apiClient.post('/v1/ai-chatbot/suggest-actions/', context);
+    const response = await apiClient.post('/v1/ai-chatbot/suggest-actions/', context || {});
     return response.data;
   },
 

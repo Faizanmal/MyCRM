@@ -421,26 +421,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showComingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.info_outline, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(child: Text('$feature coming soon!')),
-          ],
-        ),
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
-  }
-
   void _showNotificationsSheet() {
     showModalBottomSheet(
       context: context,

@@ -42,7 +42,6 @@ import {
   CalendarClock,
   MessageSquare,
   Store,
-  Leaf,
   Users2,
   Globe,
   ShieldCheck,

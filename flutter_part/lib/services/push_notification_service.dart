@@ -38,7 +38,7 @@ class PushNotificationService {
     await _localNotifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        // Handle notification tap
+        _onNotificationTapped(response);
       },
     );
 
@@ -264,17 +264,19 @@ class PushNotificationService {
   }
 
   void _onNotificationTapped(NotificationResponse response) {
-    if (response.payload != null) {
-      try {
-        final payload = jsonDecode(response.payload!) as Map<String, dynamic>;
+    try {
+      final payload = response.payload != null
+          ? jsonDecode(response.payload!) as Map<String, dynamic>
+          : null;
+      if (payload != null) {
         _notificationController.add(NotificationPayload(
           type: payload['type'] as String?,
           id: payload['id'] as int?,
           data: payload,
         ));
-      } catch (e) {
-        debugPrint('Error parsing notification payload: $e');
       }
+    } catch (e) {
+      debugPrint('Error parsing notification payload: $e');
     }
   }
 

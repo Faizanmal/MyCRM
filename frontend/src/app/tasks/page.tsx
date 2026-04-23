@@ -387,8 +387,8 @@ export default function TasksPage() {
           {/* Tasks List */}
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(5)].map((_, _i) => (
-                <Card key={stableKey(_)}>
+              {[...Array(5)].map((_, index) => (
+                <Card key={stableKey(index)}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
                       <Skeleton className="w-5 h-5 rounded-full" />
@@ -405,9 +405,9 @@ export default function TasksPage() {
           ) : tasks.length > 0 ? (
             <>
               <div className="space-y-3">
-                {tasks.map((task) => (
+                {tasks.map((task, index) => (
                   <Card 
-                    key={task.id} 
+                    key={task.id ?? `task-${index}`} 
                     className={`hover:shadow-md transition-shadow ${
                       isOverdue(task.due_date, task.status) ? 'border-red-300 dark:border-red-800' : ''
                     }`}

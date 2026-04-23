@@ -9,6 +9,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { advancedReportingAPI } from '@/lib/api';
 
 interface Dashboard {
   id: number;
@@ -54,38 +55,20 @@ export default function AdvancedReportingPage() {
     setLoading(true);
     try {
       if (activeTab === 'dashboards') {
-        const res = await fetch('/api/advanced-reporting/dashboards/', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setDashboards(data.results || data);
-        }
+        const response = await advancedReportingAPI.getDashboards();
+        setDashboards(response.data.results || response.data || []);
       } else if (activeTab === 'reports') {
-        const res = await fetch('/api/advanced-reporting/reports/', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setReports(data.results || data);
-        }
+        const response = await advancedReportingAPI.getReports();
+        setReports(response.data.results || response.data || []);
       } else if (activeTab === 'kpis') {
-        const res = await fetch('/api/advanced-reporting/kpis/summary/', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setKPIs(data);
-        }
+        const response = await advancedReportingAPI.getKPISummary();
+        setKPIs(response.data || []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+      setDashboards([]);
+      setReports([]);
+      setKPIs([]);
     } finally {
       setLoading(false);
     }

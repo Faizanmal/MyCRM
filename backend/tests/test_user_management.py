@@ -352,7 +352,6 @@ class TestUserProfile:
 
     def test_upload_avatar(self, authenticated_client, user):
         """Test uploading profile avatar."""
-        import io
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         image = SimpleUploadedFile(

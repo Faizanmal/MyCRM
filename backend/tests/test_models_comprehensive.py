@@ -4,14 +4,15 @@ MyCRM Backend - Model Tests
 Comprehensive tests for Django models
 """
 
+from datetime import timedelta
+from decimal import Decimal
+
 import pytest
-from django.test import TestCase
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.test import TestCase
 from django.utils import timezone
-from django.contrib.auth import get_user_model
-from datetime import datetime, timedelta
-from decimal import Decimal
 
 User = get_user_model()
 
@@ -78,7 +79,7 @@ class TestUserModel(TestCase):
         str_repr = str(user)
         # Should contain email or name
         self.assertTrue(
-            'display@example.com' in str_repr or 
+            'display@example.com' in str_repr or
             'John' in str_repr or
             'Doe' in str_repr
         )

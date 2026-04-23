@@ -214,7 +214,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen>
                             child: Image.network(
                               app.iconUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Icon(
+                              errorBuilder: (context, error, stackTrace) => Icon(
                                 Icons.extension,
                                 color: Colors.indigo.shade400,
                               ),

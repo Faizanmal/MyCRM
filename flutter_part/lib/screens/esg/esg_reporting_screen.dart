@@ -406,31 +406,6 @@ class _ESGReportingScreenState extends State<ESGReportingScreen>
     );
   }
 
-  Widget _buildEmissionCard(String scope, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Text(scope, style: TextStyle(color: color, fontSize: 12)),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEnvironmentalMetrics(List<ESGMetric> metrics) {
     if (metrics.isEmpty) {
       return Card(

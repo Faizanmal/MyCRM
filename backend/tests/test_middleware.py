@@ -4,13 +4,12 @@ MyCRM Backend - Middleware Tests
 Tests for Django middleware
 """
 
+from unittest.mock import Mock, patch
+
 import pytest
-from django.test import TestCase, RequestFactory, override_settings
-from django.http import HttpResponse
 from django.contrib.auth import get_user_model
-from django.contrib.sessions.middleware import SessionMiddleware
-from unittest.mock import Mock, patch, MagicMock
-import json
+from django.http import HttpResponse
+from django.test import RequestFactory, TestCase, override_settings
 
 User = get_user_model()
 

@@ -12,11 +12,11 @@ Comprehensive test suite for opportunity management including:
 - Forecasting
 """
 
+from datetime import date, timedelta
+from decimal import Decimal
+
 import pytest
 from rest_framework import status
-from decimal import Decimal
-from datetime import date, timedelta
-
 
 # =============================================================================
 # Opportunity CRUD Tests

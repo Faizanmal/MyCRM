@@ -4,16 +4,16 @@ MyCRM Backend - Performance Tests
 Load testing and performance benchmarks
 """
 
-import pytest
+import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from django.test import TestCase, TransactionTestCase
-from django.test.client import Client
-from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
-from django.db import connection, reset_queries
+
+import pytest
 from django.conf import settings
-import statistics
+from django.contrib.auth import get_user_model
+from django.db import connection, reset_queries
+from django.test import TestCase, TransactionTestCase
+from rest_framework.test import APIClient
 
 User = get_user_model()
 

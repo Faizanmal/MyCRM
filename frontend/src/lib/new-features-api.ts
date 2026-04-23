@@ -232,7 +232,7 @@ export interface IntegrationProvider {
 
 export interface Integration {
   id: string;
-  provider: IntegrationProvider;
+  provider: IntegrationProvider | string;
   name: string;
   is_active: boolean;
   status: 'pending' | 'connected' | 'error' | 'disconnected';

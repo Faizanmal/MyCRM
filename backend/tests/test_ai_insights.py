@@ -1,9 +1,14 @@
 # MyCRM Backend - Comprehensive Test Suite for AI Insights
 
+from datetime import timedelta
 from decimal import Decimal
 
 import pytest
+from django.utils import timezone
 from rest_framework import status
+
+from ai_insights.models import ChurnPrediction
+from contact_management.models import Contact
 
 
 @pytest.mark.django_db
@@ -15,6 +20,38 @@ class TestAIInsightsAPI:
         url = '/api/v1/ai-insights/churn-predictions/'
         response = authenticated_client.get(url)
         assert response.status_code in [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND]
+
+    def test_get_churn_prediction_statistics(self, authenticated_client, user, organization):
+        """Test churn prediction statistics endpoint."""
+        contact = Contact.objects.create(
+            first_name='Statistic',
+            last_name='Test',
+            email='statistic@example.com',
+            phone='+1-555-987-6543',
+            company_name='Stats Co',
+            job_title='Analyst',
+            organization=organization,
+            contact_type='customer',
+            assigned_to=user,
+            created_by=user,
+        )
+        ChurnPrediction.objects.create(
+            contact=contact,
+            churn_probability=0.85,
+            risk_level='high',
+            factors={},
+            confidence_score=0.92,
+            recommended_actions=[],
+            model_version='v1',
+            expires_at=timezone.now() + timedelta(days=30),
+        )
+
+        url = '/api/v1/ai-insights/churn-predictions/statistics/'
+        response = authenticated_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['total_predictions'] == 1
+        assert response.data['high_risk'] == 1
+        assert response.data['critical_risk'] == 0
 
     def test_get_next_best_actions(self, authenticated_client):
         """Test getting next best action recommendations."""

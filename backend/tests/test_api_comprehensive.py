@@ -4,15 +4,12 @@ MyCRM Backend - API Integration Tests
 Comprehensive API testing for all major endpoints
 """
 
-import pytest
-from django.urls import reverse
-from django.test import TestCase
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
-from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
-from decimal import Decimal
-import json
+
+import pytest
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 User = get_user_model()
 
@@ -88,7 +85,7 @@ class TestContactsAPI(BaseAPITestCase):
         }
         response = self.client.post(self.contacts_url, data)
         self.assertIn(response.status_code, [
-            status.HTTP_201_CREATED, 
+            status.HTTP_201_CREATED,
             status.HTTP_404_NOT_FOUND,
             status.HTTP_400_BAD_REQUEST
         ])
@@ -98,7 +95,7 @@ class TestContactsAPI(BaseAPITestCase):
         # First create a contact
         response = self.client.get(f'{self.contacts_url}1/')
         self.assertIn(response.status_code, [
-            status.HTTP_200_OK, 
+            status.HTTP_200_OK,
             status.HTTP_404_NOT_FOUND
         ])
     

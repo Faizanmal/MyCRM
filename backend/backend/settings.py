@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'reporting',
     # New Advanced Features
     'ai_insights',
+    'ai_chatbot',
     'multi_tenant',
     'sso_integration',
     'collaboration',
@@ -91,6 +92,7 @@ INSTALLED_APPS = [
     'email_tracking',
     'smart_scheduling',
     'ai_sales_assistant',
+    'gamification',
     'social_selling',
     'customer_success',
     # AI Workflow Automation Features

@@ -16,9 +16,7 @@
     "test:e2e:headed": "playwright test --headed",
     "type-check": "tsc --noEmit"
   },
-  "overrides": {
-
-  },
+  "overrides": {},
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
@@ -105,7 +103,7 @@
     "@types/react-virtualized": "^9.21.30",
     "@types/react-window": "^1.8.8",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
+    "eslint": "^10.2.0",
     "eslint-config-next": "^16.2.2",
     "eslint-formatter-compact": "^9.0.1",
     "eslint-formatter-unix": "^9.0.1",
@@ -121,6 +119,6 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }

@@ -8,12 +8,30 @@ const eslintConfig = defineConfig([
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
-      ".next/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    // Ignore generated and non-source assets
+    "node_modules/**",
+    "public/**",
+    "*.tsbuildinfo",
+    "tsconfig.tsbuildinfo",
+    "**/*.d.ts",
+    "e2e/**",
   ]),
   {
+    settings: {
+      react: {
+        version: "19.2.4",
+      },
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json",
+        },
+      },
+    },
     rules: {
       // TypeScript specific rules
       "@typescript-eslint/no-explicit-any": "error",
@@ -25,6 +43,11 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-empty-function": "warn",
+
+      // Import rules
+      // Disabled because the current eslint-plugin-import version is incompatible with ESLint 10.
+      "import/order": "off",
+      "import/no-unresolved": "off",
 
       // React specific rules
       "react-hooks/rules-of-hooks": "error",
@@ -58,13 +81,6 @@ const eslintConfig = defineConfig([
       "object-shorthand": "error",
       "prefer-arrow-callback": "error",
       "prefer-template": "error",
-
-      // Import rules
-      "import/no-unresolved": "warn", // Handled by TypeScript
-      "import/order": ["error", {
-        "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
-        "newlines-between": "always"
-      }],
 
       // Next.js specific rules
       "@next/next/no-html-link-for-pages": "error",

@@ -379,6 +379,22 @@ Need help with anything specific?"""
         """Suggest next actions for an entity"""
         suggestions = []
 
+        if not entity_type or not entity_id:
+            return [
+                {
+                    'action': 'Review key opportunities',
+                    'reason': 'Keep focus on deals closing soon'
+                },
+                {
+                    'action': 'Follow up on high-priority leads',
+                    'reason': 'Stay top of mind with your best prospects'
+                },
+                {
+                    'action': 'Check pending customer requests',
+                    'reason': 'Resolve issues quickly to maintain momentum'
+                },
+            ]
+
         if entity_type == 'lead':
             from lead_management.models import Lead
             try:

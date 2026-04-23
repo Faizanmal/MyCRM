@@ -1,3 +1,4 @@
+from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -91,6 +92,25 @@ class ChurnPredictionViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.get_serializer(predictions, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def statistics(self, request):
+        """Get churn prediction statistics"""
+        queryset = self.get_queryset()
+        total_predictions = queryset.count()
+        risk_counts = {item['risk_level']: item['count'] for item in queryset.values('risk_level').annotate(count=Count('id'))}
+        average_probability = queryset.aggregate(avg=Avg('churn_probability'))['avg'] or 0.0
+        last_prediction = queryset.order_by('-predicted_at').values_list('predicted_at', flat=True).first()
+
+        return Response({
+            'total_predictions': total_predictions,
+            'critical_risk': risk_counts.get('critical', 0),
+            'high_risk': risk_counts.get('high', 0),
+            'medium_risk': risk_counts.get('medium', 0),
+            'low_risk': risk_counts.get('low', 0),
+            'average_probability': average_probability,
+            'predictions_last_updated': last_prediction.isoformat() if last_prediction else None,
+        })
 
 
 class NextBestActionViewSet(viewsets.ModelViewSet):

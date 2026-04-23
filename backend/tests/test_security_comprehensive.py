@@ -14,12 +14,9 @@ Comprehensive test suite for security including:
 - Session security
 """
 
+
 import pytest
 from rest_framework import status
-from django.urls import reverse
-from unittest.mock import patch
-import time
-
 
 # =============================================================================
 # Authentication Security Tests

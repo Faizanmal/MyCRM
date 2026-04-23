@@ -470,7 +470,7 @@ class _GDPRComplianceScreenState extends State<GDPRComplianceScreen>
             ),
             const Divider(height: 24),
             _buildDetailRow('Created', _formatDate(request.createdAt)),
-            _buildDetailRow('Due Date', _formatDate(request.dueDate!)),
+            _buildDetailRow('Due Date', _formatDate(request.dueDate)),
             if (request.completedAt != null)
               _buildDetailRow('Completed', _formatDate(request.completedAt!)),
             if (request.status == 'pending') ...[

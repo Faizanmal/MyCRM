@@ -257,8 +257,8 @@ export default function ReportsPage() {
             <h2 className="text-lg font-semibold mb-4">Recent Reports</h2>
             {isLoading ? (
               <div className="space-y-4">
-                {[...Array(3)].map((_, _i) => (
-                  <Card key={stableKey(_)}>
+                {[...Array(3)].map((_, index) => (
+                  <Card key={stableKey(index)}>
                     <CardHeader>
                       <Skeleton className="h-6 w-1/2" />
                       <Skeleton className="h-4 w-3/4" />

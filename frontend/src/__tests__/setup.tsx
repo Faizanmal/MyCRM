@@ -4,10 +4,10 @@
  * Global test configuration and mocks
  */
 
-/* eslint-disable import/order */
+ 
 import React from 'react';
 import '@testing-library/jest-dom';
-/* eslint-enable import/order */
+ 
 
 // =============================================================================
 // Global Mocks

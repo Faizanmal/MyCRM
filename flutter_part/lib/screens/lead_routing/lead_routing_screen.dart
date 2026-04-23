@@ -438,7 +438,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
             ...[
             const SizedBox(height: 8),
             Text(
-              rule.description!,
+              rule.description,
               style: TextStyle(color: Colors.grey.shade600),
             ),
           ],
@@ -542,7 +542,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        assignment.leadCompany ?? 'No company',
+                        assignment.leadCompany,
                         style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                       ),
                     ],
@@ -599,7 +599,7 @@ class _LeadRoutingScreenState extends State<LeadRoutingScreen>
                 Text(
                   'Response: ${assignment.responseTime}m',
                   style: TextStyle(
-                    color: assignment.responseTime! <= 30 ? Colors.green : Colors.orange,
+                    color: assignment.responseTime <= 30 ? Colors.green : Colors.orange,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),

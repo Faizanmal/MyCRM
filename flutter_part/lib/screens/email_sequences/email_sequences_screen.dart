@@ -332,10 +332,6 @@ class _EmailSequencesScreenState extends State<EmailSequencesScreen>
     final totalSent = provider.sequences.fold<int>(
       0, (sum, s) => sum + s.sentCount,
     );
-    final avgOpenRate = provider.sequences.isEmpty
-        ? 0.0
-        : provider.sequences.map((s) => s.openRate).reduce((a, b) => a + b) /
-            provider.sequences.length;
 
     return Row(
       children: [

@@ -384,8 +384,8 @@ export default function ContactsPage() {
           {/* Contacts List */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(6)].map((_, _i) => (
-                <Card key={stableKey(_)}>
+              {[...Array(6)].map((_, index) => (
+                <Card key={stableKey(index)}>
                   <CardContent className="p-6">
                     <div className="flex items-start space-x-3 mb-4">
                       <Skeleton className="w-12 h-12 rounded-full" />
@@ -406,8 +406,8 @@ export default function ContactsPage() {
           ) : contacts.length > 0 ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {contacts.map((contact) => (
-                  <Card key={contact.id} className="hover:shadow-md transition-shadow">
+                {contacts.map((contact, index) => (
+                  <Card key={contact.id ?? `contact-${index}`} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center space-x-3">
@@ -540,7 +540,7 @@ export default function ContactsPage() {
 
         {/* Create Contact Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-125">
             <DialogHeader>
               <DialogTitle>Add New Contact</DialogTitle>
               <DialogDescription>

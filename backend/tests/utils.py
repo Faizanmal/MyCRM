@@ -4,15 +4,16 @@ MyCRM Backend - Test Utilities
 Shared utilities for pytest tests
 """
 
-import pytest
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
-from unittest.mock import Mock, patch
-from datetime import datetime, date, timedelta
-from decimal import Decimal
 import json
 import uuid
+from datetime import date, datetime, timedelta
+from decimal import Decimal
+from unittest.mock import Mock, patch
+
+import pytest
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
@@ -407,16 +408,16 @@ class QueryCounter:
         self.queries = []
     
     def __enter__(self):
-        from django.db import connection
         from django.conf import settings
+        from django.db import connection
         
         settings.DEBUG = True
         connection.queries_log.clear()
         return self
     
     def __exit__(self, *args):
-        from django.db import connection
         from django.conf import settings
+        from django.db import connection
         
         self.queries = list(connection.queries)
         settings.DEBUG = False

@@ -412,7 +412,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                   : ListView.separated(
                       controller: scrollController,
                       itemCount: _provider.conversations.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      separatorBuilder: (context, _) => const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final conversation = _provider.conversations[index];
                         return ListTile(

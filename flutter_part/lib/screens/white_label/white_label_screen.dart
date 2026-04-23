@@ -135,7 +135,7 @@ class _WhiteLabelScreenState extends State<WhiteLabelScreen>
                       child: Image.network(
                         config!.logoUrl!,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.business),
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.business),
                       ),
                     ),
                   )
@@ -360,7 +360,7 @@ class _WhiteLabelScreenState extends State<WhiteLabelScreen>
                           child: Image.network(
                             config!.logoUrl!,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.image, size: 40),
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 40),
                           ),
                         )
                       : const Icon(Icons.image, size: 40, color: Colors.grey),
@@ -405,7 +405,7 @@ class _WhiteLabelScreenState extends State<WhiteLabelScreen>
                           child: Image.network(
                             config!.faviconUrl!,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.web, size: 40),
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.web, size: 40),
                           ),
                         )
                       : const Icon(Icons.web, size: 40, color: Colors.grey),

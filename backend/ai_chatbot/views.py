@@ -5,7 +5,7 @@ API endpoints for conversational AI assistant
 
 import time
 
-from django.db import models
+from django.db import ProgrammingError, models
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -35,13 +35,19 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return ChatSession.objects.filter(user=self.request.user)
 
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except ProgrammingError:
+            return Response([])
+
     def get_serializer_class(self):
         if self.action == 'list':
             return ChatSessionListSerializer
         return ChatSessionDetailSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, last_message_at=timezone.now())
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
@@ -215,6 +221,12 @@ class QuickActionViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except ProgrammingError:
+            return Response([])
+
     @action(detail=True, methods=['post'])
     def execute(self, request, pk=None):
         """Execute a quick action"""
@@ -254,6 +266,12 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
             models.Q(created_by=self.request.user) |
             models.Q(created_by__isnull=True)
         )
+
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except ProgrammingError:
+            return Response([])
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -311,15 +329,25 @@ class SuggestNextActionsView(APIView):
     """Get AI-suggested next actions for an entity"""
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        entity_type = request.query_params.get('entity_type')
-        entity_id = request.query_params.get('entity_id')
+    def _get_params(self, request):
+        if request.method == 'POST':
+            data = request.data
+        else:
+            data = request.query_params
+        return data.get('entity_type'), data.get('entity_id')
 
-        if not entity_type or not entity_id:
-            return Response(
-                {"error": "entity_type and entity_id required"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    def get(self, request):
+        entity_type, entity_id = self._get_params(request)
+
+        chatbot = ChatbotService(request.user)
+        suggestions = chatbot.suggest_next_actions(entity_type, entity_id)
+
+        return Response({
+            'suggestions': suggestions
+        })
+
+    def post(self, request):
+        entity_type, entity_id = self._get_params(request)
 
         chatbot = ChatbotService(request.user)
         suggestions = chatbot.suggest_next_actions(entity_type, entity_id)

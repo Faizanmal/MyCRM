@@ -187,7 +187,7 @@ class _SocialInboxScreenState extends State<SocialInboxScreen>
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(message.authorAvatar!),
+                    backgroundImage: NetworkImage(message.authorAvatar),
                     child: null,
                   ),
                   const SizedBox(width: 12),

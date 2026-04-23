@@ -22,10 +22,48 @@ import { Badge } from '@/components/ui/badge';
 
 export default function IntegrationHubPage() {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
-  const [providers, setProviders] = useState<IntegrationProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'active' | 'available'>('active');
   const [syncing, setSyncing] = useState<Record<string, boolean>>({});
+
+  const availableProviders: IntegrationProvider[] = [
+    {
+      id: 'slack',
+      slug: 'slack',
+      name: 'Slack',
+      description: 'Connect Slack to sync messages, mentions, and alerts into your CRM.',
+      auth_type: 'oauth2',
+      is_active: true,
+      supported_features: ['Chat sync', 'Alerts', 'Mentions'],
+    },
+    {
+      id: 'google_calendar',
+      slug: 'google_calendar',
+      name: 'Google Calendar',
+      description: 'Sync events and meetings from Google Calendar into your CRM pipeline.',
+      auth_type: 'oauth2',
+      is_active: true,
+      supported_features: ['Event sync', 'Meeting reminders', 'Availability'],
+    },
+    {
+      id: 'salesforce',
+      slug: 'salesforce',
+      name: 'Salesforce',
+      description: 'Connect Salesforce to bring your sales data into the CRM.',
+      auth_type: 'oauth2',
+      is_active: true,
+      supported_features: ['Data sync', 'Lead import', 'Opportunity tracking'],
+    },
+    {
+      id: 'hubspot',
+      slug: 'hubspot',
+      name: 'HubSpot',
+      description: 'Sync contacts, deals, and campaigns from HubSpot.',
+      auth_type: 'oauth2',
+      is_active: true,
+      supported_features: ['Contacts', 'Deals', 'Email tracking'],
+    },
+  ];
 
   useEffect(() => {
     loadData();
@@ -33,14 +71,11 @@ export default function IntegrationHubPage() {
 
   const loadData = async () => {
     try {
-      const [integrationsRes, providersRes] = await Promise.all([
-        integrationHubAPI.getIntegrations(),
-        integrationHubAPI.getProviders(),
-      ]);
+      const integrationsRes = await integrationHubAPI.getIntegrations();
       setIntegrations(integrationsRes.data.results || integrationsRes.data);
-      setProviders(providersRes.data.results || providersRes.data);
     } catch (error) {
       console.error('Failed to load integrations:', error);
+      setIntegrations([]);
     } finally {
       setLoading(false);
     }
@@ -48,9 +83,10 @@ export default function IntegrationHubPage() {
 
   const handleConnect = async (providerId: string) => {
     try {
+      const providerInfo = availableProviders.find(p => p.id === providerId);
       const response = await integrationHubAPI.createIntegration({
         provider: providerId,
-        name: `${providers.find(p => p.id === providerId)?.name} Integration`,
+        name: `${providerInfo?.name || providerId} Integration`,
       });
       
       if (response.data.auth_url) {
@@ -175,7 +211,7 @@ export default function IntegrationHubPage() {
                   <div className="flex items-center gap-2">
                     <ChartBarIcon className="w-5 h-5 text-green-600" />
                     <div>
-                      <div className="text-2xl font-bold">{providers.length}</div>
+                      <div className="text-2xl font-bold">{availableProviders.length}</div>
                       <div className="text-xs text-gray-600">Available</div>
                     </div>
                   </div>
@@ -205,7 +241,7 @@ export default function IntegrationHubPage() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                Available Integrations ({providers.length})
+                Available Integrations ({availableProviders.length})
               </button>
             </nav>
           </div>
@@ -226,84 +262,101 @@ export default function IntegrationHubPage() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {integrations.map((integration) => (
-                    <Card key={integration.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl font-bold">
-                              {integration.provider.name.charAt(0)}
+                  {integrations.map((integration) => {
+                    const providerId =
+                      typeof integration.provider === 'string'
+                        ? integration.provider
+                        : integration.provider.id;
+                    const provider =
+                      availableProviders.find((p) => p.id === providerId) || {
+                        id: providerId,
+                        slug: providerId,
+                        name: providerId,
+                        description: '',
+                        auth_type: 'oauth2',
+                        is_active: true,
+                        supported_features: [],
+                      };
+
+                    return (
+                      <Card key={integration.id} className="hover:shadow-lg transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white text-xl font-bold">
+                                {provider.name.charAt(0)}
+                              </div>
+                              <div>
+                                <CardTitle className="text-lg">{integration.name}</CardTitle>
+                                <CardDescription className="text-sm">
+                                  {provider.name}
+                                </CardDescription>
+                              </div>
                             </div>
-                            <div>
-                              <CardTitle className="text-lg">{integration.name}</CardTitle>
-                              <CardDescription className="text-sm">
-                                {integration.provider.name}
-                              </CardDescription>
+                            {getStatusIcon(integration.status)}
+                          </div>
+                          <Badge className={getStatusColor(integration.status)}>
+                            {integration.status}
+                          </Badge>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Last Sync:</span>
+                              <span className="font-medium">
+                                {integration.last_sync_at
+                                  ? new Date(integration.last_sync_at).toLocaleDateString()
+                                  : 'Never'}
+                              </span>
                             </div>
-                          </div>
-                          {getStatusIcon(integration.status)}
-                        </div>
-                        <Badge className={getStatusColor(integration.status)}>
-                          {integration.status}
-                        </Badge>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Last Sync:</span>
-                            <span className="font-medium">
-                              {integration.last_sync_at
-                                ? new Date(integration.last_sync_at).toLocaleDateString()
-                                : 'Never'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Next Sync:</span>
-                            <span className="font-medium">
-                              {integration.next_sync_at
-                                ? new Date(integration.next_sync_at).toLocaleDateString()
-                                : 'Manual'}
-                            </span>
-                          </div>
-                          {integration.error_message && (
-                            <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                              {integration.error_message}
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Next Sync:</span>
+                              <span className="font-medium">
+                                {integration.next_sync_at
+                                  ? new Date(integration.next_sync_at).toLocaleDateString()
+                                  : 'Manual'}
+                              </span>
                             </div>
-                          )}
-                          <div className="flex gap-2 pt-2">
+                            {integration.error_message && (
+                              <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                                {integration.error_message}
+                              </div>
+                            )}
+                            <div className="flex gap-2 pt-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => handleTest(integration.id)}
+                              >
+                                Test
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => handleSync(integration.id)}
+                                disabled={syncing[integration.id]}
+                              >
+                                {syncing[integration.id] ? (
+                                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  'Sync'
+                                )}
+                              </Button>
+                            </div>
                             <Button
-                              variant="outline"
+                              variant="destructive"
                               size="sm"
-                              className="flex-1"
-                              onClick={() => handleTest(integration.id)}
+                              className="w-full"
+                              onClick={() => handleDisconnect(integration.id)}
                             >
-                              Test
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => handleSync(integration.id)}
-                              disabled={syncing[integration.id]}
-                            >
-                              {syncing[integration.id] ? (
-                                <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                              ) : (
-                                'Sync'
-                              )}
+                              Disconnect
                             </Button>
                           </div>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="w-full"
-                            onClick={() => handleDisconnect(integration.id)}
-                          >
-                            Disconnect
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -312,8 +365,10 @@ export default function IntegrationHubPage() {
           {/* Available Integrations Tab */}
           {activeTab === 'available' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {providers.filter(p => p.is_active).map((provider) => {
-                const isConnected = integrations.some(i => i.provider.id === provider.id);
+              {availableProviders.filter(p => p.is_active).map((provider) => {
+                const isConnected = integrations.some((i) =>
+                  typeof i.provider === 'string' ? i.provider === provider.id : i.provider.id === provider.id
+                );
                 return (
                   <Card key={provider.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader>

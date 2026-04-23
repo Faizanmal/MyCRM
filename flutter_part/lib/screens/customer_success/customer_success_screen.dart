@@ -477,7 +477,7 @@ class _CustomerSuccessScreenState extends State<CustomerSuccessScreen>
   }
 
   Widget _buildHealthDistribution(CustomerSuccessProvider provider) {
-    final accounts = provider.accounts.where((a) => a != null).toList();
+    final accounts = provider.accounts.toList();
     final healthy = accounts.where((a) => a.healthScore >= 80).length;
     final warning = accounts.where((a) => a.healthScore >= 60 && a.healthScore < 80).length;
     final atRisk = accounts.where((a) => a.healthScore >= 40 && a.healthScore < 60).length;

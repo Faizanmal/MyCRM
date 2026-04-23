@@ -14,7 +14,6 @@ Additional comprehensive tests for contact management:
 import pytest
 from rest_framework import status
 
-
 # =============================================================================
 # Contact Groups Tests
 # =============================================================================

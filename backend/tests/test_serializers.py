@@ -4,13 +4,14 @@ MyCRM Backend - Serializer Tests
 Tests for Django REST Framework serializers
 """
 
+from datetime import date, timedelta
+from decimal import Decimal
+
 import pytest
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from datetime import datetime, date, timedelta
-from decimal import Decimal
 
 User = get_user_model()
 

@@ -12,11 +12,11 @@ Comprehensive test suite for task management including:
 - Dashboard statistics
 """
 
-import pytest
-from rest_framework import status
-from datetime import datetime, timedelta
-from django.utils import timezone
+from datetime import timedelta
 
+import pytest
+from django.utils import timezone
+from rest_framework import status
 
 # =============================================================================
 # Task CRUD Tests

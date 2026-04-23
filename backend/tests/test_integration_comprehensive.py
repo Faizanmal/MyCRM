@@ -11,12 +11,11 @@ Comprehensive integration test suite for:
 - End-to-end API flows
 """
 
-import pytest
-from rest_framework import status
-from decimal import Decimal
 from datetime import date, timedelta
-from django.utils import timezone
 
+import pytest
+from django.utils import timezone
+from rest_framework import status
 
 # =============================================================================
 # Lead to Opportunity Conversion Flow

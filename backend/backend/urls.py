@@ -53,6 +53,7 @@ urlpatterns = [
     # New Advanced Features
     path('api/v1/integration-hub/', include('integration_hub.urls')),
     path('api/v1/ai-insights/', include('ai_insights.urls')),
+    path('api/v1/ai-chatbot/', include('ai_chatbot.urls')),
     path('api/v1/multi-tenant/', include('multi_tenant.urls')),
     path('api/v1/sso/', include('sso_integration.urls')),
     path('api/v1/collaboration/', include('collaboration.urls')),
@@ -63,6 +64,7 @@ urlpatterns = [
     path('api/v1/email-tracking/', include('email_tracking.urls')),
     path('api/v1/scheduling/', include('smart_scheduling.urls')),
     path('api/v1/ai-assistant/', include('ai_sales_assistant.urls')),
+    path('api/v1/gamification/', include('gamification.urls')),
     path('api/v1/social-selling/', include('social_selling.urls')),
     path('api/v1/customer-success/', include('customer_success.urls')),
 

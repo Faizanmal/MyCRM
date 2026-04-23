@@ -4,7 +4,7 @@ AI Sales Assistant Views
 
 import contextlib
 
-from django.db import models
+from django.db import ProgrammingError, models
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -44,6 +44,12 @@ class AIEmailDraftViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return AIEmailDraft.objects.filter(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except ProgrammingError:
+            return Response([])
 
     @action(detail=False, methods=['post'])
     def generate(self, request):
@@ -136,6 +142,12 @@ class SalesCoachAdviceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return SalesCoachAdvice.objects.filter(user=self.request.user)
 
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except ProgrammingError:
+            return Response([])
+
     @action(detail=False, methods=['post'])
     def analyze_deal(self, request):
         """Get coaching advice for a specific deal"""
@@ -214,6 +226,12 @@ class ObjectionResponseViewSet(viewsets.ModelViewSet):
         return ObjectionResponse.objects.filter(
             models.Q(is_system=True) | models.Q(created_by=self.request.user)
         )
+
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except ProgrammingError:
+            return Response([])
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user, is_system=False)

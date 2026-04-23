@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Bot, 
   Send, 
@@ -26,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { aiChatbotAPI } from '@/lib/api';
 import { stableKey } from '@/lib/stableKey';
 
@@ -40,7 +42,7 @@ interface ChatMessage {
 
 interface ChatSession {
   id: string;
-  name: string;
+  title: string;
   created_at: string;
   updated_at: string;
   message_count: number;
@@ -60,7 +62,24 @@ interface EmailTemplate {
   body: string;
 }
 
+type ApiSession = Partial<ChatSession> & { name?: string };
+type ApiMessage = Partial<ChatMessage> & { content?: unknown };
+
+const normalizeContent = (content: unknown) => {
+  if (typeof content === 'string') return content;
+  if (content === null || typeof content === 'undefined') return '';
+  if (typeof content === 'object') {
+    try {
+      return JSON.stringify(content, null, 2);
+    } catch {
+      return String(content);
+    }
+  }
+  return String(content);
+};
+
 export default function AIChatbotPage() {
+  const { isAuthenticated } = useAuth();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -72,11 +91,13 @@ export default function AIChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     loadSessions();
     loadQuickActions();
     loadEmailTemplates();
     loadSuggestions();
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     scrollToBottom();
@@ -89,14 +110,25 @@ export default function AIChatbotPage() {
   const loadSessions = async () => {
     try {
       const data = await aiChatbotAPI.getSessions();
-      setSessions(data.results || data || []);
+      const apiSessions = (data as { results?: unknown[] })?.results ?? (data as unknown[] ?? []);
+      const sessions = apiSessions.map((session): ChatSession => {
+        const normalized = session as ApiSession;
+        return {
+          id: String(normalized.id ?? ''),
+          title: normalized.title || normalized.name || 'Untitled Conversation',
+          created_at: String(normalized.created_at ?? new Date().toISOString()),
+          updated_at: String(normalized.updated_at ?? new Date().toISOString()),
+          message_count: Number(normalized.message_count ?? 0),
+        };
+      });
+      setSessions(sessions);
     } catch (error) {
       console.error('Failed to load sessions:', error);
       // Set demo data
       setSessions([
-        { id: '1', name: 'Sales Strategy Discussion', created_at: '2026-01-12T10:00:00Z', updated_at: '2026-01-12T14:30:00Z', message_count: 12 },
-        { id: '2', name: 'Lead Analysis', created_at: '2026-01-11T09:00:00Z', updated_at: '2026-01-11T16:00:00Z', message_count: 8 },
-        { id: '3', name: 'Email Drafts', created_at: '2026-01-10T11:00:00Z', updated_at: '2026-01-10T15:00:00Z', message_count: 5 },
+        { id: '1', title: 'Sales Strategy Discussion', created_at: '2026-01-12T10:00:00Z', updated_at: '2026-01-12T14:30:00Z', message_count: 12 },
+        { id: '2', title: 'Lead Analysis', created_at: '2026-01-11T09:00:00Z', updated_at: '2026-01-11T16:00:00Z', message_count: 8 },
+        { id: '3', title: 'Email Drafts', created_at: '2026-01-10T11:00:00Z', updated_at: '2026-01-10T15:00:00Z', message_count: 5 },
       ]);
     }
   };
@@ -133,7 +165,17 @@ export default function AIChatbotPage() {
   const loadSuggestions = async () => {
     try {
       const data = await aiChatbotAPI.suggestActions();
-      setSuggestions(data.suggestions || []);
+      const suggestions = (data.suggestions || []).map((suggestion): string => {
+        if (typeof suggestion === 'string') return suggestion;
+        if (suggestion && typeof suggestion === 'object') {
+          const item = suggestion as { action?: string; reason?: string };
+          return item.action && item.reason
+            ? `${item.action}: ${item.reason}`
+            : JSON.stringify(suggestion);
+        }
+        return String(suggestion);
+      });
+      setSuggestions(suggestions);
     } catch (error) {
       console.error('Failed to load suggestions:', error);
       setSuggestions([
@@ -148,14 +190,18 @@ export default function AIChatbotPage() {
   const createNewSession = async () => {
     try {
       const newSession = await aiChatbotAPI.createSession('New Conversation');
-      setSessions([newSession, ...sessions]);
-      setActiveSession(newSession);
+      const normalizedSession = {
+        ...newSession,
+        title: newSession.title || newSession.name || 'New Conversation',
+      };
+      setSessions([normalizedSession, ...sessions]);
+      setActiveSession(normalizedSession);
       setMessages([]);
     } catch (error) {
       console.error('Failed to create session:', error);
       const demoSession: ChatSession = {
         id: Date.now().toString(),
-        name: 'New Conversation',
+        title: 'New Conversation',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         message_count: 0,
@@ -170,7 +216,17 @@ export default function AIChatbotPage() {
     setActiveSession(session);
     try {
       const data = await aiChatbotAPI.getSession(session.id);
-      setMessages(data.messages || []);
+      const apiMessages = (data as { messages?: unknown[] })?.messages ?? [];
+      setMessages(apiMessages.map((message): ChatMessage => {
+        const normalized = message as ApiMessage;
+        return {
+          id: String(normalized.id ?? ''),
+          role: normalized.role === 'assistant' ? 'assistant' : 'user',
+          content: normalizeContent(normalized.content),
+          timestamp: String(normalized.timestamp ?? new Date().toISOString()),
+          feedback: normalized.feedback,
+        };
+      }));
     } catch (error) {
       console.error('Failed to load session messages:', error);
       // Demo messages
@@ -213,7 +269,7 @@ export default function AIChatbotPage() {
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.message || response.content,
+        content: normalizeContent(response.message ?? response.content),
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, assistantMessage]);
@@ -280,9 +336,10 @@ export default function AIChatbotPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] gap-4 p-4">
-      {/* Sidebar - Sessions */}
-      <Card className="w-80 flex flex-col">
+    <ProtectedRoute>
+      <div className="flex h-[calc(100vh-4rem)] gap-4 p-4">
+        {/* Sidebar - Sessions */}
+        <Card className="w-80 flex flex-col">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -311,7 +368,7 @@ export default function AIChatbotPage() {
                   tabIndex={0}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{session.name}</p>
+                    <p className="font-medium truncate">{session.title}</p>
                     <p className="text-xs opacity-70">
                       {session.message_count} messages
                     </p>
@@ -342,7 +399,7 @@ export default function AIChatbotPage() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-yellow-500" />
-                  {activeSession?.name || 'Select a conversation'}
+                  {activeSession?.title || 'Select a conversation'}
                 </CardTitle>
                 <CardDescription>
                   Powered by AI to help you work smarter
@@ -534,6 +591,7 @@ export default function AIChatbotPage() {
         </Tabs>
       </Card>
     </div>
+    </ProtectedRoute>
   );
 }
 

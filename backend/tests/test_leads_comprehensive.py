@@ -12,10 +12,10 @@ Comprehensive test suite for lead management including:
 - Bulk operations
 """
 
-import pytest
-from rest_framework import status
 from decimal import Decimal
 
+import pytest
+from rest_framework import status
 
 # =============================================================================
 # Lead CRUD Tests

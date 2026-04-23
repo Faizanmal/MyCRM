@@ -30,7 +30,7 @@ class ChatSession(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_message_at = models.DateTimeField(blank=True)
+    last_message_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'ai_chatbot_sessions'

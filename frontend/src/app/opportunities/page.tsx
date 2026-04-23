@@ -409,8 +409,8 @@ export default function OpportunitiesPage() {
           {/* Opportunities List */}
           {isLoading ? (
             <div className="space-y-4">
-              {[...Array(5)].map((_, _i) => (
-                <Card key={stableKey(_)}>
+              {[...Array(5)].map((_, i) => (
+                <Card key={stableKey(i)}>
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       <div className="flex-1 space-y-3">
@@ -427,7 +427,7 @@ export default function OpportunitiesPage() {
           ) : opportunities.length > 0 ? (
             <>
               <div className="space-y-4">
-                {opportunities.map((opp) => {
+                {opportunities.map((opp, index) => {
                   const stage = stages.find(s => s.id === opp.stage || s.id === opp.stage?.replace('-', '_'));
                   const closeDate = getOpportunityCloseDate(opp);
                   const today = new Date();
@@ -437,7 +437,7 @@ export default function OpportunitiesPage() {
                   const oppValue = getOpportunityValue(opp);
                   
                   return (
-                    <Card key={opp.id} className="hover:shadow-md transition-shadow">
+                    <Card key={opp.id || `opportunity-${index}`} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-6">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                           <div className="flex-1 space-y-3">
