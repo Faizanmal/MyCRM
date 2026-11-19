@@ -100,6 +100,7 @@ ENV/
 env.bak/
 venv.bak/
 .venv/
+.venv312/
 
 # Spyder project settings
 .spyderproject
@@ -204,6 +205,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 pnpm-debug.log*
+*.txt
 
 # === Certificates & Keys ===
 *.pem

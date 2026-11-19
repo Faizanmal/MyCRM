@@ -179,7 +179,7 @@ class MetricsCollector:
     def _init_prometheus(self):
         """Initialize Prometheus metrics"""
         try:
-            from prometheus_client import REGISTRY, Counter, Gauge, Histogram
+            from prometheus_client import Counter, Gauge, Histogram
 
             self._prom_metrics = {}
 
@@ -811,6 +811,28 @@ def count(metric_name: str, labels: dict[str, str] | None = None):
 
         return wrapper
     return decorator
+
+
+# Backward-compatible aliases exported by enterprise.__init__
+PrometheusMetrics = MetricsCollector
+DistributedTracer = TracingManager
+BusinessMetrics = MetricsCollector
+
+
+def track_metric(metric_name: str, value: float = 1, labels: dict[str, str] | None = None):
+    """Compatibility helper for legacy metric tracking calls."""
+    collector = MetricsCollector()
+    metric_def = collector.METRICS.get(metric_name)
+
+    if metric_def is None:
+        return
+
+    if metric_def.metric_type == MetricType.COUNTER:
+        collector.increment(metric_name, int(value), labels)
+    elif metric_def.metric_type == MetricType.GAUGE:
+        collector.gauge(metric_name, value, labels)
+    elif metric_def.metric_type == MetricType.HISTOGRAM:
+        collector.histogram(metric_name, value, labels)
 
 
 def setup_observability():

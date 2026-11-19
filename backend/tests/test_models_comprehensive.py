@@ -155,15 +155,11 @@ class TestContactModel(TestCase):
     
     def test_contact_email_validation(self):
         """Test email validation"""
-        try:
-            from contacts.models import Contact
-            contact = self.create_contact()
-            contact.email = 'invalid-email'
-            
-            with self.assertRaises(ValidationError):
-                contact.full_clean()
-        except ImportError:
-            pytest.skip("Contact model not available")
+        contact = self.create_contact()
+        contact.email = 'invalid-email'
+
+        with self.assertRaises(ValidationError):
+            contact.full_clean()
     
     def test_contact_phone_format(self):
         """Test phone number format"""
@@ -225,19 +221,15 @@ class TestLeadModel(TestCase):
     
     def test_lead_status_choices(self):
         """Test lead status field choices"""
-        try:
-            from leads.models import Lead
-            valid_statuses = ['new', 'contacted', 'qualified', 'converted', 'lost']
-            
-            for status in valid_statuses:
-                lead = self.create_lead(
-                    name=f'Lead {status}',
-                    email=f'{status}@example.com',
-                    status=status
-                )
-                self.assertEqual(lead.status, status)
-        except ImportError:
-            pytest.skip("Lead model not available")
+        valid_statuses = ['new', 'contacted', 'qualified', 'converted', 'lost']
+
+        for status in valid_statuses:
+            lead = self.create_lead(
+                name=f'Lead {status}',
+                email=f'{status}@example.com',
+                status=status
+            )
+            self.assertEqual(lead.status, status)
     
     def test_lead_scoring(self):
         """Test lead scoring field"""
@@ -484,14 +476,10 @@ class TestOrganizationModel(TestCase):
     
     def test_organization_slug_unique(self):
         """Test organization slug is unique"""
-        try:
-            from multi_tenant.models import Organization
-            self.create_organization(slug='unique-slug')
-            
-            with self.assertRaises(IntegrityError):
-                self.create_organization(slug='unique-slug', name='Another Org')
-        except ImportError:
-            pytest.skip("Organization model not available")
+        self.create_organization(slug='unique-slug')
+
+        with self.assertRaises(IntegrityError):
+            self.create_organization(slug='unique-slug', name='Another Org')
     
     def test_organization_str_representation(self):
         """Test organization string representation"""
@@ -721,7 +709,6 @@ class TestTagModel(TestCase):
     def test_tag_unique_name(self):
         """Test tag name uniqueness"""
         try:
-            from core.models import Tag
             self.create_tag(name='Unique Tag')
             
             with self.assertRaises(IntegrityError):

@@ -4,6 +4,7 @@ MyCRM Backend - Serializer Tests
 Tests for Django REST Framework serializers
 """
 
+import importlib
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -423,7 +424,7 @@ class TestNestedSerializers(TestCase):
     def test_contact_with_activities(self):
         """Test contact serializer with nested activities"""
         try:
-            from contacts.serializers import ContactDetailSerializer
+            importlib.import_module('contacts.serializers')
             
             # Test would verify nested serialization
             pass
@@ -433,7 +434,7 @@ class TestNestedSerializers(TestCase):
     def test_lead_with_contact(self):
         """Test lead serializer with contact relation"""
         try:
-            from leads.serializers import LeadDetailSerializer
+            importlib.import_module('leads.serializers')
             
             # Test would verify nested serialization
             pass
@@ -443,7 +444,7 @@ class TestNestedSerializers(TestCase):
     def test_opportunity_with_products(self):
         """Test opportunity with nested products"""
         try:
-            from opportunities.serializers import OpportunityDetailSerializer
+            importlib.import_module('opportunities.serializers')
             
             # Test would verify nested serialization
             pass

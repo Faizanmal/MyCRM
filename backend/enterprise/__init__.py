@@ -24,17 +24,18 @@ __author__ = 'MyCRM Enterprise Team'
 # Lazy imports to avoid circular dependencies
 def __getattr__(name):
     """Lazy load enterprise components."""
-
     # Vault Manager - Secrets Management
     if name in ('VaultClient', 'VaultConfig', 'SecretNotFoundError', 'VaultManager'):
-        if name == 'VaultManager':
-            return VaultClient
+        from .vault_manager import VaultClient, VaultConfig, VaultError, VaultManager
+        if name == 'SecretNotFoundError':
+            return VaultError
         return locals()[name]
 
     # Zero Trust Security
     if name in ('ZeroTrustMiddleware', 'DeviceTrustManager', 'ContinuousAuthenticator',
                 'TrustLevel', 'zero_trust_required', 'ZeroTrustPolicy'):
         from .zero_trust import (
+            ContinuousAuthenticator,
             DeviceTrustManager,
             ZeroTrustMiddleware,
             ZeroTrustPolicy,
@@ -44,8 +45,6 @@ def __getattr__(name):
             return ZeroTrustPolicy
         if name == 'zero_trust_required':
             return require_zero_trust
-        if name == 'ZeroTrustPolicy':
-            return ZeroTrustPolicy
         return locals()[name]
 
     # Observability
@@ -53,9 +52,11 @@ def __getattr__(name):
                 'setup_observability', 'trace', 'track_metric',
                 'MetricsCollector', 'TracingManager'):
         from .observability import (
+            BusinessMetrics,
             DistributedTracer,
             PrometheusMetrics,
             setup_observability,
+            track_metric,
             trace,
         )
         if name == 'MetricsCollector':
@@ -67,12 +68,8 @@ def __getattr__(name):
     # MLOps
     if name in ('ModelRegistry', 'FeatureStore', 'ABTestManager',
                 'ModelVersion', 'Experiment', 'MLOpsManager'):
-        from .mlops import (
-            FeatureStore,
-            ModelRegistry,
-            ModelVersion,
-        )
-        if name == 'MLOpsManager':
+        from .mlops import FeatureStore, ModelRegistry, ModelVersion
+        if name in ('ABTestManager', 'Experiment', 'MLOpsManager'):
             return ModelRegistry
         return locals()[name]
 
@@ -80,18 +77,16 @@ def __getattr__(name):
     if name in ('ComplianceChecker', 'EvidenceCollector', 'ComplianceReporter',
                 'ComplianceStatus', 'ComplianceFramework',
                 'ComplianceEngine', 'AuditAutomation'):
-        from .compliance import (
-            ComplianceChecker,
-            EvidenceCollector,
-        )
-        if name == 'ComplianceEngine':
-            return ComplianceChecker
-        if name == 'AuditAutomation':
-            return EvidenceCollector
+        from .compliance import ComplianceEngine, ComplianceFramework, ControlStatus
+        if name in ('ComplianceChecker', 'EvidenceCollector', 'ComplianceReporter', 'AuditAutomation'):
+            return ComplianceEngine
+        if name == 'ComplianceStatus':
+            return ControlStatus
         return locals()[name]
 
     # AI Services
     if name in ('AIAssistant', 'AIConfig', 'ConversationContext'):
+        from .ai_services import AIAssistant, AIConfig, ConversationContext
         return locals()[name]
 
     # Caching
@@ -124,20 +119,8 @@ def __getattr__(name):
                 'QueryAnalyzer', 'SlowQueryLogger', 'PartitionManager',
                 'DatabaseHealthMonitor', 'QueryOptimizer', 'use_primary',
                 'log_slow_queries', 'query_timer'):
-        from .database import (
-            ConnectionPoolManager,
-            DatabaseHealthMonitor,
-            PartitionManager,
-            QueryAnalyzer,
-            QueryOptimizer,
-            ReadReplicaRouter,
-            ReplicaContext,
-            SlowQueryLogger,
-            log_slow_queries,
-            query_timer,
-            use_primary,
-        )
-        return locals()[name]
+        from . import database as db
+        return getattr(db, name)
 
     # Health Checks
     if name in ('HealthCheckRegistry', 'HealthChecker', 'HealthStatus',
@@ -145,23 +128,8 @@ def __getattr__(name):
                 'RedisHealthChecker', 'CeleryHealthChecker', 'DiskHealthChecker',
                 'MemoryHealthChecker', 'ExternalServiceHealthChecker',
                 'setup_default_health_checks', 'get_health_urls', 'StartupView'):
-        from .health import (
-            AggregatedHealth,
-            CeleryHealthChecker,
-            DatabaseHealthChecker,
-            DiskHealthChecker,
-            ExternalServiceHealthChecker,
-            HealthChecker,
-            HealthCheckRegistry,
-            HealthCheckResult,
-            HealthStatus,
-            MemoryHealthChecker,
-            RedisHealthChecker,
-            StartupView,
-            get_health_urls,
-            setup_default_health_checks,
-        )
-        return locals()[name]
+        from . import health as health_module
+        return getattr(health_module, name)
 
     raise AttributeError(f"module 'enterprise' has no attribute '{name}'")
 
@@ -279,6 +247,7 @@ def setup_enterprise(settings_module=None):
 
     try:
         # Setup observability
+        from .observability import setup_observability
         setup_observability()
         logger.info("Enterprise observability initialized")
 

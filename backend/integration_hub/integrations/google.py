@@ -1,9 +1,12 @@
+import logging
 from typing import Any
 
 import requests
 from django.conf import settings
 
 from .base import BaseIntegrationClient
+
+logger = logging.getLogger(__name__)
 
 
 class GoogleWorkspaceClient(BaseIntegrationClient):
@@ -114,6 +117,7 @@ class GoogleWorkspaceClient(BaseIntegrationClient):
                 self.post('people/v1/people:createContact', contact_data)
                 synced += 1
             except Exception:
+                logger.exception("Failed to sync contact to Google", extra={'contact': contact})
                 continue
 
         return {'synced': synced}

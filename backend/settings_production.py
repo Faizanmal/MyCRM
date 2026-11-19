@@ -223,22 +223,34 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 
 # 12. ALLOWED HOSTS (Production)
+# Apex faizanmalik.me is the portfolio site — CRM is subdomain-only
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'your-domain.com',
-    'www.your-domain.com',
+    h.strip()
+    for h in os.getenv(
+        'ALLOWED_HOSTS',
+        'mycrm.faizanmalik.me,localhost,127.0.0.1',
+    ).split(',')
+    if h.strip()
 ]
 
 # 13. CORS SETTINGS
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://your-domain.com",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001"
+    o.strip()
+    for o in os.getenv(
+        'CORS_ALLOWED_ORIGINS',
+        'https://mycrm.faizanmalik.me',
+    ).split(',')
+    if o.strip()
 ]
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.getenv(
+        'CSRF_TRUSTED_ORIGINS',
+        'https://mycrm.faizanmalik.me',
+    ).split(',')
+    if o.strip()
+]
 
 # 14. QUERY OPTIMIZATION
 # Enable persistent database connections

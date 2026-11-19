@@ -20,7 +20,7 @@ import contextlib
 import hashlib
 import logging
 import pickle
-import random
+import secrets
 import threading
 import time
 import zlib
@@ -531,7 +531,7 @@ class CacheStampedeProtection:
             # XFetch: Probabilistic early recomputation
             if expires_at:
                 time_left = expires_at - time.time()
-                delta = self.beta * recompute_window * random.random()
+                delta = self.beta * recompute_window * (secrets.randbelow(1_000_000) / 1_000_000)
 
                 # Early recompute if within window
                 if time_left < delta:
@@ -844,7 +844,7 @@ def cached(
                 # Default key builder from args
                 key_parts = [str(arg) for arg in args]
                 key_parts.extend(f"{k}={v}" for k, v in sorted(kwargs.items()))
-                key_suffix = hashlib.md5(':'.join(key_parts).encode()).hexdigest()
+                key_suffix = hashlib.sha256(':'.join(key_parts).encode()).hexdigest()
 
             cache_key = f"{key_prefix}:{key_suffix}"
 

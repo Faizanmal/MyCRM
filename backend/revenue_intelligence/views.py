@@ -3,6 +3,7 @@ Revenue Intelligence Views
 Premium analytics APIs
 """
 
+import logging
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -34,6 +35,8 @@ from .serializers import (
     RevenueForecastSerializer,
     RevenueTargetSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class RevenueTargetViewSet(viewsets.ModelViewSet):
@@ -150,6 +153,7 @@ class DealScoreViewSet(viewsets.ReadOnlyModelViewSet):
                 score = engine.score_deal(opp)
                 scores.append(score)
             except Exception:
+                logger.exception("Failed to score opportunity", extra={'opportunity_id': opp.id})
                 continue  # Skip failed scores
 
         serializer = DealScoreSummarySerializer(scores, many=True)

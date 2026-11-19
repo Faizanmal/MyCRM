@@ -413,7 +413,7 @@ class AuditLogService:
             user_email=user.email if user else 'system@crm.local',
             user_role=getattr(user, 'role', 'unknown') if user else 'system',
             session=session,
-            ip_address=ip_address or '0.0.0.0',
+            ip_address=ip_address or 'unknown',
             action=action,
             action_category=action_category,
             severity=severity,

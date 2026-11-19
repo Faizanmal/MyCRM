@@ -4,6 +4,7 @@ Business logic for social selling features
 """
 
 import os
+import secrets
 from datetime import timedelta
 
 from django.conf import settings
@@ -118,8 +119,7 @@ class SocialSellingService:
             "Couldn't agree more. What's your take on how this will evolve over the next year?",
             "This is valuable perspective. Have you seen this play out differently in specific industries?",
         ]
-        import random
-        return random.choice(templates)
+        return secrets.choice(templates)
 
     def _generate_connection_request(self, profile):
         """Generate connection request message"""
@@ -131,8 +131,7 @@ class SocialSellingService:
             f"Hi {name}, We share mutual interests in this space and I'd value having you in my network. Looking forward to connecting!",
             f"Hi {name}, Your recent post caught my attention. I'd love to connect and exchange ideas.",
         ]
-        import random
-        return random.choice(templates)
+        return secrets.choice(templates)
 
     def _generate_message(self, profile):
         """Generate personalized DM"""
