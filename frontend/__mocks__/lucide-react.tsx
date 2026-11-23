@@ -16,8 +16,11 @@ const createIcon = (name: string) => {
 // Export commonly used icons
 export const AlertTriangle = createIcon('AlertTriangle');
 export const ArrowDown = createIcon('ArrowDown');
+export const ArrowDownRight = createIcon('ArrowDownRight');
 export const ArrowUp = createIcon('ArrowUp');
+export const ArrowUpRight = createIcon('ArrowUpRight');
 export const BarChart3 = createIcon('BarChart3');
+export const PieChart = createIcon('PieChart');
 export const Bell = createIcon('Bell');
 export const Building2 = createIcon('Building2');
 export const Calendar = createIcon('Calendar');

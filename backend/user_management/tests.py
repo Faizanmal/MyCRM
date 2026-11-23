@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from .models import AuditLog, Permission, UserProfile
+from .models import AuditLog, Permission, UserProfile, User as CRMUser
 
 User = get_user_model()
 
@@ -21,7 +21,7 @@ class UserModelTest(TestCase):
 
     def test_create_user(self):
         """Test creating a new user"""
-        user = User.objects.create_user(**self.user_data)
+        user = CRMUser.objects.create_user(**self.user_data)
         self.assertEqual(user.username, 'testuser')
         self.assertEqual(user.email, 'test@example.com')
         self.assertEqual(user.role, 'sales_rep')
@@ -29,19 +29,19 @@ class UserModelTest(TestCase):
 
     def test_user_str_method(self):
         """Test user string representation"""
-        user = User.objects.create_user(**self.user_data)
+        user = CRMUser.objects.create_user(**self.user_data)
         self.assertEqual(str(user), 'testuser')
 
     def test_user_role_choices(self):
         """Test user role validation"""
-        user = User.objects.create_user(**self.user_data)
+        user = CRMUser.objects.create_user(**self.user_data)
         user.role = 'admin'
         user.save()
         self.assertEqual(user.role, 'admin')
 
     def test_user_default_role(self):
         """Test default role is sales_rep"""
-        user = User.objects.create_user(
+        user = CRMUser.objects.create_user(
             username='defaultuser',
             email='default@example.com',
             password='pass123'

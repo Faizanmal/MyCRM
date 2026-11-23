@@ -27,7 +27,9 @@ class SecurityService:
         severity='info',
         success=True,
         error_message='',
-        request=None
+        request=None,
+        metadata=None,
+        **kwargs
     ):
         """Log a security audit event"""
         ip_address = None
@@ -36,6 +38,9 @@ class SecurityService:
         if request:
             ip_address = SecurityService.get_client_ip(request)
             user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+        if metadata and not new_values:
+            new_values = metadata
 
         return SecurityAuditLog.objects.create(
             user=user,

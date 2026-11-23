@@ -55,16 +55,16 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         # Owner membership is created by signal
 
     @action(detail=True, methods=['post'])
-    def switch(self, request, _pk=None):
+    def switch(self, request, pk=None):
         """Switch the current user's active organization."""
         serializer = SwitchOrganizationSerializer(
-            data={'organization_id': _pk},
+            data={'organization_id': pk},
             context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
 
-        request.session['organization_id'] = str(_pk)
-        organization = Organization.objects.get(id=_pk)
+        request.session['organization_id'] = str(pk)
+        organization = Organization.objects.get(id=pk)
 
         return Response({
             'message': f'Switched to organization: {organization.name}',
@@ -72,7 +72,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=True, methods=['get'])
-    def statistics(self, request, _pk=None):
+    def statistics(self, request, pk=None):
         """Get organization statistics."""
         organization = self.get_object()
 
@@ -93,7 +93,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         return Response(stats)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsOrganizationOwner])
-    def upgrade_plan(self, request, _pk=None):
+    def upgrade_plan(self, request, pk=None):
         """Upgrade organization plan."""
         organization = self.get_object()
         new_plan = request.data.get('plan')

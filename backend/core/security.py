@@ -39,9 +39,9 @@ class SecurityAuditLog:
         AuditLog.objects.create(
             user=user,
             action=action,
-            resource=resource,
+            resource=resource or '',
             ip_address=ip_address,
-            user_agent=user_agent,
+            user_agent=user_agent or '',
             metadata=metadata or {},
             risk_level=risk_level,
             timestamp=timezone.now()

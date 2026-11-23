@@ -15,6 +15,7 @@ const jestConfig = {
         '^.+\\.(ts|tsx)$': ['ts-jest', {
             tsconfig: {
                 jsx: 'react-jsx',
+                rootDir: '.',
             },
         }],
     },

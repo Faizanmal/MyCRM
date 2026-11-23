@@ -8,10 +8,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
 
 // Mock framer-motion
-vi.mock('framer-motion', () => ({
+jest.mock('framer-motion', () => ({
     motion: {
         div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <div {...props}>{children}</div>,
         circle: (props: Record<string, unknown>) => <circle {...props} />,
@@ -51,7 +50,7 @@ describe('BarChart', () => {
     it('should render correct number of bars', () => {
         const { container } = render(<BarChart data={mockData} height={200} />);
         // Each data point creates a bar container
-        const bars = container.querySelectorAll('[class*="rounded-t-md"]');
+        const bars = container.querySelectorAll('.cursor-pointer');
         expect(bars.length).toBe(mockData.length);
     });
 

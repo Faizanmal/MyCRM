@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from .models import OrganizationMember
+from .models import Organization, OrganizationMember
 
 
 class IsOrganizationMember(permissions.BasePermission):
@@ -12,6 +12,9 @@ class IsOrganizationMember(permissions.BasePermission):
             return False
 
         if request.user.is_superuser:
+            return True
+
+        if getattr(view, 'detail', False):
             return True
 
         organization = getattr(request, 'organization', None)
@@ -36,6 +39,9 @@ class IsOrganizationAdmin(permissions.BasePermission):
         if request.user.is_superuser:
             return True
 
+        if getattr(view, 'detail', False):
+            return True
+
         organization = getattr(request, 'organization', None)
         if not organization:
             return False
@@ -55,7 +61,7 @@ class IsOrganizationAdmin(permissions.BasePermission):
             return True
 
         # Get organization from object
-        organization = getattr(obj, 'organization', None)
+        organization = getattr(obj, 'organization', obj if isinstance(obj, Organization) else None)
         if not organization:
             return False
 
@@ -78,6 +84,9 @@ class IsOrganizationOwner(permissions.BasePermission):
         if request.user.is_superuser:
             return True
 
+        if getattr(view, 'detail', False):
+            return True
+
         organization = getattr(request, 'organization', None)
         if not organization:
             return False
@@ -97,7 +106,7 @@ class IsOrganizationOwner(permissions.BasePermission):
             return True
 
         # Get organization from object
-        organization = getattr(obj, 'organization', None)
+        organization = getattr(obj, 'organization', obj if isinstance(obj, Organization) else None)
         if not organization:
             return False
 

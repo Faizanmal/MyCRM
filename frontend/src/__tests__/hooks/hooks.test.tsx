@@ -451,10 +451,11 @@ describe('useToggle Hook', () => {
 describe('usePrevious Hook', () => {
     const createUsePrevious = () => {
         const usePrevious = <T,>(value: T) => {
-            const [prev, setPrev] = React.useState<T>();
+            const ref = React.useRef<T | undefined>(undefined);
+            const prev = ref.current;
 
             React.useEffect(() => {
-                setPrev(value);
+                ref.current = value;
             }, [value]);
 
             return prev;

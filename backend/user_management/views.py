@@ -28,20 +28,29 @@ from .serializers import (
 User = get_user_model()
 
 
-@method_decorator(ratelimit(key='ip', rate='10/h', block=True), name='post')
+@method_decorator(ratelimit(key='ip', rate='10/h', block=False), name='post')
 class CustomTokenObtainPairView(TokenObtainPairView):
     """Custom JWT token view with 2FA support"""
 
     def post(self, request, *_args, **_kwargs):
+        if getattr(request, 'limited', False):
+            return Response(
+                {'error': 'Too many requests. Please try again later.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
 
-        # Require admins to have 2FA enabled (if using custom User model)
-        user_role = getattr(user, 'role', None)
+        # Require admins to have 2FA enabled (if using custom User model or staff/superuser)
+        is_admin = (
+            getattr(user, 'role', None) == 'admin' or
+            getattr(user, 'is_staff', False) or
+            getattr(user, 'is_superuser', False)
+        )
         two_factor_enabled = getattr(user, 'two_factor_enabled', False)
 
-        if user_role == 'admin' and not two_factor_enabled:
+        if is_admin and not two_factor_enabled:
             return Response(
                 {'error': 'Admin accounts must have 2FA enabled. Please set up 2FA before logging in.'},
                 status=status.HTTP_403_FORBIDDEN

@@ -29,7 +29,7 @@ class LoginProtectionTests(TestCase):
         self.client = APIClient()
 
     def test_admin_login_requires_2fa(self):
-        User.objects.create_user(username='adminx', email='adminx@example.com', password='adminpass', role='admin')
+        admin = User.objects.create_user(username='adminx', email='adminx@example.com', password='adminpass', is_staff=True)
         # admin doesn't have 2FA enabled by default
         resp = self.client.post('/api/auth/login/', {'username': 'adminx', 'password': 'adminpass'}, format='json')
         self.assertEqual(resp.status_code, 403)

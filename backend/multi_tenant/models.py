@@ -56,9 +56,9 @@ class Organization(models.Model):
     # Billing
     billing_email = models.EmailField(blank=True)
     stripe_customer_id = models.CharField(max_length=100, blank=True)
-    subscription_start = models.DateField(blank=True)
-    subscription_end = models.DateField(blank=True)
-    trial_ends_at = models.DateField(blank=True)
+    subscription_start = models.DateField(null=True, blank=True)
+    subscription_end = models.DateField(null=True, blank=True)
+    trial_ends_at = models.DateField(null=True, blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -91,7 +91,7 @@ class Organization(models.Model):
 
     @property
     def is_active(self):
-        return self.status == 'active'
+        return self.status in ['active', 'trial']
 
     @property
     def is_trial(self):

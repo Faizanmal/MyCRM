@@ -165,7 +165,7 @@ export default function AIChatbotPage() {
   const loadSuggestions = async () => {
     try {
       const data = await aiChatbotAPI.suggestActions();
-      const suggestions = (data.suggestions || []).map((suggestion): string => {
+      const suggestions = (data.suggestions || []).map((suggestion: unknown): string => {
         if (typeof suggestion === 'string') return suggestion;
         if (suggestion && typeof suggestion === 'object') {
           const item = suggestion as { action?: string; reason?: string };

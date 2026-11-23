@@ -5,7 +5,10 @@ Document Management Models
 import os
 import uuid
 
-import magic
+try:
+    import magic
+except ImportError:
+    magic = None
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
@@ -25,8 +28,12 @@ def validate_file_content(file):
         file_content = file.read()
         file.seek(0)  # Reset file pointer
 
-        # Use magic to detect content type
-        detected_mime = magic.from_buffer(file_content, mime=True)
+        # Use magic to detect content type, or fallback to mimetypes if magic not installed
+        if magic:
+            detected_mime = magic.from_buffer(file_content, mime=True)
+        else:
+            import mimetypes
+            detected_mime, _ = mimetypes.guess_type(getattr(file, 'name', '') or '')
 
         # Map of allowed MIME types
         allowed_mimes = {
