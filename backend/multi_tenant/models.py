@@ -259,3 +259,115 @@ class TenantAwareModel(models.Model):
             if org:
                 self.organization = org
         super().save(*args, **kwargs)
+
+
+class ProductPositioningProfile(models.Model):
+    """
+    Tracks tenant product positioning, Ideal Customer Profile (ICP),
+    Jobs-To-Be-Done (JTBD), buyer task progression, and measurable value metrics.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.OneToOneField(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name='product_positioning'
+    )
+
+    # ICP & Market Positioning
+    target_market = models.CharField(
+        max_length=100,
+        default='b2b_saas',
+        help_text="Target vertical, e.g. b2b_saas, fintech, professional_services, healthtech"
+    )
+    ideal_customer_profile = models.CharField(
+        max_length=100,
+        default='mid_market',
+        help_text="Company tier, e.g. smb, mid_market, enterprise"
+    )
+    team_size_tier = models.CharField(
+        max_length=50,
+        default='20_100',
+        help_text="Sales team size tier, e.g. 1_10, 11_50, 51_200, 201_500, 500_plus"
+    )
+    primary_jtbd = models.CharField(
+        max_length=100,
+        default='pipeline_velocity',
+        help_text="Primary job to be done: pipeline_velocity, data_consolidation, ai_sales_automation, forecasting_accuracy"
+    )
+
+    # 5 Real Buyer Tasks Tracking
+    # Allowed tasks: 'eval_poc', 'data_migration', 'team_onboarding', 'pipeline_execution', 'roi_measurement'
+    buyer_tasks_completed = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of completed buyer tasks"
+    )
+
+    # Measurable Value Metrics
+    # Stores business impact metrics, e.g. {'hours_saved_weekly': 14.5, 'win_rate_lift': 28.0, 'pipeline_hygiene_score': 95}
+    value_metrics = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Quantifiable business impact metrics"
+    )
+
+    # Onboarding Status & Milestones
+    onboarding_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('in_progress', 'In Progress'),
+            ('completed', 'Completed'),
+            ('skipped', 'Skipped')
+        ],
+        default='in_progress'
+    )
+    activated_features = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of activated platform features"
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    # Auditing & Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='updated_positioning_profiles'
+    )
+
+    class Meta:
+        db_table = 'tenant_product_positioning'
+        ordering = ['-created_at']
+        verbose_name = 'Product Positioning Profile'
+        verbose_name_plural = 'Product Positioning Profiles'
+
+    def __str__(self):
+        return f"Positioning for {self.organization.name} ({self.target_market})"
+
+    def complete_buyer_task(self, task_key: str, updated_by=None):
+        from django.utils import timezone
+        valid_tasks = [
+            'eval_poc',
+            'data_migration',
+            'team_onboarding',
+            'pipeline_execution',
+            'roi_measurement'
+        ]
+        if task_key not in valid_tasks:
+            raise ValueError(f"Invalid buyer task '{task_key}'. Must be one of {valid_tasks}")
+
+        if task_key not in self.buyer_tasks_completed:
+            self.buyer_tasks_completed.append(task_key)
+            if updated_by:
+                self.last_updated_by = updated_by
+            if len(self.buyer_tasks_completed) == len(valid_tasks):
+                self.onboarding_status = 'completed'
+                self.completed_at = timezone.now()
+            self.save(update_fields=['buyer_tasks_completed', 'onboarding_status', 'completed_at', 'last_updated_by', 'updated_at'])
+        return self.buyer_tasks_completed
+

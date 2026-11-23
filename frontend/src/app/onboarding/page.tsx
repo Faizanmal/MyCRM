@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { stableKey } from '@/lib/stableKey';
+import { productPositioningApi } from '@/lib/product-position-api';
 
 
 interface OrganizationData {
@@ -97,14 +98,30 @@ export default function OnboardingPage() {
 
   const handleComplete = async () => {
     setLoading(true);
-    // Simulate API call to save onboarding data
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mark onboarding as complete in localStorage
-    localStorage.setItem('onboarding_complete', 'true');
-    
-    // Redirect to dashboard
-    router.push('/dashboard');
+    try {
+      // 1. Persist real Product Positioning & ICP Profile to Backend API
+      await productPositioningApi.updateProfile({
+        target_market: orgData.industry.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'b2b_saas',
+        ideal_customer_profile: 'mid_market',
+        team_size_tier: orgData.size || '11_50',
+        primary_jtbd: 'pipeline_velocity'
+      });
+
+      // 2. Mark buyer tasks as complete in backend database
+      await productPositioningApi.completeBuyerTask('eval_poc', {
+        org_name: orgData.name,
+        members_invited: teamMembers.length
+      });
+      await productPositioningApi.completeBuyerTask('team_onboarding', {
+        preferences
+      });
+    } catch (err) {
+      console.warn('Backend onboarding API sync encountered error, proceeding with local fallback:', err);
+    } finally {
+      localStorage.setItem('onboarding_complete', 'true');
+      setLoading(false);
+      router.push('/dashboard');
+    }
   };
 
   const isStepValid = () => {

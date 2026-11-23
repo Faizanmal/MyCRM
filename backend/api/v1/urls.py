@@ -24,8 +24,12 @@ from .scoring import LeadScoringView
 from .timeline import ActivityTimelineView, EntityTimelineView, UserActivityView
 from .views import ContactViewSet, LeadViewSet, OpportunityViewSet, TaskViewSet
 from .workflows import NotificationTemplateViewSet, WorkflowViewSet
+from multi_tenant.positioning_views import ProductPositioningViewSet
 
 router = DefaultRouter()
+
+# Product Positioning, ICP & Buyer Tasks
+router.register(r'product-position', ProductPositioningViewSet, basename='product-position')
 
 # Core CRM resources
 router.register(r'leads', LeadViewSet, basename='lead')
