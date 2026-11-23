@@ -217,10 +217,10 @@ class DetailedHealthCheckView(APIView):
     def _check_celery(self):
         """Check Celery worker connectivity"""
         try:
-            from config.celery import app
+            from celery import current_app
 
             start = time.time()
-            result = app.control.ping(timeout=5)
+            result = current_app.control.ping(timeout=1.0)
             latency = (time.time() - start) * 1000
 
             if result:
@@ -231,12 +231,14 @@ class DetailedHealthCheckView(APIView):
                 }
             else:
                 return {
-                    'status': 'unhealthy',
-                    'error': 'No workers responded',
+                    'status': 'idle',
+                    'message': 'No active worker nodes detected',
+                    'workers': 0,
                 }
         except Exception as e:
             return {
-                'status': 'unhealthy',
+                'status': 'offline',
+                'broker': 'unreachable',
                 'error': str(e),
             }
 

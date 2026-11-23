@@ -23,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / '.env')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# Determine Environment profile (local, ci, staging, production)
+ENVIRONMENT = os.getenv('ENVIRONMENT', os.getenv('DJANGO_ENV', 'local')).lower()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -32,17 +32,31 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Validate SECRET_KEY
-if not SECRET_KEY:
+# Validate SECRET_KEY & Environment Constraints
+if ENVIRONMENT in ('production', 'prod'):
     if DEBUG:
-        # In development, generate a temporary key
-        import secrets
-        SECRET_KEY = secrets.token_urlsafe(50)
-        print("WARNING: Using temporary SECRET_KEY in development. Set SECRET_KEY environment variable for production.")
-    else:
+        raise ValueError("DEBUG must be False in production environment")
+    if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable is required in production")
+    if not os.getenv('ENCRYPTION_KEY'):
+        raise ValueError("ENCRYPTION_KEY environment variable is required in production")
+elif ENVIRONMENT in ('staging', 'stage'):
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is required in staging")
+else:
+    # Development / CI / Local
+    if not SECRET_KEY:
+        if DEBUG or ENVIRONMENT in ('ci', 'local', 'test', 'development'):
+            import secrets
+            SECRET_KEY = secrets.token_urlsafe(50)
+            print(f"WARNING: Using temporary SECRET_KEY in {ENVIRONMENT}. Set SECRET_KEY environment variable for production.")
+        else:
+            raise ValueError("SECRET_KEY environment variable is required")
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
+_allowed = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',') if h.strip()]
+if 'testserver' not in _allowed and (DEBUG or ENVIRONMENT in ('local', 'ci', 'test', 'development')):
+    _allowed.append('testserver')
+ALLOWED_HOSTS = _allowed
 
 
 # Application definition
@@ -239,6 +253,34 @@ else:
                 'PORT': os.getenv('DATABASE_PORT', '5432'),
             }
         }
+
+if ENVIRONMENT in ('production', 'prod'):
+    if USE_SQLITE:
+        raise ValueError("USE_SQLITE is not allowed in production. Use PostgreSQL.")
+    if not DATABASES['default'].get('PASSWORD') and not DATABASE_URL:
+        raise ValueError("DATABASE_PASSWORD environment variable is required in production")
+    # Security flags in production
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    X_FRAME_OPTIONS = 'DENY'
+    if os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True':
+        SECURE_SSL_REDIRECT = True
+        SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+        SECURE_HSTS_PRELOAD = True
+
+elif ENVIRONMENT in ('staging', 'stage'):
+    if not DATABASES['default'].get('PASSWORD') and not USE_SQLITE and not DATABASE_URL:
+        raise ValueError("DATABASE_PASSWORD environment variable is required in staging")
+
+elif ENVIRONMENT == 'ci':
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
+    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
+    CHANNEL_LAYERS = {'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}}
 
 
 # Password validation
@@ -448,24 +490,26 @@ OAUTH_REDIRECT_URI = os.getenv('OAUTH_REDIRECT_URI', '')
 
 # Sentry Error Tracking
 SENTRY_DSN = os.getenv('SENTRY_DSN', '')
-if SENTRY_DSN and not DEBUG:
-    import sentry_sdk
-    from sentry_sdk.integrations.celery import CeleryIntegration
-    from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.redis import RedisIntegration
+if SENTRY_DSN and SENTRY_DSN != 'your-sentry-dsn-here' and not DEBUG:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.celery import CeleryIntegration
+        from sentry_sdk.integrations.django import DjangoIntegration
+        from sentry_sdk.integrations.redis import RedisIntegration
 
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(),
-            CeleryIntegration(),
-            RedisIntegration(),
-        ],
-        traces_sample_rate=0.1,
-        profiles_sample_rate=0.1,
-        environment='production' if not DEBUG else 'development',
-        send_default_pii=False,  # Don't send PII data
-    )
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[
+                DjangoIntegration(),
+                CeleryIntegration(),
+                RedisIntegration(),
+            ],
+            traces_sample_rate=0.1,
+            environment='production' if not DEBUG else 'development',
+            send_default_pii=False,  # Don't send PII data
+        )
+    except Exception as e:
+        print(f"WARNING: Sentry initialization skipped/failed: {e}")
 
 # =====================
 # SECURITY SETTINGS

@@ -19,9 +19,16 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from core.health_views import DetailedHealthCheckView, HealthCheckView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Health Check endpoints (Root, Docker, Kubernetes, Load Balancers)
+    path('health/', DetailedHealthCheckView.as_view(), name='root-health'),
+    path('healthz/', HealthCheckView.as_view(), name='root-healthz'),
+    path('api/health/', include('core.health_urls')),
+    path('api/v1/health/', include('core.health_urls')),
 
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

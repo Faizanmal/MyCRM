@@ -299,3 +299,38 @@ async def send_notification_to_user(user_id, notification_data):
             'notification': notification_data
         }
     )
+
+
+class HealthCheckConsumer(AsyncWebsocketConsumer):
+    """
+    WebSocket consumer for health and liveness checks.
+    Allows load balancers, container orchestration, and monitoring clients to verify WebSocket connectivity.
+    """
+
+    async def connect(self):
+        channel_layer_ok = self.channel_layer is not None
+        await self.accept()
+        await self.send(text_data=json.dumps({
+            'type': 'health_status',
+            'status': 'healthy' if channel_layer_ok else 'degraded',
+            'service': 'websocket',
+            'channel_layer': self.channel_layer.__class__.__name__ if channel_layer_ok else None,
+        }))
+
+    async def receive(self, text_data):
+        try:
+            data = json.loads(text_data)
+            if data.get('type') == 'ping':
+                await self.send(text_data=json.dumps({
+                    'type': 'pong'
+                }))
+            else:
+                await self.send(text_data=json.dumps({
+                    'type': 'echo',
+                    'received': data
+                }))
+        except json.JSONDecodeError:
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Invalid JSON'
+            }))
