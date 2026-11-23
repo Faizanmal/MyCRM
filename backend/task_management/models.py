@@ -67,6 +67,9 @@ class Task(models.Model):
         verbose_name = 'Task'
         verbose_name_plural = 'Tasks'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', 'priority'], name='idx_task_status_prio'),
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.assigned_to.get_full_name()}"

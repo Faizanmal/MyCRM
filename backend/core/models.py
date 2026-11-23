@@ -726,3 +726,21 @@ from .settings_models import (  # noqa: E402, F401
     UserRole,
     UserRoleAssignment,
 )
+from .audit_models import (  # noqa: E402, F401
+    AuditConfiguration,
+    AuditTrail,
+    DataSnapshot,
+    FieldHistory,
+)
+from .custom_fields import (  # noqa: E402, F401
+    CustomField,
+    CustomFieldGroup,
+    CustomFieldGroupMembership,
+    CustomFieldValue,
+)
+from .dashboard_models import (  # noqa: E402, F401
+    DashboardWidget,
+    DashboardWidgetPlacement,
+    UserDashboard,
+    WidgetDataCache,
+)

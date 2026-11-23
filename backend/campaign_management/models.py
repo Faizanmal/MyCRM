@@ -265,3 +265,13 @@ class EmailTemplate(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.category})"
+
+
+# Import email models so they are registered in the app model registry
+from .email_models import (  # noqa: E402, F401
+    EmailCampaign,
+    EmailClick,
+    EmailLink,
+    EmailRecipient,
+    EmailUnsubscribe,
+)

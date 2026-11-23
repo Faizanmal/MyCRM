@@ -61,6 +61,9 @@ class Opportunity(models.Model):
         verbose_name = 'Opportunity'
         verbose_name_plural = 'Opportunities'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['stage', 'assigned_to'], name='idx_opp_stage_assign'),
+        ]
 
     def __str__(self):
         return f"{self.name} - {self.company_name}"

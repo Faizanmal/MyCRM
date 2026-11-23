@@ -411,3 +411,16 @@ class SchedulingAnalytics(models.Model):
 
     def __str__(self):
         return f"{self.page.name} - {self.date}"
+
+
+# Import AI scheduling models so they are registered in the app model registry
+from .ai_models import (  # noqa: E402, F401
+    AISchedulingPreference,
+    AITimeSuggestion,
+    AttendeeIntelligence,
+    MeetingPrepAI,
+    NoShowPrediction,
+    ScheduleOptimization,
+    SmartReminder,
+    SmartReschedule,
+)

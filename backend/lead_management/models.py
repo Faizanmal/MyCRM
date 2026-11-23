@@ -74,6 +74,9 @@ class Lead(models.Model):
         verbose_name = 'Lead'
         verbose_name_plural = 'Leads'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', 'priority'], name='idx_lead_status_prio'),
+        ]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.company_name}"

@@ -21,13 +21,19 @@ def trigger_webhook(self, event, payload):
     from .models import Webhook, WebhookDelivery
 
     # Find active webhooks for this event
-    webhooks = Webhook.objects.filter(
-        is_active=True,
-        status='active',
-        events__contains=event
-    )
+    try:
+        webhooks = Webhook.objects.filter(
+            is_active=True,
+            status='active',
+            events__contains=event
+        )
+        webhooks_list = list(webhooks)
+    except Exception:
+        # Fallback for databases (e.g., SQLite) lacking native JSON contains lookup
+        active_hooks = Webhook.objects.filter(is_active=True, status='active')
+        webhooks_list = [w for w in active_hooks if event in (w.events or [])]
 
-    for webhook in webhooks:
+    for webhook in webhooks_list:
         # Create delivery record
         delivery = WebhookDelivery.objects.create(
             webhook=webhook,
