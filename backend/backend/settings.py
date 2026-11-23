@@ -125,6 +125,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'core.middleware.SecurityHeadersMiddleware',  # Security headers
+    'core.middleware.ApiDeprecationMiddleware',  # RFC 8594 API Deprecation and Sunset headers
     'core.middleware.RequestLoggingMiddleware',  # Request logging
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -477,6 +478,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_ALWAYS_EAGER', 'True' if USE_SQLITE else 'False').lower() == 'true'
 
 # SSO Configuration
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')

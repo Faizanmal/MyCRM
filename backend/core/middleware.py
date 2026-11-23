@@ -208,3 +208,34 @@ class RateLimitMiddleware(MiddlewareMixin):
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+
+class ApiDeprecationMiddleware(MiddlewareMixin):
+    """
+    Standardized API Deprecation and Sunset Header Middleware (RFC 8594).
+    Emits Deprecation, Sunset, and Link successor headers on legacy unversioned CRM endpoints
+    while preserving non-breaking backward compatibility.
+    """
+    LEGACY_PREFIXES = (
+        '/api/contacts/',
+        '/api/leads/',
+        '/api/opportunities/',
+        '/api/tasks/',
+        '/api/communications/',
+        '/api/campaigns/',
+        '/api/documents/',
+        '/api/integrations/',
+        '/api/activity/',
+        '/api/reports/',
+    )
+    SUNSET_DATE = "Thu, 31 Dec 2026 23:59:59 GMT"
+
+    def process_response(self, request, response):
+        path = request.path
+        if any(path.startswith(prefix) for prefix in self.LEGACY_PREFIXES):
+            response['Deprecation'] = 'true'
+            response['Sunset'] = self.SUNSET_DATE
+            # Map legacy path to versioned successor
+            v1_path = path.replace('/api/', '/api/v1/', 1)
+            response['Link'] = f'<{v1_path}>; rel="successor-version"'
+        return response

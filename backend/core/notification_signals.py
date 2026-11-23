@@ -152,7 +152,7 @@ def contact_saved(sender, instance, created, **kwargs):
         if created:
             # Log new contact creation for activity feed
 
-            if instance.owner:
+            if getattr(instance, 'owner', None):
                 # Could send team notification for high-value leads
                 pass
     except Exception as e:

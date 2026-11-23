@@ -20,10 +20,11 @@ from .tasks import trigger_webhook
 def lead_saved(sender, instance, created, **kwargs):
     """Trigger webhook when lead is created or updated"""
     event = 'lead.created' if created else 'lead.updated'
+    lead_name = getattr(instance, 'name', getattr(instance, 'full_name', f"{instance.first_name} {instance.last_name}".strip()))
     payload = {
         'event': event,
         'lead_id': str(instance.id),
-        'name': instance.name,
+        'name': lead_name,
         'email': instance.email,
         'status': instance.status,
     }
@@ -33,10 +34,11 @@ def lead_saved(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Lead)
 def lead_deleted(sender, instance, **kwargs):
     """Trigger webhook when lead is deleted"""
+    lead_name = getattr(instance, 'name', getattr(instance, 'full_name', f"{instance.first_name} {instance.last_name}".strip()))
     payload = {
         'event': 'lead.deleted',
         'lead_id': str(instance.id),
-        'name': instance.name,
+        'name': lead_name,
     }
     trigger_webhook.delay('lead.deleted', payload)
 
