@@ -744,3 +744,7 @@ from .dashboard_models import (  # noqa: E402, F401
     UserDashboard,
     WidgetDataCache,
 )
+from .async_models import (  # noqa: E402, F401
+    PoisonPillQuarantine,
+    TaskExecutionRecord,
+)

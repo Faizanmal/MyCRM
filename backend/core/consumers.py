@@ -17,18 +17,28 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     """
 
     async def connect(self):
-        """Handle WebSocket connection"""
+        """Handle WebSocket connection with revocation check"""
         self.user = self.scope['user']
 
-        if self.user.is_anonymous:
-            await self.close()
+        if self.user.is_anonymous or not self.user.is_active:
+            await self.close(code=4401)
             return
 
-        # Join user-specific notification group
+        is_valid = await self.is_user_membership_valid()
+        if not is_valid:
+            await self.close(code=4403)
+            return
+
+        # Join user-specific notification group and revocation listener group
         self.user_group_name = f'notifications_{self.user.id}'
+        self.revocation_group = f'user_revocation_{self.user.id}'
 
         await self.channel_layer.group_add(
             self.user_group_name,
+            self.channel_name
+        )
+        await self.channel_layer.group_add(
+            self.revocation_group,
             self.channel_name
         )
 
@@ -40,11 +50,30 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'message': 'Connected to notification stream'
         }))
 
+    @database_sync_to_async
+    def is_user_membership_valid(self):
+        """Verify user is active and has valid tenant membership"""
+        from core.websocket_security import is_user_still_active
+        return is_user_still_active(self.user.id)
+
+    async def user_session_revoked(self, event):
+        """Handle forced disconnect when user is deactivated or revoked mid-session"""
+        await self.send(text_data=json.dumps({
+            'type': 'revoked',
+            'message': event.get('message', 'Account access or session has been revoked.')
+        }))
+        await self.close(code=4401)
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnect"""
         if hasattr(self, 'user_group_name'):
             await self.channel_layer.group_discard(
                 self.user_group_name,
+                self.channel_name
+            )
+        if hasattr(self, 'revocation_group'):
+            await self.channel_layer.group_discard(
+                self.revocation_group,
                 self.channel_name
             )
 
@@ -125,21 +154,26 @@ class ActivityFeedConsumer(AsyncWebsocketConsumer):
         """Handle WebSocket connection"""
         self.user = self.scope['user']
 
-        if self.user.is_anonymous:
-            await self.close()
+        if self.user.is_anonymous or not self.user.is_active:
+            await self.close(code=4401)
             return
 
         # Get tenant/organization from scope or user
         self.tenant_id = await self.get_user_tenant_id()
         if not self.tenant_id:
-            await self.close()
+            await self.close(code=4403)
             return
 
-        # Join tenant-scoped activity feed group
+        # Join tenant-scoped activity feed group and user revocation group
         self.feed_group_name = f'activity_feed_tenant_{self.tenant_id}'
+        self.revocation_group = f'user_revocation_{self.user.id}'
 
         await self.channel_layer.group_add(
             self.feed_group_name,
+            self.channel_name
+        )
+        await self.channel_layer.group_add(
+            self.revocation_group,
             self.channel_name
         )
 
@@ -155,11 +189,24 @@ class ActivityFeedConsumer(AsyncWebsocketConsumer):
         membership = OrganizationMember.objects.filter(user=user, is_active=True).first()
         return membership.organization_id if membership else None
 
+    async def user_session_revoked(self, event):
+        """Handle forced disconnect when user is deactivated or revoked mid-session"""
+        await self.send(text_data=json.dumps({
+            'type': 'revoked',
+            'message': event.get('message', 'Account access or session has been revoked.')
+        }))
+        await self.close(code=4401)
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnect"""
         if hasattr(self, 'feed_group_name'):
             await self.channel_layer.group_discard(
                 self.feed_group_name,
+                self.channel_name
+            )
+        if hasattr(self, 'revocation_group'):
+            await self.channel_layer.group_discard(
+                self.revocation_group,
                 self.channel_name
             )
 
@@ -181,9 +228,20 @@ class RealtimeConsumer(AsyncWebsocketConsumer):
         self.user = self.scope['user']
         self.subscribed_channels = set()
 
-        if self.user.is_anonymous:
-            await self.close()
+        if self.user.is_anonymous or not self.user.is_active:
+            await self.close(code=4401)
             return
+
+        is_valid = await self.is_user_membership_valid()
+        if not is_valid:
+            await self.close(code=4403)
+            return
+
+        self.revocation_group = f'user_revocation_{self.user.id}'
+        await self.channel_layer.group_add(
+            self.revocation_group,
+            self.channel_name
+        )
 
         await self.accept()
 
@@ -193,12 +251,37 @@ class RealtimeConsumer(AsyncWebsocketConsumer):
             'message': 'Connected to realtime stream'
         }))
 
+    @database_sync_to_async
+    def is_user_membership_valid(self):
+        """Verify user is active and has valid tenant membership"""
+        from core.websocket_security import is_user_still_active
+        return is_user_still_active(self.user.id)
+
+    @database_sync_to_async
+    def verify_channel_access(self, channel):
+        """Verify whether user is authorized to subscribe to channel"""
+        from core.websocket_security import is_user_authorized_for_channel
+        return is_user_authorized_for_channel(self.user, channel)
+
+    async def user_session_revoked(self, event):
+        """Handle forced disconnect when user is deactivated or revoked mid-session"""
+        await self.send(text_data=json.dumps({
+            'type': 'revoked',
+            'message': event.get('message', 'Account access or session has been revoked.')
+        }))
+        await self.close(code=4401)
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnect"""
         # Unsubscribe from all channels
         for channel in self.subscribed_channels:
             await self.channel_layer.group_discard(
                 channel,
+                self.channel_name
+            )
+        if hasattr(self, 'revocation_group'):
+            await self.channel_layer.group_discard(
+                self.revocation_group,
                 self.channel_name
             )
 
@@ -231,7 +314,16 @@ class RealtimeConsumer(AsyncWebsocketConsumer):
             }))
 
     async def subscribe_to_channel(self, channel):
-        """Subscribe to a channel"""
+        """Subscribe to a channel with strict tenant and ID validation"""
+        is_allowed, reason = await self.verify_channel_access(channel)
+        if not is_allowed:
+            await self.send(text_data=json.dumps({
+                'type': 'subscription_error',
+                'channel': channel,
+                'error': reason
+            }))
+            return
+
         if channel not in self.subscribed_channels:
             self.subscribed_channels.add(channel)
             await self.channel_layer.group_add(

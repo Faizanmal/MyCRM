@@ -16,43 +16,54 @@ class DocumentCollaborationConsumer(AsyncJsonWebsocketConsumer):
         self.room_group_name = f'document_{self.document_id}'
         self.user = self.scope['user']
 
-        if not self.user.is_authenticated:
-            await self.close()
+        if not self.user.is_authenticated or not self.user.is_active:
+            await self.close(code=4401)
             return
 
-        # Join room group
+        # Enforce multi-tenant document boundary check
+        has_access = await self.check_document_tenant_access()
+        if not has_access:
+            await self.close(code=4403)
+            return
+
+        self.revocation_group = f'user_revocation_{self.user.id}'
+
+        # Join room group and user revocation group
         await self.channel_layer.group_add(
             self.room_group_name,
+            self.channel_name
+        )
+        await self.channel_layer.group_add(
+            self.revocation_group,
             self.channel_name
         )
 
         await self.accept()
 
-        # Create editing session
-        session = await self.create_editing_session()
+    @database_sync_to_async
+    def check_document_tenant_access(self):
+        """Verify user is authorized to collaborate on this document"""
+        from core.websocket_security import is_user_authorized_for_channel
+        authorized, _ = is_user_authorized_for_channel(self.user, f'document_{self.document_id}')
+        return authorized
 
-        # Notify others of new user
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'user_joined',
-                'user_id': str(self.user.id),
-                'username': self.user.username,
-                'full_name': f"{self.user.first_name} {self.user.last_name}",
-                'cursor_color': session.cursor_color if session else '#4F46E5'
-            }
-        )
-
-        # Send current active users
-        active_users = await self.get_active_users()
+    async def user_session_revoked(self, event):
+        """Handle forced disconnect when user is deactivated or revoked mid-session"""
         await self.send_json({
-            'type': 'active_users',
-            'users': active_users
+            'type': 'revoked',
+            'message': event.get('message', 'Account access or session has been revoked.')
         })
+        await self.close(code=4401)
 
     async def disconnect(self, close_code):
         # Mark session as inactive
         await self.end_editing_session()
+
+        if hasattr(self, 'revocation_group'):
+            await self.channel_layer.group_discard(
+                self.revocation_group,
+                self.channel_name
+            )
 
         # Notify others
         await self.channel_layer.group_send(
