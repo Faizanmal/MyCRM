@@ -11,7 +11,7 @@ from rest_framework.response import Response
 
 from contact_management.models import Contact
 from lead_management.models import Lead
-from multi_tenant.permissions import TenantObjectPermission
+from multi_tenant.permissions import HasRolePermission, TenantObjectPermission
 from opportunity_management.models import Opportunity
 from task_management.models import Task
 
@@ -40,7 +40,7 @@ class LeadViewSet(viewsets.ModelViewSet):
     destroy: Delete a lead
     """
     queryset = Lead.objects.select_related('assigned_to', 'owner').all()
-    permission_classes = [IsAuthenticated, TenantObjectPermission]
+    permission_classes = [IsAuthenticated, TenantObjectPermission, HasRolePermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'lead_source', 'assigned_to', 'owner']
     search_fields = ['first_name', 'last_name', 'email', 'company_name', 'phone']
@@ -61,6 +61,15 @@ class LeadViewSet(viewsets.ModelViewSet):
             if not org:
                 return queryset.none()
             queryset = queryset.filter(organization=org)
+
+            # Row-level role filtering:
+            # Members and sales_reps can only view/list their assigned or owned records unless manager/admin/owner
+            member = getattr(self.request, 'member', None)
+            if not member:
+                member = user.organization_memberships.filter(organization=org, is_active=True).first()
+            if member and member.role in ['member', 'sales_rep']:
+                from django.db.models import Q
+                queryset = queryset.filter(Q(assigned_to=user) | Q(owner=user))
 
         # Filter by query params
         status_filter = self.request.query_params.get('status', None)
@@ -178,7 +187,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     API endpoint for Contact management
     """
     queryset = Contact.objects.select_related('assigned_to', 'created_by').all()
-    permission_classes = [IsAuthenticated, TenantObjectPermission]
+    permission_classes = [IsAuthenticated, TenantObjectPermission, HasRolePermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['contact_type', 'status', 'assigned_to']
     search_fields = ['first_name', 'last_name', 'email', 'company_name', 'phone', 'mobile']
@@ -199,6 +208,15 @@ class ContactViewSet(viewsets.ModelViewSet):
             if not org:
                 return queryset.none()
             queryset = queryset.filter(organization=org)
+
+            # Row-level role filtering:
+            member = getattr(self.request, 'member', None)
+            if not member:
+                member = user.organization_memberships.filter(organization=org, is_active=True).first()
+            if member and member.role in ['member', 'sales_rep']:
+                from django.db.models import Q
+                queryset = queryset.filter(Q(assigned_to=user) | Q(created_by=user))
+
         return queryset
 
     @action(detail=False, methods=['post'])
@@ -251,7 +269,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
     API endpoint for Opportunity management
     """
     queryset = Opportunity.objects.select_related('contact', 'assigned_to', 'owner').all()
-    permission_classes = [IsAuthenticated, TenantObjectPermission]
+    permission_classes = [IsAuthenticated, TenantObjectPermission, HasRolePermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['stage', 'assigned_to', 'owner']
     search_fields = ['name', 'company_name', 'contact__first_name', 'contact__last_name']
@@ -272,6 +290,14 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             if not org:
                 return queryset.none()
             queryset = queryset.filter(organization=org)
+
+            # Row-level role filtering:
+            member = getattr(self.request, 'member', None)
+            if not member:
+                member = user.organization_memberships.filter(organization=org, is_active=True).first()
+            if member and member.role in ['member', 'sales_rep']:
+                from django.db.models import Q
+                queryset = queryset.filter(Q(assigned_to=user) | Q(owner=user))
 
         # Filter options
         stage = self.request.query_params.get('stage', None)
@@ -346,7 +372,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     API endpoint for Task management
     """
     queryset = Task.objects.select_related('assigned_to', 'created_by').all()
-    permission_classes = [IsAuthenticated, TenantObjectPermission]
+    permission_classes = [IsAuthenticated, TenantObjectPermission, HasRolePermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'task_type', 'assigned_to']
     search_fields = ['title', 'description']
@@ -367,6 +393,14 @@ class TaskViewSet(viewsets.ModelViewSet):
             if not org:
                 return queryset.none()
             queryset = queryset.filter(organization=org)
+
+            # Row-level role filtering:
+            member = getattr(self.request, 'member', None)
+            if not member:
+                member = user.organization_memberships.filter(organization=org, is_active=True).first()
+            if member and member.role in ['member', 'sales_rep']:
+                from django.db.models import Q
+                queryset = queryset.filter(Q(assigned_to=user) | Q(created_by=user))
 
         # Filter options
         assigned_to_me = self.request.query_params.get('assigned_to_me', None)

@@ -17,6 +17,8 @@ from lead_management.models import Lead
 from opportunity_management.models import Opportunity
 from task_management.models import Task
 
+from multi_tenant.permissions import HasRolePermission, TenantObjectPermission
+
 from .serializers import ImportMappingSerializer
 
 
@@ -25,8 +27,9 @@ class CSVImportView(views.APIView):
     CSV Import API endpoint
     Supports field mapping, validation, and error reporting
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, TenantObjectPermission, HasRolePermission]
     parser_classes = [MultiPartParser, FormParser]
+    action = 'import'
 
     SUPPORTED_MODELS = {
         'leads': Lead,
@@ -158,7 +161,8 @@ class CSVExportView(views.APIView):
     CSV Export API endpoint
     Exports filtered data to CSV format
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, TenantObjectPermission, HasRolePermission]
+    action = 'export'
 
     SUPPORTED_MODELS = {
         'leads': Lead,

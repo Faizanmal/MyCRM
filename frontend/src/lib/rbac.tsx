@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 // ==================== Types ====================
 
-export type Role = 'admin' | 'manager' | 'sales_rep' | 'viewer' | 'guest';
+export type Role = 'owner' | 'admin' | 'manager' | 'member' | 'sales_rep' | 'viewer' | 'guest';
 
 export type Permission =
     // Dashboard
@@ -88,9 +88,11 @@ export interface RBACContextType {
 const roleHierarchy: Record<Role, number> = {
     guest: 0,
     viewer: 1,
+    member: 2,
     sales_rep: 2,
     manager: 3,
     admin: 4,
+    owner: 5,
 };
 
 // ==================== Role Permissions ====================
@@ -106,6 +108,22 @@ const rolePermissions: Record<Role, Permission[]> = {
         'view_deals',
         'view_tasks',
         'view_reports',
+    ],
+
+    member: [
+        'view_dashboard',
+        'view_contacts',
+        'create_contacts',
+        'edit_contacts',
+        'view_deals',
+        'create_deals',
+        'edit_deals',
+        'close_deals',
+        'view_tasks',
+        'create_tasks',
+        'edit_tasks',
+        'view_reports',
+        'view_settings',
     ],
 
     sales_rep: [
@@ -154,6 +172,44 @@ const rolePermissions: Record<Role, Permission[]> = {
     ],
 
     admin: [
+        'view_dashboard',
+        'view_admin_dashboard',
+        'view_analytics',
+        'view_contacts',
+        'create_contacts',
+        'edit_contacts',
+        'delete_contacts',
+        'export_contacts',
+        'import_contacts',
+        'view_deals',
+        'create_deals',
+        'edit_deals',
+        'delete_deals',
+        'close_deals',
+        'view_tasks',
+        'create_tasks',
+        'edit_tasks',
+        'delete_tasks',
+        'assign_tasks',
+        'view_team',
+        'manage_team',
+        'invite_users',
+        'remove_users',
+        'assign_roles',
+        'view_reports',
+        'create_reports',
+        'export_reports',
+        'view_settings',
+        'manage_settings',
+        'manage_integrations',
+        'view_billing',
+        'manage_billing',
+        'access_admin',
+        'manage_organization',
+        'view_audit_log',
+    ],
+
+    owner: [
         'view_dashboard',
         'view_admin_dashboard',
         'view_analytics',
