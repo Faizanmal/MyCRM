@@ -19,51 +19,12 @@ User = get_user_model()
 
 
 def validate_file_content(file):
-    """Validate file content matches its extension using magic numbers"""
+    """Validate file content matches its extension using magic numbers and disguised executable detection"""
     if not file:
         return
 
-    # Get file content type using python-magic
-    try:
-        file_content = file.read()
-        file.seek(0)  # Reset file pointer
-
-        # Use magic to detect content type, or fallback to mimetypes if magic not installed
-        if magic:
-            detected_mime = magic.from_buffer(file_content, mime=True)
-        else:
-            import mimetypes
-            detected_mime, _ = mimetypes.guess_type(getattr(file, 'name', '') or '')
-
-        # Map of allowed MIME types
-        allowed_mimes = {
-            'application/pdf': ['pdf'],
-            'application/msword': ['doc'],
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
-            'application/vnd.ms-excel': ['xls'],
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
-            'application/vnd.ms-powerpoint': ['ppt'],
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
-            'text/plain': ['txt'],
-            'text/csv': ['csv'],
-            'image/jpeg': ['jpg', 'jpeg'],
-            'image/png': ['png'],
-            'image/gif': ['gif'],
-        }
-
-        # Check if detected MIME type is allowed
-        if detected_mime not in allowed_mimes:
-            raise ValidationError(f'File content type {detected_mime} is not allowed.')
-
-        # Check if file extension matches content type
-        filename = file.name.lower()
-        extension = filename.split('.')[-1] if '.' in filename else ''
-
-        if extension not in allowed_mimes.get(detected_mime, []):
-            raise ValidationError(f'File extension .{extension} does not match content type {detected_mime}.')
-
-    except Exception as e:
-        raise ValidationError(f'File validation failed: {str(e)}')
+    from core.upload_security import validate_uploaded_file
+    validate_uploaded_file(file)
 
 
 def document_upload_path(instance, filename):
@@ -157,6 +118,13 @@ class Document(models.Model):
         blank=True,
         related_name='documents'
     )
+    organization = models.ForeignKey(
+        'multi_tenant.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='documents'
+    )
 
     # Security
     access_level = models.CharField(
@@ -211,6 +179,32 @@ class Document(models.Model):
     def is_pdf(self):
         """Check if document is a PDF"""
         return self.file_extension == '.pdf'
+
+    @property
+    def tenant(self):
+        return self.organization
+
+    @tenant.setter
+    def tenant(self, value):
+        self.organization = value
+
+    def save(self, *args, **kwargs):
+        """Auto-populate organization boundary if not already set"""
+        if not self.organization_id:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+            if not org:
+                if self.lead and hasattr(self.lead, 'organization'):
+                    org = self.lead.organization
+                elif self.contact and hasattr(self.contact, 'organization'):
+                    org = self.contact.organization
+                elif self.opportunity and hasattr(self.opportunity, 'organization'):
+                    org = self.opportunity.organization
+                elif self.uploaded_by:
+                    org = getattr(self.uploaded_by, 'organization', None)
+            if org:
+                self.organization = org
+        super().save(*args, **kwargs)
 
     def create_version(self, new_file, updated_by):
         """Create a new version of this document"""

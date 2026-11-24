@@ -32,6 +32,14 @@ class WebhookSerializer(serializers.ModelSerializer):
             return round((obj.successful_deliveries / obj.total_deliveries) * 100, 2)
         return 0
 
+    def validate_url(self, value):
+        """Validate URL is safe from SSRF targeting private or cloud metadata IPs"""
+        from core.ssrf_protection import SSRFProtectionError, validate_safe_url
+        try:
+            return validate_safe_url(value)
+        except SSRFProtectionError as e:
+            raise serializers.ValidationError(f"Invalid webhook URL: {str(e)}")
+
 
 class WebhookDeliverySerializer(serializers.ModelSerializer):
     """Serializer for Webhook Deliveries"""

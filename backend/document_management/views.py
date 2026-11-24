@@ -24,7 +24,7 @@ from .tasks import generate_document_from_template, process_document_ocr
 
 class DocumentViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for managing documents
+    ViewSet for managing documents with multi-tenant isolation and signed URL access
     """
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
@@ -35,6 +35,33 @@ class DocumentViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description', 'extracted_text', 'tags']
     ordering_fields = ['uploaded_at', 'name', 'download_count']
 
+    def get_permissions(self):
+        if self.action in ['signed_download']:
+            return [AllowAny()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        """Strict multi-tenant organization boundary check preventing IDOR"""
+        queryset = super().get_queryset()
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return queryset.none()
+        if user.is_superuser:
+            return queryset
+
+        from multi_tenant.middleware import get_current_organization
+        org = get_current_organization() or getattr(self.request, 'organization', None) or getattr(self.request, 'tenant', None)
+        if not org:
+            org = getattr(user, 'organization', None)
+        if not org and hasattr(user, 'organization_memberships'):
+            membership = user.organization_memberships.filter(is_active=True).first()
+            if membership:
+                org = membership.organization
+
+        if org:
+            return queryset.filter(organization=org)
+        return queryset.filter(uploaded_by=user)
+
     def perform_create(self, serializer):
         """Set the uploader and trigger OCR if applicable"""
         document = serializer.save(uploaded_by=self.request.user)
@@ -44,7 +71,61 @@ class DocumentViewSet(viewsets.ModelViewSet):
             process_document_ocr.delay(str(document.id))
 
     @action(detail=True, methods=['get'])
-    def download(self, request, _pk=None):
+    def signed_url(self, request, pk=None, _pk=None):
+        """Generate a time-limited cryptographically signed download URL"""
+        document = self.get_object()
+
+        user_role = getattr(request.user, 'role', None)
+        if document.access_level == 'restricted' and user_role not in ['admin', 'manager'] and not request.user.is_superuser:
+            return Response(
+                {'error': 'Insufficient permissions'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        from core.signed_urls import generate_signed_download_token
+        expires_in = int(request.query_params.get('expires_in', 300))
+        token = generate_signed_download_token(document.id, request.user.id, expires_in_seconds=expires_in)
+        return Response({
+            'download_url': f"/api/documents/documents/signed-download/?token={token}",
+            'token': token,
+            'expires_in': expires_in
+        })
+
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def signed_download(self, request):
+        """Download document via cryptographically signed expirable token"""
+        token = request.query_params.get('token')
+        if not token:
+            return Response({'error': 'Signed token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from core.signed_urls import verify_signed_download_token
+        from django.core.signing import BadSignature, SignatureExpired
+
+        try:
+            payload = verify_signed_download_token(token)
+        except SignatureExpired:
+            return Response({'error': 'Signed URL has expired'}, status=status.HTTP_403_FORBIDDEN)
+        except BadSignature:
+            return Response({'error': 'Invalid or tampered signed URL'}, status=status.HTTP_403_FORBIDDEN)
+
+        doc_id = payload.get('doc_id')
+        try:
+            document = Document.objects.get(id=doc_id)
+        except Document.DoesNotExist:
+            return Response({'error': 'Document not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        document.download_count += 1
+        document.last_accessed = timezone.now()
+        document.save(update_fields=['download_count', 'last_accessed'])
+
+        return FileResponse(
+            document.file.open('rb'),
+            as_attachment=True,
+            filename=document.name
+        )
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None, _pk=None):
         """Download a document"""
         document = self.get_object()
 
@@ -216,6 +297,11 @@ class DocumentShareViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['document']
 
+    def get_permissions(self):
+        if self.action in ['access', 'download']:
+            return [AllowAny()]
+        return super().get_permissions()
+
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def access(self, request):
         """Access a shared document via token"""
@@ -255,6 +341,34 @@ class DocumentShareViewSet(viewsets.ReadOnlyModelViewSet):
             'can_view': share.can_view
         })
 
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def download(self, request):
+        """Download document from an active share token"""
+        token = request.query_params.get('token')
+        if not token:
+            return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            share = DocumentShare.objects.get(access_token=token)
+        except (DocumentShare.DoesNotExist, ValueError):
+            return Response({'error': 'Invalid or expired share link'}, status=status.HTTP_404_NOT_FOUND)
+
+        if share.is_expired:
+            return Response({'error': 'Share link has expired'}, status=status.HTTP_403_FORBIDDEN)
+
+        if not share.can_download:
+            return Response({'error': 'Download is not permitted for this share link'}, status=status.HTTP_403_FORBIDDEN)
+
+        share.download_count += 1
+        share.last_accessed = timezone.now()
+        share.save(update_fields=['download_count', 'last_accessed'])
+
+        return FileResponse(
+            share.document.file.open('rb'),
+            as_attachment=True,
+            filename=share.document.name
+        )
+
 
 class DocumentCommentViewSet(viewsets.ModelViewSet):
     """
@@ -265,6 +379,11 @@ class DocumentCommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['document']
+
+    def get_permissions(self):
+        if self.action in ['access', 'download']:
+            return [AllowAny()]
+        return super().get_permissions()
 
     def perform_create(self, serializer):
         """Set the comment author"""

@@ -19,7 +19,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         model = Document
         fields = [
             'id', 'name', 'description', 'category', 'file', 'file_size', 'mime_type',
-            'version', 'parent_document', 'lead', 'contact', 'opportunity',
+            'version', 'parent_document', 'lead', 'contact', 'opportunity', 'organization',
             'access_level', 'extracted_text', 'ocr_processed', 'tags',
             'uploaded_by', 'uploaded_by_name', 'uploaded_at', 'updated_at',
             'download_count', 'last_accessed',
@@ -27,7 +27,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id', 'version', 'file_size', 'mime_type', 'extracted_text', 'ocr_processed',
-            'uploaded_at', 'updated_at', 'download_count', 'last_accessed'
+            'uploaded_at', 'updated_at', 'download_count', 'last_accessed', 'organization'
         ]
 
     def create(self, validated_data):

@@ -81,7 +81,15 @@ export default function DocumentsPage() {
 
   const handleDownload = async (document: Document) => {
     try {
-      const response = await documentAPI.downloadDocument(document.id);
+      // Secure download via signed token URL with fallback
+      let response;
+      try {
+        const signedRes = await documentAPI.getSignedUrl(document.id);
+        const token = signedRes.data.token;
+        response = await documentAPI.downloadSigned(token);
+      } catch {
+        response = await documentAPI.downloadDocument(document.id);
+      }
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = window.document.createElement('a');
       link.href = url;

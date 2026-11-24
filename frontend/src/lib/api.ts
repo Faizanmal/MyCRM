@@ -593,6 +593,10 @@ export const documentAPI = {
     }),
   downloadDocument: (id: string) =>
     apiClient.get(`/documents/documents/${id}/download/`, { responseType: 'blob' }),
+  getSignedUrl: (id: string, expires_in = 300) =>
+    apiClient.get(`/documents/documents/${id}/signed_url/`, { params: { expires_in } }),
+  downloadSigned: (token: string) =>
+    apiClient.get('/documents/documents/signed_download/', { params: { token }, responseType: 'blob' }),
   createDocumentVersion: (id: string, file: File) => {
     const formData = new FormData();
     formData.append('file', file);

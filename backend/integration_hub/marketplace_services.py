@@ -360,10 +360,11 @@ class WebhookBuilderService:
             status='pending',
         )
 
-        # Deliver
+        # Deliver with SSRF protection
         start_time = timezone.now()
         try:
-            response = requests.request(
+            from core.ssrf_protection import safe_requests_request
+            response = safe_requests_request(
                 method=webhook.method,
                 url=webhook.url,
                 headers=headers,

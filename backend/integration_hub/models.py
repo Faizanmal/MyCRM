@@ -356,3 +356,74 @@ class APIEndpoint(models.Model):
 
     def __str__(self):
         return f"{self.method} {self.path}"
+
+
+class InboundWebhookEndpoint(models.Model):
+    """
+    Secure Inbound Webhook Endpoint.
+    Rigidly bound to an Organization (tenant).
+    Requires HMAC signature verification and timestamp replay defense.
+    Untrusted payload tenant fields are strictly ignored to prevent forged tenant injection.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(
+        'multi_tenant.Organization',
+        on_delete=models.CASCADE,
+        related_name='inbound_webhooks'
+    )
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    provider = models.CharField(max_length=50, default='generic')
+    secret_key = models.CharField(max_length=128, help_text="Shared secret for HMAC verification")
+    tolerance_seconds = models.IntegerField(default=300, help_text="Max acceptable timestamp drift in seconds")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'crm_inbound_webhook_endpoints'
+        verbose_name = 'Inbound Webhook Endpoint'
+        verbose_name_plural = 'Inbound Webhook Endpoints'
+
+    def __str__(self):
+        return f"{self.name} ({self.organization.name})"
+
+    @property
+    def tenant(self):
+        return self.organization
+
+
+class InboundWebhookDelivery(models.Model):
+    """
+    Delivery history for inbound webhooks with replay prevention tracking.
+    """
+    STATUS_CHOICES = [
+        ('processed', 'Processed'),
+        ('duplicate', 'Duplicate / Replay'),
+        ('invalid_signature', 'Invalid Signature'),
+        ('expired', 'Expired Timestamp'),
+        ('failed', 'Processing Failed'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    endpoint = models.ForeignKey(
+        InboundWebhookEndpoint,
+        on_delete=models.CASCADE,
+        related_name='deliveries'
+    )
+    event_id = models.CharField(max_length=255, db_index=True, blank=True, help_text="Unique event nonce/id from sender")
+    event_type = models.CharField(max_length=100, blank=True)
+    payload = models.JSONField(default=dict)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='processed')
+    received_at = models.DateTimeField(auto_now_add=True)
+    forged_tenant_detected = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'crm_inbound_webhook_deliveries'
+        verbose_name = 'Inbound Webhook Delivery'
+        verbose_name_plural = 'Inbound Webhook Deliveries'
+        indexes = [
+            models.Index(fields=['endpoint', 'event_id']),
+            models.Index(fields=['received_at']),
+        ]
+

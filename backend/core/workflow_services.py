@@ -327,7 +327,8 @@ class WorkflowEngineService:
                 rendered_payload[key] = value
 
         try:
-            response = requests.request(
+            from core.ssrf_protection import safe_requests_request
+            response = safe_requests_request(
                 method=method,
                 url=url,
                 headers=headers,

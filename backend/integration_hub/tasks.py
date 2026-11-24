@@ -77,16 +77,30 @@ def deliver_webhook(self, webhook_id, delivery_id):
         if webhook.custom_headers:
             headers.update(webhook.custom_headers)
 
-        # Make request
+        # Make request with SSRF validation
         start_time = time.time()
 
         try:
-            response = requests.post(
-                webhook.url,
-                data=payload_json,
-                headers=headers,
-                timeout=30
-            )
+            from core.ssrf_protection import SSRFProtectionError, safe_requests_request
+            try:
+                response = safe_requests_request(
+                    method='POST',
+                    url=webhook.url,
+                    data=payload_json,
+                    headers=headers,
+                    timeout=30
+                )
+            except SSRFProtectionError as ssrf_err:
+                delivery.status = 'failed'
+                delivery.error_message = f"SSRF Blocked: {str(ssrf_err)}"
+                delivery.delivered_at = timezone.now()
+                delivery.attempts += 1
+                delivery.save()
+                webhook.total_deliveries += 1
+                webhook.failed_deliveries += 1
+                webhook.save()
+                logger.error("Webhook %s delivery blocked by SSRF filter: %s", webhook.id, ssrf_err)
+                return
 
             duration_ms = int((time.time() - start_time) * 1000)
 
