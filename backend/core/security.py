@@ -134,33 +134,19 @@ class RateLimitManager:
 
 
 class DataEncryption:
-    """Enterprise-grade data encryption utilities"""
+    """Enterprise-grade data encryption utilities with MultiFernet rotation and fail-loud semantics"""
 
     @staticmethod
     def encrypt_sensitive_data(data):
-        """Encrypt sensitive data using AES encryption"""
-        from cryptography.fernet import Fernet
-
-        # In production, this should come from environment variables
-        key = settings.ENCRYPTION_KEY if hasattr(settings, 'ENCRYPTION_KEY') else Fernet.generate_key()
-        cipher_suite = Fernet(key)
-
-        if isinstance(data, str):
-            data = data.encode()
-
-        return cipher_suite.encrypt(data).decode()
+        """Encrypt sensitive data using enterprise AES/MultiFernet encryption"""
+        from core.encryption import encrypt_value
+        return encrypt_value(data)
 
     @staticmethod
     def decrypt_sensitive_data(encrypted_data):
-        """Decrypt sensitive data"""
-        from cryptography.fernet import Fernet
-
-        key = settings.ENCRYPTION_KEY if hasattr(settings, 'ENCRYPTION_KEY') else None
-        if not key:
-            raise ValueError("Encryption key not found in settings")
-
-        cipher_suite = Fernet(key)
-        return cipher_suite.decrypt(encrypted_data.encode()).decode()
+        """Decrypt sensitive data using enterprise AES/MultiFernet decryption"""
+        from core.encryption import decrypt_value
+        return decrypt_value(encrypted_data)
 
     @staticmethod
     def hash_password_custom(password, salt=None):

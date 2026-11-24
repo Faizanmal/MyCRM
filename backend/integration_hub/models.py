@@ -179,7 +179,7 @@ class ThirdPartyIntegration(models.Model):
     # OAuth credentials
     access_token = models.TextField(blank=True)
     refresh_token = models.TextField(blank=True)
-    token_expires_at = models.DateTimeField(blank=True)
+    token_expires_at = models.DateTimeField(null=True, blank=True)
 
     # API credentials
     api_key = models.CharField(max_length=255, blank=True)
@@ -194,7 +194,7 @@ class ThirdPartyIntegration(models.Model):
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     is_active = models.BooleanField(default=True)
-    last_sync_at = models.DateTimeField(blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
 
     # Error tracking
     error_message = models.TextField(blank=True)
@@ -220,6 +220,30 @@ class ThirdPartyIntegration(models.Model):
         if self.token_expires_at:
             return timezone.now() > self.token_expires_at
         return False
+
+    def save(self, *args, **kwargs):
+        """Encrypt API secrets and OAuth tokens before persisting to database"""
+        from core.encryption import encrypt_value
+        # If credentials look unencrypted (plain text), encrypt them
+        if self.api_key and not self.api_key.startswith('gAAAAA'):
+            self.api_key = encrypt_value(self.api_key)
+        if self.api_secret and not self.api_secret.startswith('gAAAAA'):
+            self.api_secret = encrypt_value(self.api_secret)
+        if self.access_token and not self.access_token.startswith('gAAAAA'):
+            self.access_token = encrypt_value(self.access_token)
+        if self.refresh_token and not self.refresh_token.startswith('gAAAAA'):
+            self.refresh_token = encrypt_value(self.refresh_token)
+        super().save(*args, **kwargs)
+
+    def get_decrypted_credentials(self) -> dict:
+        """Helper to safely retrieve decrypted credentials at runtime"""
+        from core.encryption import decrypt_value
+        return {
+            'api_key': decrypt_value(self.api_key) if self.api_key else '',
+            'api_secret': decrypt_value(self.api_secret) if self.api_secret else '',
+            'access_token': decrypt_value(self.access_token) if self.access_token else '',
+            'refresh_token': decrypt_value(self.refresh_token) if self.refresh_token else '',
+        }
 
 
 class IntegrationLog(models.Model):

@@ -434,6 +434,7 @@ if not DEBUG:
 
 # Enterprise Security Configuration
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')  # Generate with Fernet.generate_key()
+ENCRYPTION_KEYS_ROTATION = os.getenv('ENCRYPTION_KEYS_ROTATION', '')
 if not ENCRYPTION_KEY:
     import warnings
     warnings.warn('ENCRYPTION_KEY not set! Enterprise encryption features will not work.', stacklevel=2)
