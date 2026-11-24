@@ -177,6 +177,14 @@ class CSVExportView(views.APIView):
 
         model_class = self.SUPPORTED_MODELS[resource_type]
         queryset = model_class.objects.all()
+        user = request.user
+        org = getattr(request, 'organization', None)
+
+        if not user.is_superuser:
+            if not org:
+                queryset = queryset.none()
+            elif hasattr(model_class, 'organization'):
+                queryset = queryset.filter(organization=org)
 
         # SECURITY: Whitelist allowed filter fields per resource type
         ALLOWED_FILTERS = {

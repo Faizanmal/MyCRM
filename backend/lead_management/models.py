@@ -47,6 +47,14 @@ class Lead(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
 
     # Assignment and Ownership
+    organization = models.ForeignKey(
+        'multi_tenant.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='leads',
+        db_index=True
+    )
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_leads')
 
@@ -88,6 +96,20 @@ class Lead(models.Model):
     @property
     def name(self):
         return self.full_name
+
+    def save(self, *args, **kwargs):
+        if not self.organization_id:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+            if not org and self.owner:
+                org = getattr(self.owner, 'organization', None)
+                if not org and hasattr(self.owner, 'organization_memberships'):
+                    membership = self.owner.organization_memberships.filter(is_active=True).first()
+                    if membership:
+                        org = membership.organization
+            if org:
+                self.organization = org
+        super().save(*args, **kwargs)
 
 
 class LeadActivity(models.Model):

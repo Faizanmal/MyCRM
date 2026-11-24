@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from contact_management.models import Contact
 from lead_management.models import Lead
+from multi_tenant.permissions import TenantObjectPermission
 from opportunity_management.models import Opportunity
 from task_management.models import Task
 
@@ -39,7 +40,7 @@ class LeadViewSet(viewsets.ModelViewSet):
     destroy: Delete a lead
     """
     queryset = Lead.objects.select_related('assigned_to', 'owner').all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, TenantObjectPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'lead_source', 'assigned_to', 'owner']
     search_fields = ['first_name', 'last_name', 'email', 'company_name', 'phone']
@@ -54,6 +55,12 @@ class LeadViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
+        org = getattr(self.request, 'organization', None)
+
+        if not user.is_superuser:
+            if not org:
+                return queryset.none()
+            queryset = queryset.filter(organization=org)
 
         # Filter by query params
         status_filter = self.request.query_params.get('status', None)
@@ -71,7 +78,7 @@ class LeadViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def bulk_update(self, request):
-        """Bulk update multiple leads"""
+        """Bulk update multiple leads scoped strictly to current tenant"""
         serializer = BulkOperationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -79,7 +86,12 @@ class LeadViewSet(viewsets.ModelViewSet):
         action_type = serializer.validated_data['action']
         data = serializer.validated_data.get('data', {})
 
-        leads = Lead.objects.filter(id__in=ids)
+        leads = self.get_queryset().filter(id__in=ids)
+        if leads.count() != len(ids):
+            return Response(
+                {'error': 'Some or all target leads do not exist or belong to another organization'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if action_type == 'update':
             leads.update(**data, updated_at=timezone.now())
@@ -166,7 +178,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     API endpoint for Contact management
     """
     queryset = Contact.objects.select_related('assigned_to', 'created_by').all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, TenantObjectPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['contact_type', 'status', 'assigned_to']
     search_fields = ['first_name', 'last_name', 'email', 'company_name', 'phone', 'mobile']
@@ -178,9 +190,20 @@ class ContactViewSet(viewsets.ModelViewSet):
             return ContactListSerializer
         return ContactDetailSerializer
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        org = getattr(self.request, 'organization', None)
+
+        if not user.is_superuser:
+            if not org:
+                return queryset.none()
+            queryset = queryset.filter(organization=org)
+        return queryset
+
     @action(detail=False, methods=['post'])
     def bulk_update(self, request):
-        """Bulk update multiple contacts"""
+        """Bulk update multiple contacts scoped to tenant"""
         serializer = BulkOperationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -188,7 +211,12 @@ class ContactViewSet(viewsets.ModelViewSet):
         action_type = serializer.validated_data['action']
         data = serializer.validated_data.get('data', {})
 
-        contacts = Contact.objects.filter(id__in=ids)
+        contacts = self.get_queryset().filter(id__in=ids)
+        if contacts.count() != len(ids):
+            return Response(
+                {'error': 'Some or all target contacts do not exist or belong to another organization'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if action_type == 'update':
             contacts.update(**data, updated_at=timezone.now())
@@ -223,7 +251,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
     API endpoint for Opportunity management
     """
     queryset = Opportunity.objects.select_related('contact', 'assigned_to', 'owner').all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, TenantObjectPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['stage', 'assigned_to', 'owner']
     search_fields = ['name', 'company_name', 'contact__first_name', 'contact__last_name']
@@ -238,6 +266,12 @@ class OpportunityViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
+        org = getattr(self.request, 'organization', None)
+
+        if not user.is_superuser:
+            if not org:
+                return queryset.none()
+            queryset = queryset.filter(organization=org)
 
         # Filter options
         stage = self.request.query_params.get('stage', None)
@@ -252,7 +286,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def bulk_update(self, request):
-        """Bulk update multiple opportunities"""
+        """Bulk update multiple opportunities scoped to tenant"""
         serializer = BulkOperationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -260,7 +294,12 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         action_type = serializer.validated_data['action']
         data = serializer.validated_data.get('data', {})
 
-        opportunities = Opportunity.objects.filter(id__in=ids)
+        opportunities = self.get_queryset().filter(id__in=ids)
+        if opportunities.count() != len(ids):
+            return Response(
+                {'error': 'Some or all target opportunities do not exist or belong to another organization'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         if action_type == 'update':
             opportunities.update(**data, updated_at=timezone.now())
@@ -307,7 +346,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     API endpoint for Task management
     """
     queryset = Task.objects.select_related('assigned_to', 'created_by').all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, TenantObjectPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'task_type', 'assigned_to']
     search_fields = ['title', 'description']
@@ -322,6 +361,12 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         user = self.request.user
+        org = getattr(self.request, 'organization', None)
+
+        if not user.is_superuser:
+            if not org:
+                return queryset.none()
+            queryset = queryset.filter(organization=org)
 
         # Filter options
         assigned_to_me = self.request.query_params.get('assigned_to_me', None)

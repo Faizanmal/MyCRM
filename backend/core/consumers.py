@@ -118,7 +118,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
 class ActivityFeedConsumer(AsyncWebsocketConsumer):
     """
-    WebSocket consumer for real-time activity feed updates
+    WebSocket consumer for real-time activity feed updates scoped to tenant
     """
 
     async def connect(self):
@@ -129,8 +129,14 @@ class ActivityFeedConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Join activity feed group
-        self.feed_group_name = 'activity_feed'
+        # Get tenant/organization from scope or user
+        self.tenant_id = await self.get_user_tenant_id()
+        if not self.tenant_id:
+            await self.close()
+            return
+
+        # Join tenant-scoped activity feed group
+        self.feed_group_name = f'activity_feed_tenant_{self.tenant_id}'
 
         await self.channel_layer.group_add(
             self.feed_group_name,
@@ -139,12 +145,23 @@ class ActivityFeedConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
+    @database_sync_to_async
+    def get_user_tenant_id(self):
+        """Resolve user's primary organization membership ID"""
+        from multi_tenant.models import OrganizationMember
+        user = getattr(self, 'user', None) or (self.scope.get('user') if hasattr(self, 'scope') else None)
+        if not user or user.is_anonymous:
+            return None
+        membership = OrganizationMember.objects.filter(user=user, is_active=True).first()
+        return membership.organization_id if membership else None
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnect"""
-        await self.channel_layer.group_discard(
-            self.feed_group_name,
-            self.channel_name
-        )
+        if hasattr(self, 'feed_group_name'):
+            await self.channel_layer.group_discard(
+                self.feed_group_name,
+                self.channel_name
+            )
 
     async def activity_created(self, event):
         """Send new activity to feed"""

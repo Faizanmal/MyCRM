@@ -1,11 +1,20 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from multi_tenant.middleware import get_current_organization
 
 User = get_user_model()
 
 
 class Task(models.Model):
     """Task model for managing tasks and activities"""
+    organization = models.ForeignKey(
+        'multi_tenant.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='tasks',
+        db_index=True
+    )
     PRIORITY_CHOICES = [
         ('low', 'Low'),
         ('medium', 'Medium'),
@@ -44,9 +53,9 @@ class Task(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
 
     # Dates
-    due_date = models.DateTimeField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
-    reminder_date = models.DateTimeField(blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    reminder_date = models.DateTimeField(null=True, blank=True)
 
     # Related Objects
     contact = models.ForeignKey('contact_management.Contact', on_delete=models.CASCADE, blank=True, related_name='tasks')
@@ -73,6 +82,21 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.assigned_to.get_full_name()}"
+
+    def save(self, *args, **kwargs):
+        if not self.organization_id:
+            current_org = get_current_organization()
+            if current_org:
+                self.organization = current_org
+            elif hasattr(self, 'created_by') and self.created_by:
+                member = self.created_by.organization_memberships.first()
+                if member:
+                    self.organization = member.organization
+            elif hasattr(self, 'assigned_to') and self.assigned_to:
+                member = self.assigned_to.organization_memberships.first()
+                if member:
+                    self.organization = member.organization
+        super().save(*args, **kwargs)
 
 
 class CalendarEvent(models.Model):

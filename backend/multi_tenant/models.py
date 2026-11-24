@@ -241,21 +241,10 @@ class TenantAwareModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        # Ensure organization is set
+        # Ensure organization is set from current context if available
         if not self.organization_id:
             from .middleware import get_current_organization
             org = get_current_organization()
-            if not org:
-                # For development/testing, create a default organization
-                org, created = Organization.objects.get_or_create(
-                    slug='default',
-                    defaults={
-                        'name': 'Default Organization',
-                        'domain': '127.0.0.1',
-                        'email': 'admin@example.com',
-                        'status': 'active'
-                    }
-                )
             if org:
                 self.organization = org
         super().save(*args, **kwargs)

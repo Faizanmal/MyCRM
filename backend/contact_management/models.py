@@ -43,6 +43,14 @@ class Contact(models.Model):
     country = models.CharField(max_length=100, blank=True)
 
     # CRM Information
+    organization = models.ForeignKey(
+        'multi_tenant.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='contacts',
+        db_index=True
+    )
     contact_type = models.CharField(max_length=20, choices=CONTACT_TYPE_CHOICES, default='prospect')
     source = models.CharField(max_length=100, blank=True)  # How they found us
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_contacts')
@@ -75,6 +83,22 @@ class Contact(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    def save(self, *args, **kwargs):
+        if not self.organization_id:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+            if not org:
+                user = self.created_by or self.assigned_to
+                if user:
+                    org = getattr(user, 'organization', None)
+                    if not org and hasattr(user, 'organization_memberships'):
+                        membership = user.organization_memberships.filter(is_active=True).first()
+                        if membership:
+                            org = membership.organization
+            if org:
+                self.organization = org
+        super().save(*args, **kwargs)
 
 
 class ContactGroup(models.Model):

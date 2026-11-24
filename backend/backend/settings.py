@@ -56,6 +56,8 @@ else:
 _allowed = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',') if h.strip()]
 if 'testserver' not in _allowed and (DEBUG or ENVIRONMENT in ('local', 'ci', 'test', 'development')):
     _allowed.append('testserver')
+if '*' not in _allowed and (DEBUG or ENVIRONMENT in ('local', 'ci', 'test', 'development')):
+    _allowed.append('.crm.local')
 ALLOWED_HOSTS = _allowed
 
 

@@ -5,6 +5,7 @@ from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from multi_tenant.permissions import TenantObjectPermission
 from .models import Lead, LeadActivity, LeadAssignmentRule, LeadConversion
 from .serializers import (
     LeadActivitySerializer,
@@ -22,7 +23,7 @@ class LeadViewSet(viewsets.ModelViewSet):
     """Lead management viewset"""
     queryset = Lead.objects.all()
     serializer_class = LeadSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, TenantObjectPermission]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['first_name', 'last_name', 'email', 'company_name', 'phone']
     ordering_fields = ['first_name', 'last_name', 'email', 'company_name', 'created_at', 'lead_score']
@@ -35,10 +36,19 @@ class LeadViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Lead.objects.all()
+        user = self.request.user
+        org = getattr(self.request, 'organization', None)
 
-        # Filter by assigned user if not admin
+        if not user.is_superuser:
+            if not org:
+                return queryset.none()
+            queryset = queryset.filter(organization=org)
+
+        # Filter by assigned user if not admin/owner within tenant
         user_role = getattr(self.request.user, 'role', None)
-        if user_role != 'admin' and not self.request.user.is_superuser:
+        if hasattr(self.request, 'member') and self.request.member:
+            user_role = self.request.member.role
+        if user_role not in ['admin', 'owner'] and not self.request.user.is_superuser:
             queryset = queryset.filter(
                 Q(assigned_to=self.request.user) | Q(owner=self.request.user)
             )

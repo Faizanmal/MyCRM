@@ -90,7 +90,7 @@ class LeadScore(models.Model):
 
     lead = models.ForeignKey('lead_management.Lead', on_delete=models.CASCADE, related_name='scores')
     score = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
-    previous_score = models.IntegerField(blank=True)
+    previous_score = models.IntegerField(null=True, blank=True)
     score_breakdown = models.JSONField(default=dict, help_text="Points by category")
     qualification_stage = models.CharField(max_length=50, blank=True)
 
