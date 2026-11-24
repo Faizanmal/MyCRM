@@ -56,6 +56,8 @@ class UserProfile(models.Model):
     bio = models.TextField(blank=True)
     timezone = models.CharField(max_length=50, default='UTC')
     language = models.CharField(max_length=10, default='en')
+    two_factor_enabled = models.BooleanField(default=False)
+    two_factor_secret = models.CharField(max_length=64, blank=True)
     notification_preferences = models.JSONField(default=dict)
     dashboard_preferences = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)

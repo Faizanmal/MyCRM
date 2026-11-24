@@ -60,12 +60,12 @@ class Lead(models.Model):
 
     # Lead Scoring and Qualification
     lead_score = models.IntegerField(default=0)
-    estimated_value = models.DecimalField(max_digits=12, decimal_places=2, blank=True)
+    estimated_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     probability = models.IntegerField(default=0)  # Percentage
 
     # Communication
-    last_contact_date = models.DateTimeField(blank=True)
-    next_follow_up = models.DateTimeField(blank=True)
+    last_contact_date = models.DateTimeField(null=True, blank=True)
+    next_follow_up = models.DateTimeField(null=True, blank=True)
 
     # Additional Information
     notes = models.TextField(blank=True)
@@ -75,7 +75,7 @@ class Lead(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    converted_at = models.DateTimeField(blank=True)
+    converted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'crm_leads'

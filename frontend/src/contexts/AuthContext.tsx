@@ -72,20 +72,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = useCallback(() => {
-    authAPI.logout();
+  const logout = useCallback(async () => {
+    await authAPI.logout();
     setUser(null);
     window.location.href = '/login';
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        setUser(null);
-        return;
-      }
-      
       const userProfile = await authAPI.getCurrentUser();
       setUser(userProfile);
     } catch (error) {
@@ -96,23 +90,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  // Multi-tab logout listener & auth synchronization
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'auth_logout_event') {
+        setUser(null);
+        window.location.href = '/login';
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Initialize auth on mount
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        try {
-          const userProfile = await authAPI.getCurrentUser();
-          setUser(userProfile);
-        } catch (error) {
-          console.error('Auth init failed:', error);
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-        }
+      try {
+        const userProfile = await authAPI.getCurrentUser();
+        setUser(userProfile);
+      } catch (error) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-    
+
     initAuth();
   }, []);
 

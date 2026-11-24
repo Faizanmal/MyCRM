@@ -2,10 +2,11 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-// Create axios instance
+// Create axios instance with credentials support for HttpOnly cookies and CSRF
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,9 +38,11 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
-            refresh: refreshToken,
-          });
+          const response = await axios.post(
+            `${API_BASE_URL}/auth/refresh/`,
+            { refresh: refreshToken },
+            { withCredentials: true }
+          );
 
           const { access } = response.data;
           localStorage.setItem('access_token', access);
@@ -70,9 +73,16 @@ export const authAPI = {
     return response.data;
   },
 
-  logout: () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+  logout: async () => {
+    try {
+      await apiClient.post('/auth/logout/');
+    } catch {
+      // Ignore network errors on logout
+    } finally {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.setItem('auth_logout_event', Date.now().toString());
+    }
   },
 
   getCurrentUser: async () => {

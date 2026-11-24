@@ -114,16 +114,15 @@ class TenantMiddleware(MiddlewareMixin):
         since DRF authentication normally occurs inside view dispatch.
         """
         if not getattr(request, 'user', None) or request.user.is_anonymous:
-            auth_header = request.headers.get('Authorization', '')
-            if auth_header.startswith('Bearer '):
-                try:
-                    authenticator = JWTAuthentication()
-                    auth_result = authenticator.authenticate(request)
-                    if auth_result:
-                        request.user, request.auth = auth_result
-                except Exception:
-                    # Invalid token will be properly handled by DRF permission classes
-                    pass
+            try:
+                from user_management.authentication import CookieOrHeaderJWTAuthentication
+                authenticator = CookieOrHeaderJWTAuthentication()
+                auth_result = authenticator.authenticate(request)
+                if auth_result:
+                    request.user, request.auth = auth_result
+            except Exception:
+                # Invalid token will be properly handled by DRF permission classes
+                pass
 
     def process_request(self, request):
         # Always reset context at the start of a new request
