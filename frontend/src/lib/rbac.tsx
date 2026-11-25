@@ -20,6 +20,8 @@ export type Permission =
     | 'delete_contacts'
     | 'export_contacts'
     | 'import_contacts'
+    | 'merge_contacts'
+    | 'unmerge_contacts'
 
     // Deals
     | 'view_deals'
@@ -151,6 +153,8 @@ const rolePermissions: Record<Role, Permission[]> = {
         'delete_contacts',
         'export_contacts',
         'import_contacts',
+        'merge_contacts',
+        'unmerge_contacts',
         'view_deals',
         'create_deals',
         'edit_deals',
@@ -181,6 +185,8 @@ const rolePermissions: Record<Role, Permission[]> = {
         'delete_contacts',
         'export_contacts',
         'import_contacts',
+        'merge_contacts',
+        'unmerge_contacts',
         'view_deals',
         'create_deals',
         'edit_deals',
@@ -219,6 +225,8 @@ const rolePermissions: Record<Role, Permission[]> = {
         'delete_contacts',
         'export_contacts',
         'import_contacts',
+        'merge_contacts',
+        'unmerge_contacts',
         'view_deals',
         'create_deals',
         'edit_deals',

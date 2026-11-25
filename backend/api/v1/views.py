@@ -114,7 +114,7 @@ class LeadViewSet(viewsets.ModelViewSet):
         return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
-    def convert(self, request, _pk=None):
+    def convert(self, request, pk=None, *args, **kwargs):
         """Convert lead to contact and opportunity"""
         lead = self.get_object()
 
@@ -128,21 +128,27 @@ class LeadViewSet(viewsets.ModelViewSet):
             job_title=lead.job_title,
             contact_type='customer',
             assigned_to=lead.assigned_to,
-            created_by=request.user
+            created_by=request.user,
+            organization=lead.organization
         )
 
         # Create opportunity if estimated value exists
         opportunity = None
         if lead.estimated_value:
+            today = timezone.now().date()
+            now = timezone.now()
             opportunity = Opportunity.objects.create(
                 name=f"{lead.company_name} - {lead.first_name} {lead.last_name}",
                 contact=contact,
                 company_name=lead.company_name,
                 amount=lead.estimated_value,
-                probability=lead.probability,
-                expected_close_date=timezone.now().date() + timezone.timedelta(days=30),
+                probability=lead.probability or 50,
+                expected_close_date=today + timezone.timedelta(days=30),
+                actual_close_date=today + timezone.timedelta(days=30),
+                last_activity_date=now,
                 assigned_to=lead.assigned_to,
-                owner=request.user
+                owner=request.user,
+                organization=lead.organization
             )
 
         # Update lead
@@ -344,7 +350,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         return queryset
 
     @action(detail=True, methods=['post'])
-    def complete(self, request, _pk=None):
+    def complete(self, request, pk=None, *args, **kwargs):
         """Mark task as completed"""
         task = self.get_object()
         task.status = 'completed'

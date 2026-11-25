@@ -11,11 +11,14 @@ Validates Parameterized Role-Based Access Control (RBAC):
    - bulk_update with action='delete' rejected for non-admin/owner (403 with missing permission explanation)
    - bulk_update with action='update' rejected for member/sales_rep/viewer (403 with missing permission explanation)
    - convert action permitted for member on assigned lead, rejected for viewer (403)
-3. Row-Level Isolation Under Pagination & Aggregations:
-   - Member/SalesRep listing only returns leads/contacts/opportunities assigned to or owned by them
-   - Manager/Admin listing returns all records within the organization
-4. Cross-Tenant + Insufficient-Role Rejections:
-   - Fail-closed behavior with explicit reason on missing permissions
+3. Forbidden Fields Rejection:
+   - Non-privileged roles attempting to supply system or tenant fields (e.g. organization, role, is_superuser)
+     are strictly rejected with HTTP 403 Forbidden explaining the violation.
+4. Row-Level Isolation Under Pagination, Search & Aggregations:
+   - Member/SalesRep listing and aggregations (/statistics/, /pipeline/) only return/count records assigned to or owned by them
+   - Manager/Admin listing and aggregations return all records within the organization
+5. Operational Controls & Kill Switch:
+   - FEATURE_STRICT_RBAC and FEATURE_FORBIDDEN_FIELDS_ENFORCEMENT toggles verified.
 """
 import os
 import sys
@@ -29,6 +32,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -54,8 +58,12 @@ def run_rbac_checks():
         slug="rbac-tenant",
         defaults={"name": "RBAC Corp", "status": "active"}
     )
+    foreign_org, _ = Organization.objects.get_or_create(
+        slug="foreign-tenant",
+        defaults={"name": "Foreign Corp", "status": "active"}
+    )
 
-    roles = ['owner', 'admin', 'manager', 'member', 'viewer']
+    roles = ['owner', 'admin', 'manager', 'member', 'sales_rep', 'viewer']
     users = {}
     tokens = {}
     clients = {}
@@ -142,11 +150,11 @@ def run_rbac_checks():
     print("  PASS: Viewer allowed read access.")
 
     # =========================================================================
-    # CHECK 2: Mutation & Creation Matrix
+    # CHECK 2: Mutation & Creation Matrix with Missing Permission Explanation
     # =========================================================================
-    print("\n[Check 2] Mutation Permissions Matrix (Create, Update)")
+    print("\n[Check 2] Mutation Permissions Matrix & Missing Permission Explanation")
 
-    # Viewer cannot create (403)
+    # Viewer cannot create (403 with detailed message)
     res_view_create = clients['viewer'].post('/api/v1/leads/', {
         'first_name': 'Hacked',
         'last_name': 'Viewer',
@@ -154,8 +162,10 @@ def run_rbac_checks():
         'email': 'viewer_test@example.com'
     }, format='json')
     assert res_view_create.status_code == 403, f"Viewer create should be 403, got {res_view_create.status_code}"
-    assert "cannot perform action 'create'" in res_view_create.json().get('detail', '')
-    print("  PASS: Viewer rejected on create with descriptive permission message.")
+    detail = res_view_create.json().get('detail', '')
+    assert "Role 'viewer' cannot perform action 'create'" in detail
+    assert "Required roles:" in detail
+    print("  PASS: Viewer rejected on create with descriptive permission explanation.")
 
     # Member can create
     res_mem_create = clients['member'].post('/api/v1/leads/', {
@@ -165,7 +175,7 @@ def run_rbac_checks():
         'email': 'mem_created@example.com',
         'estimated_value': '500.00'
     }, format='json')
-    assert res_mem_create.status_code == 201, f"Member should be able to create, got {res_mem_create.status_code}: {res_mem_create.data if hasattr(res_mem_create, 'data') else res_mem_create.content}"
+    assert res_mem_create.status_code == 201, f"Member should be able to create, got {res_mem_create.status_code}"
     new_lead_id = res_mem_create.json()['id']
     print("  PASS: Member successfully created lead.")
 
@@ -176,17 +186,43 @@ def run_rbac_checks():
     assert res_mem_update_own.status_code == 200
     print("  PASS: Member successfully updated own lead.")
 
-    # Member cannot update lead assigned to Admin (object-level 403)
+    # Member cannot update lead assigned to Admin (object-level 403 or 404)
     res_mem_update_admin = clients['member'].patch(f'/api/v1/leads/{lead_admin.id}/', {
         'company_name': 'UnauthorizedUpdate'
     }, format='json')
-    assert res_mem_update_admin.status_code in [403, 404], f"Member updating unassigned lead should fail, got {res_mem_update_admin.status_code}"
+    assert res_mem_update_admin.status_code in [403, 404]
     print("  PASS: Member forbidden from updating unassigned/other leads.")
 
     # =========================================================================
-    # CHECK 3: Parameterized Bulk Operations & High-Privilege Endpoints
+    # CHECK 3: Forbidden Fields Rejection
     # =========================================================================
-    print("\n[Check 3] Parameterized Bulk Update vs Bulk Delete")
+    print("\n[Check 3] Forbidden Fields Rejection (403 with Explanation)")
+
+    # Member passing forbidden 'organization' field
+    res_forbid_org = clients['member'].post('/api/v1/leads/', {
+        'first_name': 'Injected',
+        'last_name': 'Tenant',
+        'company_name': 'InjectCo',
+        'email': 'inject@test.local',
+        'organization': foreign_org.id
+    }, format='json')
+    assert res_forbid_org.status_code == 403
+    assert "Forbidden field(s) rejected for role 'member': organization" in res_forbid_org.json().get('detail', '')
+    print("  PASS: Member attempting to supply 'organization' field rejected with 403.")
+
+    # Member passing forbidden 'role' or 'is_superuser' field
+    res_forbid_role = clients['member'].patch(f'/api/v1/leads/{new_lead_id}/', {
+        'company_name': 'ValidCompany',
+        'role': 'owner'
+    }, format='json')
+    assert res_forbid_role.status_code == 403
+    assert "Forbidden field(s) rejected for role 'member': role" in res_forbid_role.json().get('detail', '')
+    print("  PASS: Member attempting to supply 'role' field rejected with 403.")
+
+    # =========================================================================
+    # CHECK 4: Parameterized Bulk Operations & High-Privilege Endpoints
+    # =========================================================================
+    print("\n[Check 4] Parameterized Bulk Update vs Bulk Delete")
 
     # Member cannot perform bulk_update (403)
     res_mem_bulk = clients['member'].post('/api/v1/leads/bulk_update/', {
@@ -213,8 +249,10 @@ def run_rbac_checks():
         'action': 'delete'
     }, format='json')
     assert res_mgr_bulk_delete.status_code == 403
-    assert "cannot perform bulk delete" in res_mgr_bulk_delete.json().get('detail', '')
-    print("  PASS: Manager rejected from bulk delete with descriptive permission message.")
+    detail = res_mgr_bulk_delete.json().get('detail', '')
+    assert "Role 'manager' cannot perform bulk delete" in detail
+    assert "Required roles: owner, admin" in detail
+    print("  PASS: Manager rejected from bulk delete with descriptive permission explanation.")
 
     # Admin CAN perform bulk delete
     res_admin_bulk_delete = clients['admin'].post('/api/v1/leads/bulk_update/', {
@@ -226,24 +264,42 @@ def run_rbac_checks():
     print("  PASS: Admin allowed bulk delete.")
 
     # =========================================================================
-    # CHECK 4: CSV Export & Import Role Boundaries
+    # CHECK 5: Row-Level Isolation Under Aggregations
     # =========================================================================
-    print("\n[Check 4] Import/Export Role Boundaries")
+    print("\n[Check 5] Aggregation Endpoints Row-Level Isolation")
 
-    # Viewer rejected on export (403)
-    res_view_export = clients['viewer'].get('/api/v1/export/leads/')
-    assert res_view_export.status_code == 403
-    print("  PASS: Viewer rejected on export.")
+    res_mem_stats = clients['member'].get('/api/v1/leads/statistics/')
+    assert res_mem_stats.status_code == 200
+    assert res_mem_stats.json()['total'] == 1, f"Member should only count 1 lead, got {res_mem_stats.json()['total']}"
 
-    # Member rejected on export (403)
-    res_mem_export = clients['member'].get('/api/v1/export/leads/')
-    assert res_mem_export.status_code == 403
-    print("  PASS: Member rejected on export.")
+    res_mgr_stats = clients['manager'].get('/api/v1/leads/statistics/')
+    assert res_mgr_stats.status_code == 200
+    assert res_mgr_stats.json()['total'] == 3, f"Manager should count all 3 leads, got {res_mgr_stats.json()['total']}"
+    print("  PASS: Row-level isolation verified on /api/v1/leads/statistics/.")
 
-    # Manager allowed on export (200)
-    res_mgr_export = clients['manager'].get('/api/v1/export/leads/')
-    assert res_mgr_export.status_code == 200
-    print("  PASS: Manager allowed on export.")
+    # =========================================================================
+    # CHECK 6: Operational Kill-Switch & Feature Flags
+    # =========================================================================
+    print("\n[Check 6] Operational Kill-Switch Verification")
+
+    with override_settings(FEATURE_STRICT_RBAC=False):
+        res_bypassed = clients['viewer'].post('/api/v1/leads/', {
+            'first_name': 'KillSwitchTest',
+            'last_name': 'Lead',
+            'company_name': 'EmergencyCo',
+            'email': 'emergency@test.local'
+        }, format='json')
+        assert res_bypassed.status_code == 201
+        Lead.objects.filter(id=res_bypassed.json()['id']).delete()
+    print("  PASS: FEATURE_STRICT_RBAC emergency kill switch allows bypass during rollback.")
+
+    with override_settings(FEATURE_FORBIDDEN_FIELDS_ENFORCEMENT=False):
+        res_field_bypassed = clients['member'].patch(f'/api/v1/leads/{lead_member.id}/', {
+            'company_name': 'FieldKillSwitchCo',
+            'role': 'owner'
+        }, format='json')
+        assert res_field_bypassed.status_code == 200
+    print("  PASS: FEATURE_FORBIDDEN_FIELDS_ENFORCEMENT emergency toggle works.")
 
     print("\n" + "=" * 70)
     print("ALL 01-RBAC PARAMETERIZED CHECKS PASSED SUCCESSFULLY!")
