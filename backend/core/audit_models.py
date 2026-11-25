@@ -1,6 +1,7 @@
 """
 Audit Trail System
-Track all changes with detailed audit logs and version history
+Track all changes with detailed audit logs, version history,
+monotonic sequencing, cryptographic SHA-256 tamper detection, and credential redaction.
 """
 import uuid
 
@@ -10,11 +11,17 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
 
+from core.audit_utils import (
+    SENSITIVE_KEY_PATTERN,
+    compute_audit_record_hash,
+    redact_sensitive_data,
+)
+
 User = get_user_model()
 
 
 class AuditTrail(models.Model):
-    """Comprehensive audit trail for all CRM entities"""
+    """Comprehensive, tamper-evident audit trail for CRM entities"""
 
     ACTION_TYPES = [
         ('create', 'Created'),
@@ -28,6 +35,16 @@ class AuditTrail(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    # Multi-tenant isolation
+    organization = models.ForeignKey(
+        'multi_tenant.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='audit_trails',
+        db_index=True,
+    )
 
     # Actor
     user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='audit_trails', null=True)
@@ -43,7 +60,7 @@ class AuditTrail(models.Model):
     action = models.CharField(max_length=30, choices=ACTION_TYPES)
     description = models.TextField(help_text="Human-readable description of the change")
 
-    # Change details
+    # Change details (strictly redacted)
     changes = models.JSONField(default=dict, help_text="Field-by-field changes")
     old_values = models.JSONField(default=dict, help_text="Previous values")
     new_values = models.JSONField(default=dict, help_text="New values")
@@ -56,6 +73,12 @@ class AuditTrail(models.Model):
     # Additional context
     metadata = models.JSONField(default=dict, blank=True)
 
+    # Monotonic sequencing & cryptographic tamper-evident hash chaining
+    sequence_number = models.PositiveBigIntegerField(default=0, db_index=True)
+    prev_hash = models.CharField(max_length=64, blank=True, default='')
+    record_hash = models.CharField(max_length=64, blank=True, default='', db_index=True)
+    is_tampered = models.BooleanField(default=False)
+
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
@@ -64,6 +87,8 @@ class AuditTrail(models.Model):
         verbose_name_plural = 'Audit Trails'
         ordering = ['-timestamp']
         indexes = [
+            models.Index(fields=['organization', '-timestamp']),
+            models.Index(fields=['organization', 'sequence_number']),
             models.Index(fields=['user', '-timestamp']),
             models.Index(fields=['content_type', 'object_id', '-timestamp']),
             models.Index(fields=['action', '-timestamp']),
@@ -71,13 +96,99 @@ class AuditTrail(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user_email} {self.action} {self.content_type.model} at {self.timestamp}"
+        org_name = self.organization.name if self.organization else "System"
+        return f"[{org_name}] #{self.sequence_number} {self.user_email} {self.action} {self.content_type.model} at {self.timestamp}"
+
+    def save(self, *args, **kwargs):
+        # 1. Enforce strict credential redaction
+        if self.changes:
+            self.changes = redact_sensitive_data(self.changes)
+        if self.old_values:
+            self.old_values = redact_sensitive_data(self.old_values)
+        if self.new_values:
+            self.new_values = redact_sensitive_data(self.new_values)
+        if self.metadata:
+            self.metadata = redact_sensitive_data(self.metadata)
+
+        # 2. Resolve organization if not explicitly passed
+        if not self.organization_id:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+            if org:
+                self.organization = org
+            elif self.target and hasattr(self.target, 'organization_id') and self.target.organization_id:
+                self.organization_id = self.target.organization_id
+            elif self.user and hasattr(self.user, 'organization_memberships'):
+                first_membership = self.user.organization_memberships.first()
+                if first_membership:
+                    self.organization = first_membership.organization
+
+        # 3. Monotonic sequence & Cryptographic SHA-256 hash chaining
+        if not self.sequence_number or not self.record_hash:
+            if not self.timestamp:
+                self.timestamp = timezone.now()
+
+            # Find latest existing audit record for this tenant
+            if self.organization_id:
+                latest = (
+                    AuditTrail.objects.filter(organization_id=self.organization_id)
+                    .exclude(id=self.id)
+                    .order_by('-sequence_number')
+                    .first()
+                )
+                if latest and latest.sequence_number > 0:
+                    self.sequence_number = latest.sequence_number + 1
+                    self.prev_hash = latest.record_hash
+                else:
+                    self.sequence_number = 1
+                    self.prev_hash = "0" * 64
+            else:
+                latest = (
+                    AuditTrail.objects.filter(organization__isnull=True)
+                    .exclude(id=self.id)
+                    .order_by('-sequence_number')
+                    .first()
+                )
+                if latest and latest.sequence_number > 0:
+                    self.sequence_number = latest.sequence_number + 1
+                    self.prev_hash = latest.record_hash
+                else:
+                    self.sequence_number = 1
+                    self.prev_hash = "0" * 64
+
+            # Compute SHA-256 hash
+            self.record_hash = compute_audit_record_hash(
+                prev_hash=self.prev_hash,
+                sequence_number=self.sequence_number,
+                timestamp_iso=self.timestamp.isoformat(),
+                organization_id=str(self.organization_id or 'none'),
+                user_id=str(self.user_id or 'none'),
+                action=str(self.action or ''),
+                description=str(self.description or ''),
+                content_type_id=str(self.content_type_id or ''),
+                object_id=str(self.object_id or ''),
+                changes=self.changes or {},
+                new_values=self.new_values or {},
+                metadata=self.metadata or {},
+            )
+
+        super().save(*args, **kwargs)
 
 
 class FieldHistory(models.Model):
-    """Track individual field value history"""
+    """Track individual field value history with tenant isolation and redaction"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    # Multi-tenant isolation
+    organization = models.ForeignKey(
+        'multi_tenant.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='field_histories',
+        db_index=True,
+    )
 
     # Target object
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -105,11 +216,30 @@ class FieldHistory(models.Model):
         verbose_name_plural = 'Field Histories'
         ordering = ['-changed_at']
         indexes = [
+            models.Index(fields=['organization', '-changed_at']),
             models.Index(fields=['content_type', 'object_id', 'field_name', '-changed_at']),
         ]
 
     def __str__(self):
         return f"{self.field_name}: {self.old_value_display} → {self.new_value_display}"
+
+    def save(self, *args, **kwargs):
+        # Enforce credential redaction on field changes
+        if SENSITIVE_KEY_PATTERN.search(self.field_name):
+            self.old_value = '***REDACTED***'
+            self.new_value = '***REDACTED***'
+            self.old_value_display = '***REDACTED***'
+            self.new_value_display = '***REDACTED***'
+        else:
+            self.old_value = redact_sensitive_data(self.old_value)
+            self.new_value = redact_sensitive_data(self.new_value)
+            self.old_value_display = redact_sensitive_data(self.old_value_display)
+            self.new_value_display = redact_sensitive_data(self.new_value_display)
+
+        if not self.organization_id and self.audit_trail and self.audit_trail.organization_id:
+            self.organization_id = self.audit_trail.organization_id
+
+        super().save(*args, **kwargs)
 
 
 class DataSnapshot(models.Model):

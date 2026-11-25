@@ -15,6 +15,7 @@ from .models import (
     DataDeletionRequest,
     DataExportRequest,
     DataProcessingActivity,
+    LegalHold,
     PrivacyNotice,
     UserConsent,
     UserPrivacyPreference,
@@ -27,10 +28,16 @@ from .serializers import (
     DataDeletionRequestSerializer,
     DataExportRequestSerializer,
     DataProcessingActivitySerializer,
+    LegalHoldSerializer,
     PrivacyNoticeSerializer,
     UserConsentListSerializer,
     UserConsentSerializer,
     UserPrivacyPreferenceSerializer,
+)
+from .services import (
+    execute_gdpr_deletion,
+    generate_dsar_export,
+    verify_dsar_checksum,
 )
 
 
@@ -121,7 +128,7 @@ class UserConsentViewSet(viewsets.ModelViewSet):
 
 
 class DataExportRequestViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing data export requests."""
+    """ViewSet for managing data export requests with cryptographic integrity verification."""
     permission_classes = [IsAuthenticated]
     serializer_class = DataExportRequestSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -129,18 +136,40 @@ class DataExportRequestViewSet(viewsets.ModelViewSet):
     ordering_fields = ['requested_at', 'completed_at']
     ordering = ['-requested_at']
 
-    def get_queryset(self):
-        queryset = DataExportRequest.objects.all()
+    def _get_organization(self):
+        org = getattr(self.request, 'organization', None)
+        if not org:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+        if not org and self.request.user and self.request.user.is_authenticated:
+            from multi_tenant.models import OrganizationMember
+            member = OrganizationMember.objects.filter(user=self.request.user, is_active=True).first()
+            if member:
+                org = member.organization
+        return org
 
-        # Users can only see their own requests unless they're staff
-        if not self.request.user.is_staff:
-            queryset = queryset.filter(user=self.request.user)
+    def get_queryset(self):
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return DataExportRequest.objects.none()
+
+        org = self._get_organization()
+        if not org:
+            return DataExportRequest.objects.none()
+
+        queryset = DataExportRequest.objects.filter(organization=org)
+        if not user.is_staff:
+            queryset = queryset.filter(user=user)
 
         return queryset.select_related('user')
 
     def perform_create(self, serializer):
-        # Check if user has pending request
+        org = self._get_organization()
+        if not org:
+            raise serializers.ValidationError('Organization context required for data export.')
+
         pending_count = DataExportRequest.objects.filter(
+            organization=org,
             user=self.request.user,
             status__in=['pending', 'processing']
         ).count()
@@ -150,14 +179,39 @@ class DataExportRequestViewSet(viewsets.ModelViewSet):
                 'You already have a pending export request. Please wait for it to complete.'
             )
 
-        serializer.save(user=self.request.user)
+        export_request = serializer.save(user=self.request.user, organization=org)
+        generate_dsar_export(self.request.user, org, export_request)
 
-        # Trigger async export task (implement with Celery)
-        # from .tasks import process_data_export
-        # process_data_export.delay(export_request.id)
+    @action(detail=True, methods=['post', 'get'])
+    def process_export(self, request, pk=None):
+        """Generate DSAR export bundle immediately with SHA-256 integrity checksum."""
+        export_request = self.get_object()
+        bundle = generate_dsar_export(export_request.user, export_request.organization, export_request)
+        return Response({
+            'status': 'completed',
+            'export_id': str(export_request.id),
+            'checksum': export_request.checksum,
+            'record_counts': bundle.get('record_counts', {}),
+            'export_payload': bundle,
+        })
+
+    @action(detail=True, methods=['get'])
+    def verify(self, request, pk=None):
+        """Cryptographically verify the integrity checksum of the DSAR export bundle."""
+        export_request = self.get_object()
+        if not export_request.export_payload:
+            return Response({'error': 'Export has not been generated yet'}, status=status.HTTP_400_BAD_REQUEST)
+
+        is_valid, msg = verify_dsar_checksum(export_request.export_payload)
+        return Response({
+            'export_id': str(export_request.id),
+            'checksum': export_request.checksum,
+            'is_valid': is_valid,
+            'message': msg,
+        })
 
     @action(detail=True, methods=['post'])
-    def cancel(self, request, _pk=None):
+    def cancel(self, request, pk=None):
         """Cancel an export request."""
         export_request = self.get_object()
 
@@ -181,13 +235,13 @@ class DataExportRequestViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_requests(self, request):
         """Get current user's export requests."""
-        requests = DataExportRequest.objects.filter(user=request.user)
-        serializer = DataExportRequestSerializer(requests, many=True)
+        queryset = self.get_queryset().filter(user=request.user)
+        serializer = DataExportRequestSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
 class DataDeletionRequestViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing data deletion requests."""
+    """ViewSet for managing data deletion requests with legal hold exceptions."""
     permission_classes = [IsAuthenticated]
     serializer_class = DataDeletionRequestSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -195,22 +249,43 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
     ordering_fields = ['requested_at', 'reviewed_at', 'completed_at']
     ordering = ['-requested_at']
 
+    def _get_organization(self):
+        org = getattr(self.request, 'organization', None)
+        if not org:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+        if not org and self.request.user and self.request.user.is_authenticated:
+            from multi_tenant.models import OrganizationMember
+            member = OrganizationMember.objects.filter(user=self.request.user, is_active=True).first()
+            if member:
+                org = member.organization
+        return org
+
     def get_queryset(self):
-        queryset = DataDeletionRequest.objects.all()
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return DataDeletionRequest.objects.none()
 
-        # Users can only see their own requests unless they're staff
-        if not self.request.user.is_staff:
-            queryset = queryset.filter(user=self.request.user)
+        org = self._get_organization()
+        if not org:
+            return DataDeletionRequest.objects.none()
 
-        # Staff can filter pending reviews
-        if self.request.query_params.get('pending_review') == 'true' and self.request.user.is_staff:
+        queryset = DataDeletionRequest.objects.filter(organization=org)
+        if not user.is_staff:
+            queryset = queryset.filter(user=user)
+
+        if self.request.query_params.get('pending_review') == 'true' and user.is_staff:
             queryset = queryset.filter(status='pending')
 
         return queryset.select_related('user', 'reviewed_by')
 
     def perform_create(self, serializer):
-        # Check if user has pending request
+        org = self._get_organization()
+        if not org:
+            raise serializers.ValidationError('Organization context required for data deletion.')
+
         pending_count = DataDeletionRequest.objects.filter(
+            organization=org,
             user=self.request.user,
             status__in=['pending', 'approved', 'processing']
         ).count()
@@ -220,11 +295,11 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
                 'You already have a pending deletion request.'
             )
 
-        serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user, organization=org)
 
     @action(detail=True, methods=['post'])
-    def approve(self, request, _pk=None):
-        """Approve a deletion request (staff only)."""
+    def approve(self, request, pk=None):
+        """Approve and execute a deletion request with legal hold retention exceptions."""
         if not request.user.is_staff:
             return Response(
                 {'error': 'Only staff can approve deletion requests'},
@@ -232,26 +307,20 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
             )
 
         deletion_request = self.get_object()
-
         if deletion_request.status != 'pending':
             return Response(
                 {'error': 'Can only approve pending requests'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        deletion_request.status = 'approved'
-        deletion_request.reviewed_at = timezone.now()
-        deletion_request.reviewed_by = request.user
-        deletion_request.save(update_fields=['status', 'reviewed_at', 'reviewed_by'])
-
-        # Trigger async deletion task
-        # from .tasks import process_data_deletion
-        # process_data_deletion.delay(deletion_request.id)
-
-        return Response(DataDeletionRequestSerializer(deletion_request).data)
+        result = execute_gdpr_deletion(deletion_request, reviewer_user=request.user)
+        return Response({
+            'request': DataDeletionRequestSerializer(deletion_request).data,
+            'execution_result': result,
+        })
 
     @action(detail=True, methods=['post'])
-    def reject(self, request, _pk=None):
+    def reject(self, request, pk=None):
         """Reject a deletion request (staff only)."""
         if not request.user.is_staff:
             return Response(
@@ -260,7 +329,6 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
             )
 
         deletion_request = self.get_object()
-
         if deletion_request.status != 'pending':
             return Response(
                 {'error': 'Can only reject pending requests'},
@@ -274,6 +342,54 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
         deletion_request.save(update_fields=['status', 'reviewed_at', 'reviewed_by', 'rejection_reason'])
 
         return Response(DataDeletionRequestSerializer(deletion_request).data)
+
+
+class LegalHoldViewSet(viewsets.ModelViewSet):
+    """
+    Manage Legal Holds and statutory retention exceptions for GDPR compliance.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = LegalHoldSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['is_active', 'hold_type']
+    search_fields = ['subject_identifier', 'reason']
+    ordering_fields = ['created_at', 'released_at']
+    ordering = ['-created_at']
+
+    def _get_organization(self):
+        org = getattr(self.request, 'organization', None)
+        if not org:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+        if not org and self.request.user and self.request.user.is_authenticated:
+            from multi_tenant.models import OrganizationMember
+            member = OrganizationMember.objects.filter(user=self.request.user, is_active=True).first()
+            if member:
+                org = member.organization
+        return org
+
+    def get_queryset(self):
+        org = self._get_organization()
+        if not org:
+            return LegalHold.objects.none()
+        return LegalHold.objects.filter(organization=org).select_related('created_by', 'released_by')
+
+    def perform_create(self, serializer):
+        org = self._get_organization()
+        if not org:
+            raise serializers.ValidationError('Organization context required for legal hold.')
+        serializer.save(organization=org, created_by=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def release(self, request, pk=None):
+        """Release an active legal hold."""
+        hold = self.get_object()
+        if not hold.is_active:
+            return Response({'error': 'Legal hold is already released'}, status=status.HTTP_400_BAD_REQUEST)
+
+        reason = request.data.get('reason', '')
+        hold.release(released_by=request.user, reason=reason)
+        return Response(LegalHoldSerializer(hold).data)
 
 
 class DataProcessingActivityViewSet(viewsets.ModelViewSet):

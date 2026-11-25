@@ -29,7 +29,8 @@ class AuditTrailSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditTrail
         fields = [
-            'id', 'user', 'user_name', 'user_email', 'content_type', 'model_name',
+            'id', 'organization', 'sequence_number', 'prev_hash', 'record_hash',
+            'is_tampered', 'user', 'user_name', 'user_email', 'content_type', 'model_name',
             'object_id', 'object_repr', 'action', 'description', 'changes',
             'old_values', 'new_values', 'ip_address', 'user_agent', 'request_id',
             'metadata', 'timestamp'
@@ -118,7 +119,25 @@ class AuditTrailViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ['-timestamp']
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return AuditTrail.objects.none()
+
+        org = getattr(self.request, 'organization', None)
+        if not org:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+
+        if not org:
+            from multi_tenant.models import OrganizationMember
+            member = OrganizationMember.objects.filter(user=user, is_active=True).first()
+            if member:
+                org = member.organization
+
+        if not org:
+            return AuditTrail.objects.none()
+
+        queryset = AuditTrail.objects.filter(organization=org).select_related('user', 'content_type')
 
         # Filter by date range
         start_date = self.request.query_params.get('start_date')
@@ -144,6 +163,32 @@ class AuditTrailViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(object_id=object_id)
 
         return queryset
+
+    @action(detail=False, methods=['get'])
+    def verify_integrity(self, request):
+        """Verify cryptographic SHA-256 hash-chain integrity of the tenant's audit trail."""
+        from core.audit_service import verify_audit_trail_integrity
+        org = getattr(request, 'organization', None)
+        if not org:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+        if not org:
+            from multi_tenant.models import OrganizationMember
+            member = OrganizationMember.objects.filter(user=request.user, is_active=True).first()
+            if member:
+                org = member.organization
+        if not org:
+            return Response({'error': 'No organization context found'}, status=status.HTTP_400_BAD_REQUEST)
+
+        is_valid, anomalies = verify_audit_trail_integrity(org.id)
+        total_records = AuditTrail.objects.filter(organization=org).count()
+        return Response({
+            'organization_id': str(org.id),
+            'organization_name': org.name,
+            'is_valid': is_valid,
+            'total_records': total_records,
+            'anomalies': anomalies,
+        })
 
     @action(detail=False, methods=['get'])
     def stats(self, request):
@@ -193,7 +238,25 @@ class FieldHistoryViewSet(viewsets.ReadOnlyModelViewSet):
     ordering = ['-changed_at']
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return FieldHistory.objects.none()
+
+        org = getattr(self.request, 'organization', None)
+        if not org:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+
+        if not org:
+            from multi_tenant.models import OrganizationMember
+            member = OrganizationMember.objects.filter(user=user, is_active=True).first()
+            if member:
+                org = member.organization
+
+        if not org:
+            return FieldHistory.objects.none()
+
+        queryset = FieldHistory.objects.filter(organization=org).select_related('changed_by', 'content_type')
 
         # Filter by object
         object_id = self.request.query_params.get('object_id')

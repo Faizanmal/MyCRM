@@ -7,6 +7,7 @@ from .models import (
     DataDeletionRequest,
     DataExportRequest,
     DataProcessingActivity,
+    LegalHold,
     PrivacyNotice,
     UserConsent,
     UserPrivacyPreference,
@@ -64,9 +65,10 @@ class DataExportRequestSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'user_name', 'status', 'status_display', 'request_type',
             'data_categories', 'format', 'file_url', 'file_size_bytes',
-            'expires_at', 'requested_at', 'completed_at', 'error_message', 'notes'
+            'expires_at', 'requested_at', 'completed_at', 'error_message', 'notes',
+            'export_payload', 'checksum'
         ]
-        read_only_fields = ['user', 'requested_at', 'completed_at', 'file_url', 'file_size_bytes']
+        read_only_fields = ['user', 'requested_at', 'completed_at', 'file_url', 'file_size_bytes', 'checksum']
 
     def get_user_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
@@ -83,9 +85,10 @@ class DataDeletionRequestSerializer(serializers.ModelSerializer):
             'id', 'user', 'user_name', 'status', 'status_display', 'deletion_type',
             'data_categories', 'reason', 'requested_at', 'reviewed_at',
             'reviewed_by', 'reviewed_by_name', 'completed_at', 'rejection_reason',
-            'backup_created', 'backup_location', 'notes'
+            'backup_created', 'backup_location', 'notes',
+            'retained_legal_exceptions', 'anonymized_fields_count', 'retained_records_count'
         ]
-        read_only_fields = ['user', 'requested_at', 'reviewed_at', 'completed_at']
+        read_only_fields = ['user', 'requested_at', 'reviewed_at', 'completed_at', 'retained_legal_exceptions']
 
     def get_user_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
@@ -94,6 +97,21 @@ class DataDeletionRequestSerializer(serializers.ModelSerializer):
         if obj.reviewed_by:
             return f"{obj.reviewed_by.first_name} {obj.reviewed_by.last_name}".strip() or obj.reviewed_by.username
         return None
+
+
+class LegalHoldSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
+    released_by_name = serializers.CharField(source='released_by.get_full_name', read_only=True)
+    hold_type_display = serializers.CharField(source='get_hold_type_display', read_only=True)
+
+    class Meta:
+        model = LegalHold
+        fields = [
+            'id', 'organization', 'subject_identifier', 'hold_type', 'hold_type_display',
+            'reason', 'is_active', 'created_by', 'created_by_name', 'created_at',
+            'released_at', 'released_by', 'released_by_name', 'notes'
+        ]
+        read_only_fields = ['id', 'created_by', 'created_at', 'released_at', 'released_by']
 
 
 class DataProcessingActivitySerializer(serializers.ModelSerializer):

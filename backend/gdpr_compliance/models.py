@@ -1,7 +1,10 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.utils import timezone
 
 from multi_tenant.models import TenantAwareModel
 
@@ -58,7 +61,7 @@ class UserConsent(TenantAwareModel):
     consent_type = models.ForeignKey(ConsentType, on_delete=models.CASCADE, related_name='user_consents')
     is_granted = models.BooleanField(default=False)
     consent_date = models.DateTimeField(auto_now_add=True)
-    expiry_date = models.DateTimeField(blank=True)
+    expiry_date = models.DateTimeField(blank=True, null=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
     consent_method = models.CharField(
@@ -71,7 +74,7 @@ class UserConsent(TenantAwareModel):
         ],
         default='explicit'
     )
-    withdrawn_at = models.DateTimeField(blank=True)
+    withdrawn_at = models.DateTimeField(blank=True, null=True)
     withdrawal_reason = models.TextField(blank=True)
     version = models.IntegerField(default=1)
     metadata = models.JSONField(default=dict, blank=True)
@@ -128,12 +131,16 @@ class DataExportRequest(TenantAwareModel):
         default='json'
     )
     file_url = models.URLField(blank=True)
-    file_size_bytes = models.BigIntegerField(blank=True)
-    expires_at = models.DateTimeField(blank=True)
+    file_size_bytes = models.BigIntegerField(blank=True, null=True)
+    expires_at = models.DateTimeField(blank=True, null=True)
     requested_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
     error_message = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+
+    # DSAR cryptographic integrity
+    export_payload = models.JSONField(default=dict, blank=True)
+    checksum = models.CharField(max_length=64, blank=True, default='')
 
     class Meta:
         db_table = 'gdpr_data_export_requests'
@@ -174,7 +181,7 @@ class DataDeletionRequest(TenantAwareModel):
     )
     reason = models.TextField(blank=True)
     requested_at = models.DateTimeField(auto_now_add=True)
-    reviewed_at = models.DateTimeField(blank=True)
+    reviewed_at = models.DateTimeField(blank=True, null=True)
     reviewed_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -182,11 +189,16 @@ class DataDeletionRequest(TenantAwareModel):
         blank=True,
         related_name='reviewed_deletion_requests'
     )
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
     rejection_reason = models.TextField(blank=True)
     backup_created = models.BooleanField(default=False)
     backup_location = models.CharField(max_length=500, blank=True)
     notes = models.TextField(blank=True)
+
+    # Legal hold retention exceptions & erasure accounting
+    retained_legal_exceptions = models.JSONField(default=list, blank=True)
+    anonymized_fields_count = models.IntegerField(default=0)
+    retained_records_count = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'gdpr_data_deletion_requests'
@@ -414,3 +426,50 @@ class UserPrivacyPreference(TenantAwareModel):
 
     def __str__(self):
         return f"{self.user.username}'s Privacy Preferences"
+
+
+class LegalHold(TenantAwareModel):
+    """
+    Legal Hold / Statutory Retention Exception.
+    Ensures data subject records cannot be destroyed under GDPR 'Right to be Forgotten'
+    when subject to active litigation, regulatory audit, tax retention, or statutory duty.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    HOLD_TYPES = [
+        ('litigation', 'Litigation Hold'),
+        ('tax_audit', 'Tax / Regulatory Audit'),
+        ('statutory_retention', 'Statutory Retention Obligation'),
+        ('contractual', 'Contractual Requirement'),
+    ]
+    subject_identifier = models.CharField(
+        max_length=255,
+        db_index=True,
+        help_text="Email, User ID, or External Reference of the subject under hold"
+    )
+    hold_type = models.CharField(max_length=50, choices=HOLD_TYPES, default='litigation')
+    reason = models.TextField(help_text="Legal justification and statutory basis for retention exception")
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_legal_holds')
+    created_at = models.DateTimeField(auto_now_add=True)
+    released_at = models.DateTimeField(null=True, blank=True)
+    released_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='released_legal_holds')
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        db_table = 'gdpr_legal_holds'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['organization', 'subject_identifier', 'is_active']),
+        ]
+
+    def __str__(self):
+        status = "Active" if self.is_active else "Released"
+        return f"LegalHold [{status}] {self.subject_identifier} - {self.get_hold_type_display()}"
+
+    def release(self, released_by=None, reason=""):
+        self.is_active = False
+        self.released_at = timezone.now()
+        self.released_by = released_by
+        if reason:
+            self.notes = f"{self.notes}\nRelease note: {reason}".strip()
+        self.save(update_fields=['is_active', 'released_at', 'released_by', 'notes'])

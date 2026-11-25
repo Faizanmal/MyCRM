@@ -8,6 +8,7 @@ from .views import (
     DataDeletionRequestViewSet,
     DataExportRequestViewSet,
     DataProcessingActivityViewSet,
+    LegalHoldViewSet,
     PrivacyNoticeViewSet,
     UserConsentViewSet,
     UserPrivacyPreferenceViewSet,
@@ -20,6 +21,7 @@ router.register(r'consent-types', ConsentTypeViewSet, basename='consenttype')
 router.register(r'user-consents', UserConsentViewSet, basename='userconsent')
 router.register(r'export-requests', DataExportRequestViewSet, basename='exportrequest')
 router.register(r'deletion-requests', DataDeletionRequestViewSet, basename='deletionrequest')
+router.register(r'legal-holds', LegalHoldViewSet, basename='legalhold')
 router.register(r'processing-activities', DataProcessingActivityViewSet, basename='processingactivity')
 router.register(r'breach-incidents', DataBreachIncidentViewSet, basename='breachincident')
 router.register(r'access-logs', DataAccessLogViewSet, basename='accesslog')
