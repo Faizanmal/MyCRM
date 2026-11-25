@@ -1,14 +1,26 @@
 """
-MyCRM Contact Management Service
+MyCRM Contact & Account Management Service Layer
 
-This module provides comprehensive business logic for contact management,
-including CRUD operations, search, enrichment, and analytics.
+This module provides enterprise business logic for Contacts and Accounts:
+- Tenant-scoped CRUD and caching
+- Multi-criteria duplicate detection
+- Invariant-guarded Merge & Unmerge workflows with immutable audit snapshots
+- Streaming bounded-memory import for high-volume fixtures (10k+ records)
+- Cross-tenant reassignment prevention and audit logging
 """
 
+import csv
+import io
+import json
 import logging
+import os
+import tracemalloc
 from datetime import timedelta
-from typing import Any
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Avg, Count, Q, QuerySet
 from django.utils import timezone
 
@@ -20,43 +32,37 @@ from core.services import (
     with_logging,
     with_transaction,
 )
+from contact_management.models import (
+    Account,
+    Contact,
+    ContactActivity,
+    ContactGroup,
+    MergeAuditLog,
+)
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class ContactService(CachedService):
     """
-    Service for managing contacts.
-
-    Provides comprehensive contact management including:
-    - CRUD operations with validation
-    - Advanced search and filtering
-    - Contact scoring and enrichment
-    - Duplicate detection
-    - Bulk operations
-    - Activity tracking
+    Enterprise service for managing contacts.
+    Provides tenant-scoped operations, duplicate detection, atomic merge/unmerge,
+    and memory-bounded bulk ingestion.
     """
-
-    # Lazy model import to avoid circular dependencies
-    @property
-    def model(self):
-        from contact_management.models import Contact
-        return Contact
-
+    model = Contact
     cache_prefix = 'contact'
-    cache_ttl = 300  # 5 minutes
+    cache_ttl = 300
 
-    # Search configuration
     SEARCH_FIELDS = [
         'first_name',
         'last_name',
         'email',
-        'company',
+        'company_name',
         'phone',
         'job_title'
     ]
 
-    # Lifecycle stages
     LIFECYCLE_STAGES = [
         'subscriber',
         'lead',
@@ -67,514 +73,828 @@ class ContactService(CachedService):
         'evangelist'
     ]
 
-    def get_queryset(self) -> QuerySet:
-        """Get queryset with common select_related and prefetch_related."""
+    def get_queryset(self, include_merged: bool = False) -> QuerySet:
+        """Get queryset with select_related and exclude merged records by default"""
         qs = super().get_queryset()
+        if not include_merged:
+            qs = qs.filter(is_merged=False)
         return qs.select_related(
             'owner',
             'assigned_to',
-            'company'
-        ).prefetch_related(
-            'tags',
-            'activities'
-        )
+            'account',
+            'organization',
+            'created_by'
+        ).prefetch_related('activities')
 
     @with_logging
     def search_contacts(
         self,
-        query: str = None,
-        filters: dict[str, Any] = None,
+        query: Optional[str] = None,
+        filters: Optional[Dict[str, Any]] = None,
         order_by: str = '-created_at',
         page: int = 1,
         page_size: int = 20
-    ) -> tuple[QuerySet, int]:
-        """
-        Advanced contact search with filtering and pagination.
-
-        Args:
-            query: Free text search query
-            filters: Dictionary of filter parameters
-            order_by: Field to order results by
-            page: Page number (1-indexed)
-            page_size: Number of results per page
-
-        Returns:
-            Tuple of (queryset, total_count)
-        """
+    ) -> Tuple[QuerySet, int]:
+        """Advanced contact search with tenant filtering and pagination."""
         qs = self.get_queryset()
         filters = filters or {}
 
-        # Apply text search
         if query:
             search_query = Q()
             for field in self.SEARCH_FIELDS:
                 search_query |= Q(**{f'{field}__icontains': query})
             qs = qs.filter(search_query)
 
-        # Apply filters
         if 'status' in filters:
             qs = qs.filter(status=filters['status'])
-
         if 'lifecycle_stage' in filters:
             qs = qs.filter(lifecycle_stage=filters['lifecycle_stage'])
-
         if 'owner_id' in filters:
             qs = qs.filter(owner_id=filters['owner_id'])
-
+        if 'account_id' in filters:
+            qs = qs.filter(account_id=filters['account_id'])
         if 'company' in filters:
-            qs = qs.filter(company__icontains=filters['company'])
+            qs = qs.filter(Q(company_name__icontains=filters['company']) | Q(account__name__icontains=filters['company']))
+        if 'contact_type' in filters:
+            qs = qs.filter(contact_type=filters['contact_type'])
 
-        if 'tags' in filters:
-            tags = filters['tags']
-            if isinstance(tags, str):
-                tags = [tags]
-            qs = qs.filter(tags__name__in=tags)
-
-        if 'created_after' in filters:
-            qs = qs.filter(created_at__gte=filters['created_after'])
-
-        if 'created_before' in filters:
-            qs = qs.filter(created_at__lte=filters['created_before'])
-
-        if 'score_min' in filters:
-            qs = qs.filter(score__gte=filters['score_min'])
-
-        if 'score_max' in filters:
-            qs = qs.filter(score__lte=filters['score_max'])
-
-        # Get total count before pagination
         total_count = qs.count()
-
-        # Apply ordering
         qs = qs.order_by(order_by)
-
-        # Apply pagination
         offset = (page - 1) * page_size
-        qs = qs[offset:offset + page_size]
-
-        return qs, total_count
+        return qs[offset:offset + page_size], total_count
 
     @with_logging
     @with_transaction
-    def create_contact(self, data: dict[str, Any]) -> Any:
-        """
-        Create a new contact with validation and duplicate detection.
+    def create_contact(self, data: Dict[str, Any]) -> Contact:
+        """Create a contact with validation and tenant scoping."""
+        if self.organization:
+            data['organization'] = self.organization
+        if self.user and 'created_by' not in data:
+            data['created_by'] = self.user
+        if self.user and 'assigned_to' not in data and 'owner' not in data:
+            data['assigned_to'] = self.user
+            data['owner'] = self.user
 
-        Args:
-            data: Contact data dictionary
+        # Support 'company' alias for company_name
+        if 'company' in data and 'company_name' not in data:
+            data['company_name'] = data.pop('company')
 
-        Returns:
-            Created contact instance
-        """
-        # Check for duplicates by email
+        # Check tenant duplicate email
         email = data.get('email')
-        if email and self.exists(email=email):
-            raise ValidationException({
-                'email': ['A contact with this email already exists']
-            })
+        if email and self.organization:
+            existing = Contact.objects.filter(
+                organization=self.organization,
+                email__iexact=email,
+                is_merged=False
+            ).first()
+            if existing:
+                raise ValidationException({
+                    'email': [f"A contact with email '{email}' already exists in this organization."]
+                })
 
-        # Set default lifecycle stage
-        if 'lifecycle_stage' not in data:
-            data['lifecycle_stage'] = 'subscriber'
+        contact = Contact(**data)
+        try:
+            contact.full_clean()
+        except ValidationError as e:
+            raise ValidationException(e.message_dict if hasattr(e, 'message_dict') else {'non_field_errors': e.messages})
 
-        # Set default status
-        if 'status' not in data:
-            data['status'] = 'active'
-
-        # Calculate initial score
-        data['score'] = self._calculate_contact_score(data)
-
-        # Create contact
-        contact = self.create(data)
-
-        # Publish creation event
-        EventPublisher.publish(
-            event_type='created',
-            entity_type='contact',
-            entity_id=contact.pk,
-            data={'email': contact.email, 'company': contact.company},
-            user_id=self.user.pk if self.user else None,
-            organization_id=self.organization.pk if self.organization else None
-        )
-
-        # Trigger enrichment if enabled
-        self._trigger_enrichment(contact)
-
+        contact.save()
+        self.invalidate_cache()
         return contact
-
-    @with_logging
-    @with_transaction
-    def update_contact(self, contact_id: Any, data: dict[str, Any]) -> Any:
-        """
-        Update a contact with validation.
-
-        Args:
-            contact_id: Contact ID
-            data: Updated data dictionary
-
-        Returns:
-            Updated contact instance
-        """
-        contact = self.get(contact_id)
-
-        # Check email uniqueness if changing
-        new_email = data.get('email')
-        if new_email and new_email != contact.email and self.exists(email=new_email):
-            raise ValidationException({
-                'email': ['A contact with this email already exists']
-            })
-
-        # Track lifecycle stage changes
-        old_stage = contact.lifecycle_stage
-        new_stage = data.get('lifecycle_stage', old_stage)
-
-        # Update contact
-        contact = self.update(contact_id, data)
-
-        # Recalculate score if relevant fields changed
-        if any(k in data for k in ['email', 'phone', 'company', 'job_title']):
-            contact.score = self._calculate_contact_score(contact.__dict__)
-            contact.save(update_fields=['score'])
-
-        # Publish update event
-        EventPublisher.publish(
-            event_type='updated',
-            entity_type='contact',
-            entity_id=contact.pk,
-            data={'updated_fields': list(data.keys())},
-            user_id=self.user.pk if self.user else None,
-            organization_id=self.organization.pk if self.organization else None
-        )
-
-        # Handle lifecycle stage transition
-        if old_stage != new_stage:
-            self._handle_lifecycle_transition(contact, old_stage, new_stage)
-
-        return contact
-
-    @with_logging
-    @with_transaction
-    def merge_contacts(
-        self,
-        primary_id: Any,
-        secondary_id: Any,
-        field_choices: dict[str, str] = None
-    ) -> Any:
-        """
-        Merge two contacts into one.
-
-        Args:
-            primary_id: ID of the contact to keep
-            secondary_id: ID of the contact to merge into primary
-            field_choices: Dict mapping field names to 'primary' or 'secondary'
-
-        Returns:
-            Merged contact instance
-        """
-        primary = self.get(primary_id)
-        secondary = self.get(secondary_id)
-        field_choices = field_choices or {}
-
-        # Merge fields based on choices or non-empty values
-        mergeable_fields = [
-            'phone', 'mobile', 'company', 'job_title', 'department',
-            'website', 'linkedin_url', 'twitter_handle',
-            'address_line1', 'city', 'state', 'postal_code', 'country'
-        ]
-
-        for field in mergeable_fields:
-            primary_value = getattr(primary, field, None)
-            secondary_value = getattr(secondary, field, None)
-
-            choice = field_choices.get(field, 'primary')
-
-            if choice == 'secondary' and secondary_value or not primary_value and secondary_value:
-                setattr(primary, field, secondary_value)
-
-        # Keep higher score
-        if secondary.score > primary.score:
-            primary.score = secondary.score
-
-        # Merge tags
-        if hasattr(primary, 'tags') and hasattr(secondary, 'tags'):
-            for tag in secondary.tags.all():
-                primary.tags.add(tag)
-
-        primary.save()
-
-        # Move related records to primary
-        self._transfer_related_records(primary, secondary)
-
-        # Soft delete secondary contact
-        self.delete(secondary_id)
-
-        # Publish merge event
-        EventPublisher.publish(
-            event_type='merged',
-            entity_type='contact',
-            entity_id=primary.pk,
-            data={'merged_from': str(secondary_id)},
-            user_id=self.user.pk if self.user else None,
-            organization_id=self.organization.pk if self.organization else None
-        )
-
-        logger.info(f"Merged contact {secondary_id} into {primary_id}")
-        return primary
 
     @with_logging
     def find_duplicates(
         self,
-        contact_id: Any = None,
-        email: str = None,
-        phone: str = None,
-        company: str = None,
-        name: str = None
+        contact_id: Optional[int] = None,
+        email: Optional[str] = None,
+        phone: Optional[str] = None,
+        company: Optional[str] = None,
+        name: Optional[str] = None
     ) -> QuerySet:
-        """
-        Find potential duplicate contacts.
-
-        Args:
-            contact_id: Optional ID of contact to find duplicates for
-            email: Email to match
-            phone: Phone to match
-            company: Company to match
-            name: Name to match
-
-        Returns:
-            QuerySet of potential duplicates
-        """
+        """Find potential duplicates scoped to the current tenant."""
         qs = self.get_queryset()
         conditions = Q()
 
-        # Get comparison data from existing contact
         if contact_id:
-            contact = self.get(contact_id)
-            email = email or contact.email
-            phone = phone or contact.phone
-            company = company or contact.company
-            name = name or f"{contact.first_name} {contact.last_name}"
-            qs = qs.exclude(pk=contact_id)
+            target = self.get(contact_id)
+            email = email or target.email
+            phone = phone or target.phone or target.mobile
+            company = company or target.company
+            name = name or target.full_name
+            qs = qs.exclude(id=contact_id)
 
-        # Build match conditions
         if email:
             conditions |= Q(email__iexact=email)
 
         if phone:
-            # Normalize phone for comparison
-            normalized_phone = ''.join(filter(str.isdigit, phone))
-            conditions |= Q(phone__endswith=normalized_phone[-10:])
+            digits = ''.join(filter(str.isdigit, phone))
+            if len(digits) >= 7:
+                conditions |= Q(phone__endswith=digits[-7:]) | Q(mobile__endswith=digits[-7:])
 
         if company and name:
-            # Fuzzy match on company + name combination
-            name_parts = name.split()
+            name_parts = name.strip().split()
             if len(name_parts) >= 2:
                 conditions |= Q(
-                    company__icontains=company,
-                    first_name__icontains=name_parts[0],
-                    last_name__icontains=name_parts[-1]
+                    first_name__iexact=name_parts[0],
+                    last_name__iexact=name_parts[-1],
+                    company_name__icontains=company
                 )
+
+        if not conditions:
+            return qs.none()
 
         return qs.filter(conditions).distinct()
 
     @with_logging
     @with_transaction
-    def bulk_update_lifecycle(
+    def merge_contacts(
         self,
-        contact_ids: list[Any],
-        lifecycle_stage: str
-    ) -> int:
+        primary_id: int,
+        secondary_id: int,
+        field_choices: Optional[Dict[str, str]] = None
+    ) -> Tuple[Contact, MergeAuditLog]:
         """
-        Bulk update lifecycle stage for multiple contacts.
-
-        Args:
-            contact_ids: List of contact IDs
-            lifecycle_stage: New lifecycle stage
-
-        Returns:
-            Number of updated contacts
+        Merge two contacts with strict tenant invariants and immutable snapshot logging.
+        Invariants:
+        1. Both primary and secondary must exist.
+        2. primary_id != secondary_id.
+        3. Both must belong to the exact same organization (cross-tenant merge prohibited).
+        4. Neither can already be merged.
         """
-        if lifecycle_stage not in self.LIFECYCLE_STAGES:
-            raise ValidationException({
-                'lifecycle_stage': [f'Invalid stage. Must be one of: {", ".join(self.LIFECYCLE_STAGES)}']
-            })
+        field_choices = field_choices or {}
 
-        contacts = self.get_queryset().filter(pk__in=contact_ids)
-        count = contacts.update(
-            lifecycle_stage=lifecycle_stage,
-            updated_at=timezone.now()
-        )
+        if primary_id == secondary_id:
+            raise ValidationException({'non_field_errors': ["Cannot merge contact with itself."]})
 
-        # Publish bulk update event
-        EventPublisher.publish(
-            event_type='bulk_updated',
+        try:
+            primary = Contact.objects.select_for_update().get(id=primary_id)
+            secondary = Contact.objects.select_for_update().get(id=secondary_id)
+        except Contact.DoesNotExist as e:
+            raise ValidationException({'non_field_errors': [f"Contact not found: {str(e)}"]})
+
+        # Tenant boundary check
+        if primary.organization_id != secondary.organization_id:
+            raise ValidationException({'non_field_errors': ["Cross-tenant merge is strictly prohibited."]})
+
+        if self.organization and primary.organization_id != self.organization.id:
+            raise ValidationException({'non_field_errors': ["Unauthorized: Contact does not belong to active organization."]})
+
+        if primary.is_merged or secondary.is_merged:
+            raise ValidationException({'non_field_errors': ["Cannot merge a record that is already merged."]})
+
+        # Capture secondary snapshot before changes
+        secondary_snapshot = {
+            'id': secondary.id,
+            'first_name': secondary.first_name,
+            'last_name': secondary.last_name,
+            'email': secondary.email,
+            'phone': secondary.phone,
+            'mobile': secondary.mobile,
+            'company_name': secondary.company_name,
+            'job_title': secondary.job_title,
+            'department': secondary.department,
+            'address_line_1': secondary.address_line_1,
+            'address_line_2': secondary.address_line_2,
+            'city': secondary.city,
+            'state': secondary.state,
+            'postal_code': secondary.postal_code,
+            'country': secondary.country,
+            'contact_type': secondary.contact_type,
+            'lifecycle_stage': secondary.lifecycle_stage,
+            'source': secondary.source,
+            'notes': secondary.notes,
+            'tags': secondary.tags,
+            'custom_fields': secondary.custom_fields,
+            'account_id': secondary.account_id,
+            'assigned_to_id': secondary.assigned_to_id,
+            'owner_id': secondary.owner_id,
+        }
+
+        # Merge fields based on preferences or non-empty secondary values
+        mergeable = [
+            'phone', 'mobile', 'job_title', 'department', 'address_line_1',
+            'address_line_2', 'city', 'state', 'postal_code', 'country',
+            'website', 'linkedin', 'twitter', 'notes'
+        ]
+        for field in mergeable:
+            choice = field_choices.get(field, 'primary')
+            sec_val = getattr(secondary, field, None)
+            prim_val = getattr(primary, field, None)
+            if choice == 'secondary' and sec_val:
+                setattr(primary, field, sec_val)
+            elif not prim_val and sec_val:
+                setattr(primary, field, sec_val)
+
+        # Merge Account if primary has none
+        if not primary.account_id and secondary.account_id:
+            primary.account = secondary.account
+            primary.company_name = secondary.company_name
+
+        # Merge tags (union of lists)
+        merged_tags = list(set((primary.tags or []) + (secondary.tags or [])))
+        primary.tags = merged_tags
+
+        # Merge custom fields (shallow dict merge)
+        merged_custom = dict(secondary.custom_fields or {})
+        merged_custom.update(primary.custom_fields or {})
+        primary.custom_fields = merged_custom
+
+        # Repoint related activities
+        repointed = {}
+        activity_ids = list(secondary.activities.values_list('id', flat=True))
+        secondary.activities.update(contact=primary)
+        repointed['activities'] = activity_ids
+        repointed['activities_count'] = len(activity_ids)
+
+        # Repoint opportunities if opportunity model links to contact
+        try:
+            from opportunity_management.models import Opportunity
+            opp_count = Opportunity.objects.filter(contact=secondary).update(contact=primary)
+            repointed['opportunities_count'] = opp_count
+        except (ImportError, Exception):
+            pass
+
+        # Repoint contact groups
+        for group in secondary.groups.all():
+            group.contacts.add(primary)
+
+        primary.save()
+
+        # Mark secondary as merged (do not delete to preserve lineage and enable unmerge)
+        secondary.is_merged = True
+        secondary.merged_into = primary
+        secondary.save(update_fields=['is_merged', 'merged_into', 'updated_at'])
+
+        # Create immutable merge audit log
+        merge_log = MergeAuditLog.objects.create(
             entity_type='contact',
-            entity_id=None,
-            data={
-                'contact_ids': [str(cid) for cid in contact_ids],
-                'lifecycle_stage': lifecycle_stage
-            },
-            user_id=self.user.pk if self.user else None,
-            organization_id=self.organization.pk if self.organization else None
+            organization=primary.organization,
+            primary_id=primary.id,
+            secondary_id=secondary.id,
+            secondary_snapshot=secondary_snapshot,
+            repointed_relations=repointed,
+            merged_by=self.user
         )
 
-        # Invalidate cache
+        logger.info(
+            f"AUDIT: Contact merge completed: {secondary.id} -> {primary.id} "
+            f"in Org {primary.organization_id} by user {self.user}"
+        )
         self.invalidate_cache()
-
-        return count
+        return primary, merge_log
 
     @with_logging
-    def get_contact_analytics(self) -> dict[str, Any]:
+    @with_transaction
+    def unmerge_contact(self, merge_log_id: int) -> Contact:
         """
-        Get aggregate analytics for contacts.
-
-        Returns:
-            Dictionary of analytics data
+        Revert a previous merge operation using the snapshot in MergeAuditLog.
+        Invariants:
+        1. MergeAuditLog must exist and belong to current tenant.
+        2. Must not be already reverted.
+        3. Restores secondary to is_merged=False and clears merged_into.
         """
-        cache_key = 'analytics:overview'
-
-        def compute_analytics():
-            qs = self.get_queryset()
-
-            # Count by status
-            status_counts = dict(
-                qs.values('status')
-                .annotate(count=Count('id'))
-                .values_list('status', 'count')
-            )
-
-            # Count by lifecycle stage
-            stage_counts = dict(
-                qs.values('lifecycle_stage')
-                .annotate(count=Count('id'))
-                .values_list('lifecycle_stage', 'count')
-            )
-
-            # Count by source
-            source_counts = dict(
-                qs.values('source')
-                .annotate(count=Count('id'))
-                .values_list('source', 'count')
-            )
-
-            # Score distribution
-            score_stats = qs.aggregate(
-                avg_score=Avg('score'),
-                total_count=Count('id')
-            )
-
-            # Recent activity
-            thirty_days_ago = timezone.now() - timedelta(days=30)
-            recent_count = qs.filter(created_at__gte=thirty_days_ago).count()
-
-            return {
-                'total_contacts': score_stats['total_count'] or 0,
-                'average_score': round(score_stats['avg_score'] or 0, 1),
-                'by_status': status_counts,
-                'by_lifecycle_stage': stage_counts,
-                'by_source': source_counts,
-                'created_last_30_days': recent_count
-            }
-
-        return self.get_cached(cache_key, compute_analytics, ttl=600)
-
-    def _calculate_contact_score(self, data: dict[str, Any]) -> int:
-        """
-        Calculate contact score based on completeness and quality.
-
-        Args:
-            data: Contact data dictionary
-
-        Returns:
-            Score from 0-100
-        """
-        score = 0
-
-        # Email (25 points)
-        if data.get('email'):
-            score += 25
-
-        # Phone (15 points)
-        if data.get('phone') or data.get('mobile'):
-            score += 15
-
-        # Company (15 points)
-        if data.get('company'):
-            score += 15
-
-        # Job title (10 points)
-        if data.get('job_title'):
-            score += 10
-
-        # Full name (10 points)
-        if data.get('first_name') and data.get('last_name'):
-            score += 10
-
-        # Address (10 points)
-        if data.get('city') and data.get('country'):
-            score += 10
-
-        # Social profiles (10 points)
-        if data.get('linkedin_url'):
-            score += 5
-        if data.get('twitter_handle'):
-            score += 5
-
-        # Website (5 points)
-        if data.get('website'):
-            score += 5
-
-        return min(score, 100)
-
-    def _trigger_enrichment(self, contact) -> None:
-        """Trigger contact enrichment if configured."""
         try:
-            from data_enrichment.tasks import enrich_contact
-            enrich_contact.delay(str(contact.pk))
-            logger.debug(f"Triggered enrichment for contact {contact.pk}")
-        except ImportError:
-            logger.debug("Data enrichment module not available")
+            merge_log = MergeAuditLog.objects.select_for_update().get(id=merge_log_id)
+        except MergeAuditLog.DoesNotExist:
+            raise ValidationException({'non_field_errors': [f"Merge log {merge_log_id} not found."]})
 
-    def _handle_lifecycle_transition(
-        self,
-        contact,
-        old_stage: str,
-        new_stage: str
-    ) -> None:
-        """Handle lifecycle stage transition side effects."""
+        if self.organization and merge_log.organization_id != self.organization.id:
+            raise ValidationException({'non_field_errors': ["Unauthorized: Merge log belongs to a different organization."]})
+
+        if merge_log.is_reverted:
+            raise ValidationException({'non_field_errors': ["This merge has already been unmerged/reverted."]})
+
+        try:
+            secondary = Contact.objects.select_for_update().get(id=merge_log.secondary_id)
+        except Contact.DoesNotExist:
+            raise ValidationException({'non_field_errors': ["Secondary contact no longer exists; cannot unmerge."]})
+
+        # Revert secondary status
+        secondary.is_merged = False
+        secondary.merged_into = None
+        secondary.save(update_fields=['is_merged', 'merged_into', 'updated_at'])
+
+        # Repoint activities back to secondary contact
+        activity_ids = merge_log.repointed_relations.get('activities', [])
+        if activity_ids:
+            ContactActivity.objects.filter(id__in=activity_ids).update(contact=secondary)
+
+        merge_log.is_reverted = True
+        merge_log.reverted_by = self.user
+        merge_log.reverted_at = timezone.now()
+        merge_log.save(update_fields=['is_reverted', 'reverted_by', 'reverted_at'])
+
         logger.info(
-            f"Contact {contact.pk} lifecycle transition: {old_stage} -> {new_stage}"
+            f"AUDIT: Contact unmerge completed for log {merge_log.id}: "
+            f"restored contact {secondary.id} in Org {merge_log.organization_id}"
+        )
+        self.invalidate_cache()
+        return secondary
+
+    def import_contacts_stream(
+        self,
+        stream_or_path: Union[str, io.TextIOBase, Iterable[str]],
+        mapping: Optional[Dict[str, str]] = None,
+        duplicate_strategy: str = 'skip',  # 'skip', 'update', 'error'
+        batch_size: int = 500
+    ) -> Dict[str, Any]:
+        """
+        Import contacts with strict memory bounding (constant peak memory).
+        Streams line-by-line in batches of `batch_size`, using bulk_create and bulk_update.
+        """
+        mapping = mapping or {
+            'first_name': 'first_name',
+            'last_name': 'last_name',
+            'email': 'email',
+            'phone': 'phone',
+            'company': 'company_name',
+            'company_name': 'company_name',
+            'job_title': 'job_title',
+        }
+
+        tracemalloc.start()
+        start_mem, _ = tracemalloc.get_traced_memory()
+
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+        failed_count = 0
+        errors = []
+        total_rows = 0
+
+        # Closeable handle tracker
+        file_to_close = None
+        is_dict_stream = False
+        if isinstance(stream_or_path, str):
+            if os.path.isfile(stream_or_path):
+                file_to_close = open(stream_or_path, 'r', encoding='utf-8', errors='replace')
+                reader_iter = file_to_close
+            else:
+                reader_iter = io.StringIO(stream_or_path)
+        elif hasattr(stream_or_path, 'read'):
+            reader_iter = stream_or_path
+        elif hasattr(stream_or_path, '__iter__'):
+            reader_iter = stream_or_path
+            is_dict_stream = True
+        else:
+            reader_iter = stream_or_path
+
+        try:
+            row_iterator = reader_iter if is_dict_stream else csv.DictReader(reader_iter)
+
+            batch: List[Dict[str, Any]] = []
+
+            def process_batch(chunk: List[Dict[str, Any]]):
+                nonlocal created_count, updated_count, skipped_count, failed_count
+                if not chunk:
+                    return
+
+                chunk_emails = [item['email'].strip().lower() for item in chunk if item.get('email')]
+                existing_map = {}
+                if self.organization and chunk_emails:
+                    existing_qs = Contact.objects.filter(
+                        organization=self.organization,
+                        email__in=chunk_emails,
+                        is_merged=False
+                    )
+                    for c in existing_qs:
+                        existing_map[c.email.lower()] = c
+
+                to_create = []
+                to_update = []
+
+                for item in chunk:
+                    email_key = item.get('email', '').strip().lower()
+                    if not email_key:
+                        failed_count += 1
+                        errors.append(f"Row without email: {item}")
+                        continue
+
+                    if email_key in existing_map:
+                        if duplicate_strategy == 'skip':
+                            skipped_count += 1
+                            continue
+                        elif duplicate_strategy == 'error':
+                            failed_count += 1
+                            errors.append(f"Duplicate email found in org: {email_key}")
+                            continue
+                        elif duplicate_strategy == 'update':
+                            contact_obj = existing_map[email_key]
+                            for k, v in item.items():
+                                if k != 'email' and hasattr(contact_obj, k):
+                                    setattr(contact_obj, k, v)
+                            to_update.append(contact_obj)
+                    else:
+                        contact_data = dict(item)
+                        if 'company' in contact_data and 'company_name' not in contact_data:
+                            contact_data['company_name'] = contact_data.pop('company')
+                        contact_data['organization'] = self.organization
+                        if self.user:
+                            contact_data.setdefault('created_by', self.user)
+                            contact_data.setdefault('assigned_to', self.user)
+                            contact_data.setdefault('owner', self.user)
+                        to_create.append(Contact(**contact_data))
+
+                if to_create:
+                    Contact.objects.bulk_create(to_create, batch_size=batch_size)
+                    created_count += len(to_create)
+
+                if to_update:
+                    update_fields = ['first_name', 'last_name', 'phone', 'company_name', 'job_title', 'updated_at']
+                    Contact.objects.bulk_update(to_update, update_fields, batch_size=batch_size)
+                    updated_count += len(to_update)
+
+            for row in row_iterator:
+                total_rows += 1
+                mapped_row = {}
+                for header, val in row.items():
+                    target_field = mapping.get(header) or mapping.get(str(header).strip())
+                    if target_field:
+                        mapped_row[target_field] = (val or '').strip() if isinstance(val, str) else val
+
+                if 'email' in mapped_row and mapped_row['email']:
+                    batch.append(mapped_row)
+
+                if len(batch) >= batch_size:
+                    process_batch(batch)
+                    batch = []
+
+            # Flush residual batch
+            if batch:
+                process_batch(batch)
+                batch = []
+
+        finally:
+            if file_to_close:
+                file_to_close.close()
+            _, peak_mem = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+
+        logger.info(
+            f"STREAM IMPORT COMPLETED: {total_rows} rows processed, "
+            f"{created_count} created, {updated_count} updated, {skipped_count} skipped. "
+            f"Peak memory: {(peak_mem - start_mem) / 1024 / 1024:.2f} MB"
         )
 
-        # Notify owner of significant transitions
-        significant_transitions = ['sales_qualified', 'opportunity', 'customer']
-        if new_stage in significant_transitions and contact.owner:
-            NotificationService.send_email(
-                to=contact.owner.email,
-                subject=f"Contact {contact.email} moved to {new_stage}",
-                template='emails/lifecycle_transition.html',
-                context={
-                    'contact': contact,
-                    'old_stage': old_stage,
-                    'new_stage': new_stage
-                }
-            )
+        return {
+            'total_processed': total_rows,
+            'created': created_count,
+            'updated': updated_count,
+            'skipped': skipped_count,
+            'failed': failed_count,
+            'errors': errors[:50],  # capped for bounded reporting
+            'peak_memory_mb': round((peak_mem - start_mem) / 1024 / 1024, 2)
+        }
 
-    def _transfer_related_records(self, primary, secondary) -> None:
-        """Transfer related records from secondary to primary contact."""
-        # Transfer activities
-        if hasattr(secondary, 'activities'):
-            secondary.activities.update(contact=primary)
 
-        # Transfer notes
-        if hasattr(secondary, 'notes'):
-            secondary.notes.update(contact=primary)
+class AccountService(CachedService):
+    """
+    Enterprise service for managing B2B Accounts.
+    Provides tenant-scoped operations, duplicate detection, atomic merge/unmerge,
+    and memory-bounded bulk ingestion.
+    """
+    model = Account
+    cache_prefix = 'account'
+    cache_ttl = 300
 
-        # Transfer opportunities
-        if hasattr(secondary, 'opportunities'):
-            secondary.opportunities.update(contact=primary)
+    SEARCH_FIELDS = ['name', 'domain', 'industry', 'city', 'country']
 
-        # Transfer email tracking
-        if hasattr(secondary, 'email_tracking'):
-            secondary.email_tracking.update(contact=primary)
+    def get_queryset(self, include_merged: bool = False) -> QuerySet:
+        qs = super().get_queryset()
+        if not include_merged:
+            qs = qs.filter(is_merged=False)
+        return qs.select_related(
+            'organization',
+            'owner',
+            'assigned_to',
+            'created_by'
+        ).prefetch_related('contacts')
 
-        logger.debug(f"Transferred related records from {secondary.pk} to {primary.pk}")
+    @with_logging
+    def search_accounts(
+        self,
+        query: Optional[str] = None,
+        filters: Optional[Dict[str, Any]] = None,
+        order_by: str = '-created_at',
+        page: int = 1,
+        page_size: int = 20
+    ) -> Tuple[QuerySet, int]:
+        qs = self.get_queryset()
+        filters = filters or {}
+
+        if query:
+            search_query = Q()
+            for field in self.SEARCH_FIELDS:
+                search_query |= Q(**{f'{field}__icontains': query})
+            qs = qs.filter(search_query)
+
+        if 'account_type' in filters:
+            qs = qs.filter(account_type=filters['account_type'])
+        if 'tier' in filters:
+            qs = qs.filter(tier=filters['tier'])
+        if 'owner_id' in filters:
+            qs = qs.filter(owner_id=filters['owner_id'])
+        if 'industry' in filters:
+            qs = qs.filter(industry__icontains=filters['industry'])
+        if 'is_active' in filters:
+            qs = qs.filter(is_active=filters['is_active'])
+
+        total_count = qs.count()
+        qs = qs.order_by(order_by)
+        offset = (page - 1) * page_size
+        return qs[offset:offset + page_size], total_count
+
+    @with_logging
+    @with_transaction
+    def create_account(self, data: Dict[str, Any]) -> Account:
+        if self.organization:
+            data['organization'] = self.organization
+        if self.user and 'created_by' not in data:
+            data['created_by'] = self.user
+        if self.user and 'assigned_to' not in data and 'owner' not in data:
+            data['assigned_to'] = self.user
+            data['owner'] = self.user
+
+        # Enforce unique tenant account name
+        name = data.get('name')
+        if name and self.organization:
+            existing = Account.objects.filter(
+                organization=self.organization,
+                name__iexact=name,
+                is_merged=False
+            ).first()
+            if existing:
+                raise ValidationException({
+                    'name': [f"An account with name '{name}' already exists in this organization."]
+                })
+
+        account = Account(**data)
+        try:
+            account.full_clean()
+        except ValidationError as e:
+            raise ValidationException(e.message_dict if hasattr(e, 'message_dict') else {'non_field_errors': e.messages})
+
+        account.save()
+        self.invalidate_cache()
+        return account
+
+    @with_logging
+    @with_transaction
+    def merge_accounts(
+        self,
+        primary_id: int,
+        secondary_id: int,
+        field_choices: Optional[Dict[str, str]] = None
+    ) -> Tuple[Account, MergeAuditLog]:
+        """
+        Merge two accounts with strict tenant invariants, repointing contacts, and audit logging.
+        Invariants:
+        1. Both accounts exist and belong to the same organization.
+        2. primary_id != secondary_id.
+        3. Neither can already be merged.
+        """
+        field_choices = field_choices or {}
+
+        if primary_id == secondary_id:
+            raise ValidationException({'non_field_errors': ["Cannot merge account with itself."]})
+
+        try:
+            primary = Account.objects.select_for_update().get(id=primary_id)
+            secondary = Account.objects.select_for_update().get(id=secondary_id)
+        except Account.DoesNotExist as e:
+            raise ValidationException({'non_field_errors': [f"Account not found: {str(e)}"]})
+
+        # Tenant boundary check
+        if primary.organization_id != secondary.organization_id:
+            raise ValidationException({'non_field_errors': ["Cross-tenant merge is strictly prohibited."]})
+
+        if self.organization and primary.organization_id != self.organization.id:
+            raise ValidationException({'non_field_errors': ["Unauthorized: Account does not belong to active organization."]})
+
+        if primary.is_merged or secondary.is_merged:
+            raise ValidationException({'non_field_errors': ["Cannot merge a record that is already merged."]})
+
+        # Secondary snapshot
+        secondary_snapshot = {
+            'id': secondary.id,
+            'name': secondary.name,
+            'domain': secondary.domain,
+            'industry': secondary.industry,
+            'company_size': secondary.company_size,
+            'annual_revenue': str(secondary.annual_revenue) if secondary.annual_revenue else None,
+            'website': secondary.website,
+            'phone': secondary.phone,
+            'city': secondary.city,
+            'state': secondary.state,
+            'country': secondary.country,
+            'account_type': secondary.account_type,
+            'tier': secondary.tier,
+            'owner_id': secondary.owner_id,
+            'assigned_to_id': secondary.assigned_to_id,
+            'custom_fields': secondary.custom_fields,
+            'tags': secondary.tags,
+        }
+
+        # Merge fields
+        mergeable = [
+            'domain', 'industry', 'company_size', 'annual_revenue', 'description',
+            'website', 'linkedin_url', 'phone', 'address_line1', 'city', 'state',
+            'postal_code', 'country'
+        ]
+        for field in mergeable:
+            choice = field_choices.get(field, 'primary')
+            sec_val = getattr(secondary, field, None)
+            prim_val = getattr(primary, field, None)
+            if choice == 'secondary' and sec_val:
+                setattr(primary, field, sec_val)
+            elif not prim_val and sec_val:
+                setattr(primary, field, sec_val)
+
+        merged_tags = list(set((primary.tags or []) + (secondary.tags or [])))
+        primary.tags = merged_tags
+
+        merged_custom = dict(secondary.custom_fields or {})
+        merged_custom.update(primary.custom_fields or {})
+        primary.custom_fields = merged_custom
+
+        # Repoint contacts
+        contact_ids = list(Contact.objects.filter(account=secondary).values_list('id', flat=True))
+        contacts_count = Contact.objects.filter(account=secondary).update(
+            account=primary,
+            company_name=primary.name
+        )
+        repointed = {'contacts': contact_ids, 'contacts_count': contacts_count}
+
+        primary.save()
+
+        # Mark secondary merged
+        secondary.is_merged = True
+        secondary.merged_into = primary
+        secondary.is_active = False
+        secondary.save(update_fields=['is_merged', 'merged_into', 'is_active', 'updated_at'])
+
+        merge_log = MergeAuditLog.objects.create(
+            entity_type='account',
+            organization=primary.organization,
+            primary_id=primary.id,
+            secondary_id=secondary.id,
+            secondary_snapshot=secondary_snapshot,
+            repointed_relations=repointed,
+            merged_by=self.user
+        )
+
+        logger.info(
+            f"AUDIT: Account merge completed: {secondary.id} -> {primary.id} "
+            f"in Org {primary.organization_id} by user {self.user}"
+        )
+        self.invalidate_cache()
+        return primary, merge_log
+
+    @with_logging
+    @with_transaction
+    def unmerge_account(self, merge_log_id: int) -> Account:
+        """Revert an account merge operation."""
+        try:
+            merge_log = MergeAuditLog.objects.select_for_update().get(id=merge_log_id)
+        except MergeAuditLog.DoesNotExist:
+            raise ValidationException({'non_field_errors': [f"Merge log {merge_log_id} not found."]})
+
+        if self.organization and merge_log.organization_id != self.organization.id:
+            raise ValidationException({'non_field_errors': ["Unauthorized: Merge log belongs to a different organization."]})
+
+        if merge_log.is_reverted:
+            raise ValidationException({'non_field_errors': ["This merge has already been unmerged/reverted."]})
+
+        try:
+            secondary = Account.objects.select_for_update().get(id=merge_log.secondary_id)
+        except Account.DoesNotExist:
+            raise ValidationException({'non_field_errors': ["Secondary account no longer exists; cannot unmerge."]})
+
+        secondary.is_merged = False
+        secondary.merged_into = None
+        secondary.is_active = True
+        secondary.save(update_fields=['is_merged', 'merged_into', 'is_active', 'updated_at'])
+
+        # Repoint contacts back
+        contact_ids = merge_log.repointed_relations.get('contacts', [])
+        if contact_ids:
+            Contact.objects.filter(id__in=contact_ids).update(account=secondary, company_name=secondary.name)
+
+        merge_log.is_reverted = True
+        merge_log.reverted_by = self.user
+        merge_log.reverted_at = timezone.now()
+        merge_log.save(update_fields=['is_reverted', 'reverted_by', 'reverted_at'])
+
+        logger.info(
+            f"AUDIT: Account unmerge completed for log {merge_log.id}: "
+            f"restored account {secondary.id} in Org {merge_log.organization_id}"
+        )
+        self.invalidate_cache()
+        return secondary
+
+    def import_accounts_stream(
+        self,
+        stream_or_path: Union[str, io.TextIOBase, Iterable[Any]],
+        mapping: Optional[Dict[str, str]] = None,
+        duplicate_strategy: str = 'skip',
+        batch_size: int = 500
+    ) -> Dict[str, Any]:
+        """
+        Import accounts with bounded memory streaming.
+        """
+        mapping = mapping or {
+            'name': 'name',
+            'domain': 'domain',
+            'industry': 'industry',
+            'tier': 'tier',
+            'account_type': 'account_type',
+        }
+
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+        failed_count = 0
+        errors = []
+        total_rows = 0
+
+        file_to_close = None
+        is_dict_stream = False
+        if isinstance(stream_or_path, str):
+            if os.path.isfile(stream_or_path):
+                file_to_close = open(stream_or_path, 'r', encoding='utf-8', errors='replace')
+                reader_iter = file_to_close
+            else:
+                reader_iter = io.StringIO(stream_or_path)
+        elif hasattr(stream_or_path, 'read'):
+            reader_iter = stream_or_path
+        elif hasattr(stream_or_path, '__iter__'):
+            reader_iter = stream_or_path
+            is_dict_stream = True
+        else:
+            reader_iter = stream_or_path
+
+        try:
+            row_iterator = reader_iter if is_dict_stream else csv.DictReader(reader_iter)
+            batch: List[Dict[str, Any]] = []
+
+            def process_batch(chunk: List[Dict[str, Any]]):
+                nonlocal created_count, updated_count, skipped_count, failed_count
+                if not chunk:
+                    return
+
+                chunk_names = [item['name'].strip().lower() for item in chunk if item.get('name')]
+                existing_map = {}
+                if self.organization and chunk_names:
+                    for acc in Account.objects.filter(organization=self.organization, name__in=chunk_names, is_merged=False):
+                        existing_map[acc.name.lower()] = acc
+
+                to_create = []
+                for item in chunk:
+                    name_key = item.get('name', '').strip().lower()
+                    if not name_key:
+                        failed_count += 1
+                        continue
+
+                    if name_key in existing_map:
+                        skipped_count += 1
+                        continue
+
+                    account_data = dict(item)
+                    account_data['organization'] = self.organization
+                    if self.user:
+                        account_data.setdefault('created_by', self.user)
+                        account_data.setdefault('assigned_to', self.user)
+                        account_data.setdefault('owner', self.user)
+                    to_create.append(Account(**account_data))
+
+                if to_create:
+                    Account.objects.bulk_create(to_create, batch_size=batch_size)
+                    created_count += len(to_create)
+
+            for row in row_iterator:
+                total_rows += 1
+                mapped_row = {}
+                for header, val in row.items():
+                    target = mapping.get(header) or mapping.get(str(header).strip())
+                    if target:
+                        mapped_row[target] = (val or '').strip() if isinstance(val, str) else val
+                if 'name' in mapped_row and mapped_row['name']:
+                    batch.append(mapped_row)
+                if len(batch) >= batch_size:
+                    process_batch(batch)
+                    batch = []
+
+            if batch:
+                process_batch(batch)
+
+            return {
+                'total_rows': total_rows,
+                'created': created_count,
+                'updated': updated_count,
+                'skipped': skipped_count,
+                'failed': failed_count,
+                'errors': errors,
+            }
+        finally:
+            if file_to_close:
+                file_to_close.close()

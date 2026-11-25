@@ -164,6 +164,109 @@ export const contactsAPI = {
     });
     return response.data;
   },
+
+  mergeContacts: async (primaryId: number, secondaryId: number, fieldChoices?: Record<string, string>) => {
+    const response = await apiClient.post('/v1/contacts/merge/', {
+      primary_id: primaryId,
+      secondary_id: secondaryId,
+      field_choices: fieldChoices || {},
+    });
+    return response.data;
+  },
+
+  previewMerge: async (primaryId: number, secondaryId: number) => {
+    const response = await apiClient.post('/v1/contacts/merge/preview/', {
+      primary_id: primaryId,
+      secondary_id: secondaryId,
+    });
+    return response.data;
+  },
+
+  unmergeContact: async (auditLogId: number) => {
+    const response = await apiClient.post('/v1/contacts/unmerge/', {
+      audit_log_id: auditLogId,
+    });
+    return response.data;
+  },
+
+  getDuplicates: async () => {
+    const response = await apiClient.get('/v1/contacts/duplicates/');
+    return response.data;
+  },
+
+  getActivities: async (contactId: number) => {
+    const response = await apiClient.get(`/v1/contacts/${contactId}/activities/`);
+    return response.data;
+  },
+
+  createActivity: async (contactId: number, data: Record<string, unknown>) => {
+    const response = await apiClient.post(`/v1/contacts/${contactId}/activities/`, data);
+    return response.data;
+  },
+
+  importContacts: async (rows: Array<Record<string, unknown>>) => {
+    const response = await apiClient.post('/v1/contacts/import-contacts/', { rows });
+    return response.data;
+  },
+};
+
+// Accounts API
+export const accountsAPI = {
+  getAccounts: async (params?: Record<string, unknown>) => {
+    const response = await apiClient.get('/v1/accounts/', { params });
+    return response.data;
+  },
+
+  getAccount: async (id: number) => {
+    const response = await apiClient.get(`/v1/accounts/${id}/`);
+    return response.data;
+  },
+
+  createAccount: async (accountData: Record<string, unknown>) => {
+    const response = await apiClient.post('/v1/accounts/', accountData);
+    return response.data;
+  },
+
+  updateAccount: async (id: number, accountData: Record<string, unknown>) => {
+    const response = await apiClient.patch(`/v1/accounts/${id}/`, accountData);
+    return response.data;
+  },
+
+  deleteAccount: async (id: number) => {
+    const response = await apiClient.delete(`/v1/accounts/${id}/`);
+    return response.data;
+  },
+
+  mergeAccounts: async (primaryId: number, secondaryId: number, fieldChoices?: Record<string, string>) => {
+    const response = await apiClient.post('/v1/accounts/merge/', {
+      primary_id: primaryId,
+      secondary_id: secondaryId,
+      field_choices: fieldChoices || {},
+    });
+    return response.data;
+  },
+
+  unmergeAccount: async (auditLogId: number) => {
+    const response = await apiClient.post('/v1/accounts/unmerge/', {
+      audit_log_id: auditLogId,
+    });
+    return response.data;
+  },
+
+  getStatistics: async () => {
+    const response = await apiClient.get('/v1/accounts/statistics/');
+    return response.data;
+  },
+
+  getTimeline: async (id: number) => {
+    const response = await apiClient.get(`/v1/accounts/${id}/timeline/`);
+    return response.data;
+  },
+
+  importAccounts: async (rows: Array<Record<string, unknown>>) => {
+    const response = await apiClient.post('/v1/accounts/import_accounts/', { rows });
+    return response.data;
+  },
 };
 
 // Leads API

@@ -100,9 +100,17 @@ class CustomField(models.Model):
             if not isinstance(self.options, list):
                 raise ValidationError("Options must be a list")
 
+            normalized = []
             for opt in self.options:
-                if not isinstance(opt, dict) or 'value' not in opt or 'label' not in opt:
+                if isinstance(opt, str):
+                    normalized.append({'value': opt, 'label': opt})
+                elif isinstance(opt, dict) and 'value' in opt and 'label' in opt:
+                    normalized.append(opt)
+                elif isinstance(opt, dict) and 'value' in opt:
+                    normalized.append({'value': opt['value'], 'label': opt['value']})
+                else:
                     raise ValidationError("Each option must have 'value' and 'label'")
+            self.options = normalized
 
     def validate_value(self, value):
         """Validate a value against this field's rules"""

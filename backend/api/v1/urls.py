@@ -22,6 +22,7 @@ from .email_campaigns import EmailCampaignViewSet, EmailTemplateViewSet
 from .import_export import CSVExportView, CSVImportView
 from .scoring import LeadScoringView
 from .timeline import ActivityTimelineView, EntityTimelineView, UserActivityView
+from contact_management.views import AccountViewSet, ContactGroupViewSet
 from .views import ContactViewSet, LeadViewSet, OpportunityViewSet, TaskViewSet
 from .workflows import NotificationTemplateViewSet, WorkflowViewSet
 from multi_tenant.positioning_views import ProductPositioningViewSet
@@ -33,7 +34,11 @@ router.register(r'product-position', ProductPositioningViewSet, basename='produc
 
 # Core CRM resources
 router.register(r'leads', LeadViewSet, basename='lead')
-router.register(r'contacts', ContactViewSet, basename='contact')
+router.register(r'contacts', ContactViewSet, basename='contacts')
+router.register(r'contact', ContactViewSet, basename='contact')
+router.register(r'accounts', AccountViewSet, basename='accounts')
+router.register(r'account', AccountViewSet, basename='account')
+router.register(r'contact-groups', ContactGroupViewSet, basename='contact-groups')
 router.register(r'opportunities', OpportunityViewSet, basename='opportunity')
 router.register(r'tasks', TaskViewSet, basename='task')
 

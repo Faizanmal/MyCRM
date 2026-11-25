@@ -17,7 +17,8 @@ import {
   RefreshCw,
   AlertCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  GitMerge
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -45,7 +46,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { contactsAPI } from '@/lib/api';
+import { contactsAPI, accountsAPI } from '@/lib/api';
 import { stableKey } from '@/lib/stableKey';
 
 
@@ -59,6 +60,9 @@ interface Contact {
   company: string;
   position: string;
   status: 'active' | 'inactive' | 'lead';
+  account?: number;
+  account_name?: string;
+  is_merged?: boolean;
   address?: string;
   city?: string;
   state?: string;
@@ -76,6 +80,7 @@ interface PaginatedResponse {
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [accounts, setAccounts] = useState<Array<{ id: number; name: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -88,6 +93,9 @@ export default function ContactsPage() {
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isMergeDialogOpen, setIsMergeDialogOpen] = useState(false);
+  const [primaryContact, setPrimaryContact] = useState<Contact | null>(null);
+  const [secondaryContactId, setSecondaryContactId] = useState<string>('');
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -97,12 +105,55 @@ export default function ContactsPage() {
     last_name: '',
     email: '',
     phone: '',
+    account: '',
     company: '',
     position: '',
     status: 'active',
     city: '',
     country: '',
   });
+
+  useEffect(() => {
+    accountsAPI.getAccounts()
+      .then((res) => {
+        const accList = res.results || res;
+        setAccounts(accList);
+      })
+      .catch((err) => {
+        console.warn('Could not load accounts list:', err);
+      });
+  }, []);
+
+  const handleOpenMergeModal = (contact: Contact) => {
+    setPrimaryContact(contact);
+    setSecondaryContactId('');
+    setIsMergeDialogOpen(true);
+  };
+
+  const handleExecuteMerge = async () => {
+    if (!primaryContact || !secondaryContactId) {
+      toast.error('Please select a contact to merge.');
+      return;
+    }
+    const secId = parseInt(secondaryContactId, 10);
+    if (isNaN(secId) || secId === primaryContact.id) {
+      toast.error('Cannot merge contact into itself.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await contactsAPI.mergeContacts(primaryContact.id, secId);
+      toast.success(res.message || 'Contacts merged successfully.');
+      setIsMergeDialogOpen(false);
+      fetchContacts();
+    } catch (err: unknown) {
+      console.error('Merge failed:', err);
+      toast.error('Failed to merge contacts. Incompatible tenants or invalid contact.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const fetchContacts = useCallback(async (showRefreshing = false) => {
     try {
@@ -440,6 +491,10 @@ export default function ContactsPage() {
                               <Phone className="w-4 h-4 mr-2" />
                               Call
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenMergeModal(contact)}>
+                              <GitMerge className="w-4 h-4 mr-2" />
+                              Merge Contact
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="text-red-600"
@@ -587,6 +642,30 @@ export default function ContactsPage() {
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="account">Linked Account</Label>
+                <select
+                  id="account"
+                  className="w-full text-sm bg-background border rounded-md px-3 py-2"
+                  value={formData.account}
+                  onChange={(e) => {
+                    const accId = e.target.value;
+                    const acc = accounts.find((a) => a.id === Number(accId));
+                    setFormData({
+                      ...formData,
+                      account: accId,
+                      company: acc ? acc.name : formData.company,
+                    });
+                  }}
+                >
+                  <option value="">-- Standalone (No Account) --</option>
+                  {accounts.map((acc) => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="company">Company</Label>
@@ -655,6 +734,63 @@ export default function ContactsPage() {
               </Button>
               <Button variant="destructive" onClick={handleDeleteContact} disabled={isSubmitting}>
                 {isSubmitting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Merge Contact Dialog */}
+        <Dialog open={isMergeDialogOpen} onOpenChange={setIsMergeDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitMerge className="h-5 w-5 text-purple-500" />
+                Merge Contact
+              </DialogTitle>
+              <DialogDescription>
+                Merge another contact into{' '}
+                <span className="font-semibold text-foreground">
+                  {primaryContact ? getFullName(primaryContact) : 'Primary'}
+                </span>.
+                All activities, deals, and history will be atomically repointed.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-3">
+              <div className="space-y-1">
+                <Label htmlFor="secondary-contact">Select Secondary Contact</Label>
+                <select
+                  id="secondary-contact"
+                  className="w-full text-sm bg-background border rounded-md px-3 py-2"
+                  value={secondaryContactId}
+                  onChange={(e) => setSecondaryContactId(e.target.value)}
+                >
+                  <option value="">-- Choose Contact --</option>
+                  {contacts
+                    .filter((c) => c.id !== primaryContact?.id)
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {getFullName(c)} ({c.email})
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs p-3 rounded-md flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span>
+                  This operation merges secondary contact data, repoints all interactions, and generates an immutable audit snapshot for safe reversible unmerge.
+                </span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsMergeDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleExecuteMerge}
+                disabled={!secondaryContactId || isSubmitting}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                {isSubmitting ? 'Merging...' : 'Confirm Merge'}
               </Button>
             </DialogFooter>
           </DialogContent>

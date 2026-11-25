@@ -22,6 +22,11 @@ def pytest_configure(config):
     settings.EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     settings.CELERY_TASK_ALWAYS_EAGER = True
     settings.CELERY_TASK_EAGER_PROPAGATES = True
+    settings.DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+        'ATOMIC_REQUESTS': False,
+    }
 
 
 # =============================================================================
@@ -35,20 +40,26 @@ def api_client():
 
 
 @pytest.fixture
-def authenticated_client(user):
+def authenticated_client(user, organization):
     """Return an authenticated API client."""
     client = APIClient()
     refresh = RefreshToken.for_user(user)
-    client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+    client.credentials(
+        HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}',
+        HTTP_X_ORGANIZATION_SLUG=organization.slug
+    )
     return client
 
 
 @pytest.fixture
-def admin_client(admin_user):
+def admin_client(admin_user, organization):
     """Return an authenticated admin API client."""
     client = APIClient()
     refresh = RefreshToken.for_user(admin_user)
-    client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+    client.credentials(
+        HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}',
+        HTTP_X_ORGANIZATION_SLUG=organization.slug
+    )
     return client
 
 
@@ -59,42 +70,67 @@ def admin_client(admin_user):
 @pytest.fixture
 def user(db, organization):
     """Create a regular user."""
-    from user_management.models import User
-    return User.objects.create_user(
+    from django.contrib.auth import get_user_model
+    from multi_tenant.models import OrganizationMember
+    User = get_user_model()
+    u = User.objects.create_user(
+        username='testuser',
         email='testuser@example.com',
         password='testpass123!',
         first_name='Test',
-        last_name='User',
-        role='sales_rep',
-        organization=organization
+        last_name='User'
     )
+    OrganizationMember.objects.create(
+        organization=organization,
+        user=u,
+        role='admin',
+        is_active=True
+    )
+    return u
 
 
 @pytest.fixture
 def admin_user(db, organization):
     """Create an admin user."""
-    from user_management.models import User
-    return User.objects.create_superuser(
+    from django.contrib.auth import get_user_model
+    from multi_tenant.models import OrganizationMember
+    User = get_user_model()
+    u = User.objects.create_superuser(
+        username='adminuser',
         email='admin@example.com',
         password='adminpass123!',
         first_name='Admin',
-        last_name='User',
-        organization=organization
+        last_name='User'
     )
+    OrganizationMember.objects.create(
+        organization=organization,
+        user=u,
+        role='admin',
+        is_active=True
+    )
+    return u
 
 
 @pytest.fixture
 def manager_user(db, organization):
     """Create a manager user."""
-    from user_management.models import User
-    return User.objects.create_user(
+    from django.contrib.auth import get_user_model
+    from multi_tenant.models import OrganizationMember
+    User = get_user_model()
+    u = User.objects.create_user(
+        username='manageruser',
         email='manager@example.com',
         password='managerpass123!',
         first_name='Manager',
-        last_name='User',
-        role='manager',
-        organization=organization
+        last_name='User'
     )
+    OrganizationMember.objects.create(
+        organization=organization,
+        user=u,
+        role='manager',
+        is_active=True
+    )
+    return u
 
 
 # =============================================================================
@@ -108,7 +144,8 @@ def organization(db):
     return Organization.objects.create(
         name='Test Organization',
         slug='test-org',
-        plan='professional'
+        plan='professional',
+        status='active'
     )
 
 
@@ -119,7 +156,8 @@ def other_organization(db):
     return Organization.objects.create(
         name='Other Organization',
         slug='other-org',
-        plan='starter'
+        plan='starter',
+        status='active'
     )
 
 

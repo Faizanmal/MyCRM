@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from contact_management.views import ContactViewSet as BaseContactViewSet, AccountViewSet, ContactGroupViewSet
 from contact_management.models import Contact
 from lead_management.models import Lead
 from multi_tenant.permissions import HasRolePermission, TenantObjectPermission
@@ -182,86 +183,12 @@ class LeadViewSet(viewsets.ModelViewSet):
         return Response(stats)
 
 
-class ContactViewSet(viewsets.ModelViewSet):
+class ContactViewSet(BaseContactViewSet):
     """
-    API endpoint for Contact management
+    API endpoint for Contact management with full enterprise support
+    (tenant isolation, duplicate detection, atomic merge/unmerge, streaming import, activities)
     """
-    queryset = Contact.objects.select_related('assigned_to', 'created_by').all()
-    permission_classes = [IsAuthenticated, TenantObjectPermission, HasRolePermission]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['contact_type', 'status', 'assigned_to']
-    search_fields = ['first_name', 'last_name', 'email', 'company_name', 'phone', 'mobile']
-    ordering_fields = ['created_at', 'updated_at', 'last_name', 'first_name']
-    ordering = ['-created_at']
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return ContactListSerializer
-        return ContactDetailSerializer
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        user = self.request.user
-        org = getattr(self.request, 'organization', None)
-
-        if not user.is_superuser:
-            if not org:
-                return queryset.none()
-            queryset = queryset.filter(organization=org)
-
-            # Row-level role filtering:
-            member = getattr(self.request, 'member', None)
-            if not member:
-                member = user.organization_memberships.filter(organization=org, is_active=True).first()
-            if member and member.role in ['member', 'sales_rep']:
-                from django.db.models import Q
-                queryset = queryset.filter(Q(assigned_to=user) | Q(created_by=user))
-
-        return queryset
-
-    @action(detail=False, methods=['post'])
-    def bulk_update(self, request):
-        """Bulk update multiple contacts scoped to tenant"""
-        serializer = BulkOperationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        ids = serializer.validated_data['ids']
-        action_type = serializer.validated_data['action']
-        data = serializer.validated_data.get('data', {})
-
-        contacts = self.get_queryset().filter(id__in=ids)
-        if contacts.count() != len(ids):
-            return Response(
-                {'error': 'Some or all target contacts do not exist or belong to another organization'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        if action_type == 'update':
-            contacts.update(**data, updated_at=timezone.now())
-            return Response({'success': True, 'updated': contacts.count()})
-        elif action_type == 'delete':
-            count = contacts.count()
-            contacts.delete()
-            return Response({'success': True, 'deleted': count})
-
-        return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False, methods=['get'])
-    def statistics(self, request):
-        """Get contact statistics"""
-        queryset = self.get_queryset()
-
-        stats = {
-            'total': queryset.count(),
-            'by_type': {},
-            'by_status': {}
-        }
-
-        for contact_type in Contact.CONTACT_TYPE_CHOICES:
-            type_key = contact_type[0]
-            stats['by_type'][type_key] = queryset.filter(contact_type=type_key).count()
-
-        return Response(stats)
+    pass
 
 
 class OpportunityViewSet(viewsets.ModelViewSet):

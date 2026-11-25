@@ -14,6 +14,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from rest_framework_simplejwt.tokens import RefreshToken
+
 User = get_user_model()
 
 
@@ -24,8 +26,20 @@ def api_client():
 
 
 @pytest.fixture
-def test_user(db):
+def test_organization(db):
+    """Create and return test organization."""
+    from multi_tenant.models import Organization
+    return Organization.objects.create(
+        name='Contact Test Org',
+        slug='contact-org',
+        status='active'
+    )
+
+
+@pytest.fixture
+def test_user(db, test_organization):
     """Create and return a test user."""
+    from multi_tenant.models import OrganizationMember
     user = User.objects.create_user(
         username='contactuser',
         email='contacts@example.com',
@@ -33,18 +47,29 @@ def test_user(db):
         first_name='Contact',
         last_name='User'
     )
+    OrganizationMember.objects.create(
+        organization=test_organization,
+        user=user,
+        role='admin',
+        is_active=True
+    )
     return user
 
 
 @pytest.fixture
-def authenticated_client(api_client, test_user):
-    """Return an authenticated API client."""
+def authenticated_client(api_client, test_user, test_organization):
+    """Return an authenticated API client with tenant headers."""
     api_client.force_authenticate(user=test_user)
+    token = str(RefreshToken.for_user(test_user).access_token)
+    api_client.credentials(
+        HTTP_AUTHORIZATION=f'Bearer {token}',
+        HTTP_X_ORGANIZATION_SLUG=test_organization.slug
+    )
     return api_client
 
 
 @pytest.fixture
-def sample_contact(db, test_user):
+def sample_contact(db, test_user, test_organization):
     """Create and return a sample contact."""
     from contact_management.models import Contact
     return Contact.objects.create(
@@ -54,12 +79,13 @@ def sample_contact(db, test_user):
         phone='+1234567890',
         company='Acme Inc',
         job_title='CEO',
-        created_by=test_user
+        created_by=test_user,
+        organization=test_organization
     )
 
 
 @pytest.fixture
-def multiple_contacts(db, test_user):
+def multiple_contacts(db, test_user, test_organization):
     """Create multiple contacts for testing."""
     from contact_management.models import Contact
 
@@ -73,7 +99,8 @@ def multiple_contacts(db, test_user):
             email=f'contact{i}@{company.lower()}.com',
             company=company,
             phone=f'+1234567890{i}',
-            created_by=test_user
+            created_by=test_user,
+            organization=test_organization
         )
         contacts.append(contact)
     return contacts

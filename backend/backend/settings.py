@@ -242,6 +242,7 @@ else:
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': BASE_DIR / 'db.sqlite3',
+                'ATOMIC_REQUESTS': False,
             }
         }
     else:
@@ -251,6 +252,7 @@ else:
                 'NAME': os.getenv('DATABASE_NAME', 'mycrm_db'),
                 'USER': os.getenv('DATABASE_USER', 'mycrm_user'),
                 'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+                'ATOMIC_REQUESTS': False,
                 # resolve host names so running Django locally with DATABASE_HOST=db
                 # doesn't immediately blow up with getaddrinfo errors
                 'HOST': _resolve_env_host('DATABASE_HOST', 'localhost'),
@@ -673,3 +675,10 @@ LOGGING = {
 # Create logs directory if it doesn't exist
 LOGS_DIR = BASE_DIR / 'logs'
 LOGS_DIR.mkdir(exist_ok=True)
+
+# CRM Core Feature Flags
+FEATURE_CONTACT_MERGE = os.getenv('FEATURE_CONTACT_MERGE', 'True') == 'True'
+FEATURE_ACCOUNT_MERGE = os.getenv('FEATURE_ACCOUNT_MERGE', 'True') == 'True'
+FEATURE_ASYNC_IMPORT = os.getenv('FEATURE_ASYNC_IMPORT', 'True') == 'True'
+FEATURE_CONTACT_DUPLICATE_DETECTION = os.getenv('FEATURE_CONTACT_DUPLICATE_DETECTION', 'True') == 'True'
+

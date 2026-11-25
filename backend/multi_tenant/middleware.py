@@ -153,19 +153,19 @@ class TenantMiddleware(MiddlewareMixin):
             if org_slug:
                 requested_explicitly = True
                 with contextlib.suppress(Organization.DoesNotExist):
-                    organization = Organization.objects.get(slug=org_slug, status='active')
+                    organization = Organization.objects.get(slug=org_slug, status__in=['active', 'trial'])
 
             elif tenant_id:
                 requested_explicitly = True
                 with contextlib.suppress(Organization.DoesNotExist, ValueError):
-                    organization = Organization.objects.get(id=tenant_id, status='active')
+                    organization = Organization.objects.get(id=tenant_id, status__in=['active', 'trial'])
 
             # Method 2: Check custom domain
             if not organization:
                 host = request.get_host().split(':')[0]
                 if host not in ('localhost', '127.0.0.1', 'testserver'):
                     with contextlib.suppress(Organization.DoesNotExist):
-                        organization = Organization.objects.get(domain=host, status='active')
+                        organization = Organization.objects.get(domain=host, status__in=['active', 'trial'])
                         if organization:
                             requested_explicitly = True
 
@@ -176,7 +176,7 @@ class TenantMiddleware(MiddlewareMixin):
                 if len(parts) > 2 and parts[0] not in self.SYSTEM_SUBDOMAINS:
                     subdomain = parts[0]
                     with contextlib.suppress(Organization.DoesNotExist):
-                        organization = Organization.objects.get(slug=subdomain, status='active')
+                        organization = Organization.objects.get(slug=subdomain, status__in=['active', 'trial'])
                         if organization:
                             requested_explicitly = True
 
@@ -185,17 +185,17 @@ class TenantMiddleware(MiddlewareMixin):
                 org_id = request.session.get('organization_id') if hasattr(request, 'session') else None
                 if org_id:
                     with contextlib.suppress(Organization.DoesNotExist):
-                        organization = Organization.objects.get(id=org_id, status='active')
+                        organization = Organization.objects.get(id=org_id, status__in=['active', 'trial'])
 
             # Method 5: Auto-resolve user's primary organization if authenticated and no explicit tenant given
             if not organization and request.user.is_authenticated:
                 # Check user.organization attribute or active membership
                 org = getattr(request.user, 'organization', None)
-                if org and org.status == 'active':
+                if org and org.status in ('active', 'trial'):
                     organization = org
                 else:
                     active_membership = request.user.organization_memberships.filter(
-                        organization__status='active',
+                        organization__status__in=['active', 'trial'],
                         is_active=True
                     ).select_related('organization').first()
                     if active_membership:

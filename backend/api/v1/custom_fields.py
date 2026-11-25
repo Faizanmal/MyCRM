@@ -14,6 +14,10 @@ from core.custom_fields import CustomField, CustomFieldValue
 class CustomFieldSerializer(serializers.ModelSerializer):
     model_name = serializers.CharField(source='content_type.model', read_only=True)
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
+    content_type = serializers.PrimaryKeyRelatedField(
+        queryset=ContentType.objects.all(),
+        required=False
+    )
 
     class Meta:
         model = CustomField
@@ -27,8 +31,25 @@ class CustomFieldSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
 
+    def validate_options(self, value):
+        if isinstance(value, list):
+            normalized = []
+            for opt in value:
+                if isinstance(opt, str):
+                    normalized.append({'value': opt, 'label': opt})
+                elif isinstance(opt, dict) and 'value' in opt:
+                    normalized.append({'value': opt['value'], 'label': opt.get('label', opt['value'])})
+                else:
+                    normalized.append(opt)
+            return normalized
+        return value
+
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
+        if 'content_type' not in validated_data:
+            from django.contrib.contenttypes.models import ContentType
+            from contact_management.models import Contact
+            validated_data['content_type'] = ContentType.objects.get_for_model(Contact)
         return super().create(validated_data)
 
 
