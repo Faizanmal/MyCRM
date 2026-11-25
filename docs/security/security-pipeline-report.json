@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-11-25T14:22:25.743514+00:00",
+  "pipeline_status": "PASSED",
+  "gates": {
+    "secret_scanner": {
+      "status": "PASSED",
+      "violations_count": 0,
+      "violations": []
+    },
+    "dependency_audit": {
+      "status": "PASSED",
+      "vulnerabilities_count": 0,
+      "vulnerabilities": []
+    },
+    "tenancy_abuse": {
+      "status": "PASSED",
+      "tests_executed": 6,
+      "results": [
+        {
+          "test": "cross_tenant_lead_idor_read",
+          "passed": true,
+          "details": "Status 404 (Expected 404 or 403)"
+        },
+        {
+          "test": "cross_tenant_lead_idor_delete",
+          "passed": true,
+          "details": "Status 404, resource preserved: True"
+        },
+        {
+          "test": "forged_tenant_header_spoofing",
+          "passed": true,
+          "details": "Status 200, victim data not leaked under forged header"
+        },
+        {
+          "test": "anonymous_probing_denied",
+          "passed": true,
+          "details": "Status 401 (Expected 401 Unauthorized)"
+        },
+        {
+          "test": "cross_tenant_audit_idor",
+          "passed": true,
+          "details": "Status 404 (Expected 404 Not Found)"
+        },
+        {
+          "test": "role_privilege_escalation_denied",
+          "passed": true,
+          "details": "Status 403 (Expected 403 Forbidden for non-staff)"
+        }
+      ]
+    },
+    "dangerous_endpoints_gate": {
+      "status": "PASSED",
+      "changed_files_count": 24,
+      "violations": []
+    }
+  },
+  "duration_seconds": 19.339848
+}

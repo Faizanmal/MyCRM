@@ -11,6 +11,7 @@ from .health_views import (
     MetricsView,
     PingView,
     ReadinessCheckView,
+    SecurityPipelineStatusView,
 )
 
 urlpatterns = [
@@ -20,4 +21,5 @@ urlpatterns = [
     path('live/', LivenessCheckView.as_view(), name='liveness-check'),
     path('health/', DetailedHealthCheckView.as_view(), name='detailed-health'),
     path('metrics/', MetricsView.as_view(), name='metrics'),
+    path('security/', SecurityPipelineStatusView.as_view(), name='security-pipeline-status'),
 ]
