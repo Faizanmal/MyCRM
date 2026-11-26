@@ -15,6 +15,7 @@ router.register(r'accounts', AccountViewSet, basename='account')
 router.register(r'groups', ContactGroupViewSet, basename='contact-group')
 router.register(r'imports', ContactImportViewSet, basename='contact-import')
 router.register(r'merge-logs', MergeAuditLogViewSet, basename='merge-log')
+router.register(r'', ContactViewSet, basename='contact-direct')
 
 urlpatterns = [
     path('', include(router.urls)),

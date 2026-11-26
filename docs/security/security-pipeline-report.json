@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-25T14:22:25.743514+00:00",
+  "timestamp": "2026-11-26T11:28:06.164870+00:00",
   "pipeline_status": "PASSED",
   "gates": {
     "secret_scanner": {
@@ -50,9 +50,9 @@
     },
     "dangerous_endpoints_gate": {
       "status": "PASSED",
-      "changed_files_count": 24,
+      "changed_files_count": 8,
       "violations": []
     }
   },
-  "duration_seconds": 19.339848
+  "duration_seconds": 20.326769
 }

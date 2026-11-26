@@ -21,13 +21,24 @@ class PerformanceTestCase(TestCase):
     """Base class for performance tests"""
 
     def setUp(self):
+        from multi_tenant.models import Organization, OrganizationMember
         self.client = APIClient()
         self.user = User.objects.create_user(
             username='perftest',
             email='perf@example.com',
             password='testpass123'
         )
+        self.org, _ = Organization.objects.get_or_create(
+            slug='perf-org',
+            defaults={'name': 'Performance Test Org', 'status': 'active'}
+        )
+        OrganizationMember.objects.get_or_create(
+            organization=self.org,
+            user=self.user,
+            defaults={'role': 'admin', 'is_active': True}
+        )
         self.client.force_authenticate(user=self.user)
+        self.client.credentials(HTTP_X_ORGANIZATION_SLUG=self.org.slug)
 
     def measure_time(self, func, *args, **kwargs):
         """Measure execution time of a function"""
@@ -56,7 +67,8 @@ class DatabasePerformanceTest(PerformanceTestCase):
                 first_name=f'User{i}',
                 last_name=f'Test{i}',
                 email=f'user{i}@example.com',
-                created_by=self.user
+                created_by=self.user,
+                organization=self.org
             )
             for i in range(1000)
         ]
@@ -76,7 +88,8 @@ class DatabasePerformanceTest(PerformanceTestCase):
                 last_name=f'Test{i}',
                 email=f'user{i}@example.com',
                 assigned_to=self.user,
-                created_by=self.user
+                created_by=self.user,
+                organization=self.org
             )
 
         # Without optimization
@@ -111,7 +124,8 @@ class DatabasePerformanceTest(PerformanceTestCase):
                 first_name=f'User{i}',
                 last_name=f'Test{i}',
                 email=f'user{i}@example.com',
-                created_by=self.user
+                created_by=self.user,
+                organization=self.org
             )
             for i in range(1000)
         ])
@@ -138,7 +152,8 @@ class APIPerformanceTest(PerformanceTestCase):
                 first_name=f'User{i}',
                 last_name=f'Test{i}',
                 email=f'user{i}@example.com',
-                created_by=self.user
+                created_by=self.user,
+                organization=self.org
             )
             for i in range(100)
         ])
@@ -173,19 +188,30 @@ class ConcurrentLoadTest(TransactionTestCase):
     """Test concurrent user load"""
 
     def setUp(self):
-        self.base_url = 'http://localhost:8000'
+        from multi_tenant.models import Organization, OrganizationMember
         self.user = User.objects.create_user(
             username='loadtest',
             email='load@example.com',
             password='testpass123'
         )
+        self.org, _ = Organization.objects.get_or_create(
+            slug='perf-org-load',
+            defaults={'name': 'Performance Load Test Org', 'status': 'active'}
+        )
+        OrganizationMember.objects.get_or_create(
+            organization=self.org,
+            user=self.user,
+            defaults={'role': 'admin', 'is_active': True}
+        )
 
     def make_request(self, endpoint):
         """Make a single API request"""
         try:
+            client = APIClient()
+            client.force_authenticate(user=self.user)
+            client.credentials(HTTP_X_ORGANIZATION_SLUG=self.org.slug)
             start = time.time()
-            # You'll need to authenticate properly for production tests
-            response = requests.get(f"{self.base_url}{endpoint}", timeout=10)
+            response = client.get(endpoint)
             elapsed = (time.time() - start) * 1000
             return {
                 'status': response.status_code,
@@ -213,7 +239,7 @@ class ConcurrentLoadTest(TransactionTestCase):
             for _ in range(requests_per_user):
                 result = self.make_request(endpoint)
                 session_results.append(result)
-                time.sleep(0.1)  # Small delay between requests
+                time.sleep(0.01)
             return session_results
 
         start_time = time.time()
@@ -245,7 +271,7 @@ class ConcurrentLoadTest(TransactionTestCase):
             print(f"Median response time: {statistics.median(response_times):.2f}ms")
 
 
-class MemoryPerformanceTest(TestCase):
+class MemoryPerformanceTest(PerformanceTestCase):
     """Test memory usage and performance"""
 
     def test_memory_efficient_queries(self):
@@ -258,11 +284,8 @@ class MemoryPerformanceTest(TestCase):
                 first_name=f'User{i}',
                 last_name=f'Test{i}',
                 email=f'user{i}@example.com',
-                created_by=User.objects.create_user(
-                    username=f'creator{i}',
-                    email=f'creator{i}@example.com',
-                    password='pass123'
-                )
+                created_by=self.user,
+                organization=self.org
             )
             for i in range(100)
         ])
@@ -295,7 +318,8 @@ class CachePerformanceTest(PerformanceTestCase):
             first_name='Cache',
             last_name='Test',
             email='cache@example.com',
-            created_by=self.user
+            created_by=self.user,
+            organization=self.org
         )
 
         cache_key = f'contact_{contact.id}'
