@@ -205,7 +205,12 @@ backend\tests\test_uploads_webhooks.py::TestUploadsAndWebhooks::test_forged_tena
 - All forged tenant identity injection attempts emit `CRITICAL` audit logs:
   `SECURITY ALERT: Inbound webhook on endpoint <uuid> received forged tenant ID '<forged_id>' (bound organization is '<org_id>'). Overriding untrusted payload tenant.`
 
-### 6.2 Rollback Instructions
+### 6.2 Operational Feature Flags (`backend/backend/settings.py`)
+- `FEATURE_STRICT_UPLOAD_VALIDATION` (default: `True`): Toggles magic byte and disguised executable validation for uploads.
+- `FEATURE_SSRF_PROTECTION` (default: `True`): Toggles egress filtering against private/loopback/cloud metadata destinations.
+- `FEATURE_INBOUND_WEBHOOK_VERIFICATION` (default: `True`): Toggles strict HMAC-SHA256 signature verification for inbound webhooks.
+
+### 6.3 Rollback Instructions
 If a rollback is required:
 1. Revert Git commit: `git revert HEAD`
 2. Reverse database migrations:

@@ -706,4 +706,9 @@ FEATURE_FIELD_ENCRYPTION = os.getenv('FEATURE_FIELD_ENCRYPTION', 'True') == 'Tru
 FEATURE_FAIL_CLOSED_KEYS = os.getenv('FEATURE_FAIL_CLOSED_KEYS', 'True' if ENVIRONMENT in ('production', 'prod', 'staging', 'stage') else 'False') == 'True'
 ENCRYPTION_ACTIVE_KID = os.getenv('ENCRYPTION_ACTIVE_KID', 'key-2026-v1')
 
+# Uploads, Webhooks & SSRF Feature Flags
+FEATURE_STRICT_UPLOAD_VALIDATION = os.getenv('FEATURE_STRICT_UPLOAD_VALIDATION', 'True') == 'True'
+FEATURE_SSRF_PROTECTION = os.getenv('FEATURE_SSRF_PROTECTION', 'True') == 'True'
+FEATURE_INBOUND_WEBHOOK_VERIFICATION = os.getenv('FEATURE_INBOUND_WEBHOOK_VERIFICATION', 'True') == 'True'
+
 

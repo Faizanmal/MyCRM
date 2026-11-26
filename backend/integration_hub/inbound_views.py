@@ -81,39 +81,41 @@ class InboundWebhookReceiverView(APIView):
             )
 
         # 3. HMAC-SHA256 Signature verification
-        signature_header = request.headers.get('X-Webhook-Signature')
-        if not signature_header:
-            return Response(
-                {'error': 'Missing required X-Webhook-Signature header'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+        from django.conf import settings
+        if getattr(settings, 'FEATURE_INBOUND_WEBHOOK_VERIFICATION', True):
+            signature_header = request.headers.get('X-Webhook-Signature')
+            if not signature_header:
+                return Response(
+                    {'error': 'Missing required X-Webhook-Signature header'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
 
-        # Strip optional 'sha256=' prefix if provided
-        received_sig = signature_header
-        if received_sig.startswith('sha256='):
-            received_sig = received_sig[7:]
+            # Strip optional 'sha256=' prefix if provided
+            received_sig = signature_header
+            if received_sig.startswith('sha256='):
+                received_sig = received_sig[7:]
 
-        # Compute expected signature over timestamp + body or raw body
-        secret_bytes = endpoint.secret_key.encode('utf-8')
-        sig_with_ts = hmac.new(
-            secret_bytes,
-            f"{timestamp_header}.{body_text}".encode('utf-8'),
-            hashlib.sha256
-        ).hexdigest()
+            # Compute expected signature over timestamp + body or raw body
+            secret_bytes = endpoint.secret_key.encode('utf-8')
+            sig_with_ts = hmac.new(
+                secret_bytes,
+                f"{timestamp_header}.{body_text}".encode('utf-8'),
+                hashlib.sha256
+            ).hexdigest()
 
-        sig_raw_body = hmac.new(
-            secret_bytes,
-            raw_body,
-            hashlib.sha256
-        ).hexdigest()
+            sig_raw_body = hmac.new(
+                secret_bytes,
+                raw_body,
+                hashlib.sha256
+            ).hexdigest()
 
-        is_valid = hmac.compare_digest(received_sig, sig_with_ts) or hmac.compare_digest(received_sig, sig_raw_body)
-        if not is_valid:
-            logger.warning("Invalid webhook signature received for endpoint %s", endpoint.id)
-            return Response(
-                {'error': 'Invalid webhook signature'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+            is_valid = hmac.compare_digest(received_sig, sig_with_ts) or hmac.compare_digest(received_sig, sig_raw_body)
+            if not is_valid:
+                logger.warning("Invalid webhook signature received for endpoint %s", endpoint.id)
+                return Response(
+                    {'error': 'Invalid webhook signature'},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
 
         # Parse JSON payload
         try:

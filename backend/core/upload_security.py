@@ -77,6 +77,10 @@ def validate_uploaded_file(file_obj) -> None:
     if not file_obj:
         return
 
+    from django.conf import settings
+    if not getattr(settings, 'FEATURE_STRICT_UPLOAD_VALIDATION', True):
+        return
+
     filename = getattr(file_obj, 'name', '') or ''
     sanitized_name = sanitize_filename(filename).lower()
 

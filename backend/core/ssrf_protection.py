@@ -83,6 +83,10 @@ def validate_safe_url(url: str, allow_private: bool = False) -> str:
     if not url or not isinstance(url, str):
         raise SSRFProtectionError("URL must be a non-empty string.")
 
+    from django.conf import settings
+    if not allow_private and not getattr(settings, 'FEATURE_SSRF_PROTECTION', True):
+        return url
+
     try:
         parsed = urlparse(url.strip())
     except Exception as e:
