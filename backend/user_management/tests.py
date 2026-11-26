@@ -93,17 +93,19 @@ class PermissionTest(TestCase):
 
     def test_permission_unique_codename(self):
         """Test that codename must be unique"""
+        from django.db import IntegrityError, transaction
         Permission.objects.create(
             name='View Contacts',
             codename='view_contacts',
             module='contacts'
         )
-        with self.assertRaises(Exception):
-            Permission.objects.create(
-                name='View All Contacts',
-                codename='view_contacts',
-                module='contacts'
-            )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Permission.objects.create(
+                    name='View All Contacts',
+                    codename='view_contacts',
+                    module='contacts'
+                )
 
 
 class AuditLogTest(TestCase):

@@ -62,10 +62,11 @@ class TestUserModel(TestCase):
         )
         
         with self.assertRaises(IntegrityError):
-            User.objects.create_user(
-                email='unique@example.com',
-                password='Another123!'
-            )
+            with transaction.atomic():
+                User.objects.create_user(
+                    email='unique@example.com',
+                    password='Another123!'
+                )
     
     def test_user_str_representation(self):
         """Test user string representation"""
@@ -479,7 +480,8 @@ class TestOrganizationModel(TestCase):
         self.create_organization(slug='unique-slug')
 
         with self.assertRaises(IntegrityError):
-            self.create_organization(slug='unique-slug', name='Another Org')
+            with transaction.atomic():
+                self.create_organization(slug='unique-slug', name='Another Org')
     
     def test_organization_str_representation(self):
         """Test organization string representation"""

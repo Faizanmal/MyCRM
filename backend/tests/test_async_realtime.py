@@ -159,3 +159,64 @@ class TestAsyncRealtime:
         assert q.error_type == 'MalformedPayloadError'
         assert q.tenant == org1
         assert q.status == 'quarantined'
+
+    def test_poison_pill_api_rbac_and_replay(self, setup_entities):
+        """Admin can list and replay quarantined tasks, while non-admin is rejected with 403"""
+        from rest_framework.test import APIClient
+        org1 = setup_entities['org1']
+        user1 = setup_entities['user1']
+        user2 = setup_entities['user2']
+
+        # Promote user1 to admin in org1
+        membership = OrganizationMember.objects.get(organization=org1, user=user1)
+        membership.role = 'admin'
+        membership.save()
+
+        # Create a quarantine record
+        q = PoisonPillQuarantine.objects.create(
+            task_name='process_webhook',
+            task_id='t-123',
+            payload={'bad': 'data'},
+            error_type='ValueError',
+            error_message='Invalid JSON',
+            tenant=org1,
+            status='quarantined'
+        )
+
+        client = APIClient()
+
+        # 1. Non-admin user from org2 is rejected (403)
+        client.force_authenticate(user=user2)
+        resp_denied = client.get(f'/api/core/poison-jobs/{q.id}/')
+        assert resp_denied.status_code in (403, 404)
+
+        # 2. Admin user from org1 can retrieve
+        client.force_authenticate(user=user1)
+        client.credentials(HTTP_X_ORGANIZATION_SLUG=org1.slug)
+        resp = client.get(f'/api/core/poison-jobs/{q.id}/')
+        assert resp.status_code == 200
+        assert resp.data['task_name'] == 'process_webhook'
+
+        # 3. Admin replays the task
+        resp_replay = client.post(f'/api/core/poison-jobs/{q.id}/replay/', {'notes': 'Fix applied'})
+        assert resp_replay.status_code == 200
+        assert resp_replay.data['status'] == 'replayed'
+
+        q.refresh_from_db()
+        assert q.status == 'replayed'
+        assert 'Fix applied' in q.resolution_notes
+
+    @pytest.mark.asyncio
+    async def test_jwt_websocket_auth_middleware(self, setup_entities):
+        """JWT token in query string authenticates user and resolves tenant into scope"""
+        from rest_framework_simplejwt.tokens import AccessToken
+        from core.websocket_auth_middleware import get_user_from_jwt
+
+        user1 = setup_entities['user1']
+        org1 = setup_entities['org1']
+
+        token = str(AccessToken.for_user(user1))
+        resolved_user, tenant_id = await get_user_from_jwt(token)
+
+        assert resolved_user.id == user1.id
+        assert tenant_id == str(org1.id)

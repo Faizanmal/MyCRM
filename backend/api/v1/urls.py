@@ -26,6 +26,7 @@ from contact_management.views import AccountViewSet, ContactGroupViewSet
 from .views import ContactViewSet, LeadViewSet, OpportunityViewSet, TaskViewSet
 from .workflows import NotificationTemplateViewSet, WorkflowViewSet
 from multi_tenant.positioning_views import ProductPositioningViewSet
+from core.async_views import PoisonPillQuarantineViewSet, TaskExecutionRecordViewSet
 
 router = DefaultRouter()
 
@@ -57,6 +58,10 @@ router.register(r'field-history', FieldHistoryViewSet, basename='field-history')
 # Dashboards
 router.register(r'widgets', DashboardWidgetViewSet, basename='widget')
 router.register(r'dashboards', UserDashboardViewSet, basename='dashboard')
+
+# Async resilience & quarantine
+router.register(r'poison-jobs', PoisonPillQuarantineViewSet, basename='poison-job')
+router.register(r'task-executions', TaskExecutionRecordViewSet, basename='task-execution')
 
 # Custom fields
 router.register(r'custom-fields', CustomFieldViewSet, basename='custom-field')

@@ -76,6 +76,7 @@ coverage==7.12.0
 locust==2.42.2
 django-redis==5.4.0
 factory-boy>=3.3.3  # For generating test data
+tblib>=3.0.0  # For pickling tracebacks in parallel test runners
 
 # Logging
 python-json-logger==4.0.0

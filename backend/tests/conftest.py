@@ -22,11 +22,12 @@ def pytest_configure(config):
     settings.EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
     settings.CELERY_TASK_ALWAYS_EAGER = True
     settings.CELERY_TASK_EAGER_PROPAGATES = True
-    settings.DATABASES['default'] = {
+    settings.DATABASES['default'].update({
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': ':memory:',
         'ATOMIC_REQUESTS': False,
-    }
+        'TIME_ZONE': None,
+    })
 
 
 # =============================================================================

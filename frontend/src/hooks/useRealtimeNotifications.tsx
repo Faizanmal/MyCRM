@@ -104,6 +104,12 @@ export function RealtimeNotificationProvider({ children }: { children: ReactNode
                         allSubscribers.forEach(callback => callback(message));
                     }
 
+                    if (message.type === 'revoked') {
+                        console.warn('Session revoked by server:', message.message);
+                        ws.close(4401, 'Revoked');
+                        return;
+                    }
+
                     // Handle specific message types
                     handleSystemMessage(message);
                 } catch (error) {
@@ -111,9 +117,15 @@ export function RealtimeNotificationProvider({ children }: { children: ReactNode
                 }
             };
 
-            ws.onclose = () => {
+            ws.onclose = (event) => {
                 setIsConnected(false);
                 wsRef.current = null;
+
+                // Stop reconnecting if unauthorized or revoked
+                if (event.code === 4401 || event.code === 4403) {
+                    console.warn(`WebSocket closed due to auth failure (${event.code}). Stopping reconnection.`);
+                    return;
+                }
 
                 // Attempt reconnection
                 if (reconnectAttemptsRef.current < maxReconnectAttempts) {

@@ -57,6 +57,10 @@ def is_user_authorized_for_channel(user, channel_name: str) -> tuple[bool, str]:
     Validate whether an authenticated user is authorized to subscribe to a Channels group.
     Blocks wrong-tenant subscriptions, cross-user subscriptions, and guessed groups.
     """
+    from django.conf import settings
+    if not getattr(settings, 'REALTIME_WEBSOCKET_ENABLED', True):
+        return False, "Realtime subscriptions temporarily disabled by operational switch"
+
     if not user or user.is_anonymous:
         return False, "Authentication required"
 

@@ -459,7 +459,10 @@ export function RealtimeProvider({
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     
-    const ws = new WebSocket(`${wsUrl}?user_id=${userId}`);
+    // Check if token exists
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const wsUrlWithAuth = token ? `${wsUrl}?token=${token}` : (userId ? `${wsUrl}?user_id=${userId}` : wsUrl);
+    const ws = new WebSocket(wsUrlWithAuth);
     wsRef.current = ws;
     
     ws.onopen = () => {
@@ -484,13 +487,18 @@ export function RealtimeProvider({
     ws.onmessage = (event) => {
       try {
         const message: RealtimeMessage = JSON.parse(event.data);
+        if (message.type === 'revoked') {
+          console.warn('Realtime session revoked by server');
+          ws.close(4401, 'Revoked');
+          return;
+        }
         handleMessage(message);
       } catch (e) {
         console.error('Failed to parse WebSocket message:', e);
       }
     };
     
-    ws.onclose = () => {
+    ws.onclose = (event: CloseEvent) => {
       setIsConnected(false);
       setConnectionId(null);
       
@@ -498,6 +506,12 @@ export function RealtimeProvider({
         clearInterval(heartbeatIntervalRef.current);
       }
       
+      // Do not auto-reconnect if access was revoked or denied
+      if (event.code === 4401 || event.code === 4403) {
+        console.warn(`Realtime connection closed with code ${event.code}. Discontinuing auto-reconnect.`);
+        return;
+      }
+
       // Attempt reconnect
       reconnectTimeoutRef.current = setTimeout(() => connectRef.current?.(), reconnectInterval);
     };

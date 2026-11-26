@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 from campaign_management.views import CampaignViewSet, EmailTemplateViewSet
 
 from . import views, views_monitoring
+from .async_views import PoisonPillQuarantineViewSet, TaskExecutionRecordViewSet
 
 router = DefaultRouter()
 router.register(r'audit-logs', views.AuditLogViewSet)
@@ -24,6 +25,8 @@ router.register(r'advanced-analytics', views.AdvancedAnalyticsViewSet, basename=
 router.register(r'ai-analytics', views.AIAnalyticsViewSet, basename='ai-analytics')
 router.register(r'email-campaigns', CampaignViewSet, basename='email-campaign')
 router.register(r'email-templates', EmailTemplateViewSet, basename='email-template')
+router.register(r'poison-jobs', PoisonPillQuarantineViewSet, basename='poison-job')
+router.register(r'task-executions', TaskExecutionRecordViewSet, basename='task-execution')
 
 urlpatterns = [
     path('', include(router.urls)),
