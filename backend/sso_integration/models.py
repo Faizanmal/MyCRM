@@ -118,6 +118,24 @@ class SSOProvider(models.Model):
     def is_active(self):
         return self.status == 'active'
 
+    def save(self, *args, **kwargs):
+        from core.encryption import encrypt_value, is_encrypted
+        if self.client_secret and not is_encrypted(self.client_secret):
+            self.client_secret = encrypt_value(self.client_secret)
+        super().save(*args, **kwargs)
+
+    def get_decrypted_client_secret(self) -> str:
+        from core.encryption import decrypt_value, is_encrypted
+        if not self.client_secret:
+            return ""
+        if is_encrypted(self.client_secret):
+            return decrypt_value(self.client_secret)
+        return self.client_secret
+
+    @property
+    def decrypted_client_secret(self) -> str:
+        return self.get_decrypted_client_secret()
+
     def get_redirect_uri(self):
         """Get the OAuth2 redirect URI for this provider."""
         from django.conf import settings
@@ -154,6 +172,21 @@ class SSOSession(models.Model):
     user_agent = models.TextField(blank=True, default='')
     is_active = models.BooleanField(default=True)
     ended_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        from core.encryption import encrypt_value, is_encrypted
+        if self.sso_token and not is_encrypted(self.sso_token):
+            self.sso_token = encrypt_value(self.sso_token)
+        if self.refresh_token and not is_encrypted(self.refresh_token):
+            self.refresh_token = encrypt_value(self.refresh_token)
+        super().save(*args, **kwargs)
+
+    def get_decrypted_tokens(self) -> dict:
+        from core.encryption import decrypt_value, is_encrypted
+        return {
+            'sso_token': decrypt_value(self.sso_token) if is_encrypted(self.sso_token) else self.sso_token,
+            'refresh_token': decrypt_value(self.refresh_token) if is_encrypted(self.refresh_token) else self.refresh_token,
+        }
 
     class Meta:
         ordering = ['-created_at']

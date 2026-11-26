@@ -223,26 +223,26 @@ class ThirdPartyIntegration(models.Model):
 
     def save(self, *args, **kwargs):
         """Encrypt API secrets and OAuth tokens before persisting to database"""
-        from core.encryption import encrypt_value
+        from core.encryption import encrypt_value, is_encrypted
         # If credentials look unencrypted (plain text), encrypt them
-        if self.api_key and not self.api_key.startswith('gAAAAA'):
+        if self.api_key and not is_encrypted(self.api_key):
             self.api_key = encrypt_value(self.api_key)
-        if self.api_secret and not self.api_secret.startswith('gAAAAA'):
+        if self.api_secret and not is_encrypted(self.api_secret):
             self.api_secret = encrypt_value(self.api_secret)
-        if self.access_token and not self.access_token.startswith('gAAAAA'):
+        if self.access_token and not is_encrypted(self.access_token):
             self.access_token = encrypt_value(self.access_token)
-        if self.refresh_token and not self.refresh_token.startswith('gAAAAA'):
+        if self.refresh_token and not is_encrypted(self.refresh_token):
             self.refresh_token = encrypt_value(self.refresh_token)
         super().save(*args, **kwargs)
 
     def get_decrypted_credentials(self) -> dict:
         """Helper to safely retrieve decrypted credentials at runtime"""
-        from core.encryption import decrypt_value
+        from core.encryption import decrypt_value, is_encrypted
         return {
-            'api_key': decrypt_value(self.api_key) if self.api_key else '',
-            'api_secret': decrypt_value(self.api_secret) if self.api_secret else '',
-            'access_token': decrypt_value(self.access_token) if self.access_token else '',
-            'refresh_token': decrypt_value(self.refresh_token) if self.refresh_token else '',
+            'api_key': decrypt_value(self.api_key) if is_encrypted(self.api_key) else (self.api_key or ''),
+            'api_secret': decrypt_value(self.api_secret) if is_encrypted(self.api_secret) else (self.api_secret or ''),
+            'access_token': decrypt_value(self.access_token) if is_encrypted(self.access_token) else (self.access_token or ''),
+            'refresh_token': decrypt_value(self.refresh_token) if is_encrypted(self.refresh_token) else (self.refresh_token or ''),
         }
 
 

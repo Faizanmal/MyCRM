@@ -620,12 +620,16 @@ LOGGING = {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse',
         },
+        'sensitive_data': {
+            '()': 'core.logging_filters.SensitiveDataFilter',
+        },
     },
     'handlers': {
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'filters': ['sensitive_data'],
         },
         'file': {
             'level': 'INFO',
@@ -634,6 +638,7 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 10,  # 10MB
             'backupCount': 10,
             'formatter': 'verbose',
+            'filters': ['sensitive_data'],
         },
         'security': {
             'level': 'WARNING',
@@ -642,6 +647,7 @@ LOGGING = {
             'maxBytes': 1024 * 1024 * 10,  # 10MB
             'backupCount': 10,
             'formatter': 'verbose',
+            'filters': ['sensitive_data'],
         },
     },
     'loggers': {
@@ -693,4 +699,11 @@ FEATURE_MFA_ENFORCEMENT = os.getenv('FEATURE_MFA_ENFORCEMENT', 'True') == 'True'
 FEATURE_SSO_STRICT_VALIDATION = os.getenv('FEATURE_SSO_STRICT_VALIDATION', 'True') == 'True'
 FEATURE_LOGIN_RATE_LIMIT = os.getenv('FEATURE_LOGIN_RATE_LIMIT', 'True') == 'True'
 LOGIN_RATE_THROTTLE_RATE = os.getenv('LOGIN_RATE_THROTTLE_RATE', '10/minute')
+
+# Encryption & Key Management Feature Flags
+ENCRYPTION_KEYRING = None
+FEATURE_FIELD_ENCRYPTION = os.getenv('FEATURE_FIELD_ENCRYPTION', 'True') == 'True'
+FEATURE_FAIL_CLOSED_KEYS = os.getenv('FEATURE_FAIL_CLOSED_KEYS', 'True' if ENVIRONMENT in ('production', 'prod', 'staging', 'stage') else 'False') == 'True'
+ENCRYPTION_ACTIVE_KID = os.getenv('ENCRYPTION_ACTIVE_KID', 'key-2026-v1')
+
 

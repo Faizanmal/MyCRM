@@ -128,7 +128,7 @@ class OAuth2Service:
             'code': code,
             'redirect_uri': redirect_uri or self.provider.get_redirect_uri(),
             'client_id': self.provider.client_id,
-            'client_secret': self.provider.client_secret,
+            'client_secret': self.provider.get_decrypted_client_secret(),
             'code_verifier': code_verifier,
         }
 
@@ -172,7 +172,7 @@ class OAuth2Service:
             'grant_type': 'refresh_token',
             'refresh_token': refresh_token,
             'client_id': self.provider.client_id,
-            'client_secret': self.provider.client_secret,
+            'client_secret': self.provider.get_decrypted_client_secret(),
         }
 
         try:

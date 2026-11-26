@@ -7,11 +7,16 @@ import re
 
 SENSITIVE_PATTERNS = [
     re.compile(r'(password["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
+    re.compile(r'(client_secret["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
+    re.compile(r'(api_secret["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
+    re.compile(r'(api_key["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
     re.compile(r'(secret["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
     re.compile(r'(token["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
-    re.compile(r'(api_key["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
+    re.compile(r'(access_token["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
+    re.compile(r'(refresh_token["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
     re.compile(r'(authorization["\':\s=]+Bearer\s+)([^"\'\s&]+)', re.IGNORECASE),
     re.compile(r'(encryption_key["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
+    re.compile(r'(private_key["\':\s=]+)(["\']?)([^"\'\s&]+)\2', re.IGNORECASE),
 ]
 
 
