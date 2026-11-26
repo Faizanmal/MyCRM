@@ -2,6 +2,13 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
+// Extract CSRF token from browser document.cookie for secure CSRF protection
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+  return match ? decodeURIComponent(match[3]) : null;
+}
+
 // Create axios instance with credentials support for HttpOnly cookies and CSRF
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -12,12 +19,23 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor: adds bearer fallback if present, and attaches CSRF token on mutative requests
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    // Attach X-CSRFToken header on state-modifying requests
+    const method = config.method?.toUpperCase();
+    if (method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      const csrfToken = getCookie('csrftoken');
+      if (csrfToken) {
+        config.headers['X-CSRFToken'] = csrfToken;
+      }
     }
     return config;
   },
@@ -26,39 +44,83 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle token refresh
+// Concurrency queue for resilient 401 token refresh
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Response interceptor to handle token refresh resiliently with queueing
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Do not attempt refresh on auth endpoints themselves
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/login/') ||
+                           originalRequest.url?.includes('/auth/refresh/') ||
+                           originalRequest.url?.includes('/auth/verify-2fa/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (token) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
-        const refreshToken = localStorage.getItem('refresh_token');
-        if (refreshToken) {
-          const response = await axios.post(
-            `${API_BASE_URL}/auth/refresh/`,
-            { refresh: refreshToken },
-            { withCredentials: true }
-          );
+        const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
+        const response = await axios.post(
+          `${API_BASE_URL}/auth/refresh/`,
+          refreshToken ? { refresh: refreshToken } : {},
+          { withCredentials: true }
+        );
 
-          const { access } = response.data;
+        const { access } = response.data;
+        if (access && typeof window !== 'undefined') {
           localStorage.setItem('access_token', access);
-
-          // Retry original request
-          originalRequest.headers.Authorization = `Bearer ${access}`;
-          return apiClient(originalRequest);
         }
-      } catch (refreshError: unknown) {
-        // Refresh failed - log error and redirect to login
-        const errorMessage = refreshError instanceof Error ? refreshError.message : 'Token refresh failed';
-        console.error('Token refresh error:', errorMessage);
 
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        processQueue(null, access || null);
+
+        if (access) {
+          originalRequest.headers.Authorization = `Bearer ${access}`;
+        }
+        return apiClient(originalRequest);
+      } catch (refreshError: unknown) {
+        processQueue(refreshError, null);
+
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.setItem('auth_logout_event', Date.now().toString());
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

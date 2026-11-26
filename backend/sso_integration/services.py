@@ -27,10 +27,10 @@ class OAuth2Service:
         if not provider.is_oauth2:
             raise ValueError("Provider must be an OAuth2 provider")
 
-    def generate_authorization_url(self, state: str = None, redirect_uri: str = None) -> tuple[str, str]:
+    def generate_authorization_url(self, state: str = None, redirect_uri: str = None, nonce: str = None) -> tuple[str, str, str]:
         """
-        Generate OAuth2 authorization URL with PKCE.
-        Returns: (authorization_url, code_verifier)
+        Generate OAuth2 authorization URL with PKCE and state/nonce validation.
+        Returns: (authorization_url, code_verifier, state)
         """
         if not state:
             state = secrets.token_urlsafe(32)
@@ -50,6 +50,8 @@ class OAuth2Service:
             'code_challenge': code_challenge,
             'code_challenge_method': 'S256',
         }
+        if nonce:
+            params['nonce'] = nonce
 
         # Provider-specific parameters
         if self.provider.provider_type == 'oauth2_microsoft':
@@ -60,7 +62,57 @@ class OAuth2Service:
             params['prompt'] = 'consent'
 
         authorization_url = f"{self.provider.authorization_url}?{urlencode(params)}"
-        return authorization_url, code_verifier
+        return authorization_url, code_verifier, state
+
+    @staticmethod
+    def validate_state(expected_state: str, received_state: str) -> bool:
+        """
+        Validates state parameter using constant-time comparison to prevent OAuth CSRF attacks.
+        """
+        if not expected_state or not received_state:
+            return False
+        return secrets.compare_digest(str(expected_state), str(received_state))
+
+    def validate_redirect_uri(self, redirect_uri: str) -> bool:
+        """
+        Validates that redirect URI strictly matches configured provider redirect URI.
+        Prevents open redirectors and credential leakage.
+        """
+        if not redirect_uri:
+            return False
+        return redirect_uri == self.provider.get_redirect_uri()
+
+    def validate_id_token(
+        self,
+        id_token_payload: dict[str, Any],
+        expected_nonce: str = None,
+        expected_audience: str = None
+    ) -> bool:
+        """
+        Validates OIDC ID token audience, expiration, and nonce.
+        """
+        if not id_token_payload or not isinstance(id_token_payload, dict):
+            return False
+
+        # Validate audience
+        aud = id_token_payload.get('aud')
+        target_aud = expected_audience or self.provider.client_id
+        if aud != target_aud:
+            return False
+
+        # Validate expiration
+        exp = id_token_payload.get('exp')
+        if exp:
+            from datetime import timezone as dt_timezone
+            exp_dt = datetime.fromtimestamp(exp, tz=dt_timezone.utc)
+            if exp_dt < timezone.now():
+                return False
+
+        # Validate nonce if required
+        if expected_nonce and id_token_payload.get('nonce') != expected_nonce:
+            return False
+
+        return True
 
     def exchange_code_for_token(
         self,
@@ -262,6 +314,49 @@ class SAMLService:
         except Exception as e:
             raise Exception(f"Failed to parse SAML response: {str(e)}")
 
+    def validate_saml_response(
+        self,
+        saml_response: str,
+        expected_audience: str = None,
+        expected_recipient: str = None
+    ) -> bool:
+        """
+        Validates SAML assertion audience restriction, destination recipient, and timestamp constraints.
+        """
+        import xml.etree.ElementTree as ET
+
+        try:
+            decoded = base64.b64decode(saml_response)
+            root = ET.fromstring(decoded)
+            ns = {
+                'saml': 'urn:oasis:names:tc:SAML:2.0:assertion',
+                'samlp': 'urn:oasis:names:tc:SAML:2.0:protocol'
+            }
+
+            # 1. Validate Audience restriction
+            target_aud = expected_audience or self.provider.entity_id
+            aud_elem = root.find('.//saml:Audience', ns)
+            if aud_elem is not None and aud_elem.text and aud_elem.text != target_aud:
+                return False
+
+            # 2. Validate Destination / Recipient ACS URL
+            dest = root.get('Destination')
+            if expected_recipient and dest and dest != expected_recipient:
+                return False
+
+            # 3. Validate timestamp conditions
+            conditions = root.find('.//saml:Conditions', ns)
+            if conditions is not None:
+                not_on_or_after = conditions.get('NotOnOrAfter')
+                if not_on_or_after:
+                    expiry = datetime.strptime(not_on_or_after, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc if hasattr(timezone, 'utc') else None)
+                    if expiry < timezone.now():
+                        return False
+
+            return True
+        except Exception:
+            return False
+
     def map_user_attributes(self, saml_data: dict[str, Any]) -> dict[str, Any]:
         """
         Map SAML attributes to application user fields.
@@ -321,13 +416,35 @@ class SSOAuthenticationService:
             status='success',
             sso_attributes=user_data,
             ip_address=request_meta.get('REMOTE_ADDR') if request_meta else None,
-            user_agent=request_meta.get('HTTP_USER_AGENT') if request_meta else None,
+            user_agent=(request_meta.get('HTTP_USER_AGENT') if request_meta else '') or '',
         )
 
+        # Try to find existing user
         try:
-            # Try to find existing user
             user = User.objects.get(email=email)
             created = False
+
+            # Validate Tenant Binding for existing user
+            from multi_tenant.models import OrganizationMember
+            membership = OrganizationMember.objects.filter(
+                organization=provider.organization,
+                user=user,
+                is_active=True
+            ).first()
+
+            if not membership:
+                if provider.auto_create_users:
+                    OrganizationMember.objects.create(
+                        organization=provider.organization,
+                        user=user,
+                        role=provider.default_role or 'member',
+                        is_active=True
+                    )
+                else:
+                    attempt.status = 'failed'
+                    attempt.error_message = f"Cross-tenant SSO denied: User is not an active member of organization '{provider.organization.slug}'"
+                    attempt.save()
+                    raise ValueError(f"Cross-tenant SSO denied: User is not an active member of organization '{provider.organization.slug}'")
 
             # Update user info if configured
             if provider.auto_update_user_info:

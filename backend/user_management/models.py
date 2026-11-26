@@ -58,6 +58,7 @@ class UserProfile(models.Model):
     language = models.CharField(max_length=10, default='en')
     two_factor_enabled = models.BooleanField(default=False)
     two_factor_secret = models.CharField(max_length=64, blank=True)
+    two_factor_backup_codes = models.JSONField(default=list, blank=True)
     notification_preferences = models.JSONField(default=dict)
     dashboard_preferences = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -76,10 +76,11 @@ class SSOProviderViewSet(viewsets.ModelViewSet):
         try:
             if provider.is_oauth2:
                 oauth2_service = OAuth2Service(provider)
-                auth_url, code_verifier = oauth2_service.generate_authorization_url()
+                auth_url, code_verifier, state = oauth2_service.generate_authorization_url()
 
-                # Store code_verifier in session for callback
+                # Store code_verifier and state in session for callback
                 request.session[f'oauth2_code_verifier_{provider.id}'] = code_verifier
+                request.session[f'oauth2_state_{provider.id}'] = state
 
                 return Response({
                     'status': 'success',
@@ -324,6 +325,17 @@ class SSOCallbackView(viewsets.ViewSet):
                 'error': 'Authorization code not provided'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        # Validate OAuth state parameter against session (CSRF protection)
+        oauth2_service = OAuth2Service(provider)
+        state = request.GET.get('state') or request.POST.get('state')
+        stored_state = request.session.get(f'oauth2_state_{provider.id}')
+        if getattr(settings, 'FEATURE_SSO_STRICT_VALIDATION', True):
+            if not oauth2_service.validate_state(stored_state, state):
+                logger.warning(f"OAuth state validation failed for SSO provider {provider.id}")
+                return Response({
+                    'error': 'Invalid, missing, or mismatched state parameter (CSRF protection violation).'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             # Get code_verifier from session
             code_verifier = request.session.get(f'oauth2_code_verifier_{provider.id}')
@@ -331,7 +343,6 @@ class SSOCallbackView(viewsets.ViewSet):
                 raise ValueError("Code verifier not found in session")
 
             # Exchange code for token
-            oauth2_service = OAuth2Service(provider)
             token_data = oauth2_service.exchange_code_for_token(code, code_verifier)
 
             # Get user info

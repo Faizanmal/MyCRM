@@ -1,5 +1,7 @@
 import base64
+import hashlib
 import io
+import secrets
 
 import pyotp
 import qrcode
@@ -26,13 +28,52 @@ from .serializers import (
     UserSerializer,
     UserUpdateSerializer,
 )
+from .throttling import LoginRateThrottle
 
 User = get_user_model()
 
 
+def generate_backup_codes(count=8) -> tuple[list[str], list[str]]:
+    """
+    Generates plain-text backup recovery codes for user display and SHA-256 hashes for storage.
+    Format: 'XXXX-XXXX'
+    Returns: (plain_codes, hashed_codes)
+    """
+    plain_codes = []
+    hashed_codes = []
+    chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    for _ in range(count):
+        part1 = "".join(secrets.choice(chars) for _ in range(4))
+        part2 = "".join(secrets.choice(chars) for _ in range(4))
+        code = f"{part1}-{part2}"
+        code_hash = hashlib.sha256(code.strip().upper().encode()).hexdigest()
+        plain_codes.append(code)
+        hashed_codes.append(code_hash)
+    return plain_codes, hashed_codes
+
+
+def verify_and_consume_backup_code(user, raw_code: str) -> bool:
+    """
+    Verifies if raw_code matches any stored hashed backup code in user.profile.
+    If matched, removes the code (single-use) and returns True.
+    """
+    if not raw_code:
+        return False
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    stored_hashes = list(profile.two_factor_backup_codes or [])
+    candidate_hash = hashlib.sha256(raw_code.strip().upper().encode()).hexdigest()
+    if candidate_hash in stored_hashes:
+        stored_hashes.remove(candidate_hash)
+        profile.two_factor_backup_codes = stored_hashes
+        profile.save(update_fields=['two_factor_backup_codes'])
+        return True
+    return False
+
+
 @method_decorator(ratelimit(key='ip', rate='10/h', block=False), name='post')
 class CustomTokenObtainPairView(TokenObtainPairView):
-    """Custom JWT token view with 2FA gating and secure HttpOnly cookie support"""
+    """Custom JWT token view with 2FA gating, rate limiting, and secure HttpOnly cookie support"""
+    throttle_classes = [LoginRateThrottle]
 
     def post(self, request, *_args, **_kwargs):
         if getattr(request, 'limited', False):
@@ -87,7 +128,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             'refresh': str(refresh),
             'user': UserSerializer(user).data
         })
-        set_auth_cookies(resp, str(access_token), str(refresh))
+        set_auth_cookies(resp, str(access_token), str(refresh), request=request)
         return resp
 
     def get_client_ip(self, request):
@@ -121,7 +162,7 @@ class CustomTokenRefreshView(TokenRefreshView):
         refresh = token_data.get('refresh')
 
         resp = Response(token_data, status=status.HTTP_200_OK)
-        set_auth_cookies(resp, access, refresh)
+        set_auth_cookies(resp, access, refresh, request=request)
         return resp
 
 
@@ -148,9 +189,11 @@ class LogoutView(views.APIView):
 
 class TwoFactorLoginVerifyView(views.APIView):
     """
-    Validates TOTP token against 2FA challenge token to complete login.
+    Validates TOTP token or backup recovery code against 2FA challenge token to complete login.
+    Protected by LoginRateThrottle.
     """
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [LoginRateThrottle]
 
     def post(self, request):
         user_id = request.data.get('user_id')
@@ -159,7 +202,7 @@ class TwoFactorLoginVerifyView(views.APIView):
 
         if not (user_id and code and temp_token):
             return Response(
-                {'error': 'user_id, temp_token, and 6-digit code are required.'},
+                {'error': 'user_id, temp_token, and 6-digit code or backup code are required.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -174,11 +217,36 @@ class TwoFactorLoginVerifyView(views.APIView):
         if not secret:
             return Response({'error': '2FA is not configured for this user.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        totp = pyotp.TOTP(secret)
-        if not totp.verify(str(code), valid_window=1):
-            return Response({'error': 'Invalid 2FA verification code.'}, status=status.HTTP_400_BAD_REQUEST)
+        is_valid = False
+        method_used = 'totp'
 
-        # Success: Issue full authentication tokens
+        # 1. Try TOTP code verification (6-digit numeric)
+        clean_code = str(code).strip()
+        if clean_code.isdigit() and len(clean_code) == 6:
+            totp = pyotp.TOTP(secret)
+            if totp.verify(clean_code, valid_window=1):
+                is_valid = True
+
+        # 2. Try backup recovery code verification
+        if not is_valid:
+            if verify_and_consume_backup_code(user, clean_code):
+                is_valid = True
+                method_used = 'backup_code'
+
+        if not is_valid:
+            return Response({'error': 'Invalid 2FA verification code or backup recovery code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Success: Log audit event and issue full authentication tokens
+        AuditLog.objects.create(
+            user=user,
+            action='login_2fa_success',
+            model_name='User',
+            object_id=str(user.id),
+            details={'method': method_used},
+            ip_address=self.get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
 
@@ -187,8 +255,13 @@ class TwoFactorLoginVerifyView(views.APIView):
             'refresh': str(refresh),
             'user': UserSerializer(user).data
         })
-        set_auth_cookies(resp, str(access_token), str(refresh))
+        set_auth_cookies(resp, str(access_token), str(refresh), request=request)
         return resp
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+        return ip
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -252,8 +325,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def setup_2fa(self, request):
         """Setup 2FA for user"""
         user = request.user
+        profile, _ = UserProfile.objects.get_or_create(user=user)
 
-        if getattr(user, 'two_factor_enabled', False):
+        if getattr(user, 'two_factor_enabled', False) or profile.two_factor_enabled:
             return Response(
                 {'error': '2FA is already enabled'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -261,8 +335,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
         # Generate secret key
         secret = pyotp.random_base32()
-        user.two_factor_secret = secret
-        user.save()
+        profile.two_factor_secret = secret
+        if hasattr(user, 'two_factor_secret'):
+            user.two_factor_secret = secret
+            try:
+                user.save(update_fields=['two_factor_secret'])
+            except Exception:
+                user.save()
 
         # Generate QR code
         totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
@@ -279,9 +358,44 @@ class UserViewSet(viewsets.ModelViewSet):
         img.save(buffer, format='PNG')
         qr_code = base64.b64encode(buffer.getvalue()).decode()
 
+        # Generate initial batch of 8 backup recovery codes
+        plain_codes, hashed_codes = generate_backup_codes(count=8)
+        profile.two_factor_backup_codes = hashed_codes
+        profile.save()
+
         return Response({
             'secret': secret,
-            'qr_code': f"data:image/png;base64,{qr_code}"
+            'qr_code': f"data:image/png;base64,{qr_code}",
+            'backup_codes': plain_codes
+        })
+
+    @action(detail=False, methods=['post'])
+    def generate_backup_codes(self, request):
+        """Regenerate a new set of 2FA backup recovery codes for the authenticated user"""
+        user = request.user
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if not (getattr(user, 'two_factor_enabled', False) or profile.two_factor_enabled):
+            return Response(
+                {'error': 'Two-factor authentication must be enabled before generating backup codes.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        plain_codes, hashed_codes = generate_backup_codes(count=8)
+        profile.two_factor_backup_codes = hashed_codes
+        profile.save(update_fields=['two_factor_backup_codes'])
+
+        AuditLog.objects.create(
+            user=user,
+            action='update',
+            model_name='User',
+            object_id=str(user.id),
+            details={'event': 'regenerate_2fa_backup_codes'},
+            ip_address=self.get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+
+        return Response({
+            'message': 'Backup codes regenerated successfully. Store them in a secure location.',
+            'backup_codes': plain_codes
         })
 
     @action(detail=False, methods=['post'])
@@ -291,23 +405,31 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         user = request.user
+        profile, _ = UserProfile.objects.get_or_create(user=user)
         token = serializer.validated_data['token']
 
-        if not getattr(user, 'two_factor_secret', None):
+        secret = profile.two_factor_secret or getattr(user, 'two_factor_secret', None)
+        if not secret:
             return Response(
                 {'error': '2FA setup not initiated'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        totp = pyotp.TOTP(user.two_factor_secret)
+        totp = pyotp.TOTP(secret)
         if not totp.verify(token, valid_window=1):
             return Response(
                 {'error': 'Invalid token'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user.two_factor_enabled = True
-        user.save()
+        profile.two_factor_enabled = True
+        profile.save(update_fields=['two_factor_enabled'])
+        if hasattr(user, 'two_factor_enabled'):
+            user.two_factor_enabled = True
+            try:
+                user.save(update_fields=['two_factor_enabled'])
+            except Exception:
+                user.save()
 
         # Log 2FA enablement
         AuditLog.objects.create(
@@ -326,9 +448,19 @@ class UserViewSet(viewsets.ModelViewSet):
     def disable_2fa(self, request):
         """Disable 2FA for user"""
         user = request.user
-        user.two_factor_enabled = False
-        user.two_factor_secret = None
-        user.save()
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile.two_factor_enabled = False
+        profile.two_factor_secret = ''
+        profile.two_factor_backup_codes = []
+        profile.save()
+
+        if hasattr(user, 'two_factor_enabled'):
+            user.two_factor_enabled = False
+            user.two_factor_secret = ''
+            try:
+                user.save(update_fields=['two_factor_enabled', 'two_factor_secret'])
+            except Exception:
+                user.save()
 
         # Log 2FA disablement
         AuditLog.objects.create(

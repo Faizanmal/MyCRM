@@ -93,7 +93,7 @@ class SSOProvider(models.Model):
 
     # Statistics
     total_logins = models.PositiveIntegerField(default=0)
-    last_used_at = models.DateTimeField(blank=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -142,18 +142,18 @@ class SSOSession(models.Model):
     )
 
     # Session data
-    session_index = models.CharField(max_length=500, blank=True)  # SAML session index
-    name_id = models.CharField(max_length=500, blank=True)  # SAML name ID
-    sso_token = models.TextField(blank=True)  # OAuth2 access token
-    refresh_token = models.TextField(blank=True)  # OAuth2 refresh token
-    expires_at = models.DateTimeField(blank=True)
+    session_index = models.CharField(max_length=500, blank=True, default='')  # SAML session index
+    name_id = models.CharField(max_length=500, blank=True, default='')  # SAML name ID
+    sso_token = models.TextField(blank=True, default='')  # OAuth2 access token
+    refresh_token = models.TextField(blank=True, default='')  # OAuth2 refresh token
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.TextField(blank=True)
+    user_agent = models.TextField(blank=True, default='')
     is_active = models.BooleanField(default=True)
-    ended_at = models.DateTimeField(blank=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -193,15 +193,15 @@ class SSOLoginAttempt(models.Model):
     # Attempt details
     email = models.EmailField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    error_message = models.TextField(blank=True)
+    error_message = models.TextField(blank=True, default='')
 
     # SSO data
-    sso_user_id = models.CharField(max_length=500, blank=True)
+    sso_user_id = models.CharField(max_length=500, blank=True, default='')
     sso_attributes = models.JSONField(default=dict, blank=True)
 
     # Request metadata
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.TextField(blank=True)
+    user_agent = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
