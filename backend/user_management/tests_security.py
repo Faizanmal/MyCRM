@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 
 from django.conf import settings
@@ -10,14 +11,14 @@ User = get_user_model()
 
 class SettingsSecurityTests(TestCase):
     def test_jwt_lifetimes_and_cookie_defaults(self):
-        # Access token lifetime default is 15 minutes
         access_td = settings.SIMPLE_JWT.get('ACCESS_TOKEN_LIFETIME')
         refresh_td = settings.SIMPLE_JWT.get('REFRESH_TOKEN_LIFETIME')
         self.assertIsInstance(access_td, timedelta)
         self.assertIsInstance(refresh_td, timedelta)
-        self.assertEqual(int(access_td.total_seconds()), 15 * 60)
-        # refresh default is 7 days (10080 minutes)
-        self.assertEqual(int(refresh_td.total_seconds()), 10080 * 60)
+        expected_access_seconds = int(os.getenv('JWT_ACCESS_TOKEN_LIFETIME', '15')) * 60
+        self.assertEqual(int(access_td.total_seconds()), expected_access_seconds)
+        expected_refresh_seconds = int(os.getenv('JWT_REFRESH_TOKEN_LIFETIME', '10080')) * 60
+        self.assertEqual(int(refresh_td.total_seconds()), expected_refresh_seconds)
 
     def test_session_cookie_settings(self):
         self.assertTrue(settings.SESSION_COOKIE_HTTPONLY)

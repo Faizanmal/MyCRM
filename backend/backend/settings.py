@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 import socket
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -22,6 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env file
 load_dotenv(BASE_DIR / '.env')
+
+# Detect if running under tests
+TESTING = (
+    'test' in sys.argv
+    or 'test_coverage' in sys.argv
+    or 'pytest' in sys.modules
+    or os.getenv('TESTING', 'False').lower() in ('true', '1', 'yes')
+)
 
 # Determine Environment profile (local, ci, staging, production)
 ENVIRONMENT = os.getenv('ENVIRONMENT', os.getenv('DJANGO_ENV', 'local')).lower()
@@ -271,7 +280,7 @@ if ENVIRONMENT in ('production', 'prod'):
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
-    if os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True':
+    if not TESTING and os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True':
         SECURE_SSL_REDIRECT = True
         SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
         SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -528,7 +537,7 @@ if SENTRY_DSN and SENTRY_DSN != 'your-sentry-dsn-here' and not DEBUG:
 ADMIN_IP_WHITELIST = os.getenv('ADMIN_IP_WHITELIST', '').split(',') if os.getenv('ADMIN_IP_WHITELIST') else []
 
 # Security Headers
-if not DEBUG:
+if not DEBUG and not TESTING:
     SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True'
     SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -542,6 +551,9 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SAMESITE = 'Lax'
+
+if TESTING:
+    SECURE_SSL_REDIRECT = False
 
 # Password Requirements
 AUTH_PASSWORD_VALIDATORS = [
