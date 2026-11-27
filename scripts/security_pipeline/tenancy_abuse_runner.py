@@ -13,7 +13,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
 try:
     import django
+    from django.conf import settings
+    os.environ['TESTING'] = 'True'
     django.setup()
+    settings.SECURE_SSL_REDIRECT = False
     from django.contrib.auth import get_user_model
     from rest_framework.test import APIClient
     from multi_tenant.models import Organization, OrganizationMember
