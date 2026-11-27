@@ -66,6 +66,7 @@ urlpatterns = [
     path('api/v1/sso/', include('sso_integration.urls')),
     path('api/v1/collaboration/', include('collaboration.urls')),
     path('api/v1/gdpr/', include('gdpr_compliance.urls')),
+    path('api/v1/settings/', include('core.settings_urls')),
 
     # Premium Revenue Features
     path('api/v1/revenue-intelligence/', include('revenue_intelligence.urls')),

@@ -24,9 +24,6 @@ router.register(r'roles', UserRoleViewSet, basename='roles')
 router.register(r'role-assignments', UserRoleAssignmentViewSet, basename='role-assignments')
 
 urlpatterns = [
-    # ViewSet routes
-    path('', include(router.urls)),
-
     # Analytics dashboard
     path('analytics/dashboard/', AnalyticsDashboardView.as_view(), name='analytics-dashboard'),
 
@@ -53,4 +50,7 @@ urlpatterns = [
     path('roles/initialize/', UserRoleViewSet.as_view({'post': 'initialize_defaults'}), name='roles-initialize'),
     path('permissions/me/', UserRoleAssignmentViewSet.as_view({'get': 'my_roles'}), name='my-permissions'),
     path('permissions/check/', UserRoleAssignmentViewSet.as_view({'post': 'check_permission'}), name='check-permission'),
+
+    # ViewSet routes
+    path('', include(router.urls)),
 ]

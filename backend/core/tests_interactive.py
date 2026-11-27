@@ -45,7 +45,7 @@ class UserPreferencesAPITestCase(APITestCase):
 
     def test_update_preferences(self):
         """Test updating user preferences"""
-        UserPreferences.objects.create(user=self.user)
+        UserPreferences.objects.get_or_create(user=self.user)
 
         url = '/api/v1/interactive/preferences/me/'
         data = {
@@ -62,7 +62,7 @@ class UserPreferencesAPITestCase(APITestCase):
 
     def test_save_dashboard_layout(self):
         """Test saving dashboard widget layout"""
-        UserPreferences.objects.create(user=self.user)
+        UserPreferences.objects.get_or_create(user=self.user)
 
         url = '/api/v1/interactive/preferences/dashboard/'
         data = {
@@ -79,7 +79,7 @@ class UserPreferencesAPITestCase(APITestCase):
 
     def test_add_recent_item(self):
         """Test adding a recent item"""
-        prefs = UserPreferences.objects.create(user=self.user)
+        prefs, _ = UserPreferences.objects.get_or_create(user=self.user)
 
         url = '/api/v1/interactive/preferences/recent-item/'
         data = {

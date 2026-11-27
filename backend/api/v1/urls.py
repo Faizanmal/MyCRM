@@ -92,5 +92,8 @@ urlpatterns = [
 
     # Interactive features (user preferences, onboarding, AI recommendations, search)
     path('interactive/', include('core.interactive_urls')),
+
+    # Settings and RBAC
+    path('settings/', include('core.settings_urls')),
 ]
 

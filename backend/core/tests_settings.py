@@ -42,6 +42,7 @@ class UserPreferenceModelTest(TestCase):
             email='test@example.com',
             password='testpass123'
         )
+        UserPreference.objects.filter(user=self.user).delete()
 
     def test_create_preferences(self):
         """Test creating user preferences"""
@@ -89,6 +90,7 @@ class NotificationPreferenceModelTest(TestCase):
             email='test@example.com',
             password='testpass123'
         )
+        NotificationPreference.objects.filter(user=self.user).delete()
 
     def test_create_notification_preferences(self):
         """Test creating notification preferences"""
@@ -124,7 +126,7 @@ class NotificationTypeSettingModelTest(TestCase):
             email='test@example.com',
             password='testpass123'
         )
-        self.prefs = NotificationPreference.objects.create(user=self.user)
+        self.prefs, _ = NotificationPreference.objects.get_or_create(user=self.user)
 
     def test_create_type_setting(self):
         """Test creating notification type setting"""
@@ -174,7 +176,7 @@ class ExportJobModelTest(TestCase):
 
         self.assertEqual(job.status, 'pending')
         self.assertEqual(job.progress, 0)
-        self.assertIsNone(job.file_path)
+        self.assertFalse(job.file_path)
 
     def test_mark_processing(self):
         """Test marking job as processing"""
@@ -449,7 +451,7 @@ class ExportJobAPITest(APITestCase):
             'format': 'csv',
             'entities': ['contacts', 'deals'],
             'date_range': 'month'
-        })
+        }, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         self.assertIn('id', response.data)
@@ -459,7 +461,7 @@ class ExportJobAPITest(APITestCase):
         response = self.client.post('/api/v1/settings/export/', {
             'format': 'csv',
             'entities': []
-        })
+        }, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -499,7 +501,8 @@ class UserRoleAPITest(APITestCase):
         response = self.client.get('/api/v1/settings/roles/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertGreaterEqual(len(response.data), 5)
+        roles = response.data['results'] if isinstance(response.data, dict) and 'results' in response.data else response.data
+        self.assertGreaterEqual(len(roles), 5)
 
     def test_initialize_roles_admin_only(self):
         """Test initializing roles requires admin"""

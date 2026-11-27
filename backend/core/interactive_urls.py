@@ -23,8 +23,6 @@ router.register(r'smart-filters', SmartFilterViewSet, basename='smart-filters')
 router.register(r'quick-actions', QuickActionViewSet, basename='quick-actions')
 
 urlpatterns = [
-    path('', include(router.urls)),
-
     # Global search
     path('search/', GlobalSearchView.as_view(), name='global-search'),
 
@@ -68,4 +66,7 @@ urlpatterns = [
     path('quick-actions/pinned/',
          QuickActionViewSet.as_view({'get': 'pinned'}),
          name='pinned-quick-actions'),
+
+    # Default router URLs
+    path('', include(router.urls)),
 ]
