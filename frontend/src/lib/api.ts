@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/a
 // Extract CSRF token from browser document.cookie for secure CSRF protection
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+  const match = document.cookie.match(new RegExp(`(^|;\\s*)(${name})=([^;]*)`));
   return match ? decodeURIComponent(match[3]) : null;
 }
 

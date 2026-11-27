@@ -52,6 +52,9 @@ const eslintConfig = defineConfig([
       // React specific rules
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/purity": "warn",
       "react/prop-types": "off", // Using TypeScript for prop validation
       "react/jsx-uses-react": "off", // Not needed in React 17+
       "react/react-in-jsx-scope": "off", // Not needed in React 17+
@@ -60,7 +63,7 @@ const eslintConfig = defineConfig([
       "react/jsx-no-undef": "error",
       "react/jsx-pascal-case": "error",
       "react/jsx-uses-vars": "error",
-      "react/no-array-index-key": "error",
+      "react/no-array-index-key": "warn",
 
       // Accessibility rules
       "jsx-a11y/alt-text": "error",

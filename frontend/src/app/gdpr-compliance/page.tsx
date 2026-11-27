@@ -36,7 +36,7 @@ interface DeletionRequest {
   requested_at: string;
   reviewed_at?: string;
   reason?: string;
-  retained_legal_exceptions?: any[];
+  retained_legal_exceptions?: unknown[];
 }
 
 interface BreachIncident {
@@ -54,7 +54,7 @@ interface BreachIncident {
 interface IntegrityStatus {
   is_valid: boolean;
   total_records: number;
-  anomalies: any[];
+  anomalies: unknown[];
   checked_at?: string;
 }
 
@@ -86,12 +86,12 @@ export default function GDPRCompliancePage() {
         const data = await res.json();
         const items = data.results || data;
         if (Array.isArray(items) && items.length > 0) {
-          setConsents(items.map((c: any) => ({
-            id: c.id,
-            type: c.consent_type_name || c.consent_type || 'User Consent',
-            category: c.category || 'marketing',
+          setConsents(items.map((c: Record<string, unknown>) => ({
+            id: c.id as string | number,
+            type: (c.consent_type_name || c.consent_type || 'User Consent') as string,
+            category: (c.category || 'marketing') as 'marketing' | 'analytics' | 'essential',
             granted: Boolean(c.is_granted && !c.withdrawn_at),
-            date: c.consent_date || c.created_at,
+            date: (c.consent_date || c.created_at) as string,
             can_withdraw: !c.is_required,
           })));
         }
@@ -108,14 +108,14 @@ export default function GDPRCompliancePage() {
         const data = await res.json();
         const items = data.results || data;
         if (Array.isArray(items)) {
-          setExportRequests(items.map((r: any) => ({
-            id: r.id,
-            type: r.export_type ? r.export_type.replace('_', ' ').toUpperCase() : 'Full Data Export',
-            format: (r.format || 'json').toUpperCase(),
-            status: r.status,
-            requested_at: r.requested_at,
-            completed_at: r.completed_at,
-            checksum: r.checksum,
+          setExportRequests(items.map((r: Record<string, unknown>) => ({
+            id: r.id as string | number,
+            type: r.export_type ? (r.export_type as string).replace('_', ' ').toUpperCase() : 'Full Data Export',
+            format: ((r.format as string) || 'json').toUpperCase(),
+            status: r.status as 'pending' | 'processing' | 'completed' | 'failed',
+            requested_at: r.requested_at as string,
+            completed_at: r.completed_at as string | undefined,
+            checksum: r.checksum as string | undefined,
             file_url: r.status === 'completed' ? '#' : undefined,
           })));
         }
@@ -132,14 +132,14 @@ export default function GDPRCompliancePage() {
         const data = await res.json();
         const items = data.results || data;
         if (Array.isArray(items)) {
-          setDeletionRequests(items.map((d: any) => ({
-            id: d.id,
-            type: d.deletion_type ? d.deletion_type.replace('_', ' ').toUpperCase() : 'Data Erasure',
-            status: d.status,
-            requested_at: d.requested_at,
-            reviewed_at: d.reviewed_at,
-            reason: d.reason,
-            retained_legal_exceptions: d.retained_legal_exceptions || [],
+          setDeletionRequests(items.map((d: Record<string, unknown>) => ({
+            id: d.id as string | number,
+            type: d.deletion_type ? (d.deletion_type as string).replace('_', ' ').toUpperCase() : 'Data Erasure',
+            status: d.status as 'pending' | 'approved' | 'rejected' | 'processing' | 'completed',
+            requested_at: d.requested_at as string,
+            reviewed_at: d.reviewed_at as string | undefined,
+            reason: d.reason as string | undefined,
+            retained_legal_exceptions: (d.retained_legal_exceptions as unknown[]) || [],
           })));
         }
       }

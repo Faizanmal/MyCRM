@@ -82,7 +82,7 @@ export const productPositioningApi = {
   /**
    * Complete one of the 5 buyer tasks
    */
-  completeBuyerTask: async (taskKey: string, metadata: Record<string, any> = {}): Promise<{
+  completeBuyerTask: async (taskKey: string, metadata: Record<string, unknown> = {}): Promise<{
     status: string;
     task_key: string;
     buyer_tasks_completed: string[];
