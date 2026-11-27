@@ -53,7 +53,7 @@ class DealRoom(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    archived_at = models.DateTimeField(blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     # Statistics
     message_count = models.PositiveIntegerField(default=0)
@@ -156,7 +156,7 @@ class Channel(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    archived_at = models.DateTimeField(blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     # Statistics
     message_count = models.PositiveIntegerField(default=0)
@@ -258,8 +258,8 @@ class Message(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    edited_at = models.DateTimeField(blank=True)
-    deleted_at = models.DateTimeField(blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     # Flags
     is_pinned = models.BooleanField(default=False)
@@ -418,7 +418,7 @@ class DocumentComment(TenantAwareModel):
         blank=True,
         related_name='collaboration_resolved_comments'
     )
-    resolved_at = models.DateTimeField(blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -598,7 +598,7 @@ class ApprovalInstance(TenantAwareModel):
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     # Attachments and context
     attachments = models.JSONField(default=list, blank=True)

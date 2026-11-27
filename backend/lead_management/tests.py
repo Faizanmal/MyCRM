@@ -107,7 +107,8 @@ class LeadActivityTest(TestCase):
         activity = LeadActivity.objects.create(
             lead=self.lead,
             activity_type='call',
-            subject='Follow-up call'
+            subject='Follow-up call',
+            user=self.user
         )
         self.assertEqual(activity.lead, self.lead)
         self.assertEqual(activity.activity_type, 'call')
@@ -118,12 +119,14 @@ class LeadActivityTest(TestCase):
         LeadActivity.objects.create(
             lead=self.lead,
             activity_type='call',
-            subject='First call'
+            subject='First call',
+            user=self.user
         )
         LeadActivity.objects.create(
             lead=self.lead,
             activity_type='email',
-            subject='Follow-up email'
+            subject='Follow-up email',
+            user=self.user
         )
         self.assertEqual(self.lead.activities.count(), 2)
 

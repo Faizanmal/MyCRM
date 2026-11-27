@@ -147,7 +147,7 @@ class Document(models.Model):
 
     # Tracking
     download_count = models.IntegerField(default=0)
-    last_accessed = models.DateTimeField(blank=True)
+    last_accessed = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'crm_documents'
@@ -289,12 +289,12 @@ class DocumentShare(models.Model):
     can_view = models.BooleanField(default=True)
 
     # Expiration
-    expires_at = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     # Tracking
     view_count = models.IntegerField(default=0)
     download_count = models.IntegerField(default=0)
-    last_accessed = models.DateTimeField(blank=True)
+    last_accessed = models.DateTimeField(null=True, blank=True)
 
     # Metadata
     shared_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -375,7 +375,7 @@ class DocumentApproval(models.Model):
         related_name='approval_requests'
     )
     requested_at = models.DateTimeField(auto_now_add=True)
-    responded_at = models.DateTimeField(blank=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'crm_document_approvals'

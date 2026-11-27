@@ -44,7 +44,7 @@ class VoiceRecording(models.Model):
     # File info
     file_url = models.URLField(blank=True)
     file_path = models.CharField(max_length=500, blank=True)
-    file_size_bytes = models.BigIntegerField(blank=True)
+    file_size_bytes = models.BigIntegerField(null=True, blank=True, default=0)
     file_format = models.CharField(max_length=20, blank=True)  # mp3, wav, m4a, etc.
 
     # Duration
@@ -97,8 +97,8 @@ class VoiceRecording(models.Model):
     recorded_at = models.DateTimeField(default=timezone.now)
 
     # Processing info
-    processing_started_at = models.DateTimeField(blank=True)
-    processing_completed_at = models.DateTimeField(blank=True)
+    processing_started_at = models.DateTimeField(null=True, blank=True)
+    processing_completed_at = models.DateTimeField(null=True, blank=True)
     processing_error = models.TextField(blank=True)
 
     # Language
@@ -179,7 +179,7 @@ class Transcription(models.Model):
         blank=True,
         related_name='edited_transcriptions'
     )
-    edited_at = models.DateTimeField(blank=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

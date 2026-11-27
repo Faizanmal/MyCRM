@@ -1,60 +1,57 @@
 """
 AI Insights Tests
 """
-
+from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
-from .models import AIInsight, DataAnalysisJob, PredictionModel
+from contact_management.models import Contact
+from .models import ChurnPrediction, NextBestAction
 
 User = get_user_model()
 
 
-class AIInsightModelTest(TestCase):
+class ChurnPredictionModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpass')
-        self.insight = AIInsight.objects.create(
-            title='Lead Conversion Trend',
-            insight_type='trend',
-            category='lead_conversion',
-            description='Lead conversion rate is increasing',
-            confidence_score=0.85,
-            generated_by=self.user
-        )
-
-    def test_insight_creation(self):
-        self.assertEqual(self.insight.title, 'Lead Conversion Trend')
-        self.assertEqual(self.insight.confidence_score, 0.85)
-        self.assertFalse(self.insight.is_dismissed)
-
-
-class PredictionModelTest(TestCase):
-    def setUp(self):
-        self.model = PredictionModel.objects.create(
-            name='Lead Scoring Model',
-            model_type='lead_scoring',
-            version='1.0',
-            accuracy=0.92,
-            status='active'
-        )
-
-    def test_model_creation(self):
-        self.assertEqual(self.model.name, 'Lead Scoring Model')
-        self.assertEqual(self.model.accuracy, 0.92)
-        self.assertEqual(self.model.status, 'active')
-
-
-class DataAnalysisJobTest(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpass')
-        self.job = DataAnalysisJob.objects.create(
-            name='Sales Forecast Analysis',
-            job_type='forecast',
-            status='pending',
+        self.contact = Contact.objects.create(
+            first_name='John',
+            last_name='Doe',
+            email='john@example.com',
             created_by=self.user
         )
+        self.prediction = ChurnPrediction.objects.create(
+            contact=self.contact,
+            churn_probability=0.75,
+            risk_level='high',
+            factors={'inactivity_days': 30},
+            confidence_score=0.88,
+            model_version='v1.0',
+            expires_at=timezone.now() + timedelta(days=30)
+        )
 
-    def test_job_creation(self):
-        self.assertEqual(self.job.name, 'Sales Forecast Analysis')
-        self.assertEqual(self.job.status, 'pending')
-        self.assertEqual(self.job.progress, 0)
+    def test_churn_prediction_creation(self):
+        self.assertEqual(self.prediction.contact, self.contact)
+        self.assertEqual(self.prediction.risk_level, 'high')
+        self.assertAlmostEqual(self.prediction.churn_probability, 0.75)
+
+
+class NextBestActionModelTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='actionuser', password='testpass')
+        self.action = NextBestAction.objects.create(
+            user=self.user,
+            entity_type='contact',
+            entity_id=1,
+            action_type='call',
+            title='Follow up call',
+            description='Discuss renewal',
+            reasoning='High churn risk detected',
+            priority_score=85.0
+        )
+
+    def test_next_best_action_creation(self):
+        self.assertEqual(self.action.title, 'Follow up call')
+        self.assertEqual(self.action.action_type, 'call')
+        self.assertEqual(self.action.priority_score, 85.0)

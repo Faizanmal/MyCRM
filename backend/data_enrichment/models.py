@@ -142,7 +142,7 @@ class EnrichmentProfile(models.Model):
     skills = models.JSONField(default=list)
 
     # Enrichment metadata
-    last_enriched_at = models.DateTimeField(blank=True)
+    last_enriched_at = models.DateTimeField(null=True, blank=True)
     enrichment_sources = models.JSONField(default=list)
     data_freshness_score = models.FloatField(default=1.0)
 
@@ -232,12 +232,12 @@ class CompanyEnrichment(models.Model):
 
     # Metrics
     alexa_rank = models.IntegerField(blank=True)
-    monthly_visits = models.BigIntegerField(blank=True)
+    monthly_visits = models.BigIntegerField(null=True, blank=True, default=0)
     traffic_rank = models.IntegerField(blank=True)
 
     # Enrichment metadata
     enrichment_score = models.IntegerField(default=0)
-    last_enriched_at = models.DateTimeField(blank=True)
+    last_enriched_at = models.DateTimeField(null=True, blank=True)
     enrichment_sources = models.JSONField(default=list)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -355,7 +355,7 @@ class IntentSignal(models.Model):
 
     # Timing
     detected_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     # Action taken
     was_actioned = models.BooleanField(default=False)
@@ -363,7 +363,7 @@ class IntentSignal(models.Model):
         User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='actioned_intent_signals'
     )
-    actioned_at = models.DateTimeField(blank=True)
+    actioned_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'intent_signals'
@@ -415,7 +415,7 @@ class NewsAlert(models.Model):
     # Source
     source_name = models.CharField(max_length=200, blank=True)
     source_url = models.URLField(blank=True)
-    published_at = models.DateTimeField(blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
 
     # Analysis
     sentiment = models.CharField(max_length=20, choices=SENTIMENT_CHOICES, default='neutral')
@@ -437,7 +437,7 @@ class NewsAlert(models.Model):
         User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='read_news_alerts'
     )
-    read_at = models.DateTimeField(blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -524,8 +524,8 @@ class EnrichmentJob(models.Model):
     failed_records = models.IntegerField(default=0)
 
     # Timing
-    started_at = models.DateTimeField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     # User who initiated
     initiated_by = models.ForeignKey(
@@ -590,7 +590,7 @@ class EnrichmentRule(models.Model):
 
     # Stats
     times_triggered = models.IntegerField(default=0)
-    last_triggered_at = models.DateTimeField(blank=True)
+    last_triggered_at = models.DateTimeField(null=True, blank=True)
 
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True,
@@ -646,7 +646,7 @@ class SocialProfile(models.Model):
     posts_count = models.IntegerField(blank=True)
 
     # Activity
-    last_active = models.DateTimeField(blank=True)
+    last_active = models.DateTimeField(null=True, blank=True)
     recent_posts = models.JSONField(default=list)
     interests = models.JSONField(default=list)
 

@@ -102,7 +102,7 @@ class Translation(models.Model):
         null=True,
         related_name='reviewed_translations'
     )
-    reviewed_at = models.DateTimeField(blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -135,7 +135,7 @@ class Currency(models.Model):
 
     # Exchange rate (relative to base currency)
     exchange_rate = models.DecimalField(max_digits=20, decimal_places=10, default=1)
-    exchange_rate_updated_at = models.DateTimeField(blank=True)
+    exchange_rate_updated_at = models.DateTimeField(null=True, blank=True)
 
     # Status
     is_active = models.BooleanField(default=True)

@@ -78,7 +78,7 @@ class Webhook(models.Model):
     total_deliveries = models.IntegerField(default=0)
     successful_deliveries = models.IntegerField(default=0)
     failed_deliveries = models.IntegerField(default=0)
-    last_delivery_at = models.DateTimeField(blank=True)
+    last_delivery_at = models.DateTimeField(null=True, blank=True)
 
     # Metadata
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -128,11 +128,11 @@ class WebhookDelivery(models.Model):
 
     # Retry info
     attempts = models.IntegerField(default=0)
-    next_retry_at = models.DateTimeField(blank=True)
+    next_retry_at = models.DateTimeField(null=True, blank=True)
 
     # Timing
     created_at = models.DateTimeField(auto_now_add=True)
-    delivered_at = models.DateTimeField(blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
     duration_ms = models.IntegerField(blank=True, help_text="Response time in milliseconds")
 
     class Meta:

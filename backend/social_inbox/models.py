@@ -44,11 +44,11 @@ class SocialAccount(models.Model):
     # OAuth tokens (encrypted in production)
     access_token = models.TextField()
     refresh_token = models.TextField(blank=True)
-    token_expires_at = models.DateTimeField(blank=True)
+    token_expires_at = models.DateTimeField(null=True, blank=True)
 
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    last_sync_at = models.DateTimeField(blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
     sync_error = models.TextField(blank=True)
 
     # Settings
@@ -162,7 +162,7 @@ class SocialConversation(models.Model):
     # Sentiment analysis
     sentiment_score = models.FloatField(blank=True, help_text="-1 to 1")
     sentiment_label = models.CharField(max_length=20, blank=True)  # positive, negative, neutral
-    sentiment_analyzed_at = models.DateTimeField(blank=True)
+    sentiment_analyzed_at = models.DateTimeField(null=True, blank=True)
 
     # AI suggestions
     suggested_response = models.TextField(blank=True)
@@ -179,8 +179,8 @@ class SocialConversation(models.Model):
     # Timestamps
     first_message_at = models.DateTimeField()
     last_message_at = models.DateTimeField()
-    first_response_at = models.DateTimeField(blank=True)
-    resolved_at = models.DateTimeField(blank=True)
+    first_response_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -241,7 +241,7 @@ class SocialMessage(models.Model):
 
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     # Timestamps
     platform_created_at = models.DateTimeField()
@@ -305,7 +305,7 @@ class SocialMonitoringRule(models.Model):
     # Status
     is_active = models.BooleanField(default=True)
     matches_count = models.IntegerField(default=0)
-    last_matched_at = models.DateTimeField(blank=True)
+    last_matched_at = models.DateTimeField(null=True, blank=True)
 
     # Organization
     tenant = models.ForeignKey(
@@ -354,8 +354,8 @@ class SocialPost(models.Model):
 
     # Scheduling
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    scheduled_at = models.DateTimeField(blank=True)
-    published_at = models.DateTimeField(blank=True)
+    scheduled_at = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
 
     # Results per platform
     publish_results = models.JSONField(default=dict, blank=True)

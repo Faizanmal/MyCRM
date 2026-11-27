@@ -108,9 +108,9 @@ class PushNotification(models.Model):
     error_message = models.TextField(blank=True)
 
     # Tracking
-    sent_at = models.DateTimeField(blank=True)
-    delivered_at = models.DateTimeField(blank=True)
-    clicked_at = models.DateTimeField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    clicked_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -166,8 +166,8 @@ class BackgroundSyncJob(models.Model):
 
     # Timing
     requested_at = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'background_sync_jobs'
@@ -266,7 +266,7 @@ class OfflineAction(models.Model):
 
     # Timestamps
     created_offline_at = models.DateTimeField()  # When action was taken offline
-    synced_at = models.DateTimeField(blank=True)
+    synced_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -305,17 +305,17 @@ class InstallationAnalytics(models.Model):
 
     # Prompt tracking
     prompt_shown = models.BooleanField(default=False)
-    prompt_shown_at = models.DateTimeField(blank=True)
+    prompt_shown_at = models.DateTimeField(null=True, blank=True)
     prompt_dismissed = models.BooleanField(default=False)
     prompt_accepted = models.BooleanField(default=False)
 
     # Installation timestamps
-    installed_at = models.DateTimeField(blank=True)
-    uninstalled_at = models.DateTimeField(blank=True)
+    installed_at = models.DateTimeField(null=True, blank=True)
+    uninstalled_at = models.DateTimeField(null=True, blank=True)
 
     # Usage tracking
     standalone_launches = models.IntegerField(default=0)
-    last_standalone_launch = models.DateTimeField(blank=True)
+    last_standalone_launch = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

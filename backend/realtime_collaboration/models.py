@@ -108,7 +108,7 @@ class CollaborativeDocument(models.Model):
         blank=True,
         related_name='realtime_locked_documents'
     )
-    locked_at = models.DateTimeField(blank=True)
+    locked_at = models.DateTimeField(null=True, blank=True)
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -203,8 +203,8 @@ class DocumentCollaborator(models.Model):
     notify_on_comments = models.BooleanField(default=True)
 
     # Activity
-    last_viewed_at = models.DateTimeField(blank=True)
-    last_edited_at = models.DateTimeField(blank=True)
+    last_viewed_at = models.DateTimeField(null=True, blank=True)
+    last_edited_at = models.DateTimeField(null=True, blank=True)
 
     added_by = models.ForeignKey(
         User,
@@ -270,7 +270,7 @@ class DocumentComment(models.Model):
         blank=True,
         related_name='realtime_resolved_comments'
     )
-    resolved_at = models.DateTimeField(blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     # Author
     author = models.ForeignKey(
@@ -324,7 +324,7 @@ class EditingSession(models.Model):
     cursor_color = models.CharField(max_length=7, default='#4F46E5')
 
     connected_at = models.DateTimeField(auto_now_add=True)
-    disconnected_at = models.DateTimeField(blank=True)
+    disconnected_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'collab_editing_sessions'

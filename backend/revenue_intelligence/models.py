@@ -423,12 +423,12 @@ class DealRiskAlert(models.Model):
     is_active = models.BooleanField(default=True)
     is_acknowledged = models.BooleanField(default=False)
     acknowledged_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    acknowledged_at = models.DateTimeField(blank=True)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
 
     # Resolution
     is_resolved = models.BooleanField(default=False)
     resolution_notes = models.TextField(blank=True)
-    resolved_at = models.DateTimeField(blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

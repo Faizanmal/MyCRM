@@ -41,9 +41,9 @@ class Campaign(models.Model):
     content_text = models.TextField(blank=True, help_text="Plain text fallback")
 
     # Scheduling
-    scheduled_at = models.DateTimeField(blank=True)
-    started_at = models.DateTimeField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
+    scheduled_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     # Targeting
     segment = models.ForeignKey('CampaignSegment', on_delete=models.SET_NULL, null=True, blank=True)
@@ -159,12 +159,12 @@ class CampaignRecipient(models.Model):
     variant = models.CharField(max_length=50, blank=True, help_text="A/B test variant (A, B, etc.)")
 
     # Tracking
-    sent_at = models.DateTimeField(blank=True)
-    delivered_at = models.DateTimeField(blank=True)
-    opened_at = models.DateTimeField(blank=True)
-    first_clicked_at = models.DateTimeField(blank=True)
-    bounced_at = models.DateTimeField(blank=True)
-    unsubscribed_at = models.DateTimeField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    opened_at = models.DateTimeField(null=True, blank=True)
+    first_clicked_at = models.DateTimeField(null=True, blank=True)
+    bounced_at = models.DateTimeField(null=True, blank=True)
+    unsubscribed_at = models.DateTimeField(null=True, blank=True)
 
     # Engagement
     open_count = models.IntegerField(default=0)

@@ -46,7 +46,7 @@ class OfflineSyncQueue(models.Model):
     # Data
     payload = models.JSONField()
     local_timestamp = models.DateTimeField()
-    server_timestamp = models.DateTimeField(blank=True)
+    server_timestamp = models.DateTimeField(null=True, blank=True)
 
     # Sync status
     status = models.CharField(max_length=20, choices=SYNC_STATUS, default='pending')
@@ -95,13 +95,13 @@ class DeviceRegistration(models.Model):
     push_provider = models.CharField(max_length=50, blank=True)  # fcm, apns
 
     # Sync settings
-    last_sync_at = models.DateTimeField(blank=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
     sync_enabled = models.BooleanField(default=True)
     sync_interval_minutes = models.IntegerField(default=15)
 
     # Status
     is_active = models.BooleanField(default=True)
-    last_active_at = models.DateTimeField(blank=True)
+    last_active_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -227,7 +227,7 @@ class LocationCheckIn(models.Model):
 
     # Duration tracking
     check_in_time = models.DateTimeField()
-    check_out_time = models.DateTimeField(blank=True)
+    check_out_time = models.DateTimeField(null=True, blank=True)
     duration_minutes = models.IntegerField(blank=True)
 
     # Linked CRM objects

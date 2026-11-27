@@ -72,7 +72,7 @@ class DashboardWidget(models.Model):
 
     # Refresh settings
     refresh_interval = models.IntegerField(choices=REFRESH_INTERVALS, default=300)
-    last_refreshed_at = models.DateTimeField(blank=True)
+    last_refreshed_at = models.DateTimeField(null=True, blank=True)
 
     # Permissions
     is_public = models.BooleanField(default=False, help_text="Available to all users")

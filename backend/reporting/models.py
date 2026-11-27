@@ -96,8 +96,8 @@ class ReportSchedule(models.Model):
 
     # Status
     is_active = models.BooleanField(default=True)
-    last_run = models.DateTimeField(blank=True)
-    next_run = models.DateTimeField(blank=True)
+    last_run = models.DateTimeField(null=True, blank=True)
+    next_run = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -221,7 +221,7 @@ class DataExport(models.Model):
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     file_path = models.CharField(max_length=500, blank=True)
-    file_size = models.BigIntegerField(blank=True)
+    file_size = models.BigIntegerField(null=True, blank=True, default=0)
     record_count = models.IntegerField(default=0)
 
     # Error handling
@@ -230,7 +230,7 @@ class DataExport(models.Model):
     # Ownership
     requested_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'crm_data_exports'

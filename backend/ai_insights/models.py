@@ -83,7 +83,7 @@ class NextBestAction(models.Model):
         choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')],
         default='medium'
     )
-    suggested_timing = models.DateTimeField(blank=True)
+    suggested_timing = models.DateTimeField(null=True, blank=True)
 
     # Action status
     status = models.CharField(
@@ -101,7 +101,7 @@ class NextBestAction(models.Model):
     model_version = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-priority_score', '-created_at']

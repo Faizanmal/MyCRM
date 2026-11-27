@@ -37,12 +37,12 @@ class CustomerAccount(models.Model):
     language = models.CharField(max_length=10, default='en')
 
     # Security
-    last_login = models.DateTimeField(blank=True)
+    last_login = models.DateTimeField(null=True, blank=True)
     login_count = models.IntegerField(default=0)
     failed_login_attempts = models.IntegerField(default=0)
-    locked_until = models.DateTimeField(blank=True)
+    locked_until = models.DateTimeField(null=True, blank=True)
     password_reset_token = models.CharField(max_length=255, blank=True)
-    password_reset_expires = models.DateTimeField(blank=True)
+    password_reset_expires = models.DateTimeField(null=True, blank=True)
     two_factor_enabled = models.BooleanField(default=False)
     two_factor_secret = models.CharField(max_length=32, blank=True)
 
@@ -142,7 +142,7 @@ class SupportTicket(models.Model):
 
     # Resolution
     resolution = models.TextField(blank=True)
-    resolved_at = models.DateTimeField(blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
     resolved_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -156,9 +156,9 @@ class SupportTicket(models.Model):
     satisfaction_feedback = models.TextField(blank=True)
 
     # SLA tracking
-    sla_response_due = models.DateTimeField(blank=True)
-    sla_resolution_due = models.DateTimeField(blank=True)
-    first_response_at = models.DateTimeField(blank=True)
+    sla_response_due = models.DateTimeField(null=True, blank=True)
+    sla_resolution_due = models.DateTimeField(null=True, blank=True)
+    first_response_at = models.DateTimeField(null=True, blank=True)
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -284,8 +284,8 @@ class CustomerOrder(models.Model):
 
     # Dates
     ordered_at = models.DateTimeField(auto_now_add=True)
-    shipped_at = models.DateTimeField(blank=True)
-    delivered_at = models.DateTimeField(blank=True)
+    shipped_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
 
     # Documents
     invoice_url = models.URLField(blank=True)
@@ -342,7 +342,7 @@ class KnowledgeBaseArticle(models.Model):
         related_name='kb_articles'
     )
 
-    published_at = models.DateTimeField(blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -418,7 +418,7 @@ class PortalNotification(models.Model):
     action_url = models.URLField(blank=True)
 
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

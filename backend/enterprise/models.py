@@ -68,7 +68,7 @@ class DeviceFingerprint(models.Model):
 
     # Verification
     is_verified = models.BooleanField(default=False)
-    verified_at = models.DateTimeField(blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
     verification_method = models.CharField(max_length=50, blank=True)
 
     # Geolocation
@@ -139,13 +139,13 @@ class SecuritySession(models.Model):
 
     # Continuous auth
     last_activity = models.DateTimeField(auto_now=True)
-    last_verification = models.DateTimeField(blank=True)
+    last_verification = models.DateTimeField(null=True, blank=True)
     verification_interval = models.IntegerField(default=3600)  # seconds
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
-    terminated_at = models.DateTimeField(blank=True)
+    terminated_at = models.DateTimeField(null=True, blank=True)
     termination_reason = models.CharField(max_length=200, blank=True)
 
     class Meta:
@@ -325,11 +325,11 @@ class ThreatIndicator(models.Model):
 
     # Validity
     is_active = models.BooleanField(default=True)
-    expires_at = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     # Stats
     hit_count = models.IntegerField(default=0)
-    last_hit = models.DateTimeField(blank=True)
+    last_hit = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -405,8 +405,8 @@ class SecurityIncident(models.Model):
 
     # Timeline
     detected_at = models.DateTimeField(auto_now_add=True)
-    contained_at = models.DateTimeField(blank=True)
-    resolved_at = models.DateTimeField(blank=True)
+    contained_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     created_by = models.ForeignKey(
         User,

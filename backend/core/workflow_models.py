@@ -257,7 +257,7 @@ class WorkflowInstance(models.Model):
 
     # Timing
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     last_activity_at = models.DateTimeField(auto_now=True)
 
     # Error info
@@ -265,7 +265,7 @@ class WorkflowInstance(models.Model):
     error_node = models.CharField(max_length=100, blank=True)
 
     # Resume info
-    resume_at = models.DateTimeField(blank=True)  # For delays/schedules
+    resume_at = models.DateTimeField(null=True, blank=True)  # For delays/schedules
     resume_data = models.JSONField(default=dict)
 
     class Meta:
@@ -308,8 +308,8 @@ class WorkflowNodeExecution(models.Model):
     output_data = models.JSONField(default=dict)
 
     # Timing
-    started_at = models.DateTimeField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     execution_time_ms = models.IntegerField(blank=True)
 
     # Retry info
@@ -390,12 +390,12 @@ class WorkflowApprovalRequest(models.Model):
     delegated_reason = models.TextField(blank=True)
 
     # Timing
-    due_date = models.DateTimeField(blank=True)
-    responded_at = models.DateTimeField(blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
 
     # Reminders
     reminder_sent_count = models.IntegerField(default=0)
-    last_reminder_at = models.DateTimeField(blank=True)
+    last_reminder_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

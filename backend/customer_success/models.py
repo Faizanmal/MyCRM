@@ -55,7 +55,7 @@ class CustomerAccount(models.Model):
 
     # Onboarding
     onboarding_complete = models.BooleanField(default=False)
-    onboarding_completed_at = models.DateTimeField(blank=True)
+    onboarding_completed_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -167,7 +167,7 @@ class CustomerMilestone(models.Model):
     description = models.TextField(blank=True)
 
     target_date = models.DateField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     is_completed = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -284,10 +284,10 @@ class PlaybookExecution(models.Model):
     )
 
     current_step = models.IntegerField(default=0)
-    next_step_at = models.DateTimeField(blank=True)
+    next_step_at = models.DateTimeField(null=True, blank=True)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     triggered_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -507,8 +507,8 @@ class NPSSurvey(models.Model):
     )
 
     # Status
-    sent_at = models.DateTimeField(blank=True)
-    responded_at = models.DateTimeField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

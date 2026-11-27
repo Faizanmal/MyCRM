@@ -50,9 +50,9 @@ class Communication(models.Model):
     # Email Specific Fields
     email_id = models.CharField(max_length=255, blank=True)  # External email ID
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
     is_replied = models.BooleanField(default=False)
-    replied_at = models.DateTimeField(blank=True)
+    replied_at = models.DateTimeField(null=True, blank=True)
 
     # Call Specific Fields
     call_duration = models.IntegerField(blank=True)  # Duration in seconds
@@ -132,7 +132,7 @@ class EmailCampaign(models.Model):
     template = models.ForeignKey(EmailTemplate, on_delete=models.CASCADE, default=1)
 
     # Scheduling
-    scheduled_date = models.DateTimeField(blank=True)
+    scheduled_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Recipients
@@ -151,7 +151,7 @@ class EmailCampaign(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='communication_email_campaigns')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    sent_at = models.DateTimeField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'crm_email_campaigns'

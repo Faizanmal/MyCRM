@@ -149,7 +149,7 @@ class QualificationWorkflow(models.Model):
     priority = models.IntegerField(default=0)
 
     execution_count = models.IntegerField(default=0)
-    last_executed_at = models.DateTimeField(blank=True)
+    last_executed_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -187,7 +187,7 @@ class WorkflowExecution(models.Model):
     error_message = models.TextField(blank=True)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'lead_workflow_execution'

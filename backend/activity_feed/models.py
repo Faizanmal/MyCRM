@@ -132,7 +132,7 @@ class Mention(models.Model):
 
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -196,7 +196,7 @@ class Notification(models.Model):
 
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     # Link
     action_url = models.CharField(max_length=500, blank=True)

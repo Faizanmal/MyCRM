@@ -53,7 +53,7 @@ class Opportunity(models.Model):
     # Dates
     expected_close_date = models.DateField()
     actual_close_date = models.DateField(blank=True)
-    last_activity_date = models.DateTimeField(blank=True)
+    last_activity_date = models.DateTimeField(null=True, blank=True)
 
     # Additional Information
     notes = models.TextField(blank=True)

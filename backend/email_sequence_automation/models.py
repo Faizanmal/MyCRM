@@ -70,7 +70,7 @@ class EmailSequence(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    activated_at = models.DateTimeField(blank=True)
+    activated_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'automation_email_sequences'
@@ -250,7 +250,7 @@ class SequenceEnrollment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
 
     # Scheduling
-    next_action_at = models.DateTimeField(blank=True)
+    next_action_at = models.DateTimeField(null=True, blank=True)
 
     # Enrollment source
     enrolled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sequence_enrollments')
@@ -258,7 +258,7 @@ class SequenceEnrollment(models.Model):
 
     # Exit tracking
     exit_reason = models.CharField(max_length=200, blank=True)
-    exited_at = models.DateTimeField(blank=True)
+    exited_at = models.DateTimeField(null=True, blank=True)
 
     # Analytics
     emails_sent = models.IntegerField(default=0)
@@ -271,7 +271,7 @@ class SequenceEnrollment(models.Model):
 
     # Timestamps
     enrolled_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -371,15 +371,15 @@ class ABTest(models.Model):
 
     # Winner
     winning_variant = models.ForeignKey(SequenceEmail, null=True, blank=True, on_delete=models.SET_NULL, related_name='won_tests')
-    winner_selected_at = models.DateTimeField(blank=True)
+    winner_selected_at = models.DateTimeField(null=True, blank=True)
     auto_select_winner = models.BooleanField(default=True)
 
     # Results
     results = models.JSONField(default=dict, help_text="Statistical test results")
 
     # Timestamps
-    started_at = models.DateTimeField(blank=True)
-    completed_at = models.DateTimeField(blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -432,7 +432,7 @@ class AutomatedTrigger(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_triggered_at = models.DateTimeField(blank=True)
+    last_triggered_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'email_automated_triggers'

@@ -33,6 +33,11 @@ jobs:
           pip install -r backend/requirements.txt
           pip install pytest pytest-django pytest-asyncio
 
+      - name: Run Database Migrations
+        run: |
+          cd backend
+          python manage.py migrate
+
       - name: Run Enterprise Security Pipeline
         run: |
           python scripts/run_security_pipeline.py --mode all --report docs/security/security-pipeline-report.json

@@ -306,16 +306,16 @@ class DataBreachIncident(TenantAwareModel):
         default='identified'
     )
     authority_notified = models.BooleanField(default=False)
-    authority_notification_date = models.DateTimeField(blank=True)
+    authority_notification_date = models.DateTimeField(null=True, blank=True)
     users_notified = models.BooleanField(default=False)
-    user_notification_date = models.DateTimeField(blank=True)
+    user_notification_date = models.DateTimeField(null=True, blank=True)
     notification_required = models.BooleanField(
         default=True,
         help_text='Whether notification to authorities is required (within 72 hours)'
     )
     risk_assessment = models.TextField(blank=True)
     lessons_learned = models.TextField(blank=True)
-    closed_at = models.DateTimeField(blank=True)
+    closed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'gdpr_breach_incidents'

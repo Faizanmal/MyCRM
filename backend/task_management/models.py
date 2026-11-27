@@ -170,7 +170,7 @@ class Reminder(models.Model):
     # Scheduling
     reminder_time = models.DateTimeField()
     is_sent = models.BooleanField(default=False)
-    sent_at = models.DateTimeField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
 
     # Assignment
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reminders')

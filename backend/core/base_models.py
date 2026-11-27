@@ -45,7 +45,7 @@ class SoftDeleteModel(models.Model):
     Objects are marked as deleted instead of being removed from the database.
     """
     is_deleted = models.BooleanField(default=False, db_index=True)
-    deleted_at = models.DateTimeField(blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -244,7 +244,7 @@ class ActivityTrackableMixin(models.Model):
     Mixin to add activity tracking to a model.
     Tracks last activity and activity count.
     """
-    last_activity_at = models.DateTimeField(blank=True)
+    last_activity_at = models.DateTimeField(null=True, blank=True)
     activity_count = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -523,7 +523,7 @@ class Notification(TimeStampedModel):
 
     # Status
     is_read = models.BooleanField(default=False)
-    read_at = models.DateTimeField(blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     # Related object
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True)

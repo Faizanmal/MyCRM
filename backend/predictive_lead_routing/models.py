@@ -60,10 +60,10 @@ class SalesRepProfile(models.Model):
 
     # AI Scoring
     overall_performance_score = models.DecimalField(max_digits=5, decimal_places=2, default=50)
-    last_performance_update = models.DateTimeField(blank=True)
+    last_performance_update = models.DateTimeField(null=True, blank=True)
 
     # Round Robin
-    last_assignment_at = models.DateTimeField(blank=True)
+    last_assignment_at = models.DateTimeField(null=True, blank=True)
     assignment_weight = models.IntegerField(default=100, validators=[MinValueValidator(1), MaxValueValidator(200)])
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -195,12 +195,12 @@ class LeadAssignment(models.Model):
 
     # Timing
     assigned_at = models.DateTimeField(auto_now_add=True)
-    accepted_at = models.DateTimeField(blank=True)
-    first_response_at = models.DateTimeField(blank=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    first_response_at = models.DateTimeField(null=True, blank=True)
 
     # Outcome tracking
     outcome = models.CharField(max_length=50, blank=True)
-    outcome_at = models.DateTimeField(blank=True)
+    outcome_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'lead_assignments'
@@ -297,7 +297,7 @@ class RebalancingEvent(models.Model):
     after_distribution = models.JSONField(default=dict)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'lead_rebalancing_events'

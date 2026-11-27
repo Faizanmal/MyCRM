@@ -259,7 +259,7 @@ class Meeting(models.Model):
     # Tracking
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    cancelled_at = models.DateTimeField(blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
     cancellation_reason = models.TextField(blank=True)
 
     class Meta:
@@ -319,7 +319,7 @@ class MeetingReminder(models.Model):
 
     # Delivery
     scheduled_at = models.DateTimeField()
-    sent_at = models.DateTimeField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
     is_sent = models.BooleanField(default=False)
 
     # For guest or host

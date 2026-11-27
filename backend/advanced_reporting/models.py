@@ -145,7 +145,7 @@ class Report(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    last_generated_at = models.DateTimeField(blank=True)
+    last_generated_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'crm_report'
@@ -192,8 +192,8 @@ class ReportSchedule(models.Model):
     delivery_config = models.JSONField(default=dict, help_text="Additional delivery settings")
 
     is_active = models.BooleanField(default=True)
-    last_sent_at = models.DateTimeField(blank=True)
-    next_run_at = models.DateTimeField(blank=True)
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    next_run_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -228,11 +228,11 @@ class ReportExecution(models.Model):
     filters_used = models.JSONField(default=dict)
     rows_returned = models.IntegerField(blank=True)
     file_path = models.CharField(max_length=500, blank=True)
-    file_size_bytes = models.BigIntegerField(blank=True)
+    file_size_bytes = models.BigIntegerField(null=True, blank=True, default=0)
     error_message = models.TextField(blank=True)
 
     started_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     executed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='report_executions')
 
     class Meta:

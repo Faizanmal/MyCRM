@@ -74,15 +74,15 @@ class TrackedEmail(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
 
     # Scheduling
-    scheduled_at = models.DateTimeField(blank=True)
+    scheduled_at = models.DateTimeField(null=True, blank=True)
 
     # Timestamps
-    sent_at = models.DateTimeField(blank=True)
-    delivered_at = models.DateTimeField(blank=True)
-    first_opened_at = models.DateTimeField(blank=True)
-    last_opened_at = models.DateTimeField(blank=True)
-    first_clicked_at = models.DateTimeField(blank=True)
-    replied_at = models.DateTimeField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    first_opened_at = models.DateTimeField(null=True, blank=True)
+    last_opened_at = models.DateTimeField(null=True, blank=True)
+    first_clicked_at = models.DateTimeField(null=True, blank=True)
+    replied_at = models.DateTimeField(null=True, blank=True)
 
     # Counts
     open_count = models.IntegerField(default=0)
@@ -382,12 +382,12 @@ class SequenceEnrollment(models.Model):
 
     # Progress
     current_step = models.IntegerField(default=1)
-    next_action_at = models.DateTimeField(blank=True)
+    next_action_at = models.DateTimeField(null=True, blank=True)
 
     # Timestamps
     enrolled_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(blank=True)
-    exited_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    exited_at = models.DateTimeField(null=True, blank=True)
     exit_reason = models.CharField(max_length=200, blank=True)
 
     class Meta:

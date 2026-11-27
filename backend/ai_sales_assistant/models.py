@@ -138,10 +138,10 @@ class SalesCoachAdvice(models.Model):
     # Status
     is_dismissed = models.BooleanField(default=False)
     is_completed = models.BooleanField(default=False)
-    completed_at = models.DateTimeField(blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'sales_coach_advice'
@@ -286,7 +286,7 @@ class DealInsight(models.Model):
     is_actioned = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'deal_insights'
