@@ -415,7 +415,7 @@ class NotificationPreferenceAPITest(APITestCase):
         response = self.client.patch('/api/v1/settings/notifications/channel/', {
             'channel': 'push',
             'enabled': False
-        })
+        }, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(response.data['enabled'])
@@ -427,7 +427,7 @@ class NotificationPreferenceAPITest(APITestCase):
             'start_time': '22:00',
             'end_time': '07:00',
             'days': ['Mon', 'Tue', 'Wed']
-        })
+        }, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data['enabled'])

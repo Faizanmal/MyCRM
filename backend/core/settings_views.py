@@ -192,6 +192,11 @@ class NotificationPreferenceViewSet(viewsets.ModelViewSet):
         channel = request.data.get('channel')
         enabled = request.data.get('enabled')
 
+        if isinstance(enabled, str):
+            enabled = enabled.lower() in ('true', '1', 'yes')
+        else:
+            enabled = bool(enabled)
+
         if channel in ['email', 'push', 'in_app', 'sms']:
             setattr(prefs, f'{channel.replace("-", "_")}_enabled', enabled)
             prefs.save()
