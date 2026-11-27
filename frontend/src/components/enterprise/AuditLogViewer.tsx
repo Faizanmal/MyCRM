@@ -40,13 +40,37 @@ export default function AuditLogViewer() {
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
   const [riskFilter, setRiskFilter] = useState('all');
+  const [integrityVerified, setIntegrityVerified] = useState<{ isValid: boolean; checked: boolean; total: number } | null>(null);
   const { toast } = useToast();
 
   const loadLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/core/audit-logs/');
-      setLogs(response.data.results || response.data);
+      // Try unified audit-trail endpoint first, fallback to core audit-logs
+      let response;
+      try {
+        response = await axios.get('/api/v1/audit-trail/');
+      } catch {
+        response = await axios.get('/api/core/audit-logs/');
+      }
+      const raw = response.data.results || response.data;
+      setLogs(Array.isArray(raw) ? raw.map((r: any) => ({
+        id: r.id,
+        user: r.user && typeof r.user === 'object' ? r.user : {
+          id: r.user || 'system',
+          username: r.user_email || r.user_name || 'System / Automated',
+          email: r.user_email || '',
+        },
+        action: r.action || 'activity',
+        model_name: r.model_name || (r.content_type && typeof r.content_type === 'object' ? r.content_type.model : 'Entity'),
+        object_id: r.object_id,
+        changes: r.changes || {},
+        ip_address: r.ip_address || '-',
+        user_agent: r.user_agent || '',
+        risk_level: r.is_tampered ? 'critical' : (r.risk_level || 'low'),
+        timestamp: r.timestamp || r.created_at || new Date().toISOString(),
+        metadata: r.metadata,
+      })) : []);
     } catch {
       toast({
         title: 'Error',
@@ -57,6 +81,35 @@ export default function AuditLogViewer() {
       setLoading(false);
     }
   }, [toast]);
+
+  const verifyIntegrity = async () => {
+    try {
+      const response = await axios.get('/api/v1/audit-trail/verify_integrity/');
+      setIntegrityVerified({
+        isValid: response.data.is_valid,
+        checked: true,
+        total: response.data.total_records || 0,
+      });
+      if (response.data.is_valid) {
+        toast({
+          title: 'Integrity Verified',
+          description: `All ${response.data.total_records} audit records cryptographically verified with SHA-256 hash chaining.`,
+        });
+      } else {
+        toast({
+          title: 'Tamper Detected!',
+          description: `Found ${response.data.anomalies?.length || 0} anomaly in audit trail cryptographic signatures.`,
+          variant: 'destructive',
+        });
+      }
+    } catch {
+      toast({
+        title: 'Verification Failed',
+        description: 'Could not perform cryptographic integrity check.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   React.useEffect(() => {
     loadLogs();
@@ -76,13 +129,24 @@ export default function AuditLogViewer() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Shield className="h-8 w-8" />
             Audit Log Viewer
           </h1>
           <p className="text-muted-foreground mt-1">Track all system activities and changes</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {integrityVerified && (
+            <Badge variant={integrityVerified.isValid ? "secondary" : "destructive"} className="text-xs py-1 px-2.5">
+              {integrityVerified.isValid ? `✓ SHA-256 Validated (${integrityVerified.total} records)` : '⚠ Tamper Detected'}
+            </Badge>
+          )}
+          <Button onClick={verifyIntegrity} variant="outline" size="sm" className="gap-2">
+            <Shield className="h-4 w-4" />
+            Verify Hash Chain
+          </Button>
         </div>
       </div>
 

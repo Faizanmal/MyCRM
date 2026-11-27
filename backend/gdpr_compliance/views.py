@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.db.models import Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, serializers, status, viewsets
+from rest_framework import filters, permissions, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -39,6 +39,42 @@ from .services import (
     generate_dsar_export,
     verify_dsar_checksum,
 )
+from .config import is_dsar_export_enabled, is_legal_hold_enforcement_enabled
+from multi_tenant.models import OrganizationMember
+
+
+class IsAdminOrComplianceOfficer(permissions.BasePermission):
+    """
+    Permission class checking if the user is an active admin, owner,
+    compliance officer, or platform staff in the tenant organization.
+    """
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if request.user.is_staff or request.user.is_superuser:
+            return True
+
+        org = getattr(request, 'organization', None)
+        if not org:
+            from multi_tenant.middleware import get_current_organization
+            org = get_current_organization()
+        if not org and hasattr(request.user, 'organization_memberships'):
+            mem = request.user.organization_memberships.filter(is_active=True).first()
+            if mem:
+                org = mem.organization
+
+        if not org:
+            return False
+
+        return OrganizationMember.objects.filter(
+            organization=org,
+            user=request.user,
+            role__in=['owner', 'admin', 'compliance_officer', 'security_officer'],
+            is_active=True
+        ).exists()
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
 
 
 class ConsentTypeViewSet(viewsets.ModelViewSet):
@@ -164,6 +200,9 @@ class DataExportRequestViewSet(viewsets.ModelViewSet):
         return queryset.select_related('user')
 
     def perform_create(self, serializer):
+        if not is_dsar_export_enabled():
+            raise serializers.ValidationError('DSAR export functionality is temporarily disabled by policy.')
+
         org = self._get_organization()
         if not org:
             raise serializers.ValidationError('Organization context required for data export.')
@@ -185,6 +224,11 @@ class DataExportRequestViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post', 'get'])
     def process_export(self, request, pk=None):
         """Generate DSAR export bundle immediately with SHA-256 integrity checksum."""
+        if not is_dsar_export_enabled():
+            return Response(
+                {'error': 'DSAR export functionality is temporarily disabled by policy.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
         export_request = self.get_object()
         bundle = generate_dsar_export(export_request.user, export_request.organization, export_request)
         return Response({
@@ -300,9 +344,20 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         """Approve and execute a deletion request with legal hold retention exceptions."""
-        if not request.user.is_staff:
+        is_admin_or_staff = request.user.is_staff or request.user.is_superuser
+        if not is_admin_or_staff:
+            org = self._get_organization()
+            if org:
+                is_admin_or_staff = OrganizationMember.objects.filter(
+                    organization=org,
+                    user=request.user,
+                    role__in=['owner', 'admin', 'compliance_officer', 'security_officer'],
+                    is_active=True
+                ).exists()
+
+        if not is_admin_or_staff:
             return Response(
-                {'error': 'Only staff can approve deletion requests'},
+                {'error': 'Only organization administrators or compliance staff can approve deletion requests.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -321,10 +376,21 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
-        """Reject a deletion request (staff only)."""
-        if not request.user.is_staff:
+        """Reject a deletion request (admin/staff only)."""
+        is_admin_or_staff = request.user.is_staff or request.user.is_superuser
+        if not is_admin_or_staff:
+            org = self._get_organization()
+            if org:
+                is_admin_or_staff = OrganizationMember.objects.filter(
+                    organization=org,
+                    user=request.user,
+                    role__in=['owner', 'admin', 'compliance_officer', 'security_officer'],
+                    is_active=True
+                ).exists()
+
+        if not is_admin_or_staff:
             return Response(
-                {'error': 'Only staff can reject deletion requests'},
+                {'error': 'Only organization administrators or compliance staff can reject deletion requests.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -347,8 +413,9 @@ class DataDeletionRequestViewSet(viewsets.ModelViewSet):
 class LegalHoldViewSet(viewsets.ModelViewSet):
     """
     Manage Legal Holds and statutory retention exceptions for GDPR compliance.
+    Strictly restricted to organization administrators and compliance staff.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminOrComplianceOfficer]
     serializer_class = LegalHoldSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active', 'hold_type']

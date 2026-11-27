@@ -177,3 +177,135 @@ def test_legal_hold_deletion_retention(org_setup):
     user_a.refresh_from_db()
     assert user_a.first_name == "Anonymized"
     assert user_a.is_active is False
+
+
+@pytest.mark.django_db
+def test_adversarial_wrong_tenant_cannot_access_or_approve_deletion(org_setup):
+    """Ensure Tenant B cannot access or approve Tenant A's deletion or export requests"""
+    org_a = org_setup['org_a']
+    org_b = org_setup['org_b']
+    user_a = org_setup['user_a']
+    user_b = org_setup['user_b']
+
+    del_req = DataDeletionRequest.objects.create(
+        organization=org_a,
+        user=user_a,
+        deletion_type='full_deletion',
+    )
+    exp_req = DataExportRequest.objects.create(
+        organization=org_a,
+        user=user_a,
+    )
+
+    client_b = APIClient()
+    client_b.force_authenticate(user=user_b)
+
+    # Tenant B tries to view Tenant A's deletion request detail
+    res_del = client_b.get(f'/api/v1/gdpr/deletion-requests/{del_req.id}/')
+    assert res_del.status_code == 404
+
+    # Tenant B tries to approve Tenant A's deletion request
+    res_approve = client_b.post(f'/api/v1/gdpr/deletion-requests/{del_req.id}/approve/')
+    assert res_approve.status_code == 404
+
+    # Tenant B tries to view Tenant A's export request detail
+    res_exp = client_b.get(f'/api/v1/gdpr/export-requests/{exp_req.id}/')
+    assert res_exp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_adversarial_insufficient_role_rejected(org_setup):
+    """Ensure regular tenant member without admin/compliance role is rejected with 403"""
+    org_a = org_setup['org_a']
+    user_member = User.objects.create_user(username="member_user", email="member@org.com", password="Password123!")
+    OrganizationMember.objects.create(organization=org_a, user=user_member, role='member', is_active=True)
+
+    del_req = DataDeletionRequest.objects.create(
+        organization=org_a,
+        user=user_member,
+        deletion_type='full_deletion',
+    )
+
+    client = APIClient()
+    client.force_authenticate(user=user_member)
+
+    # Member tries to approve a deletion request -> 403 Forbidden
+    res_approve = client.post(f'/api/v1/gdpr/deletion-requests/{del_req.id}/approve/')
+    assert res_approve.status_code == 403
+
+    # Member tries to create a legal hold -> 403 Forbidden
+    res_hold = client.post('/api/v1/gdpr/legal-holds/', {
+        'subject_identifier': 'target@org.com',
+        'hold_type': 'litigation',
+        'reason': 'Unauthorized legal hold attempt',
+    })
+    assert res_hold.status_code == 403
+
+    # Member tries to verify audit integrity -> 403 Forbidden
+    res_verify = client.get('/api/v1/audit-trail/verify_integrity/')
+    assert res_verify.status_code == 403
+
+
+@pytest.mark.django_db
+def test_adversarial_anonymous_rejected():
+    """Ensure unauthenticated requests are rejected with 401 across all endpoints"""
+    client = APIClient()
+
+    assert client.get('/api/v1/audit-trail/').status_code == 401
+    assert client.get('/api/v1/audit-trail/verify_integrity/').status_code == 401
+    assert client.get('/api/v1/gdpr/export-requests/').status_code == 401
+    assert client.get('/api/v1/gdpr/deletion-requests/').status_code == 401
+    assert client.get('/api/v1/gdpr/legal-holds/').status_code == 401
+
+
+@pytest.mark.django_db
+def test_async_tasks_idempotency_and_poison_quarantine(org_setup):
+    """Ensure Celery tasks are idempotent against duplicate triggers and poison pills are quarantined"""
+    from core.async_models import PoisonPillQuarantine
+    from gdpr_compliance.tasks import execute_gdpr_deletion_task, process_dsar_export_task
+
+    org_a = org_setup['org_a']
+    user_a = org_setup['user_a']
+
+    exp_req = DataExportRequest.objects.create(organization=org_a, user=user_a)
+
+    # First execution completes
+    res1 = process_dsar_export_task(str(exp_req.id))
+    assert res1['status'] == 'completed'
+    assert len(res1['checksum']) == 64
+
+    # Second execution returns cached/already completed result without duplicate work
+    res2 = process_dsar_export_task(str(exp_req.id))
+    assert res2.get('status') in ('already_completed', 'completed')
+    assert res2.get('checksum') == res1['checksum']
+
+    # Poison pill test: non-existent ID triggers quarantine
+    poison_res = process_dsar_export_task('00000000-0000-0000-0000-000000000000')
+    assert poison_res['status'] == 'quarantined'
+    assert PoisonPillQuarantine.objects.filter(task_name='process_dsar_export_task').exists()
+
+
+@pytest.mark.django_db
+def test_feature_flags_and_api_verify_integrity(org_setup, monkeypatch):
+    """Ensure feature flag toggles work and API verify_integrity endpoint functions properly"""
+    org_a = org_setup['org_a']
+    user_a = org_setup['user_a']
+
+    client = APIClient()
+    client.force_authenticate(user=user_a)
+
+    # 1. API audit integrity check succeeds for admin
+    res = client.get('/api/v1/audit-trail/verify_integrity/')
+    assert res.status_code == 200
+    assert res.data['is_valid'] is True
+
+    # 2. When AUDIT_TAMPER_DETECTION_ENABLED is false -> 503
+    monkeypatch.setenv('AUDIT_TAMPER_DETECTION_ENABLED', '0')
+    res_disabled = client.get('/api/v1/audit-trail/verify_integrity/')
+    assert res_disabled.status_code == 503
+
+    # 3. When GDPR_DSAR_EXPORT_ENABLED is false -> 503
+    monkeypatch.setenv('GDPR_DSAR_EXPORT_ENABLED', '0')
+    exp_req = DataExportRequest.objects.create(organization=org_a, user=user_a)
+    res_export = client.post(f'/api/v1/gdpr/export-requests/{exp_req.id}/process_export/')
+    assert res_export.status_code == 503

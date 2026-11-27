@@ -99,7 +99,7 @@ def execute_idempotent(task_name: str, idempotency_key: str, func, *args, **kwar
         raise exc
 
 
-def idempotent_task(timeout: int = 3600, key_func=None):
+def idempotent_task(timeout: int = 3600, timeout_seconds: int = None, key_func=None, **kwargs):
     """
     Decorator for Celery shared_tasks to enforce idempotency.
     Usage:

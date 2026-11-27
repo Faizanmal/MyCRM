@@ -64,32 +64,34 @@ def quarantine_job(task_name: str, payload: dict | str, error: Exception, tenant
 
 def quarantine_poison_pill(
     exceptions=(PoisonPillError, MalformedPayloadError, json.JSONDecodeError, ValueError, KeyError, TypeError),
-    tenant_extractor=None
+    tenant_extractor=None,
+    task_name=None,
+    **kwargs
 ):
     """
     Decorator for Celery tasks to quarantine poison pill payloads instead of crash-looping workers.
     """
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            task_name = getattr(func, '__name__', str(func))
+        def wrapper(*args, **kwargs_inner):
+            effective_task_name = task_name or getattr(func, '__name__', str(func))
             try:
-                return func(*args, **kwargs)
+                return func(*args, **kwargs_inner)
             except exceptions as exc:
                 tenant = None
                 if tenant_extractor:
                     try:
-                        tenant = tenant_extractor(*args, **kwargs)
+                        tenant = tenant_extractor(*args, **kwargs_inner)
                     except Exception:
                         pass
-                elif 'tenant' in kwargs:
-                    tenant = kwargs['tenant']
-                elif 'organization' in kwargs:
-                    tenant = kwargs['organization']
+                elif 'tenant' in kwargs_inner:
+                    tenant = kwargs_inner['tenant']
+                elif 'organization' in kwargs_inner:
+                    tenant = kwargs_inner['organization']
 
-                combined_payload = {'args': list(args), 'kwargs': kwargs}
+                combined_payload = {'args': list(args), 'kwargs': kwargs_inner}
                 quarantine = quarantine_job(
-                    task_name=task_name,
+                    task_name=effective_task_name,
                     payload=combined_payload,
                     error=exc,
                     tenant=tenant,

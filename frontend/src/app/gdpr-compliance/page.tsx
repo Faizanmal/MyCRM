@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Shield, Download, Trash2, AlertTriangle,
   X, Clock, Eye, Lock, Settings, UserCheck,
   Bell, Plus, ExternalLink,
-  Info, CheckCircle2, XCircle
+  Info, CheckCircle2, XCircle, RefreshCw
 } from 'lucide-react';
 
 // Types
 interface Consent {
-  id: number;
+  id: number | string;
   type: string;
   category: string;
   granted: boolean;
@@ -19,26 +19,28 @@ interface Consent {
 }
 
 interface ExportRequest {
-  id: number;
+  id: number | string;
   type: string;
   format: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
   requested_at: string;
   completed_at?: string;
+  checksum?: string;
   file_url?: string;
 }
 
 interface DeletionRequest {
-  id: number;
+  id: number | string;
   type: string;
   status: 'pending' | 'approved' | 'rejected' | 'processing' | 'completed';
   requested_at: string;
   reviewed_at?: string;
   reason?: string;
+  retained_legal_exceptions?: any[];
 }
 
 interface BreachIncident {
-  id: number;
+  id: number | string;
   incident_id: string;
   title: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -49,85 +51,195 @@ interface BreachIncident {
   users_notified: boolean;
 }
 
-interface PrivacySettings {
-  allow_data_processing: boolean;
-  allow_marketing_emails: boolean;
-  allow_analytics: boolean;
-  allow_third_party_sharing: boolean;
-  allow_profiling: boolean;
-  data_retention_preference: 'minimum' | 'standard' | 'extended';
+interface IntegrityStatus {
+  is_valid: boolean;
+  total_records: number;
+  anomalies: any[];
+  checked_at?: string;
 }
 
 export default function GDPRCompliancePage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'consents' | 'export' | 'deletion' | 'breaches'>('dashboard');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  // Mock data
-  const consents: Consent[] = [
-    {
-      id: 1,
-      type: 'Essential Services',
-      category: 'essential',
-      granted: true,
-      date: '2024-01-15',
-      can_withdraw: false
-    },
-    {
-      id: 2,
-      type: 'Marketing Communications',
-      category: 'marketing',
-      granted: false,
-      date: '2024-01-15',
-      can_withdraw: true
-    },
-    {
-      id: 3,
-      type: 'Analytics & Performance',
-      category: 'analytics',
-      granted: true,
-      date: '2024-01-15',
-      can_withdraw: true
-    },
-    {
-      id: 4,
-      type: 'Third-Party Integrations',
-      category: 'third_party',
-      granted: true,
-      date: '2024-02-01',
-      can_withdraw: true
+  // Live data states
+  const [consents, setConsents] = useState<Consent[]>([]);
+  const [exportRequests, setExportRequests] = useState<ExportRequest[]>([]);
+  const [deletionRequests, setDeletionRequests] = useState<DeletionRequest[]>([]);
+  const [breaches, setBreaches] = useState<BreachIncident[]>([]);
+  const [integrityStatus, setIntegrityStatus] = useState<IntegrityStatus | null>(null);
+
+  const fetchConsents = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/gdpr/user-consents/');
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.results || data;
+        if (Array.isArray(items) && items.length > 0) {
+          setConsents(items.map((c: any) => ({
+            id: c.id,
+            type: c.consent_type_name || c.consent_type || 'User Consent',
+            category: c.category || 'marketing',
+            granted: Boolean(c.is_granted && !c.withdrawn_at),
+            date: c.consent_date || c.created_at,
+            can_withdraw: !c.is_required,
+          })));
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch consents from API, keeping state', e);
     }
-  ];
+  }, []);
 
-  const exportRequests: ExportRequest[] = [
-    {
-      id: 1,
-      type: 'Full Data Export',
-      format: 'JSON',
-      status: 'completed',
-      requested_at: '2024-03-10',
-      completed_at: '2024-03-10',
-      file_url: '#'
-    },
-    {
-      id: 2,
-      type: 'Contact Data',
-      format: 'CSV',
-      status: 'processing',
-      requested_at: '2024-03-15'
+  const fetchExports = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/gdpr/export-requests/my_requests/');
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.results || data;
+        if (Array.isArray(items)) {
+          setExportRequests(items.map((r: any) => ({
+            id: r.id,
+            type: r.export_type ? r.export_type.replace('_', ' ').toUpperCase() : 'Full Data Export',
+            format: (r.format || 'json').toUpperCase(),
+            status: r.status,
+            requested_at: r.requested_at,
+            completed_at: r.completed_at,
+            checksum: r.checksum,
+            file_url: r.status === 'completed' ? '#' : undefined,
+          })));
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch export requests', e);
     }
-  ];
+  }, []);
 
-  const deletionRequests: DeletionRequest[] = [
-    {
-      id: 1,
-      type: 'Specific Data Deletion',
-      status: 'completed',
-      requested_at: '2024-02-20',
-      reviewed_at: '2024-02-21',
-      reason: 'No longer using marketing features'
+  const fetchDeletions = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/gdpr/deletion-requests/');
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.results || data;
+        if (Array.isArray(items)) {
+          setDeletionRequests(items.map((d: any) => ({
+            id: d.id,
+            type: d.deletion_type ? d.deletion_type.replace('_', ' ').toUpperCase() : 'Data Erasure',
+            status: d.status,
+            requested_at: d.requested_at,
+            reviewed_at: d.reviewed_at,
+            reason: d.reason,
+            retained_legal_exceptions: d.retained_legal_exceptions || [],
+          })));
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch deletion requests', e);
     }
-  ];
+  }, []);
 
-  const breaches: BreachIncident[] = [
+  const fetchIntegrity = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/audit-trail/verify_integrity/');
+      if (res.ok) {
+        const data = await res.json();
+        setIntegrityStatus({
+          is_valid: data.is_valid,
+          total_records: data.total_records,
+          anomalies: data.anomalies || [],
+          checked_at: new Date().toLocaleTimeString(),
+        });
+      }
+    } catch (e) {
+      console.warn('Could not verify audit integrity', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchConsents();
+    fetchExports();
+    fetchDeletions();
+    fetchIntegrity();
+  }, [fetchConsents, fetchExports, fetchDeletions, fetchIntegrity]);
+
+  const handleWithdrawConsent = async (consentId: number | string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/v1/gdpr/user-consents/${consentId}/withdraw/`, { method: 'POST' });
+      if (res.ok) {
+        setMessage({ text: 'Consent successfully withdrawn.', type: 'success' });
+        fetchConsents();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setMessage({ text: err.error || 'Failed to withdraw consent.', type: 'error' });
+      }
+    } catch {
+      setMessage({ text: 'Network error withdrawing consent.', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateExport = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/v1/gdpr/export-requests/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ export_type: 'full_export', format: 'json' })
+      });
+      if (res.ok) {
+        setMessage({ text: 'DSAR export request created and generated with SHA-256 integrity checksum.', type: 'success' });
+        fetchExports();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setMessage({ text: err.error || err.detail || 'Failed to create export request.', type: 'error' });
+      }
+    } catch {
+      setMessage({ text: 'Network error submitting export request.', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyExport = async (exportId: number | string) => {
+    try {
+      const res = await fetch(`/api/v1/gdpr/export-requests/${exportId}/verify/`);
+      const data = await res.json();
+      if (data.is_valid) {
+        alert(`Integrity Verified!\nSHA-256 Checksum: ${data.checksum}\nStatus: Cryptographically Untampered`);
+      } else {
+        alert(`Verification Failed!\nMessage: ${data.message || 'Checksum mismatch detected'}`);
+      }
+    } catch {
+      alert('Network error verifying DSAR export checksum.');
+    }
+  };
+
+  const handleCreateDeletion = async () => {
+    const reason = prompt('Please state the reason for requesting GDPR Article 17 Data Erasure:');
+    if (!reason) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/v1/gdpr/deletion-requests/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deletion_type: 'full_deletion', reason })
+      });
+      if (res.ok) {
+        setMessage({ text: 'Data deletion request submitted for compliance officer review.', type: 'success' });
+        fetchDeletions();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setMessage({ text: err.error || err.detail || 'Failed to submit deletion request.', type: 'error' });
+      }
+    } catch {
+      setMessage({ text: 'Network error submitting deletion request.', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
     {
       id: 1,
       incident_id: 'BR-2024-001',
@@ -210,6 +322,16 @@ export default function GDPRCompliancePage() {
         <p className="text-gray-600">
           Manage your data privacy, consents, and compliance requirements
         </p>
+        {message && (
+          <div className={`mt-4 p-4 rounded-lg flex items-center justify-between ${
+            message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' :
+            message.type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' :
+            'bg-blue-50 text-blue-800 border border-blue-200'
+          }`}>
+            <span>{message.text}</span>
+            <button onClick={() => setMessage(null)} className="ml-4 text-gray-500 hover:text-gray-700">✕</button>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -316,6 +438,49 @@ export default function GDPRCompliancePage() {
                   <p className="text-sm font-medium text-orange-900">Security Incidents</p>
                   <p className="text-xs text-orange-700 mt-1">Tracked incidents</p>
                 </div>
+              </div>
+
+              {/* Cryptographic Audit Trail Integrity Status */}
+              <div className="bg-linear-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-lg ${
+                    integrityStatus?.is_valid ? 'bg-green-100 text-green-700' :
+                    integrityStatus ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    <Shield className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      Cryptographic Audit Trail Integrity
+                      {integrityStatus?.is_valid && (
+                        <span className="text-xs bg-green-100 text-green-800 font-medium px-2.5 py-0.5 rounded-full">
+                          SHA-256 Validated
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {integrityStatus ? (
+                        integrityStatus.is_valid ? (
+                          `All ${integrityStatus.total_records} audit trail records verified. Monotonic sequencing and SHA-256 hash chaining intact.`
+                        ) : (
+                          `Tampering detected! Found ${integrityStatus.anomalies.length} anomaly in audit trail cryptographic signatures.`
+                        )
+                      ) : (
+                        'Verify the cryptographic SHA-256 hash chain and monotonic event sequencing for this tenant.'
+                      )}
+                    </p>
+                    {integrityStatus?.checked_at && (
+                      <p className="text-xs text-gray-500 mt-1">Last verified at {integrityStatus.checked_at}</p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={fetchIntegrity}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shrink-0"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Verify Hash Chain
+                </button>
               </div>
 
               {/* Privacy Settings */}
@@ -478,7 +643,11 @@ export default function GDPRCompliancePage() {
                           {consent.granted ? 'Granted' : 'Not Granted'}
                         </span>
                         {consent.can_withdraw && consent.granted && (
-                          <button className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center">
+                          <button
+                            onClick={() => handleWithdrawConsent(consent.id)}
+                            disabled={loading}
+                            className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center disabled:opacity-50"
+                          >
                             <X className="w-4 h-4 mr-1" />
                             Withdraw Consent
                           </button>
@@ -499,7 +668,11 @@ export default function GDPRCompliancePage() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Data Export Requests</h3>
                   <p className="text-gray-600">Download your personal data in various formats</p>
                 </div>
-                <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center">
+                <button
+                  onClick={handleCreateExport}
+                  disabled={loading}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center disabled:opacity-50"
+                >
                   <Plus className="w-5 h-5 mr-2" />
                   New Export Request
                 </button>
@@ -536,10 +709,13 @@ export default function GDPRCompliancePage() {
                         <span className={`text-sm font-medium px-3 py-1 rounded-full ${getStatusColor(request.status)}`}>
                           {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                         </span>
-                        {request.status === 'completed' && request.file_url && (
-                          <button className="text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center">
-                            <Download className="w-4 h-4 mr-1" />
-                            Download File
+                        {request.status === 'completed' && (
+                          <button
+                            onClick={() => handleVerifyExport(request.id)}
+                            className="text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center"
+                          >
+                            <Shield className="w-4 h-4 mr-1" />
+                            Verify Checksum
                           </button>
                         )}
                       </div>
@@ -572,7 +748,11 @@ export default function GDPRCompliancePage() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Data Deletion Requests</h3>
                   <p className="text-gray-600">Request deletion of your personal data (Right to be Forgotten)</p>
                 </div>
-                <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center">
+                <button
+                  onClick={handleCreateDeletion}
+                  disabled={loading}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center disabled:opacity-50"
+                >
                   <Trash2 className="w-5 h-5 mr-2" />
                   Request Data Deletion
                 </button>

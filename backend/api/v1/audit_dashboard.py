@@ -167,6 +167,13 @@ class AuditTrailViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def verify_integrity(self, request):
         """Verify cryptographic SHA-256 hash-chain integrity of the tenant's audit trail."""
+        from gdpr_compliance.config import is_audit_tamper_detection_enabled
+        if not is_audit_tamper_detection_enabled():
+            return Response(
+                {'error': 'Cryptographic audit tamper verification is temporarily disabled by policy.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
         from core.audit_service import verify_audit_trail_integrity
         org = getattr(request, 'organization', None)
         if not org:
@@ -179,6 +186,22 @@ class AuditTrailViewSet(viewsets.ReadOnlyModelViewSet):
                 org = member.organization
         if not org:
             return Response({'error': 'No organization context found'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Enforce role: only admin, owner, compliance officer, or platform staff
+        is_admin = request.user.is_staff or request.user.is_superuser
+        if not is_admin:
+            from multi_tenant.models import OrganizationMember
+            is_admin = OrganizationMember.objects.filter(
+                organization=org,
+                user=request.user,
+                role__in=['owner', 'admin', 'compliance_officer', 'security_officer'],
+                is_active=True
+            ).exists()
+        if not is_admin:
+            return Response(
+                {'error': 'Only organization administrators or compliance staff can verify audit integrity.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         is_valid, anomalies = verify_audit_trail_integrity(org.id)
         total_records = AuditTrail.objects.filter(organization=org).count()
