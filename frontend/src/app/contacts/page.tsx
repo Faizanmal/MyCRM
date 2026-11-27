@@ -244,6 +244,7 @@ export default function ContactsPage() {
       last_name: '',
       email: '',
       phone: '',
+      account: '',
       company: '',
       position: '',
       status: 'active',

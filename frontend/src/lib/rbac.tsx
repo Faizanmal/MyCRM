@@ -590,8 +590,10 @@ export function getPermissionsForRole(role: Role): Permission[] {
 
 export function getRoleName(role: Role): string {
     const names: Record<Role, string> = {
+        owner: 'Owner',
         admin: 'Administrator',
         manager: 'Manager',
+        member: 'Member',
         sales_rep: 'Sales Representative',
         viewer: 'Viewer',
         guest: 'Guest',
@@ -601,8 +603,10 @@ export function getRoleName(role: Role): string {
 
 export function getRoleColor(role: Role): string {
     const colors: Record<Role, string> = {
+        owner: 'bg-amber-100 text-amber-800',
         admin: 'bg-purple-100 text-purple-700',
         manager: 'bg-blue-100 text-blue-700',
+        member: 'bg-slate-100 text-slate-700',
         sales_rep: 'bg-green-100 text-green-700',
         viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
         guest: 'bg-yellow-100 text-yellow-700',

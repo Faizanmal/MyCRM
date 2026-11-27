@@ -58,6 +58,15 @@ interface IntegrityStatus {
   checked_at?: string;
 }
 
+interface PrivacySettings {
+  allow_data_processing: boolean;
+  allow_marketing_emails: boolean;
+  allow_analytics: boolean;
+  allow_third_party_sharing: boolean;
+  allow_profiling: boolean;
+  data_retention_preference: 'minimum' | 'standard' | 'extended';
+}
+
 export default function GDPRCompliancePage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'consents' | 'export' | 'deletion' | 'breaches'>('dashboard');
   const [loading, setLoading] = useState<boolean>(false);
@@ -240,29 +249,6 @@ export default function GDPRCompliancePage() {
       setLoading(false);
     }
   };
-    {
-      id: 1,
-      incident_id: 'BR-2024-001',
-      title: 'Unauthorized API Access Attempt',
-      severity: 'medium',
-      status: 'remediated',
-      discovered_at: '2024-03-01',
-      affected_users: 0,
-      authority_notified: false,
-      users_notified: false
-    },
-    {
-      id: 2,
-      incident_id: 'BR-2024-002',
-      title: 'Database Configuration Error',
-      severity: 'low',
-      status: 'closed',
-      discovered_at: '2024-02-15',
-      affected_users: 5,
-      authority_notified: false,
-      users_notified: true
-    }
-  ];
 
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
     allow_data_processing: true,

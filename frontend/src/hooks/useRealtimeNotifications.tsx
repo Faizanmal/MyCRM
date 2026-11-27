@@ -7,6 +7,7 @@ interface RealtimeMessage {
     type: string;
     payload: Record<string, unknown>;
     timestamp: string;
+    message?: string;
 }
 
 interface RealtimeContextType {
